@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Room {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  hostId         String?
+  createdAt      DateTime  @default(now())
+  lastActivityAt DateTime  @default(now())
+  progress       Json // see RoomProgress in src/lib/types.ts
+  status         String    @default("playing") // "playing" | "voting" | "finished"
+  ending         String? // "EXPOSE" | "PROTECT"
+  voteDeadline   DateTime?
+  players        Player[]
+  notes          Note[]
+  attempts       Attempt[]
+  hints          HintRequest[]
+  votes          EndingVote[]
+  events         AnalyticsEvent[]
+}
+
+model Player {
+  id          String   @id @default(cuid())
+  roomId      String
+  room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  token       String   @unique
+  displayName String
+  color       String
+  currentView String? // e.g. "browser:thedrift.blog" or "app:notes"
+  lastSeenAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@index([roomId])
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  roomId      String
+  room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  authorId    String
+  visibility  String // "PRIVATE" | "PUBLIC"
+  body        String
+  fragmentTag String? // "name" | "year" | "id" | "cipher" | "address"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([roomId, visibility])
+}
+
+model Attempt {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  playerId  String
+  puzzleId  String
+  input     String
+  correct   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([roomId, puzzleId, createdAt])
+}
+
+model HintRequest {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  puzzleId  String
+  tier      Int
+  playerId  String?
+  createdAt DateTime @default(now())
+
+  @@unique([roomId, puzzleId, tier])
+}
+
+model EndingVote {
+  roomId   String
+  room     Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  playerId String
+  choice   String // "EXPOSE" | "PROTECT"
+
+  @@id([roomId, playerId])
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  playerId  String?
+  type      String // "site.visit" | "attempt" | "hint" | "puzzle.solved" | "room.created" | "ending"
+  data      Json?
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+}
