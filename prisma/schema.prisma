@@ -89,8 +89,9 @@ model EndingVote {
 
 model AnalyticsEvent {
   id        String   @id @default(cuid())
-  roomId    String
-  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomRef   String // room id, kept after the room expires so stats survive
+  roomId    String?
+  room      Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
   playerId  String?
   type      String // "site.visit" | "attempt" | "hint" | "puzzle.solved" | "room.created" | "ending"
   data      Json?
