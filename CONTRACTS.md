@@ -18,7 +18,7 @@ Types: `src/lib/types.ts` (source of truth). DB: `prisma/schema.prisma`. Spec: `
 | POST | /api/rooms/[code]/join | `{displayName,color}` | `{code}` + sets cookie. 404 unknown/expired room |
 | GET | /api/rooms/[code]/state | – | `RoomState` (401 if no player cookie) |
 | POST | /api/rooms/[code]/presence | `{view: string}` | `{ok}` heartbeat; client sends every 15s and on view change |
-| POST | /api/resolve | `{code,address}` | `ResolveResponse` (records visit; first lostpaws.net visit unlocks decoder) |
+| POST | /api/resolve | `{code,address}` | `ResolveResponse` (records visit) |
 | POST | /api/rooms/[code]/attempt | `{puzzleId,input}` | `AttemptResponse`; 429 w/ `rateLimited` when >5/min/puzzle/room |
 | POST | /api/rooms/[code]/notes | `{body,visibility,fragmentTag?}` | `NoteDTO` |
 | PATCH | /api/rooms/[code]/notes/[id] | `{body?,visibility?,fragmentTag?}` | `NoteDTO` (author only; host may also edit nothing but delete) |
@@ -52,6 +52,7 @@ bonusEpilogue(): string
 bonusFiles(): { name: string; body: string }[]   // returned via GET /api/rooms/[code]/files only if bonus-pin solved
 HINT_PUZZLES: HintPuzzleId[]
 ```
+Decoder: unlocked by solving `tools-folder` (requires `bonus-pin`), not by visiting a site.
 Gating: `intranet.meridian-inst.net` subpages beyond login require `intranet-login` solved;
 `switch.ada-voss.net` unreachable until `intranet-login` solved. lostpaws listings render ciphertext until
 `shift-key` solved, then plaintext.

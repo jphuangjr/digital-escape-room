@@ -39,7 +39,8 @@ Fee: paid in advance. Questions: none, apparently.`,
 - Notes: private by default. Tap "Share to room" when it matters.
   Tag fragments (name / year / ID / cipher key / address).
 - Email: keep an eye on it. Ada leaves voicemails.
-- Decoder: shows up once you find something worth decoding.
+- Decoder: Ada keeps it in "Ada's Tools". She never could resist
+  a security question.
 - Stuck? The hints panel can ask Ada for a nudge.`,
   },
   {
@@ -166,11 +167,92 @@ function PinPad({ ctx }: { ctx: GameCtx }) {
   );
 }
 
-type View = { kind: "root" } | { kind: "personal" } | { kind: "file"; file: FileItem; from: "root" | "personal" };
+function SecurityQuestion({ ctx }: { ctx: GameCtx }) {
+  const [answer, setAnswer] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [retryUntil, setRetryUntil] = useState<number | null>(null);
+  const now = useNow(500);
+  const waiting = retryUntil !== null && retryUntil > now;
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const value = answer.trim();
+    if (!value || busy || waiting) return;
+    setBusy(true);
+    setError(null);
+    const res = await ctx.api<AttemptResponse>("/attempt", {
+      method: "POST",
+      body: { puzzleId: "tools-folder", input: value },
+    });
+    setBusy(false);
+    const d = res.data;
+    if (res.status === 429 || d?.rateLimited) {
+      setRetryUntil(Date.now() + (d?.retryAfterSec ?? 60) * 1000);
+      setError(d?.message ?? "Too many attempts.");
+      return;
+    }
+    if (!d) {
+      setError("Couldn't reach the server. Try again.");
+      return;
+    }
+    if (d.correct) {
+      ctx.toast("Folder unlocked", "success");
+      await ctx.refresh();
+    } else {
+      setError(d.message ?? "That's not it.");
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="mx-auto flex w-full max-w-xs flex-col gap-4 py-6">
+      <div className="text-center">
+        <div className="mb-1 text-3xl" aria-hidden>
+          🔒
+        </div>
+        <h3 className="text-base font-semibold text-zinc-100">Ada&apos;s Tools</h3>
+        <p className="mt-3 text-xs uppercase tracking-widest text-zinc-500">Security question</p>
+        <p className="mt-1 font-serif text-lg text-zinc-100">Who was Dad&apos;s weather?</p>
+      </div>
+      <input
+        value={answer}
+        onChange={(e) => setAnswer(e.target.value)}
+        placeholder="Answer"
+        autoCapitalize="off"
+        autoCorrect="off"
+        spellCheck={false}
+        enterKeyHint="go"
+        aria-label="Security answer"
+        className="min-h-12 rounded-lg border border-zinc-700 bg-zinc-900 px-3 text-zinc-100 placeholder:text-zinc-600"
+      />
+      <button
+        type="submit"
+        disabled={busy || waiting || !answer.trim()}
+        className="min-h-12 rounded-lg bg-amber-400 font-semibold text-zinc-950 disabled:opacity-50"
+      >
+        {busy ? "Checking…" : "Unlock"}
+      </button>
+      <div className="min-h-5 text-center text-sm" aria-live="polite">
+        {waiting ? (
+          <span className="text-amber-300">Locked out. Retry in {Math.ceil(((retryUntil ?? 0) - now) / 1000)}s</span>
+        ) : error ? (
+          <span className="text-red-400">{error}</span>
+        ) : null}
+      </div>
+    </form>
+  );
+}
+
+type View =
+  | { kind: "root" }
+  | { kind: "personal" }
+  | { kind: "tools" }
+  | { kind: "file"; file: FileItem; from: "root" | "personal" };
 
 export function FilesApp({ ctx }: { ctx: GameCtx }) {
   const { state } = ctx;
   const unlocked = state.progress.solved.includes("bonus-pin");
+  const toolsUnlocked = state.progress.solved.includes("tools-folder");
   const hasCompass = state.progress.badges.includes("compass");
   const [view, setView] = useState<View>({ kind: "root" });
   const [personal, setPersonal] = useState<FileItem[] | null>(null);
@@ -240,6 +322,23 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
     );
   }
 
+  if (view.kind === "tools") {
+    return (
+      <div className="flex h-full min-h-0 flex-col bg-zinc-950 text-zinc-100">
+        {header("~/Ada's Tools", () => setView({ kind: "root" }))}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          {!toolsUnlocked ? (
+            <SecurityQuestion ctx={ctx} />
+          ) : (
+            <ul className="divide-y divide-zinc-900">
+              {row("🧭", "Decoder", "app · Caesar shift and A1Z26", () => ctx.openApp("decoder"))}
+            </ul>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (view.kind === "personal") {
     return (
       <div className="flex h-full min-h-0 flex-col bg-zinc-950 text-zinc-100">
@@ -275,6 +374,12 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
       <ul className="min-h-0 flex-1 divide-y divide-zinc-900 overflow-y-auto overscroll-contain">
         {row(unlocked ? "📂" : "🔒", "Ada's Personal", unlocked ? "folder · unlocked" : "folder · PIN required", () =>
           setView({ kind: "personal" }),
+        )}
+        {row(
+          toolsUnlocked ? "📂" : "🔒",
+          "Ada's Tools",
+          toolsUnlocked ? "folder · unlocked" : "folder · security question",
+          () => setView({ kind: "tools" }),
         )}
         {LOCAL_FILES.map((f) => row("📄", f.name, "text file", () => setView({ kind: "file", file: f, from: "root" })))}
       </ul>

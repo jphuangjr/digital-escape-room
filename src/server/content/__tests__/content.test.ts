@@ -212,3 +212,15 @@ describe("Branch B entry", () => {
     expect(resolveSite(wren!.link!.href, fresh())).not.toBeNull();
   });
 });
+
+describe("Ada's Tools security question", () => {
+  it("accepts Mara in any case or spacing and rejects other names", () => {
+    for (const v of ["mara", "MARA", " Mara ", "Mara."]) expect(checkAnswer("tools-folder", v)).toBe(true);
+    for (const v of ["ada", "weather", "gale", ""]) expect(checkAnswer("tools-folder", v)).toBe(false);
+  });
+
+  it("the clue lives in Ada's Personal", () => {
+    const note = bonusFiles().find((f) => f.name === "notes_on_mara.txt");
+    expect(note?.body).toMatch(/Dad called her his weather/);
+  });
+});

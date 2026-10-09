@@ -12,6 +12,8 @@ const INTRANET_USER = "wren.okafor";
 const INTRANET_PASS = `${FRAGMENTS.year}${FRAGMENTS.id}`;
 const FINAL_PHRASE = `${FRAGMENTS.name}-${FRAGMENTS.year}-${FRAGMENTS.id}`;
 const BONUS_PIN = "0314";
+/** "Who was Dad's weather?" (notes_on_mara.txt inside Ada's Personal). */
+const TOOLS_ANSWER = "mara";
 
 /** Trim, lowercase, collapse internal whitespace to a single space. */
 export function normalize(input: string): string {
@@ -46,6 +48,8 @@ export function checkAnswer(puzzleId: PuzzleId, input: string): boolean {
       return normalizePhrase(input) === FINAL_PHRASE;
     case "bonus-pin":
       return input.replace(/\D/g, "") === BONUS_PIN;
+    case "tools-folder":
+      return normalize(input).replace(/[^a-z]/g, "") === TOOLS_ANSWER;
     default:
       return false;
   }

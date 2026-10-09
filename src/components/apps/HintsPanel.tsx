@@ -6,13 +6,14 @@ import type { HintPuzzleId } from "@/lib/types";
 import { btnGhost, formatCountdown, useNow } from "./shared";
 
 export const HINT_LABELS: { id: HintPuzzleId; label: string }[] = [
+  { id: "bonus-pin", label: "Ada's Personal" },
+  { id: "tools-folder", label: "Ada's Tools" },
   { id: "find-blog", label: "Finding Ada's drafts" },
   { id: "shift-key", label: "The cipher key" },
   { id: "find-pets", label: "The forum trail" },
   { id: "pet-id", label: "Biscuit" },
   { id: "intranet-login", label: "The intranet" },
   { id: "final-phrase", label: "The switch" },
-  { id: "bonus-pin", label: "Ada's Personal" },
 ];
 
 const MAX_TIER = 3;

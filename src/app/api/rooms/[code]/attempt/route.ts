@@ -7,7 +7,7 @@ import { publish } from "@/server/realtime";
 import { track } from "@/server/analytics";
 import { checkAnswer } from "@/server/content";
 
-const PREREQS: Partial<Record<PuzzleId, PuzzleId>> = { "final-phrase": "intranet-login" };
+const PREREQS: Partial<Record<PuzzleId, PuzzleId>> = { "final-phrase": "intranet-login", "tools-folder": "bonus-pin" };
 
 export async function POST(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
@@ -65,6 +65,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
       if (cur.solved.includes(puzzleId)) return null;
       const p = { ...cur, solved: [...cur.solved, puzzleId] };
       if (puzzleId === "bonus-pin" && !p.badges.includes("compass")) p.badges = [...p.badges, "compass"];
+      if (puzzleId === "tools-folder" && !p.unlockedApps.includes("decoder")) p.unlockedApps = [...p.unlockedApps, "decoder"];
       const data =
         puzzleId === "final-phrase" && status === "playing"
           ? { status: "voting", voteDeadline: new Date(Date.now() + VOTE_DURATION_MS) }
