@@ -6,6 +6,7 @@ import { mutateProgress } from "@/server/progress";
 import { publish } from "@/server/realtime";
 import { track } from "@/server/analytics";
 import { checkAnswer } from "@/server/content";
+import { recordFinishedCase } from "@/server/cases";
 
 const PREREQS: Partial<Record<PuzzleId, PuzzleId>> = { "final-phrase": "intranet-login", "tools-folder": "bonus-pin" };
 
@@ -68,12 +69,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
       if (puzzleId === "tools-folder" && !p.unlockedApps.includes("decoder")) p.unlockedApps = [...p.unlockedApps, "decoder"];
       const data =
         puzzleId === "final-phrase" && status === "playing"
-          ? { status: "voting", voteDeadline: new Date(Date.now() + VOTE_DURATION_MS) }
+          ? { status: "voting", voteDeadline: new Date(Date.now() + VOTE_DURATION_MS), finishedAt: new Date() }
           : undefined;
       return { progress: p, data };
     });
     nextProgress = res.progress;
     solvedNow = res.changed;
+    if (solvedNow && puzzleId === "final-phrase") await recordFinishedCase(room.id).catch(() => {});
     if (solvedNow) {
       track(room.id, player.id, "puzzle.solved", {
         puzzleId,

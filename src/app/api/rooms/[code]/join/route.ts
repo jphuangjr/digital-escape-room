@@ -3,6 +3,7 @@ import { error, json, readBody } from "@/server/http";
 import { validateColor, validateDisplayName } from "@/server/logic";
 import { getPlayerInRoom, getRoom, newPlayerToken, setPlayerCookie, touchRoom } from "@/server/session";
 import { publish } from "@/server/realtime";
+import { getSessionUser } from "@/server/auth";
 
 const MAX_PLAYERS = 16;
 
@@ -17,12 +18,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   const color = validateColor(body.color);
   if (!color) return error(400, "Color must be a hex value like #c9a227.");
 
-  // Rejoin with an existing cookie: keep identity, refresh name/color.
+  const user = await getSessionUser();
+
+  // Rejoin (by cookie, or by Google account on a new device): keep identity, refresh name/color.
   const existing = await getPlayerInRoom(room);
   if (existing) {
+    // Signing in after joining anonymously links this player to the account, unless the account
+    // already has a different player in this room.
+    const link =
+      user && !existing.userId
+        ? !(await db.player.findUnique({ where: { roomId_userId: { roomId: room.id, userId: user.id } } }))
+        : false;
     await db.player.update({
       where: { id: existing.id },
-      data: { displayName: name.value, color, lastSeenAt: new Date() },
+      data: {
+        displayName: name.value,
+        color,
+        lastSeenAt: new Date(),
+        ...(link ? { userId: user!.id, image: user!.image } : {}),
+      },
     });
     await setPlayerCookie(room.code, existing.token);
     await publish(room.code, "presence.updated", { playerId: existing.id });
@@ -33,7 +47,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   if (count >= MAX_PLAYERS) return error(409, "This room is full.");
 
   const token = newPlayerToken();
-  const player = await db.player.create({ data: { roomId: room.id, token, displayName: name.value, color } });
+  const player = await db.player.create({
+    data: { roomId: room.id, token, displayName: name.value, color, userId: user?.id, image: user?.image },
+  });
   await setPlayerCookie(room.code, token);
   await touchRoom(room, true);
   await publish(room.code, "presence.updated", { playerId: player.id, joined: true });

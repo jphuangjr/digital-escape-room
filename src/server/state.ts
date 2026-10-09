@@ -76,6 +76,7 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
     isHost: p.id === room.hostId,
     online: p.id === player.id || isOnline(p, now),
     currentView: p.currentView,
+    image: p.image,
   }));
 
   const attemptDTOs: AttemptDTO[] = attempts.map((a) => {
@@ -96,7 +97,14 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
     code: room.code,
     status: room.status as RoomStatus,
     hostId: room.hostId,
-    me: { id: player.id, displayName: player.displayName, color: player.color, isHost: player.id === room.hostId },
+    me: {
+      id: player.id,
+      displayName: player.displayName,
+      color: player.color,
+      isHost: player.id === room.hostId,
+      image: player.image,
+      signedIn: player.userId !== null,
+    },
     players: playersPublic,
     progress,
     publicNotes: notes.filter((n) => n.visibility === "PUBLIC").map((n) => noteDTO(n, byId.get(n.authorId))),

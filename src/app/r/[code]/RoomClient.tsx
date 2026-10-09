@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { RoomState } from "@/lib/types";
+import { signIn } from "next-auth/react";
+import type { MeResponse, RoomState } from "@/lib/types";
 import { apiFetch } from "@/lib/client/game";
 import { useRoomChannel } from "@/lib/realtime/client";
 import { GameShell } from "@/components/shell/GameShell";
@@ -131,6 +132,18 @@ function JoinForm({
   const [color, setColor] = useState(AVATAR_COLORS[0]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [me, setMe] = useState<MeResponse | null>(null);
+
+  useEffect(() => {
+    fetch("/api/me")
+      .then((r) => (r.ok ? (r.json() as Promise<MeResponse>) : null))
+      .then((data) => {
+        if (!data) return;
+        setMe(data);
+        if (data.user?.name) setName((n) => n || data.user!.name!.slice(0, 24));
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     try {
@@ -233,6 +246,24 @@ function JoinForm({
         >
           {busy ? "Joining…" : "Join the investigation"}
         </button>
+
+        {me?.googleEnabled && !me.user && (
+          <div className="mt-5 border-t border-stone-800 pt-4 text-center">
+            <p className="text-xs text-stone-500">Optional: keep your progress and times, and rejoin from any device.</p>
+            <button
+              type="button"
+              onClick={() => signIn("google", { callbackUrl: `/r/${code}` })}
+              className="mt-2 min-h-11 px-3 text-sm font-semibold text-amber-300 underline"
+            >
+              Sign in with Google
+            </button>
+          </div>
+        )}
+        {me?.user && (
+          <p className="mt-4 text-center text-xs text-stone-500">
+            Signed in as {me.user.name || me.user.email}. You&apos;ll join as yourself.
+          </p>
+        )}
       </form>
     </div>
   );

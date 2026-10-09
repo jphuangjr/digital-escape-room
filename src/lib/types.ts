@@ -40,6 +40,7 @@ export interface PlayerPublic {
   isHost: boolean;
   online: boolean; // lastSeenAt within 30s
   currentView: string | null;
+  image: string | null; // Google profile photo when signed in
 }
 
 export interface NoteDTO {
@@ -100,7 +101,7 @@ export interface RoomState {
   code: string;
   status: RoomStatus;
   hostId: string | null;
-  me: { id: string; displayName: string; color: string; isHost: boolean };
+  me: { id: string; displayName: string; color: string; isHost: boolean; image: string | null; signedIn: boolean };
   players: PlayerPublic[];
   progress: RoomProgress;
   publicNotes: NoteDTO[];
@@ -164,4 +165,22 @@ export interface AttemptResponse {
   retryAfterSec?: number;
   message?: string;
   progress: RoomProgress;
+}
+
+// ---------- Accounts (optional Google sign-in) ----------
+
+export interface MeResponse {
+  googleEnabled: boolean; // false when the server has no OAuth credentials configured
+  user: { name: string | null; email: string | null; image: string | null } | null;
+  activeRooms: { code: string; gameId: string; status: RoomStatus; isHost: boolean; playerCount: number; createdAt: string }[];
+  cases: {
+    gameId: string;
+    roomCode: string;
+    startedAt: string;
+    finishedAt: string;
+    durationMs: number;
+    ending: Ending | null;
+    wasHost: boolean;
+    playerCount: number;
+  }[];
 }

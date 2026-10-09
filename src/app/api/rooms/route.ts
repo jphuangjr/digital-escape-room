@@ -4,8 +4,12 @@ import { error, json, readBody } from "@/server/http";
 import { initialProgress, validateColor, validateDisplayName } from "@/server/logic";
 import { newPlayerToken, newRoomCode, setPlayerCookie, sweepExpiredRooms } from "@/server/session";
 import { track } from "@/server/analytics";
+import { getSessionUser, googleEnabled } from "@/server/auth";
 
 export async function POST(req: Request) {
+  // Hosting requires Google sign-in (joining stays optional). Skipped when OAuth isn't configured.
+  const user = await getSessionUser();
+  if (googleEnabled && !user) return error(401, "Sign in with Google to host a room.", { signInRequired: true });
   const body = await readBody(req);
   if (!body) return error(400, "Invalid JSON body.");
   const name = validateDisplayName(body.displayName);
@@ -24,7 +28,7 @@ export async function POST(req: Request) {
           data: { code, progress: initialProgress() as unknown as Prisma.InputJsonValue },
         });
         const p = await tx.player.create({
-          data: { roomId: r.id, token, displayName: name.value, color },
+          data: { roomId: r.id, token, displayName: name.value, color, userId: user?.id, image: user?.image },
         });
         return tx.room.update({ where: { id: r.id }, data: { hostId: p.id } });
       });

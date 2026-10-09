@@ -15,6 +15,8 @@ model Room {
   createdAt      DateTime  @default(now())
   lastActivityAt DateTime  @default(now())
   progress       Json // see RoomProgress in src/lib/types.ts
+  gameId         String    @default("ada-voss") // which escape room; more games later
+  finishedAt     DateTime? // when the final puzzle was solved (escape time = finishedAt - createdAt)
   status         String    @default("playing") // "playing" | "voting" | "finished"
   ending         String? // "EXPOSE" | "PROTECT"
   voteDeadline   DateTime?
@@ -31,13 +33,49 @@ model Player {
   roomId      String
   room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   token       String   @unique
+  userId      String? // set when the player is signed in with Google
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  image       String? // Google profile photo, if signed in
   displayName String
   color       String
   currentView String? // e.g. "browser:thedrift.blog" or "app:notes"
   lastSeenAt  DateTime @default(now())
   createdAt   DateTime @default(now())
 
+  @@unique([roomId, userId])
   @@index([roomId])
+}
+
+/// A Google-signed-in person. Anonymous players have no User.
+model User {
+  id        String       @id @default(cuid())
+  googleSub String       @unique
+  email     String?
+  name      String?
+  image     String?
+  createdAt DateTime     @default(now())
+  players   Player[]
+  cases     CaseRecord[]
+}
+
+/// Permanent record of a finished case for a signed-in player. Survives room expiry.
+model CaseRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId      String
+  roomRef     String // Room.id at the time; the room itself may be gone
+  roomCode    String
+  startedAt   DateTime
+  finishedAt  DateTime
+  durationMs  Int
+  ending      String? // filled in once the vote resolves
+  wasHost     Boolean
+  playerCount Int
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, roomRef])
+  @@index([userId, gameId])
 }
 
 model Note {
