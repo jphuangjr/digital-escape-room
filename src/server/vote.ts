@@ -6,6 +6,7 @@ import { decideVote, isEnding, ONLINE_WINDOW_MS, parseProgress, tally } from "./
 import { publish } from "./realtime";
 import { track } from "./analytics";
 import { bonusEpilogue, endingText } from "./content";
+import { recordCaseEnding } from "./cases";
 
 export async function loadVoteState(room: Room): Promise<VoteState | null> {
   if (room.status === "playing") return null;
@@ -57,6 +58,7 @@ export async function finishRoom(room: Room, ending: Ending, playerId: string | 
   const updated = await db.room.findUnique({ where: { id: room.id } });
   if (!updated) return null;
   track(room.id, playerId, "ending", { ending, tieBrokenByHost: byHost });
+  await recordCaseEnding(room.id, ending).catch(() => {});
   await publish(room.code, "ending.resolved", { ending });
   return updated;
 }

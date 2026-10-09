@@ -58,3 +58,11 @@ Gating: `intranet.meridian-inst.net` subpages beyond login require `intranet-log
 `shift-key` solved, then plaintext.
 
 Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, files}`.
+
+## Accounts (optional Google sign-in, next-auth v4, JWT sessions)
+- Enabled only when `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET` are set (plus `AUTH_SECRET`); otherwise fully anonymous.
+- Hosting (`POST /api/rooms`) requires sign-in when enabled → 401 `{signInRequired:true}`. Joining stays optional.
+- `getPlayerInRoom` falls back from the `pt_<CODE>` cookie to the signed-in user's Player in that room
+  (one per user per room) and re-issues the cookie, so a signed-in player is the same player on any device.
+- Final phrase solved → `Room.finishedAt`; a `CaseRecord` (game, time, ending, host?) is written per signed-in
+  player and survives room expiry. `GET /api/me` → `MeResponse` (user, open rooms, finished cases).

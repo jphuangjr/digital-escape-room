@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import type { Player, Room } from "@prisma/client";
 import { db } from "./db";
 import { generateRoomCode, normalizeRoomCode } from "./logic";
+import { getSessionUser } from "./auth";
 
 export const ROOM_TTL_MS = 48 * 60 * 60 * 1000;
 const COOKIE_MAX_AGE = 30 * 24 * 60 * 60;
@@ -62,13 +63,22 @@ export async function getPlayer(rawCode: string): Promise<{ room: Room; player: 
   return player ? { room, player } : null;
 }
 
-/** The cookie-identified player of an already-loaded room, or null. */
+/**
+ * The caller's player in an already-loaded room, or null. Identified by the room cookie, or failing
+ * that by Google sign-in (same player on any device), in which case the cookie is re-issued.
+ */
 export async function getPlayerInRoom(room: Room): Promise<Player | null> {
   const jar = await cookies();
   const token = jar.get(cookieName(room.code))?.value;
-  if (!token) return null;
-  const player = await db.player.findUnique({ where: { token } });
-  if (!player || player.roomId !== room.id) return null;
+  if (token) {
+    const player = await db.player.findUnique({ where: { token } });
+    if (player && player.roomId === room.id) return player;
+  }
+  const user = await getSessionUser();
+  if (!user) return null;
+  const player = await db.player.findUnique({ where: { roomId_userId: { roomId: room.id, userId: user.id } } });
+  if (!player) return null;
+  await setPlayerCookie(room.code, player.token);
   return player;
 }
 

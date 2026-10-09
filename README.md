@@ -13,6 +13,9 @@ npx prisma migrate dev
 npm run dev                   # http://localhost:3000
 npm test                      # vitest
 ```
+Google sign-in (optional, required only to host): set `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_SECRET`;
+OAuth redirect URI is `<origin>/api/auth/callback/google`.
+
 Admin analytics (which puzzles stall players): `GET /api/admin/analytics?token=$ADMIN_TOKEN`.
 
 The answer key lives only in `src/server/**` (guarded with `server-only`); client code must never import it.

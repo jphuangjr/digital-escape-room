@@ -111,12 +111,23 @@ export function RoomSheet({ ctx, open, onClose }: { ctx: GameCtx; open: boolean;
               {players.map((p) => (
                 <li key={p.id} className="flex min-h-12 items-center gap-3 rounded-md px-1 py-1.5">
                   <span className="relative shrink-0">
-                    <span
-                      className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-black"
-                      style={{ backgroundColor: p.color }}
-                    >
-                      {p.displayName.charAt(0).toUpperCase()}
-                    </span>
+                    {p.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={p.image}
+                        alt=""
+                        referrerPolicy="no-referrer"
+                        className="h-9 w-9 rounded-full border-2 object-cover"
+                        style={{ borderColor: p.color }}
+                      />
+                    ) : (
+                      <span
+                        className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-black"
+                        style={{ backgroundColor: p.color }}
+                      >
+                        {p.displayName.charAt(0).toUpperCase()}
+                      </span>
+                    )}
                     <span
                       className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-stone-950 ${
                         p.online ? "bg-emerald-500" : "bg-stone-600"
