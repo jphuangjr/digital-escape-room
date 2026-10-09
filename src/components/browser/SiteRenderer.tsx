@@ -122,6 +122,13 @@ function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
                 <p className="font-semibold">{p.name}</p>
                 <p className={`text-sm italic ${t.muted}`}>{p.role}</p>
                 <p className="mt-1 text-sm leading-relaxed">{p.bio}</p>
+                {p.link && (
+                  <p className="mt-1 text-sm">
+                    <SiteLink href={p.link.href} env={env}>
+                      {p.link.text}
+                    </SiteLink>
+                  </p>
+                )}
               </div>
             </li>
           ))}

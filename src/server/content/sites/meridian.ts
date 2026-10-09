@@ -54,10 +54,10 @@ function home(): SitePage {
   });
 }
 
-const STAFF: { name: string; role: string; bio: string; photo: string | null }[] = [
+const STAFF: Extract<Block, { type: "staff" }>["people"] = [
   { name: "Dr. Harriet Calloway", role: "Director", bio: "Has led the Institute for two decades. Believes the past is a public utility and should be maintained like one.", photo: "calloway.jpg" },
   { name: "Dr. Ada Voss", role: "Senior Archivist (on leave)", bio: "Specialist in harbour-era ledgers and municipal deeds. Known for reading the footnotes nobody else reads.", photo: "voss.jpg" },
-  { name: "Wren Okafor", role: "Systems Archivist", bio: "Maintains the Institute's digital catalogue and access systems. Off the clock, she still holds the high score on Circuit Runner '94 — and will tell you so on the RunnerBoard if you ask.", photo: null },
+  { name: "Wren Okafor", role: "Systems Archivist", bio: "Maintains the Institute's digital catalogue and access systems. Off the clock, she still holds the high score on Circuit Runner '94 — and will tell you so on runnerboard.net if you ask.", photo: null, link: { text: "runnerboard.net →", href: "runnerboard.net" } },
   { name: "Thomas Kell", role: "Deputy Director, Continuity", bio: "Oversees reconciliation of conflicting records. \"Two truths are one too many.\"", photo: "kell.jpg" },
   { name: "Priya Ramanathan", role: "Conservator", bio: "Restores paper, vellum and film. Can tell a forged watermark by the way it catches the light.", photo: "ramanathan.jpg" },
   { name: "Lionel Ash", role: "Head of Security", bio: "Former harbour police. Responsible for the vaults, the keys and the people who ask about them.", photo: "ash.jpg" },
