@@ -7,7 +7,7 @@ Multiplayer, mobile-first online escape room. Next.js 15 (App Router) + Prisma/P
 
 ## Run locally
 ```bash
-cp .env.example .env          # set DATABASE_URL; Supabase vars optional (falls back to 4s polling)
+cp .env.example .env          # set POSTGRES_PRISMA_URL + POSTGRES_URL_NON_POOLING (Vercel Supabase integration names); Supabase vars optional (falls back to 4s polling)
 npm install
 npx prisma migrate dev
 npm run dev                   # http://localhost:3000
