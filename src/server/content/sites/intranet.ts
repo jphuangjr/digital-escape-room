@@ -9,18 +9,19 @@ const FOOTER: Block = { type: "footer", text: "© since 1978. Meridian Institute
 function login(gatedFrom?: string): SitePage {
   const blocks: Block[] = [
     { type: "compass" },
-    { type: "heading", level: 1, text: "Meridian Staff Portal" },
+    { type: "heading", level: 1, text: "The Vault" },
+    { type: "paragraph", text: "Meridian Staff Access" },
     ...(gatedFrom ? [{ type: "notice", tone: "warning", text: "Session required. Please sign in to continue." } as Block] : []),
     { type: "paragraph", text: "Authorised personnel only. Accounts follow the standard staff format." },
-    { type: "form", form: "intranet-login", prompt: "Sign in with your staff username and access code." },
-    { type: "notice", tone: "info", text: "Forgotten your access code? Legacy accounts were issued codes at onboarding. Contact Systems (W. Okafor) — extension unavailable." },
+    { type: "form", form: "intranet-login", prompt: "Enter your staff username and vault code." },
+    { type: "notice", tone: "info", text: "Forgotten your vault code? Legacy accounts were issued codes at onboarding. Contact Systems (W. Okafor) — extension unavailable." },
     FOOTER,
   ];
-  return page(INTRANET_HOST, "Staff Portal — Sign in", "intranet", blocks, {
+  return page(INTRANET_HOST, "The Vault — Meridian Staff Access", "intranet", blocks, {
     headComments: ["MeridianAuth 1.3 — legacy mode"],
     bodyComments: [
       "usernames: firstname.lastname (lowercase)",
-      "legacy access codes per IT-2019-07: the TRUE founding year, followed by the 4-digit registry ID the user chose. yes, really. — W.O.",
+      "legacy vault codes per IT-2019-07: the TRUE founding year, followed by the 4-digit registry ID the user chose. yes, really. — W.O.",
     ],
   });
 }
@@ -68,7 +69,7 @@ function dashboard(): SitePage {
     MEMO,
     FOOTER,
   ];
-  return page(INTRANET_HOST, "Staff Portal — Dashboard", "intranet", blocks, {
+  return page(INTRANET_HOST, "The Vault — Dashboard", "intranet", blocks, {
     headComments: ["MeridianAuth 1.3 — session ok"],
     bodyComments: ["she used my account. I let her. — W."],
   });

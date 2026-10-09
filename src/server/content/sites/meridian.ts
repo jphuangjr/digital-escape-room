@@ -11,6 +11,7 @@ const NAV: Block = {
     { text: "About", href: `${MERIDIAN_HOST}/about` },
     { text: "Staff", href: `${MERIDIAN_HOST}/staff` },
     { text: "Collections", href: `${MERIDIAN_HOST}/collections` },
+    { text: "Staff portal", href: "intranet.meridian-inst.net" },
   ],
 };
 

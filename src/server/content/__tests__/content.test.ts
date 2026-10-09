@@ -224,3 +224,15 @@ describe("Ada's Tools security question", () => {
     expect(note?.body).toMatch(/Dad called her his weather/);
   });
 });
+
+describe("Vault entry", () => {
+  it("Meridian's nav links to the staff portal, which is branded as the Vault", () => {
+    const home = resolveSite("meridian-inst.net", fresh());
+    const nav = home?.blocks.find((b): b is Extract<Block, { type: "nav" }> => b.type === "nav");
+    const portal = nav?.links.find((l) => l.text === "Staff portal");
+    expect(portal?.href).toBe("intranet.meridian-inst.net");
+    const login = resolveSite(portal!.href, fresh());
+    expect(login?.title).toMatch(/Vault/);
+    expect(login?.blocks.some((b) => b.type === "form" && /vault code/i.test(b.prompt))).toBe(true);
+  });
+});
