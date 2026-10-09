@@ -47,10 +47,34 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
+type Kind = "single" | "group";
+
+const EXPIRY_OPTIONS: { label: string; days: number | null }[] = [
+  { label: "Never", days: null },
+  { label: "1 day", days: 1 },
+  { label: "7 days", days: 7 },
+  { label: "30 days", days: 30 },
+];
+
+function usesLabel(c: AdminCodeDTO): string {
+  if (c.maxUses === 1) return "Single-use";
+  return `Group · ${c.useCount}/${c.maxUses ?? "∞"} uses`;
+}
+
+const STATUS_LABEL: Record<AdminCodeDTO["status"], string> = {
+  active: "",
+  used: "Used up",
+  expired: "Expired",
+  revoked: "Turned off",
+};
+
 function CodesPanel() {
   const [gameId, setGameId] = useState(GAMES[0].id);
   const [codes, setCodes] = useState<AdminCodeDTO[] | null>(null);
+  const [kind, setKind] = useState<Kind>("single");
   const [count, setCount] = useState(5);
+  const [maxUses, setMaxUses] = useState<number | null>(10);
+  const [expiresInDays, setExpiresInDays] = useState<number | null>(null);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -76,22 +100,33 @@ function CodesPanel() {
     const res = await fetch("/api/admin/codes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ gameId, count, note }),
+      body: JSON.stringify(
+        kind === "group" ? { gameId, kind, maxUses, expiresInDays, note } : { gameId, kind, count, expiresInDays, note },
+      ),
     });
     const data = (await res.json().catch(() => ({}))) as { codes?: AdminCodeDTO[]; error?: string };
     setBusy(false);
     if (!res.ok || !data.codes) return setMsg(data.error ?? "Couldn't generate codes.");
     setFresh(new Set(data.codes.map((c) => c.id)));
     setCodes((cur) => [...data.codes!, ...(cur ?? [])]);
-    setMsg(`Generated ${data.codes.length} ${data.codes.length === 1 ? "code" : "codes"}.`);
+    if (kind === "group") {
+      setMsg("Group code created. Share its QR or link in the group chat.");
+      setQrFor(data.codes[0]);
+    } else {
+      setMsg(`Generated ${data.codes.length} ${data.codes.length === 1 ? "code" : "codes"}.`);
+    }
   }
 
-  async function revoke(c: AdminCodeDTO) {
-    if (!confirm(`Revoke ${c.code}? It will stop working.`)) return;
+  async function turnOff(c: AdminCodeDTO) {
+    const warning =
+      c.useCount > 0
+        ? `Turn off ${c.code}? Nobody else can use it. The ${c.useCount} ${c.useCount === 1 ? "person" : "people"} who already claimed it keep their room.`
+        : `Turn off ${c.code}? It will stop working.`;
+    if (!confirm(warning)) return;
     const res = await fetch(`/api/admin/codes/${c.id}`, { method: "DELETE" });
     const data = (await res.json().catch(() => ({}))) as { error?: string };
-    if (!res.ok) return setMsg(data.error ?? "Couldn't revoke.");
-    setCodes((cur) => (cur ?? []).filter((x) => x.id !== c.id));
+    if (!res.ok) return setMsg(data.error ?? "Couldn't turn it off.");
+    setCodes((cur) => (cur ?? []).map((x) => (x.id === c.id ? { ...x, status: "revoked", revokedAt: new Date().toISOString() } : x)));
   }
 
   async function copy(text: string, label: string) {
@@ -103,8 +138,11 @@ function CodesPanel() {
     }
   }
 
-  const unused = (codes ?? []).filter((c) => !c.redeemedAt);
-  const used = (codes ?? []).filter((c) => c.redeemedAt);
+  const active = (codes ?? []).filter((c) => c.status === "active");
+  const done = (codes ?? []).filter((c) => c.status !== "active");
+  const activeSingles = active.filter((c) => c.maxUses === 1);
+  const chip = (on: boolean) =>
+    `min-h-11 rounded-lg border px-3 text-sm ${on ? "border-noir-brass bg-noir-brass text-noir-bg" : "border-noir-line text-noir-ink-dim"}`;
 
   return (
     <div className="flex flex-col gap-5">
@@ -120,9 +158,7 @@ function CodesPanel() {
               setFresh(new Set());
               setMsg(null);
             }}
-            className={`min-h-11 shrink-0 rounded-lg border px-4 text-sm ${
-              g.id === gameId ? "border-noir-brass bg-noir-brass text-noir-bg" : "border-noir-line text-noir-ink-dim"
-            }`}
+            className={`shrink-0 ${chip(g.id === gameId)}`}
           >
             {g.title}
             {g.status === "soon" ? " (soon)" : ""}
@@ -130,37 +166,89 @@ function CodesPanel() {
         ))}
       </div>
 
-      <form onSubmit={generate} className="flex flex-col gap-3 rounded-xl border border-noir-line bg-noir-bg-2 p-4">
-        <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-noir-ink-faint">Generate purchase codes</h2>
-        <div className="flex flex-wrap gap-3">
-          <label className="flex flex-col gap-1">
-            <span className="text-xs text-noir-ink-faint">How many</span>
-            <input
-              type="number"
-              min={1}
-              max={50}
-              value={count}
-              onChange={(e) => setCount(Math.max(1, Math.min(50, Number(e.target.value) || 1)))}
-              className="min-h-12 w-24 rounded-lg border border-noir-line bg-noir-bg-3 px-3 text-noir-ink"
-            />
-          </label>
-          <label className="flex min-w-48 flex-1 flex-col gap-1">
-            <span className="text-xs text-noir-ink-faint">Note (optional, e.g. who it&apos;s for)</span>
-            <input
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              maxLength={120}
-              placeholder="Birthday gift for Alex"
-              className="min-h-12 rounded-lg border border-noir-line bg-noir-bg-3 px-3 text-noir-ink placeholder:text-noir-ink-faint"
-            />
-          </label>
+      <form onSubmit={generate} className="flex flex-col gap-4 rounded-xl border border-noir-line bg-noir-bg-2 p-4">
+        <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-noir-ink-faint">Create purchase codes</h2>
+
+        <div role="radiogroup" aria-label="Code type" className="grid grid-cols-2 gap-2">
+          <button type="button" role="radio" aria-checked={kind === "single"} onClick={() => setKind("single")} className={chip(kind === "single")}>
+            Single-use codes
+          </button>
+          <button type="button" role="radio" aria-checked={kind === "group"} onClick={() => setKind("group")} className={chip(kind === "group")}>
+            Group code
+          </button>
         </div>
+        <p className="text-xs text-noir-ink-faint">
+          {kind === "single"
+            ? "One code per person. Each works for exactly one account."
+            : "One shareable code for a group chat. Anyone with it can claim a free room, once per account, until it runs out or expires."}
+        </p>
+
+        <div className="flex flex-wrap gap-3">
+          {kind === "single" ? (
+            <label className="flex flex-col gap-1">
+              <span className="text-xs text-noir-ink-faint">How many codes</span>
+              <input
+                type="number"
+                min={1}
+                max={50}
+                value={count}
+                onChange={(e) => setCount(Math.max(1, Math.min(50, Number(e.target.value) || 1)))}
+                className="min-h-12 w-24 rounded-lg border border-noir-line bg-noir-bg-3 px-3 text-noir-ink"
+              />
+            </label>
+          ) : (
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-noir-ink-faint">Uses allowed</span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={2}
+                  max={10000}
+                  value={maxUses ?? ""}
+                  disabled={maxUses === null}
+                  aria-label="Uses allowed"
+                  onChange={(e) => setMaxUses(Math.max(2, Math.min(10000, Number(e.target.value) || 2)))}
+                  className="min-h-12 w-24 rounded-lg border border-noir-line bg-noir-bg-3 px-3 text-noir-ink disabled:opacity-40"
+                />
+                <label className="flex min-h-11 items-center gap-2 text-sm text-noir-ink-dim">
+                  <input
+                    type="checkbox"
+                    checked={maxUses === null}
+                    onChange={(e) => setMaxUses(e.target.checked ? null : 10)}
+                    className="h-5 w-5 accent-[var(--color-noir-brass,#c9a227)]"
+                  />
+                  Unlimited
+                </label>
+              </div>
+            </div>
+          )}
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-noir-ink-faint">Expires</span>
+            <div className="flex flex-wrap gap-1">
+              {EXPIRY_OPTIONS.map((o) => (
+                <button key={o.label} type="button" onClick={() => setExpiresInDays(o.days)} className={chip(expiresInDays === o.days)} aria-pressed={expiresInDays === o.days}>
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs text-noir-ink-faint">Note (optional, e.g. who it&apos;s for)</span>
+          <input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            maxLength={120}
+            placeholder={kind === "group" ? "Book club chat" : "Birthday gift for Alex"}
+            className="min-h-12 rounded-lg border border-noir-line bg-noir-bg-3 px-3 text-noir-ink placeholder:text-noir-ink-faint"
+          />
+        </label>
         <button
           type="submit"
           disabled={busy}
           className="min-h-12 rounded-lg bg-noir-brass font-semibold text-noir-bg active:bg-noir-brass-hi disabled:opacity-60"
         >
-          {busy ? "Generating…" : `Generate ${count} ${count === 1 ? "code" : "codes"}`}
+          {busy ? "Creating…" : kind === "group" ? "Create group code" : `Generate ${count} ${count === 1 ? "code" : "codes"}`}
         </button>
         {msg && (
           <p role="status" className="text-sm text-noir-ink-dim">
@@ -175,64 +263,104 @@ function CodesPanel() {
         <>
           <section className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-noir-ink-faint">Unused ({unused.length})</h2>
-              {unused.length > 0 && (
+              <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-noir-ink-faint">Active ({active.length})</h2>
+              {activeSingles.length > 1 && (
                 <button
-                  onClick={() => copy(unused.map((c) => c.code).join("\n"), `${unused.length} unused codes`)}
+                  onClick={() => copy(activeSingles.map((c) => c.code).join("\n"), `${activeSingles.length} single-use codes`)}
                   className="min-h-11 text-sm text-noir-brass underline"
                 >
-                  Copy all
+                  Copy all single-use
                 </button>
               )}
             </div>
-            {unused.length === 0 && <p className="text-sm text-noir-ink-faint">No unused codes for this game.</p>}
+            {active.length === 0 && <p className="text-sm text-noir-ink-faint">No active codes for this game.</p>}
             <ul className="flex flex-col gap-2">
-              {unused.map((c) => (
-                <li
-                  key={c.id}
-                  className={`flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2 ${
-                    fresh.has(c.id) ? "border-noir-brass/70 bg-noir-brass/10" : "border-noir-line bg-noir-bg-2"
-                  }`}
-                >
-                  <button type="button" onClick={() => setQrFor(c)} className="min-w-0 flex-1 text-left" aria-label={`Show QR for ${c.code}`}>
-                    <span className="block font-mono tracking-wider text-noir-ink">{c.code}</span>
-                    <span className="block text-xs text-noir-ink-faint">
-                      {new Date(c.createdAt).toLocaleDateString()}
-                      {c.note ? ` · ${c.note}` : ""}
-                    </span>
-                  </button>
-                  <button onClick={() => setQrFor(c)} className="min-h-11 px-2 text-sm text-noir-brass underline">
-                    QR
-                  </button>
-                  <button onClick={() => copy(c.code, c.code)} className="min-h-11 px-2 text-sm text-noir-brass underline">
-                    Copy
-                  </button>
-                  <button onClick={() => revoke(c)} className="min-h-11 px-2 text-sm text-noir-ink-faint underline">
-                    Revoke
-                  </button>
-                </li>
+              {active.map((c) => (
+                <CodeRow key={c.id} c={c} highlight={fresh.has(c.id)} onQr={() => setQrFor(c)} onCopy={copy} onTurnOff={() => turnOff(c)} />
               ))}
             </ul>
           </section>
 
           <section className="flex flex-col gap-2">
-            <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-noir-ink-faint">Redeemed ({used.length})</h2>
-            {used.length === 0 && <p className="text-sm text-noir-ink-faint">None yet.</p>}
+            <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-noir-ink-faint">Used, expired or off ({done.length})</h2>
+            {done.length === 0 && <p className="text-sm text-noir-ink-faint">None yet.</p>}
             <ul className="flex flex-col gap-2">
-              {used.map((c) => (
-                <li key={c.id} className="rounded-lg border border-noir-line bg-noir-bg-2/60 px-3 py-2">
-                  <span className="block font-mono tracking-wider text-noir-ink-dim line-through decoration-noir-ink-faint">{c.code}</span>
-                  <span className="block text-xs text-noir-ink-faint">
-                    {c.redeemedBy} · {new Date(c.redeemedAt!).toLocaleString()}
-                    {c.note ? ` · ${c.note}` : ""}
-                  </span>
-                </li>
+              {done.map((c) => (
+                <CodeRow key={c.id} c={c} onQr={() => setQrFor(c)} onCopy={copy} />
               ))}
             </ul>
           </section>
         </>
       )}
     </div>
+  );
+}
+
+function CodeRow({
+  c,
+  highlight = false,
+  onQr,
+  onCopy,
+  onTurnOff,
+}: {
+  c: AdminCodeDTO;
+  highlight?: boolean;
+  onQr: () => void;
+  onCopy: (text: string, label: string) => void;
+  onTurnOff?: () => void;
+}) {
+  const live = c.status === "active";
+  const meta = [
+    usesLabel(c),
+    STATUS_LABEL[c.status],
+    c.expiresAt ? `${new Date(c.expiresAt).getTime() > Date.now() ? "expires" : "expired"} ${new Date(c.expiresAt).toLocaleDateString()}` : "",
+    c.note ?? "",
+  ].filter(Boolean);
+  return (
+    <li
+      className={`rounded-lg border px-3 py-2 ${
+        highlight ? "border-noir-brass/70 bg-noir-brass/10" : live ? "border-noir-line bg-noir-bg-2" : "border-noir-line bg-noir-bg-2/60"
+      }`}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <button type="button" onClick={onQr} className="min-w-0 flex-1 text-left" aria-label={`Show QR for ${c.code}`}>
+          <span className={`block font-mono tracking-wider ${live ? "text-noir-ink" : "text-noir-ink-dim line-through decoration-noir-ink-faint"}`}>
+            {c.code}
+          </span>
+          <span className="block text-xs text-noir-ink-faint">{meta.join(" · ")}</span>
+        </button>
+        {live && (
+          <>
+            <button onClick={onQr} className="min-h-11 px-2 text-sm text-noir-brass underline">
+              QR
+            </button>
+            <button onClick={() => onCopy(c.code, c.code)} className="min-h-11 px-2 text-sm text-noir-brass underline">
+              Copy
+            </button>
+            {onTurnOff && (
+              <button onClick={onTurnOff} className="min-h-11 px-2 text-sm text-noir-ink-faint underline">
+                Turn off
+              </button>
+            )}
+          </>
+        )}
+      </div>
+      {c.redemptions.length > 0 && (
+        <details className="mt-1 text-xs text-noir-ink-faint">
+          <summary className="min-h-8 cursor-pointer content-center">
+            Claimed by {c.useCount} {c.useCount === 1 ? "account" : "accounts"}
+          </summary>
+          <ul className="mt-1 flex flex-col gap-0.5 pl-3">
+            {c.redemptions.map((r) => (
+              <li key={r.email + r.at}>
+                {r.email} · {new Date(r.at).toLocaleString()}
+              </li>
+            ))}
+            {c.useCount > c.redemptions.length && <li>…and {c.useCount - c.redemptions.length} more</li>}
+          </ul>
+        </details>
+      )}
+    </li>
   );
 }
 
@@ -270,7 +398,10 @@ function CodeQrDialog({
         <QrCode url={url} size={240} label={`QR code to redeem ${code.code}`} />
         <p className="font-mono tracking-wider text-noir-brass">{code.code}</p>
         {code.note && <p className="text-xs text-noir-ink-faint">{code.note}</p>}
-        <p className="text-xs text-noir-ink-dim">They&apos;ll sign in with Google and the room is added to their account. Single use.</p>
+        <p className="text-xs text-noir-ink-dim">
+          They&apos;ll sign in with Google and the room is added to their account.{" "}
+          {code.maxUses === 1 ? "Single use." : `Once per account · ${code.useCount}/${code.maxUses ?? "∞"} used.`}
+        </p>
         <div className="flex w-full gap-2">
           <button
             type="button"

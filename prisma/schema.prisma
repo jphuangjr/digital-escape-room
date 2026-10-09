@@ -58,7 +58,7 @@ model User {
   cases     CaseRecord[]
   purchases GamePurchase[]
   codesMade PurchaseCode[] @relation("CodeCreatedBy")
-  codesUsed PurchaseCode[] @relation("CodeRedeemedBy")
+  redemptions CodeRedemption[]
 }
 
 /// Permanent right for a user to host a game. Created by redeeming a code (later: Stripe).
@@ -74,20 +74,35 @@ model GamePurchase {
   @@unique([userId, gameId])
 }
 
-/// Single-use code an admin generates for one game. Redeeming it creates a GamePurchase.
+/// Code an admin generates for one game. Redeeming it creates a GamePurchase.
+/// Single-use codes have maxUses 1; group codes allow more (null = unlimited), once per account.
 model PurchaseCode {
-  id           String    @id @default(cuid())
-  code         String    @unique // stored normalized: uppercase, no dashes
-  gameId       String
-  note         String?
-  createdById  String
-  createdBy    User      @relation("CodeCreatedBy", fields: [createdById], references: [id])
-  createdAt    DateTime  @default(now())
-  redeemedById String?
-  redeemedBy   User?     @relation("CodeRedeemedBy", fields: [redeemedById], references: [id])
-  redeemedAt   DateTime?
+  id          String           @id @default(cuid())
+  code        String           @unique // stored normalized: uppercase, no dashes
+  gameId      String
+  note        String?
+  maxUses     Int?             @default(1) // null = unlimited
+  useCount    Int              @default(0)
+  expiresAt   DateTime?
+  revokedAt   DateTime? // turned off by an admin; purchases already made stay
+  createdById String
+  createdBy   User             @relation("CodeCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime         @default(now())
+  redemptions CodeRedemption[]
 
   @@index([gameId, createdAt])
+}
+
+/// One account claiming one code. An account can claim a given code only once.
+model CodeRedemption {
+  id        String       @id @default(cuid())
+  codeId    String
+  code      PurchaseCode @relation(fields: [codeId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+
+  @@unique([codeId, userId])
 }
 
 /// Permanent record of a finished case for a signed-in player. Survives room expiry.
