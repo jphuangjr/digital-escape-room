@@ -7,9 +7,11 @@ import type { MeResponse, OpenHostedRoom } from "@/lib/types";
 import { AccountBar, GoogleButton, MyCases } from "@/components/site/Account";
 import { Compass } from "@/components/site/Compass";
 import { ReplaceRoomDialog } from "@/components/site/ReplaceRoomDialog";
+import { RedeemBox } from "@/components/site/RedeemBox";
 
 const COLORS = ["#c9a227", "#a3302a", "#3d8c88", "#6b7fd7", "#b56cc4", "#d9824b", "#7fae4e", "#d8d2c4"];
 const PREF_KEY = "ada.profile";
+const GAME_ID = "ada-voss";
 
 function normalizeCode(raw: string): string {
   let s = raw.trim().toUpperCase().replace(/[\s_]/g, "");
@@ -47,6 +49,7 @@ export function AdaLanding() {
 
   const signedIn = Boolean(me?.user);
   const mustSignInToHost = mode === "create" && Boolean(me?.googleEnabled) && !signedIn;
+  const mustUnlockToHost = mode === "create" && signedIn && !me!.ownedGames.includes(GAME_ID);
 
   useEffect(() => {
     try {
@@ -84,15 +87,27 @@ export function AdaLanding() {
       const res = await fetch(mode === "create" ? "/api/rooms" : `/api/rooms/${code}/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ displayName, color, ...(mode === "create" && replaceExisting ? { replaceExisting: true } : {}) }),
+        body: JSON.stringify({
+          displayName,
+          color,
+          ...(mode === "create" ? { gameId: GAME_ID } : {}),
+          ...(mode === "create" && replaceExisting ? { replaceExisting: true } : {}),
+        }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         code?: string;
         error?: string;
         signInRequired?: boolean;
         replaceRequired?: boolean;
+        purchaseRequired?: boolean;
         openRooms?: OpenHostedRoom[];
       };
+      if (data.purchaseRequired) {
+        setMe((m) => (m ? { ...m, ownedGames: m.ownedGames.filter((g) => g !== GAME_ID) } : m));
+        setErr("Enter a purchase code to host this case.");
+        setBusy(false);
+        return;
+      }
       if (data.replaceRequired && data.openRooms?.length) {
         setReplaceRooms(data.openRooms);
         setBusy(false);
@@ -237,6 +252,13 @@ export function AdaLanding() {
               <GoogleButton label="Sign in with Google to host" callbackUrl="/play/ada-voss" />
               <p className="text-center text-xs text-noir-ink-faint">Hosts sign in. Friends can join with just a name.</p>
             </div>
+          ) : mustUnlockToHost ? (
+            <RedeemBox
+              gameTitle="The Vanishing of Dr. Ada Voss"
+              onRedeemed={(gameId) =>
+                setMe((m) => (m && !m.ownedGames.includes(gameId) ? { ...m, ownedGames: [...m.ownedGames, gameId] } : m))
+              }
+            />
           ) : (
             <button
               type="submit"

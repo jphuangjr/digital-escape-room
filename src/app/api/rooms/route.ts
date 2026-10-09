@@ -5,6 +5,8 @@ import { error, json, readBody } from "@/server/http";
 import { initialProgress, validateColor, validateDisplayName } from "@/server/logic";
 import { newPlayerToken, newRoomCode, openRoomsHostedBy, setPlayerCookie, sweepExpiredRooms } from "@/server/session";
 import { publish } from "@/server/realtime";
+import { ownsGame } from "@/server/purchases";
+import { getGame } from "@/lib/games";
 import { track } from "@/server/analytics";
 import { getSessionUser, googleEnabled } from "@/server/auth";
 
@@ -18,6 +20,12 @@ export async function POST(req: Request) {
   if (!name.ok) return error(400, name.error);
   const color = validateColor(body.color);
   if (!color) return error(400, "Color must be a hex value like #c9a227.");
+  const gameId = typeof body.gameId === "string" ? body.gameId : "ada-voss";
+  if (getGame(gameId)?.status !== "live") return error(400, "Unknown game.");
+  // Hosting a game requires owning it (joining a friend's room is free).
+  if (user && !(await ownsGame(user, gameId))) {
+    return error(403, "Unlock this game to host it.", { purchaseRequired: true, gameId });
+  }
 
   // One open room per host: starting a new case deletes the old one, but only once the host has
   // confirmed (replaceExisting: true) after seeing which rooms will go.
@@ -54,7 +62,7 @@ export async function POST(req: Request) {
     try {
       const room = await db.$transaction(async (tx) => {
         const r = await tx.room.create({
-          data: { code, progress: initialProgress() as unknown as Prisma.InputJsonValue },
+          data: { code, gameId, progress: initialProgress() as unknown as Prisma.InputJsonValue },
         });
         const p = await tx.player.create({
           data: { roomId: r.id, token, displayName: name.value, color, userId: user?.id, image: user?.image },

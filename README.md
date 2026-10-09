@@ -26,6 +26,9 @@ npm test                      # vitest
 Google sign-in (optional, required only to host): set `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_SECRET`;
 OAuth redirect URI is `<origin>/api/auth/callback/google`.
 
+Hosting requires owning the game. Until Stripe is wired up, admins (emails in `ACCOUNT_ADMIN`, comma-separated)
+generate single-use purchase codes at `/admin`; players redeem them on the game page.
+
 Admin analytics (which puzzles stall players): `GET /api/admin/analytics?token=$ADMIN_TOKEN`.
 
 The answer key lives only in `src/server/**` (guarded with `server-only`); client code must never import it.

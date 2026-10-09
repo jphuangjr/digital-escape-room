@@ -69,3 +69,11 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   (one per user per room) and re-issues the cookie, so a signed-in player is the same player on any device.
 - Final phrase solved → `Room.finishedAt`; a `CaseRecord` (game, time, ending, host?) is written per signed-in
   player and survives room expiry. `GET /api/me` → `MeResponse` (user, open rooms, finished cases).
+
+## Purchases (hosting rights) and admin
+- Hosting a game requires owning it: `GamePurchase(userId, gameId)` (permanent; `source` "code" now, "stripe" later).
+  Admins (emails in `ACCOUNT_ADMIN`, comma-separated) own every game. Joining is always free.
+  `POST /api/rooms {gameId}` → 403 `{purchaseRequired:true}` when not owned.
+- `POST /api/redeem {code}` → single-use `PurchaseCode` (KEY-XXXX-XXXX-XXXX) → purchase. If the user already owns the
+  game, the code is not consumed.
+- Admin page `/admin`; APIs `GET|POST /api/admin/codes`, `DELETE /api/admin/codes/[id]` (unused codes only).

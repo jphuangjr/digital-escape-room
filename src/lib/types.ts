@@ -171,6 +171,8 @@ export interface AttemptResponse {
 
 export interface MeResponse {
   googleEnabled: boolean; // false when the server has no OAuth credentials configured
+  isAdmin: boolean; // email listed in ACCOUNT_ADMIN
+  ownedGames: string[]; // game ids this user may host (all of them for admins)
   user: { name: string | null; email: string | null; image: string | null } | null;
   activeRooms: { code: string; gameId: string; status: RoomStatus; isHost: boolean; playerCount: number; createdAt: string }[];
   cases: {
@@ -199,4 +201,15 @@ export interface ReplaceRoomsRequired {
   error: string;
   replaceRequired: true;
   openRooms: OpenHostedRoom[];
+}
+
+/** A purchase code as the admin page sees it. */
+export interface AdminCodeDTO {
+  id: string;
+  code: string; // display form, KEY-XXXX-XXXX-XXXX
+  gameId: string;
+  note: string | null;
+  createdAt: string;
+  redeemedAt: string | null;
+  redeemedBy: string | null; // email of the account that redeemed it
 }
