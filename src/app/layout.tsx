@@ -2,11 +2,10 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "The Vanishing of Dr. Ada Voss",
-  description:
-    "A multiplayer online escape room. Dr. Ada Voss vanished 48 hours ago. Her laptop is open. Start at the beginning.",
-  applicationName: "Ada Voss",
-  appleWebApp: { capable: true, title: "Ada Voss", statusBarStyle: "black-translucent" },
+  title: "Escape Escape — online escape rooms",
+  description: "Multiplayer online escape rooms you play together on your phones.",
+  applicationName: "Escape Escape",
+  appleWebApp: { capable: true, title: "Escape Escape", statusBarStyle: "black-translucent" },
   formatDetection: { telephone: false },
 };
 
