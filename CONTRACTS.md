@@ -74,6 +74,8 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
 - Hosting a game requires owning it: `GamePurchase(userId, gameId)` (permanent; `source` "code" now, "stripe" later).
   Admins (emails in `ACCOUNT_ADMIN`, comma-separated) own every game. Joining is always free.
   `POST /api/rooms {gameId}` → 403 `{purchaseRequired:true}` when not owned.
-- `POST /api/redeem {code}` → single-use `PurchaseCode` (KEY-XXXX-XXXX-XXXX) → purchase. If the user already owns the
-  game, the code is not consumed.
-- Admin page `/admin`; APIs `GET|POST /api/admin/codes`, `DELETE /api/admin/codes/[id]` (unused codes only).
+- `POST /api/redeem {code}` → `PurchaseCode` (KEY-XXXX-XXXX-XXXX) → purchase. Each account can claim a code once
+  (`CodeRedemption`). Single-use codes have `maxUses` 1; group codes allow more (null = unlimited) and may expire.
+  Capacity is enforced with a conditional `UPDATE … WHERE useCount < maxUses`. If the user already owns the game,
+  the code isn't consumed. Turned-off (`revokedAt`) or expired codes stop working; purchases already made stay.
+- Admin page `/admin`; APIs `GET|POST /api/admin/codes` (`kind: single|group`), `DELETE /api/admin/codes/[id]` (turn off).

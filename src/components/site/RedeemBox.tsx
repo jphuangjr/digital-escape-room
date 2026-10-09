@@ -74,7 +74,7 @@ export function RedeemBox({ gameTitle, onRedeemed }: { gameTitle: string; onRede
           {msg.text}
         </p>
       )}
-      <p className="text-xs text-noir-ink-faint">Codes are single-use and unlock hosting permanently. Joining a friend&apos;s room is always free.</p>
+      <p className="text-xs text-noir-ink-faint">A code unlocks hosting on your account permanently. Joining a friend&apos;s room is always free.</p>
     </div>
   );
 }

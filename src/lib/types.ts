@@ -209,7 +209,11 @@ export interface AdminCodeDTO {
   code: string; // display form, KEY-XXXX-XXXX-XXXX
   gameId: string;
   note: string | null;
+  maxUses: number | null; // 1 = single-use; null = unlimited group code
+  useCount: number;
+  expiresAt: string | null;
+  revokedAt: string | null;
   createdAt: string;
-  redeemedAt: string | null;
-  redeemedBy: string | null; // email of the account that redeemed it
+  status: "active" | "used" | "expired" | "revoked";
+  redemptions: { email: string; at: string }[]; // newest first, up to 50
 }
