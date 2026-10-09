@@ -87,3 +87,12 @@ export async function touchRoom(room: Pick<Room, "id" | "lastActivityAt">, force
   if (!force && Date.now() - room.lastActivityAt.getTime() < 60_000) return;
   await db.room.update({ where: { id: room.id }, data: { lastActivityAt: new Date() } }).catch(() => {});
 }
+
+/** Non-expired rooms whose host player is this signed-in user. */
+export async function openRoomsHostedBy(userId: string) {
+  const players = await db.player.findMany({
+    where: { userId, room: { lastActivityAt: { gte: new Date(Date.now() - ROOM_TTL_MS) } } },
+    include: { room: { include: { _count: { select: { players: true } } } } },
+  });
+  return players.filter((p) => p.room.hostId === p.id).map((p) => p.room);
+}

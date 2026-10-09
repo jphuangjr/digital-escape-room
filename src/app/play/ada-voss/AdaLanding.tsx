@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { MeResponse } from "@/lib/types";
+import type { MeResponse, OpenHostedRoom } from "@/lib/types";
 import { AccountBar, GoogleButton, MyCases } from "@/components/site/Account";
 import { Compass } from "@/components/site/Compass";
+import { ReplaceRoomDialog } from "@/components/site/ReplaceRoomDialog";
 
 const COLORS = ["#c9a227", "#a3302a", "#3d8c88", "#6b7fd7", "#b56cc4", "#d9824b", "#7fae4e", "#d8d2c4"];
 const PREF_KEY = "ada.profile";
@@ -26,6 +27,7 @@ export function AdaLanding() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [me, setMe] = useState<MeResponse | null>(null);
+  const [replaceRooms, setReplaceRooms] = useState<OpenHostedRoom[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,6 +65,10 @@ export function AdaLanding() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    await send(false);
+  }
+
+  async function send(replaceExisting: boolean) {
     setErr(null);
     const displayName = name.trim();
     if (!displayName) return setErr("Give yourself a name, investigator.");
@@ -78,9 +84,20 @@ export function AdaLanding() {
       const res = await fetch(mode === "create" ? "/api/rooms" : `/api/rooms/${code}/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ displayName, color }),
+        body: JSON.stringify({ displayName, color, ...(mode === "create" && replaceExisting ? { replaceExisting: true } : {}) }),
       });
-      const data = (await res.json().catch(() => ({}))) as { code?: string; error?: string; signInRequired?: boolean };
+      const data = (await res.json().catch(() => ({}))) as {
+        code?: string;
+        error?: string;
+        signInRequired?: boolean;
+        replaceRequired?: boolean;
+        openRooms?: OpenHostedRoom[];
+      };
+      if (data.replaceRequired && data.openRooms?.length) {
+        setReplaceRooms(data.openRooms);
+        setBusy(false);
+        return;
+      }
       if (data.signInRequired) {
         setErr("Sign in with Google to host a room.");
         setMe((m) => (m ? { ...m, googleEnabled: true, user: null } : m));
@@ -92,6 +109,7 @@ export function AdaLanding() {
         setBusy(false);
         return;
       }
+      setReplaceRooms(null);
       router.push(`/r/${data.code}`);
     } catch {
       setErr("Network trouble. Try again.");
@@ -101,6 +119,14 @@ export function AdaLanding() {
 
   return (
     <main className="noir-vignette min-h-dvh pt-safe pb-safe px-safe">
+      {replaceRooms && (
+        <ReplaceRoomDialog
+          rooms={replaceRooms}
+          busy={busy}
+          onCancel={() => setReplaceRooms(null)}
+          onConfirm={() => void send(true)}
+        />
+      )}
       <div className="mx-auto flex max-w-md flex-col gap-8 px-4 pb-10 pt-10">
         <Link href="/" className="-mb-4 inline-flex min-h-11 items-center self-start text-sm text-noir-ink-faint">
           ← All escape rooms
