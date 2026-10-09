@@ -188,7 +188,7 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         />
       </label>
       <label className="block text-sm">
-        Password
+        Vault code
         <div className="mt-1 flex gap-2">
           <input
             {...inputProps}
