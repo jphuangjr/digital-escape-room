@@ -5,6 +5,7 @@ import type { PuzzleId } from "@/lib/types";
 import { ColorDot, relativeTime, useNow } from "./shared";
 
 export const PUZZLE_LABELS: Record<PuzzleId, string> = {
+  "tools-folder": "Ada's Tools",
   "shift-key": "Lost Paws cipher",
   "intranet-login": "Intranet login",
   "final-phrase": "Dead man's switch",

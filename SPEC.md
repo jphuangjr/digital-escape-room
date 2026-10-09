@@ -39,7 +39,7 @@ Tone: noir. Motif: a compass with a broken needle (7 notches) appears on every s
 | Notes | Private + public notes | Start |
 | Email | Sister's engagement email, Ada's voicemail hints | Start |
 | Files | "Ada's Personal" bonus folder (PIN-locked) | Start |
-| Decoder | Caesar shift and A1Z26 tools | First visit to Site 4 |
+| Decoder | Caesar shift and A1Z26 tools | Solving the "Ada's Tools" folder in Files (see §9) |
 Mobile: each app full-screen with bottom dock. Desktop: draggable windows optional.
 
 ## 7. Puzzle graph
@@ -55,7 +55,7 @@ Site 2 "The Drift" (`thedrift.blog`) [Branch A]: Real series: 5 posts, first let
 
 Site 3 RunnerBoard (`runnerboard.net`) [Branch B]: Real user `compass_needle`: 4 posts with timestamps HH:MM decoded with A1Z26 spell LOSTPAWS: 12:15 LO, 19:20 ST, 16:01 PA, 23:19 WS → `lostpaws.net`. A post mentions "has anyone seen Biscuit?". Decoy user `needle_compass`: 20:18, 01:16, 04:15, 15:18 → TRAPDOOR; `trapdoor.net` is an Institute honeypot telling players they've been misled, nudging back.
 
-Site 4 Lost Paws (`lostpaws.net`): Listing descriptions are Caesar shift 7. Decoded message: "WREN HAS THE KEY. VAULT CODE IS THE YEAR THEY LIED." Generate ciphertext from plaintext with a utility; don't hand-encode. Biscuit (tabby) listing shows pet ID 0412 (fragment C). Decoder app unlocks on first visit.
+Site 4 Lost Paws (`lostpaws.net`): Listing descriptions are Caesar shift 7. Decoded message: "WREN HAS THE KEY. VAULT CODE IS THE YEAR THEY LIED." Generate ciphertext from plaintext with a utility; don't hand-encode. Biscuit (tabby) listing shows pet ID 0412 (fragment C).
 
 Site 5 Intranet (`intranet.meridian-inst.net`): login username `wren.okafor`, password `19870412`. Contains record-diff evidence (before/after historical entries) and a redacted memo; tap-to-reveal discloses address of Site 6.
 
@@ -63,8 +63,9 @@ Site 6 Dead man's switch (`switch.ada-voss.net`): cosmetic countdown, input `wre
 
 Normalization: trim, lowercase, collapse whitespace, treat `_`/`-`/space as equivalent separators in final phrase.
 
-## 9. Bonus
-Files → "Ada's Personal" PIN = 0314, found in Email: sister's engagement email mentions Ada's birthday March 14. Contents: voicemail transcripts, lore about sister, Wren, Institute. Reward: bonus epilogue + compass badge. Optional.
+## 9. Opening puzzle: Ada's Personal → Ada's Tools → Decoder
+Files → "Ada's Personal" PIN = 0314, found in Email: sister's engagement email mentions Ada's birthday March 14. Contents: voicemail transcripts, lore about sister, Wren, Institute; reward: epilogue + compass badge.
+Files → "Ada's Tools" asks "Who was Dad's weather?" Answer `mara` (notes_on_mara.txt in Ada's Personal: "Dad called her his weather"). Requires Ada's Personal solved first. Solving it unlocks the Decoder for the room, so players have the A1Z26 tool before RunnerBoard.
 
 ## 10. Hints
 Ada's voicemails arrive in shared Email app. 3 tiers per puzzle (nudge, bigger nudge, near-answer). Any player requests next tier; unlocks for whole room. Cooldown 2 min per puzzle between tiers.

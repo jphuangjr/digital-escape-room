@@ -7,7 +7,8 @@ export type PuzzleId =
   | "shift-key" // submitted on lostpaws.net "decode listings" form; unlocks plaintext listings
   | "intranet-login" // intranet login form (username + password joined as "user:pass")
   | "final-phrase" // switch.ada-voss.net input
-  | "bonus-pin"; // Files app "Ada's Personal" PIN
+  | "bonus-pin" // Files app "Ada's Personal" PIN
+  | "tools-folder"; // Files app "Ada's Tools" security question; unlocks the Decoder
 
 /** Puzzles that have hints. Includes navigation milestones that aren't attempt-validated. */
 export type HintPuzzleId =
@@ -17,7 +18,8 @@ export type HintPuzzleId =
   | "pet-id"
   | "intranet-login"
   | "final-phrase"
-  | "bonus-pin";
+  | "bonus-pin"
+  | "tools-folder";
 
 export type FragmentTag = "name" | "year" | "id" | "cipher" | "address";
 export type Ending = "EXPOSE" | "PROTECT";

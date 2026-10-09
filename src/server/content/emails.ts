@@ -19,6 +19,8 @@ export function baseEmails(): EmailDTO[] {
         "meridian-inst.net",
         "",
         "— A.",
+        "",
+        "P.S. Pack my tools before you go anywhere. They're in Files on this laptop, locked the way family locks things. Mara will tell you more than she means to.",
       ].join("\n"),
     },
     {

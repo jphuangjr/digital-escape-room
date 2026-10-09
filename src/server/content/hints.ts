@@ -2,13 +2,14 @@ import "server-only";
 import type { HintPuzzleId } from "@/lib/types";
 
 export const HINT_PUZZLES: HintPuzzleId[] = [
+  "bonus-pin",
+  "tools-folder",
   "find-blog",
   "shift-key",
   "find-pets",
   "pet-id",
   "intranet-login",
   "final-phrase",
-  "bonus-pin",
 ];
 
 export const HINT_TITLES: Record<HintPuzzleId, string> = {
@@ -19,6 +20,7 @@ export const HINT_TITLES: Record<HintPuzzleId, string> = {
   "intranet-login": "The door",
   "final-phrase": "Proof of life",
   "bonus-pin": "My folder",
+  "tools-folder": "My tools",
 };
 
 /** Ada's voicemails. Tier 1 = nudge, 2 = bigger nudge, 3 = near-answer. */
@@ -57,6 +59,11 @@ const HINTS: Record<HintPuzzleId, [string, string, string]> = {
     "My personal folder is locked with something only family would think of. My sister talks about me more than I'd like.",
     "Read my sister's email again. She mentions a date that's mine and no one else's.",
     "My birthday. March fourteenth. Month then day, four digits, with the zero in front.",
+  ],
+  "tools-folder": [
+    "You'll want my decoder before you go much further. I locked it behind a question only family could answer. The answer is in my personal folder.",
+    "Open my personal folder and read what I wrote about my sister. Dad had a nickname for each of us.",
+    "Dad called me his compass and my sister his weather. The answer is her name: Mara.",
   ],
 };
 
