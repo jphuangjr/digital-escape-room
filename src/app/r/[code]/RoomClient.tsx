@@ -105,9 +105,9 @@ function NotFound() {
   return (
     <div className="flex min-h-[100dvh] flex-col items-center justify-center px-6 text-center">
       <CompassMark className="h-16 w-16 text-stone-600" />
-      <h1 className="mt-6 font-serif text-2xl text-stone-100">Room not found or expired</h1>
+      <h1 className="mt-6 font-serif text-2xl text-stone-100">This room is closed</h1>
       <p className="mt-2 max-w-sm text-sm text-stone-400">
-        The trail has gone cold. Rooms close after 48 hours without activity.
+        The trail has gone cold. The host may have started a new room, or it sat idle for 48 hours.
       </p>
       <Link
         href="/"

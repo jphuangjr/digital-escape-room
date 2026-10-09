@@ -9,7 +9,8 @@ export type RoomEvent =
   | "attempt.logged"
   | "hint.unlocked"
   | "vote.updated"
-  | "ending.resolved";
+  | "ending.resolved"
+  | "room.closed"; // host started a new room; clients refetch and get 404
 
 /** Server-side publisher interface so the provider can be swapped. */
 export interface RealtimePublisher {

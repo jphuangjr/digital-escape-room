@@ -34,7 +34,7 @@ Addresses are normalized: lowercase, strip `http(s)://`, `www.`, trailing `/`.
 - Channel `room:<CODE>`. Server publishes via `publish(code, event, payload)` from `src/server/realtime.ts`
   (uses Supabase REST broadcast with service role key; no-op if env missing).
 - Events: `presence.updated`, `note.public.created|updated|deleted`, `progress.updated`, `attempt.logged`,
-  `hint.unlocked`, `vote.updated`, `ending.resolved`. Payloads are hints only — clients may simply
+  `hint.unlocked`, `vote.updated`, `ending.resolved`, `room.closed`. Payloads are hints only — clients may simply
   refetch `GET /state` on any event (debounced). Private notes are NEVER published.
 - Client: `useRoomChannel(code, onEvent)` in `src/lib/realtime/client.ts`; if Supabase env is missing it
   polls `/state` every 4s instead.
@@ -62,6 +62,9 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
 ## Accounts (optional Google sign-in, next-auth v4, JWT sessions)
 - Enabled only when `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET` are set (plus `AUTH_SECRET`); otherwise fully anonymous.
 - Hosting (`POST /api/rooms`) requires sign-in when enabled → 401 `{signInRequired:true}`. Joining stays optional.
+- One open room per host: if the user already hosts non-expired rooms, `POST /api/rooms` → 409 `ReplaceRoomsRequired`
+  listing them; resending with `replaceExisting: true` deletes them immediately (publishing `room.closed`) and creates
+  the new room. CaseRecords are unaffected.
 - `getPlayerInRoom` falls back from the `pt_<CODE>` cookie to the signed-in user's Player in that room
   (one per user per room) and re-issues the cookie, so a signed-in player is the same player on any device.
 - Final phrase solved → `Room.finishedAt`; a `CaseRecord` (game, time, ending, host?) is written per signed-in

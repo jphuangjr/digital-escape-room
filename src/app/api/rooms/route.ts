@@ -1,8 +1,10 @@
 import type { Prisma } from "@prisma/client";
+import type { ReplaceRoomsRequired, RoomStatus } from "@/lib/types";
 import { db } from "@/server/db";
 import { error, json, readBody } from "@/server/http";
 import { initialProgress, validateColor, validateDisplayName } from "@/server/logic";
-import { newPlayerToken, newRoomCode, setPlayerCookie, sweepExpiredRooms } from "@/server/session";
+import { newPlayerToken, newRoomCode, openRoomsHostedBy, setPlayerCookie, sweepExpiredRooms } from "@/server/session";
+import { publish } from "@/server/realtime";
 import { track } from "@/server/analytics";
 import { getSessionUser, googleEnabled } from "@/server/auth";
 
@@ -16,6 +18,33 @@ export async function POST(req: Request) {
   if (!name.ok) return error(400, name.error);
   const color = validateColor(body.color);
   if (!color) return error(400, "Color must be a hex value like #c9a227.");
+
+  // One open room per host: starting a new case deletes the old one, but only once the host has
+  // confirmed (replaceExisting: true) after seeing which rooms will go.
+  if (user) {
+    const open = await openRoomsHostedBy(user.id);
+    if (open.length > 0) {
+      if (body.replaceExisting !== true) {
+        return json<ReplaceRoomsRequired>(
+          {
+            error: "You already have an open room.",
+            replaceRequired: true,
+            openRooms: open.map((r) => ({
+              code: r.code,
+              gameId: r.gameId,
+              status: r.status as RoomStatus,
+              playerCount: r._count.players,
+              createdAt: r.createdAt.toISOString(),
+            })),
+          },
+          409,
+        );
+      }
+      // Case records live in their own table and analytics rows are detached, so finished times survive.
+      await db.room.deleteMany({ where: { id: { in: open.map((r) => r.id) } } });
+      await Promise.all(open.map((r) => publish(r.code, "room.closed", { reason: "replaced" })));
+    }
+  }
 
   void sweepExpiredRooms();
 

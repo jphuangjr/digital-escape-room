@@ -184,3 +184,19 @@ export interface MeResponse {
     playerCount: number;
   }[];
 }
+
+/** A room the signed-in host already has open; creating another requires confirming its deletion. */
+export interface OpenHostedRoom {
+  code: string;
+  gameId: string;
+  status: RoomStatus;
+  playerCount: number;
+  createdAt: string;
+}
+
+/** 409 from POST /api/rooms when the host already has open rooms and didn't pass `replaceExisting`. */
+export interface ReplaceRoomsRequired {
+  error: string;
+  replaceRequired: true;
+  openRooms: OpenHostedRoom[];
+}
