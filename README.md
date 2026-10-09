@@ -1,4 +1,14 @@
-# The Vanishing of Dr. Ada Voss
+# Escape Escape
+
+A directory of multiplayer, mobile-first online escape rooms (`/`). Games are listed in `src/lib/games.ts`.
+The first one is **The Vanishing of Dr. Ada Voss** (`/play/ada-voss`).
+
+## Adding a game
+1. Add an entry to `GAMES` in `src/lib/games.ts` (its `id` is stored on rooms and case records).
+2. Give it a landing page at its `href` (see `src/app/play/ada-voss/`).
+3. Create its rooms with that `gameId`.
+
+## The Vanishing of Dr. Ada Voss
 
 Multiplayer, mobile-first online escape room. Next.js 15 (App Router) + Prisma/Postgres + Supabase Realtime.
 

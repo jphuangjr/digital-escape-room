@@ -113,7 +113,7 @@ function NotFound() {
         href="/"
         className="mt-8 inline-flex min-h-11 items-center rounded-md bg-amber-500 px-6 font-semibold text-black active:bg-amber-400"
       >
-        Back to the start
+        All escape rooms
       </Link>
     </div>
   );
