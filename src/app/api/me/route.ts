@@ -3,13 +3,15 @@ import { db } from "@/server/db";
 import { json } from "@/server/http";
 import { getSessionUser, googleEnabled } from "@/server/auth";
 import { ROOM_TTL_MS } from "@/server/session";
+import { isAdmin, ownedGameIds } from "@/server/purchases";
 
 /** The signed-in user (if any), their rooms that are still open, and their finished cases with times. */
 export async function GET() {
   const user = await getSessionUser();
-  if (!user) return json<MeResponse>({ googleEnabled, user: null, activeRooms: [], cases: [] });
+  if (!user) return json<MeResponse>({ googleEnabled, isAdmin: false, ownedGames: [], user: null, activeRooms: [], cases: [] });
 
-  const [players, cases] = await Promise.all([
+  const [ownedGames, players, cases] = await Promise.all([
+    ownedGameIds(user),
     db.player.findMany({
       where: { userId: user.id, room: { lastActivityAt: { gte: new Date(Date.now() - ROOM_TTL_MS) } } },
       include: { room: { include: { _count: { select: { players: true } } } } },
@@ -21,6 +23,8 @@ export async function GET() {
 
   return json<MeResponse>({
     googleEnabled,
+    isAdmin: isAdmin(user),
+    ownedGames,
     user: { name: user.name, email: user.email, image: user.image },
     activeRooms: players.map((p) => ({
       code: p.room.code,

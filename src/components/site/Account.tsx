@@ -62,6 +62,11 @@ export function AccountBar({ me, callbackUrl = "/", fallbackColor = "#c9a227" }:
                 <span className="min-w-0 flex-1 truncate text-sm text-noir-ink-dim">
                   Signed in as <span className="text-noir-ink">{me.user!.name || me.user!.email}</span>
                 </span>
+                {me!.isAdmin && (
+                  <a href="/admin" className="min-h-11 shrink-0 content-center px-2 text-sm font-semibold text-noir-brass underline">
+                    Admin
+                  </a>
+                )}
                 <button
                   type="button"
                   onClick={() => signOut({ callbackUrl })}

@@ -56,6 +56,38 @@ model User {
   createdAt DateTime     @default(now())
   players   Player[]
   cases     CaseRecord[]
+  purchases GamePurchase[]
+  codesMade PurchaseCode[] @relation("CodeCreatedBy")
+  codesUsed PurchaseCode[] @relation("CodeRedeemedBy")
+}
+
+/// Permanent right for a user to host a game. Created by redeeming a code (later: Stripe).
+model GamePurchase {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId    String
+  source    String // "code" | "stripe"
+  sourceRef String? // PurchaseCode.id, or a Stripe checkout session id later
+  createdAt DateTime @default(now())
+
+  @@unique([userId, gameId])
+}
+
+/// Single-use code an admin generates for one game. Redeeming it creates a GamePurchase.
+model PurchaseCode {
+  id           String    @id @default(cuid())
+  code         String    @unique // stored normalized: uppercase, no dashes
+  gameId       String
+  note         String?
+  createdById  String
+  createdBy    User      @relation("CodeCreatedBy", fields: [createdById], references: [id])
+  createdAt    DateTime  @default(now())
+  redeemedById String?
+  redeemedBy   User?     @relation("CodeRedeemedBy", fields: [redeemedById], references: [id])
+  redeemedAt   DateTime?
+
+  @@index([gameId, createdAt])
 }
 
 /// Permanent record of a finished case for a signed-in player. Survives room expiry.
