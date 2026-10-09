@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { AdminCodeDTO } from "@/lib/types";
 import { GAMES } from "@/lib/games";
 import { useMe } from "@/components/site/Account";
+import { QrCode } from "@/components/site/QrCode";
 
 export function AdminClient() {
   const me = useMe();
@@ -54,6 +55,7 @@ function CodesPanel() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [fresh, setFresh] = useState<Set<string>>(new Set());
+  const [qrFor, setQrFor] = useState<AdminCodeDTO | null>(null);
 
   const load = useCallback(async () => {
     setCodes(null);
@@ -106,6 +108,7 @@ function CodesPanel() {
 
   return (
     <div className="flex flex-col gap-5">
+      {qrFor && <CodeQrDialog code={qrFor} onClose={() => setQrFor(null)} onCopy={copy} />}
       <div role="tablist" aria-label="Game" className="-mx-4 flex gap-2 overflow-x-auto px-4">
         {GAMES.map((g) => (
           <button
@@ -191,13 +194,16 @@ function CodesPanel() {
                     fresh.has(c.id) ? "border-noir-brass/70 bg-noir-brass/10" : "border-noir-line bg-noir-bg-2"
                   }`}
                 >
-                  <span className="min-w-0 flex-1">
-                    <span className="block select-all font-mono tracking-wider text-noir-ink">{c.code}</span>
+                  <button type="button" onClick={() => setQrFor(c)} className="min-w-0 flex-1 text-left" aria-label={`Show QR for ${c.code}`}>
+                    <span className="block font-mono tracking-wider text-noir-ink">{c.code}</span>
                     <span className="block text-xs text-noir-ink-faint">
                       {new Date(c.createdAt).toLocaleDateString()}
                       {c.note ? ` · ${c.note}` : ""}
                     </span>
-                  </span>
+                  </button>
+                  <button onClick={() => setQrFor(c)} className="min-h-11 px-2 text-sm text-noir-brass underline">
+                    QR
+                  </button>
                   <button onClick={() => copy(c.code, c.code)} className="min-h-11 px-2 text-sm text-noir-brass underline">
                     Copy
                   </button>
@@ -226,6 +232,58 @@ function CodesPanel() {
           </section>
         </>
       )}
+    </div>
+  );
+}
+
+/** Full-screen QR for one purchase code. Scanning opens /redeem?code=…, which signs the person in and credits them. */
+function CodeQrDialog({
+  code,
+  onClose,
+  onCopy,
+}: {
+  code: AdminCodeDTO;
+  onClose: () => void;
+  onCopy: (text: string, label: string) => void;
+}) {
+  const url = `${window.location.origin}/redeem?code=${encodeURIComponent(code.code)}`;
+  const game = GAMES.find((g) => g.id === code.gameId);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 pb-safe pt-safe" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="qr-title"
+        onClick={(e) => e.stopPropagation()}
+        className="flex w-full max-w-sm flex-col items-center gap-3 rounded-xl border border-noir-line bg-noir-bg-2 p-5 text-center"
+      >
+        <h2 id="qr-title" className="font-serif text-xl text-noir-ink">
+          Scan to claim {game?.title ?? code.gameId}
+        </h2>
+        <QrCode url={url} size={240} label={`QR code to redeem ${code.code}`} />
+        <p className="font-mono tracking-wider text-noir-brass">{code.code}</p>
+        {code.note && <p className="text-xs text-noir-ink-faint">{code.note}</p>}
+        <p className="text-xs text-noir-ink-dim">They&apos;ll sign in with Google and the room is added to their account. Single use.</p>
+        <div className="flex w-full gap-2">
+          <button
+            type="button"
+            onClick={() => onCopy(url, "claim link")}
+            className="min-h-12 flex-1 rounded-lg border border-noir-line font-semibold text-noir-brass"
+          >
+            Copy link
+          </button>
+          <button type="button" onClick={onClose} className="min-h-12 flex-1 rounded-lg bg-noir-brass font-semibold text-noir-bg" autoFocus>
+            Done
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
