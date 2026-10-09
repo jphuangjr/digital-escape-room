@@ -201,3 +201,14 @@ describe("hints, emails, endings", () => {
     expect(bonusFiles().length).toBeGreaterThanOrEqual(4);
   });
 });
+
+describe("Branch B entry", () => {
+  it("Wren's staff entry links to the forum by its full address", () => {
+    const page = resolveSite("meridian-inst.net/staff", fresh());
+    const staff = page?.blocks.find((b): b is Extract<Block, { type: "staff" }> => b.type === "staff");
+    const wren = staff?.people.find((p) => p.name === "Wren Okafor");
+    expect(wren?.bio).toContain("runnerboard.net");
+    expect(wren?.link?.href).toBe("runnerboard.net");
+    expect(resolveSite(wren!.link!.href, fresh())).not.toBeNull();
+  });
+});

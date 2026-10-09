@@ -131,7 +131,7 @@ export type Block =
   | { type: "image"; alt: string; caption?: string; art: string; fileInfo: ImageFileInfo } // art = emoji/glyph or key for an SVG placeholder
   | { type: "redacted"; text: string; label?: string } // tap-to-reveal
   | { type: "list"; items: string[] }
-  | { type: "staff"; people: { name: string; role: string; bio: string; photo: string | null }[] }
+  | { type: "staff"; people: { name: string; role: string; bio: string; photo: string | null; link?: { text: string; href: string } }[] }
   | { type: "post"; title: string; author?: string; date: string; time?: string; body: string; series?: string }
   | { type: "listing"; title: string; meta: string; body: string; petId?: string } // body may be ciphertext
   | { type: "diff"; label: string; before: string; after: string }
