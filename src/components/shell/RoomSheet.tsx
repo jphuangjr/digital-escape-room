@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { QrCode } from "@/components/site/QrCode";
 import type { GameCtx } from "@/lib/client/game";
 import { AttemptLog } from "@/components/apps/AttemptLog";
 import { HintsPanel } from "@/components/apps/HintsPanel";
@@ -107,7 +108,8 @@ export function RoomSheet({ ctx, open, onClose }: { ctx: GameCtx; open: boolean;
 
         <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-3">
           {tab === "people" && (
-            <ul className="space-y-1">
+            <>
+              <ul className="space-y-1">
               {players.map((p) => (
                 <li key={p.id} className="flex min-h-12 items-center gap-3 rounded-md px-1 py-1.5">
                   <span className="relative shrink-0">
@@ -147,12 +149,28 @@ export function RoomSheet({ ctx, open, onClose }: { ctx: GameCtx; open: boolean;
                   </div>
                 </li>
               ))}
-            </ul>
+              </ul>
+              <InviteQr code={ctx.code} />
+            </>
           )}
           {tab === "attempts" && <AttemptLog ctx={ctx} />}
           {tab === "hints" && <HintsPanel ctx={ctx} />}
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Scan-to-join: opens /r/CODE, where the join form offers Google sign-in or just a name. */
+function InviteQr({ code }: { code: string }) {
+  const url = typeof window === "undefined" ? "" : `${window.location.origin}/r/${code}`;
+  if (!url) return null;
+  return (
+    <div className="mt-4 flex flex-col items-center gap-2 rounded-lg border border-stone-800 bg-stone-950 px-4 py-4 text-center">
+      <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">Scan to join</p>
+      <QrCode url={url} size={184} label={`QR code to join room ${code}`} />
+      <p className="font-mono text-sm tracking-widest text-amber-300">{code}</p>
+      <p className="text-xs text-stone-500">Point a phone camera here. They can sign in with Google or just enter a name.</p>
     </div>
   );
 }
