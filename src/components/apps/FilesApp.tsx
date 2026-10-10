@@ -91,6 +91,20 @@ Honorarios: pagados por adelantado. Preguntas: ninguna, al parecer.`,
 ルームのメンバーと共有すること。
 
 報酬：前払い済み。質問：どうやら無用。`,
+      "pt-BR": `RESUMO DO CASO — CONFIDENCIAL
+Cliente: a irmã da Dra. Ada Voss
+Assunto: Dra. Ada Voss, arquivista, Instituto Meridian
+Situação: desaparecida, último contato há 48 horas
+
+Missão:
+Descobrir o que aconteceu com a Ada. Ela deixou uma única mensagem:
+"Se você está lendo isto, eu cheguei perto demais. Comece pelo começo."
+
+Este notebook é dela. O navegador ainda tem os favoritos dela. A caixa
+de entrada ainda está sincronizando. Trabalhem juntos, anotem tudo e
+compartilhem o que importa com o resto da sala.
+
+Honorários: pagos adiantado. Perguntas: nenhuma, pelo jeito.`,
     },
   },
   {
@@ -152,6 +166,19 @@ Honorarios: pagados por adelantado. Preguntas: ninguna, al parecer.`,
 - デコーダー：エイダは個人フォルダの中の「Ada's Tools」にしまっている。
   セキュリティの質問を設定せずにはいられない人だった。
 - 行き詰まったら？ ヒントパネルからエイダにそれとなく助けを頼める。`,
+      "pt-BR": `NOTAS DE CAMPO PARA QUEM USAR ESTA MÁQUINA
+
+- Navegador: digite um endereço na barra ou toque num favorito.
+  Toda página tem um botão "Ver código-fonte". As imagens têm
+  "Informações do arquivo". Toque nas tarjas pretas para revelar
+  o que há por baixo.
+- Notas: privadas por padrão. Toque em "Compartilhar com a sala"
+  quando importar. Marque os fragmentos (nome / ano / ID /
+  chave da cifra / endereço).
+- E-mail: fique de olho. A Ada deixa mensagens de voz.
+- Decodificador: a Ada guarda ele em "Ada's Tools", dentro da pasta
+  pessoal dela. Ela nunca resistiu a uma pergunta de segurança.
+- Travou? No painel de dicas dá para pedir um empurrãozinho à Ada.`,
     },
   },
   {
@@ -177,6 +204,10 @@ Honorarios: pagados por adelantado. Preguntas: ninguna, al parecer.`,
 - 妹に折り返し電話
 - 何にでもコンパスを描くクセをやめる
 - 期限切れの前にドメインを更新`,
+      "pt-BR": `- fazer backup do arquivo (de novo)
+- retornar a ligação da minha irmã
+- parar de desenhar bússolas em tudo
+- renovar o domínio antes que expire`,
     },
   },
 ];
@@ -290,6 +321,27 @@ CS 110：コンピューターはどう数えるか
 W.は最近「何でも」授業のコードで書く。
 買い物リスト。ドアの暗証番号。たぶんパスワードも。
 覚えておくこと。`,
+    "pt-BR": `HARBOUR COMMUNITY COLLEGE — CURSOS NOTURNOS
+CS 110: Como os computadores contam
+Terças, 18h30–20h30, Sala 12
+Professora: W. Okafor
+
+Semana 1  O que é um computador, afinal?   (apostila)
+Semana 2  Interruptores: ligado e desligado (apostila)
+Semana 3  Binário: contando com dois dedos
+          Aula + teste prático on-line:
+          harbourcc.edu/cs110/binary
+          Passe no teste para instalar no seu
+          computador o tradutor de binário da turma.
+Semana 4  Senhas, e por que a sua é ruim
+
+Traga um lápis. Notebooks são bem-vindos. Celulares virados para baixo.
+
+---
+(Ada, na margem:)
+W. agora escreve TUDO no código da turma dela.
+Listas de compras. Códigos de portas. Provavelmente senhas.
+Aprenda.`,
   },
 };
 

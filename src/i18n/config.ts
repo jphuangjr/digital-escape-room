@@ -1,13 +1,13 @@
 // Locale settings shared by server and client. Language is per player (cookie), never in the URL,
 // so invite links and QR codes work for everyone.
 
-export const LOCALES = ["en", "ko", "zh-TW", "es", "ja"] as const;
+export const LOCALES = ["en", "ko", "zh-TW", "es", "ja", "pt-BR"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "en";
 export const LOCALE_COOKIE = "lang";
 
 /** Each language's name, written in that language (for the switcher). */
-export const LOCALE_NAMES: Record<Locale, string> = { en: "English", ko: "한국어", "zh-TW": "繁體中文", es: "Español", ja: "日本語" };
+export const LOCALE_NAMES: Record<Locale, string> = { en: "English", ko: "한국어", "zh-TW": "繁體中文", es: "Español", ja: "日本語", "pt-BR": "Português (Brasil)" };
 
 export function isLocale(x: unknown): x is Locale {
   return typeof x === "string" && (LOCALES as readonly string[]).includes(x);
@@ -15,11 +15,14 @@ export function isLocale(x: unknown): x is Locale {
 
 /**
  * Map a language tag to the locale we serve. All Chinese tags go to Traditional Chinese for now
- * (zh-TW, zh-HK, zh-Hant…, and also zh-CN until Simplified exists: closer than English).
+ * (zh-TW, zh-HK, zh-Hant…, and also zh-CN until Simplified exists: closer than English), and all
+ * Portuguese tags go to Brazilian Portuguese.
  */
 function baseLocale(tag: string): string {
   const base = tag.split("-")[0];
-  return base === "zh" ? "zh-TW" : base;
+  if (base === "zh") return "zh-TW";
+  if (base === "pt") return "pt-BR"; // pt-PT too, until European Portuguese exists
+  return base;
 }
 
 /** Best supported locale for an Accept-Language header, e.g. "ko-KR,ko;q=0.9,en;q=0.8" -> "ko". */

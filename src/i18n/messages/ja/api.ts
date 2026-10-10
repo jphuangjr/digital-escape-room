@@ -56,6 +56,8 @@ const messages: Record<keyof typeof en, string> = {
   "api.attempt.notReady": "何も起こりません。まだその時ではないようです。",
   "api.attempt.rateLimited": "試行回数が多すぎます。{s}秒後にもう一度お試しください。",
   "api.attempt.wrong": "違います。",
+  "api.attempt.lockedOut": "誤ったキーのためシステムがロックされています。{s}秒後にもう一度お試しください。",
+  "api.attempt.wrongLocked": "キーが違います。システムは{s}秒間ロックされます。",
   "api.attempt.solved.binaryLesson": "クイズに合格しました。デコーダーで2進数変換が使えるようになりました。",
   "api.attempt.solved.adminConsole": "管理コンソールのロックを解除しました。",
   "api.decode.badShift": "シフトは整数で指定してください。",

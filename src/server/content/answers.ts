@@ -7,7 +7,7 @@ import type { PuzzleId } from "@/lib/types";
  */
 export const FRAGMENTS = { name: "wren", year: "1987", id: "0412" } as const;
 
-const SHIFT_ANSWERS = new Set(["7", "seven", "rot7", "shift7", "+7", "칠", "일곱", "七", "siete", "なな", "しち"]);
+const SHIFT_ANSWERS = new Set(["7", "seven", "rot7", "shift7", "+7", "칠", "일곱", "七", "siete", "なな", "しち", "sete"]);
 const INTRANET_USER = "wren.okafor";
 const INTRANET_PASS = `${FRAGMENTS.year}${FRAGMENTS.id}`;
 const FINAL_PHRASE = `${FRAGMENTS.name}-${FRAGMENTS.year}-${FRAGMENTS.id}`;

@@ -16,33 +16,34 @@ const footer = (x: X): Block => ({
     "zh-TW": "港灣社區學院 · 夜間部 · 晚上 6 點開門，咖啡不保證有。",
     es: "Harbour Community College · Estudios nocturnos · Abrimos a las 6 p. m.; el café no está garantizado.",
     ja: "ハーバー・コミュニティ・カレッジ · 夜間講座 · 開校は午後6時、コーヒーの保証はありません。",
+    "pt-BR": "Harbour Community College · Cursos noturnos · Abrimos às 18h; o café não é garantido.",
   }),
 });
 
 const nav = (x: X): Block => ({
   type: "nav",
   links: [
-    { text: x({ en: "Home", ko: "홈", "zh-TW": "首頁", es: "Inicio", ja: "ホーム" }), href: HARBOURCC_HOST },
+    { text: x({ en: "Home", ko: "홈", "zh-TW": "首頁", es: "Inicio", ja: "ホーム", "pt-BR": "Início" }), href: HARBOURCC_HOST },
     { text: "CS 110", href: `${HARBOURCC_HOST}/cs110` },
-    { text: x({ en: "Week 3: Binary", ko: "3주차: 이진법", "zh-TW": "第 3 週：二進位", es: "Semana 3: Binario", ja: "第3週：2進数" }), href: `${HARBOURCC_HOST}/cs110/binary` },
+    { text: x({ en: "Week 3: Binary", ko: "3주차: 이진법", "zh-TW": "第 3 週：二進位", es: "Semana 3: Binario", ja: "第3週：2進数", "pt-BR": "Semana 3: Binário" }), href: `${HARBOURCC_HOST}/cs110/binary` },
   ],
 });
 
 function home(x: X): SitePage {
   const blocks: Block[] = [
     nav(x),
-    { type: "heading", level: 1, text: x({ en: "Harbour Community College", ko: "하버 커뮤니티 칼리지", "zh-TW": "港灣社區學院", es: "Harbour Community College", ja: "ハーバー・コミュニティ・カレッジ" }) },
-    { type: "paragraph", text: x({ en: "Evening Studies. Learn something after work.", ko: "야간 과정. 퇴근 후에 무언가를 배워 보세요.", "zh-TW": "夜間部。下班後，學點新東西。", es: "Estudios nocturnos. Aprenda algo después del trabajo.", ja: "夜間講座。仕事帰りに、何かを学びませんか。" }) },
-    { type: "heading", level: 2, text: x({ en: "This term's evening courses", ko: "이번 학기 야간 강좌", "zh-TW": "本學期夜間課程", es: "Cursos nocturnos de este período", ja: "今学期の夜間講座" }) },
+    { type: "heading", level: 1, text: x({ en: "Harbour Community College", ko: "하버 커뮤니티 칼리지", "zh-TW": "港灣社區學院", es: "Harbour Community College", ja: "ハーバー・コミュニティ・カレッジ", "pt-BR": "Harbour Community College" }) },
+    { type: "paragraph", text: x({ en: "Evening Studies. Learn something after work.", ko: "야간 과정. 퇴근 후에 무언가를 배워 보세요.", "zh-TW": "夜間部。下班後，學點新東西。", es: "Estudios nocturnos. Aprenda algo después del trabajo.", ja: "夜間講座。仕事帰りに、何かを学びませんか。", "pt-BR": "Cursos noturnos. Aprenda algo depois do trabalho." }) },
+    { type: "heading", level: 2, text: x({ en: "This term's evening courses", ko: "이번 학기 야간 강좌", "zh-TW": "本學期夜間課程", es: "Cursos nocturnos de este período", ja: "今学期の夜間講座", "pt-BR": "Cursos noturnos deste semestre" }) },
     {
       type: "list",
       items: [
-        x({ en: "CS 110: How Computers Count (Tuesdays, W. Okafor)", ko: "CS 110: 컴퓨터는 어떻게 셈을 하나 (화요일, W. 오카포(Okafor))", "zh-TW": "CS 110：電腦怎麼數數（週二，W. 奧卡佛（Okafor））", es: "CS 110: Cómo cuentan las computadoras (martes, W. Okafor)", ja: "CS 110：コンピューターはどう数えるか（火曜、W・オカフォー（Okafor））" }),
-        x({ en: "HIST 204: The Harbour Before the Fire (Wednesdays, staff)", ko: "HIST 204: 대화재 이전의 항구 (수요일, 교직원)", "zh-TW": "HIST 204：大火之前的港灣（週三，校內教師）", es: "HIST 204: El puerto antes del incendio (miércoles, profesorado)", ja: "HIST 204：大火以前の港（水曜、教員）" }),
-        x({ en: "ART 101: Drawing From Life (Thursdays, staff)", ko: "ART 101: 인물 드로잉 (목요일, 교직원)", "zh-TW": "ART 101：人物寫生（週四，校內教師）", es: "ART 101: Dibujo del natural (jueves, profesorado)", ja: "ART 101：人物デッサン（木曜、教員）" }),
+        x({ en: "CS 110: How Computers Count (Tuesdays, W. Okafor)", ko: "CS 110: 컴퓨터는 어떻게 셈을 하나 (화요일, W. 오카포(Okafor))", "zh-TW": "CS 110：電腦怎麼數數（週二，W. 奧卡佛（Okafor））", es: "CS 110: Cómo cuentan las computadoras (martes, W. Okafor)", ja: "CS 110：コンピューターはどう数えるか（火曜、W・オカフォー（Okafor））", "pt-BR": "CS 110: Como os computadores contam (terças, W. Okafor)" }),
+        x({ en: "HIST 204: The Harbour Before the Fire (Wednesdays, staff)", ko: "HIST 204: 대화재 이전의 항구 (수요일, 교직원)", "zh-TW": "HIST 204：大火之前的港灣（週三，校內教師）", es: "HIST 204: El puerto antes del incendio (miércoles, profesorado)", ja: "HIST 204：大火以前の港（水曜、教員）", "pt-BR": "HIST 204: O porto antes do incêndio (quartas, corpo docente)" }),
+        x({ en: "ART 101: Drawing From Life (Thursdays, staff)", ko: "ART 101: 인물 드로잉 (목요일, 교직원)", "zh-TW": "ART 101：人物寫生（週四，校內教師）", es: "ART 101: Dibujo del natural (jueves, profesorado)", ja: "ART 101：人物デッサン（木曜、教員）", "pt-BR": "ART 101: Desenho com modelo vivo (quintas, corpo docente)" }),
       ],
     },
-    { type: "link", text: x({ en: "CS 110 course page →", ko: "CS 110 강좌 페이지 →", "zh-TW": "CS 110 課程頁面 →", es: "Página del curso CS 110 →", ja: "CS 110 講座ページ →" }), href: `${HARBOURCC_HOST}/cs110` },
+    { type: "link", text: x({ en: "CS 110 course page →", ko: "CS 110 강좌 페이지 →", "zh-TW": "CS 110 課程頁面 →", es: "Página del curso CS 110 →", ja: "CS 110 講座ページ →", "pt-BR": "Página do curso CS 110 →" }), href: `${HARBOURCC_HOST}/cs110` },
     {
       type: "notice",
       tone: "info",
@@ -52,11 +53,12 @@ function home(x: X): SitePage {
         "zh-TW": "應社區合作夥伴要求，HIST 204 本學期停開。",
         es: "HIST 204 se cancela este período a petición de una institución colaboradora de la comunidad.",
         ja: "HIST 204 は、地域連携団体の要請により今学期は休講となりました。",
+        "pt-BR": "HIST 204 foi cancelado neste semestre a pedido de uma instituição parceira da comunidade.",
       }),
     },
     footer(x),
   ];
-  return page(HARBOURCC_HOST, x({ en: "Harbour Community College", ko: "하버 커뮤니티 칼리지", "zh-TW": "港灣社區學院", es: "Harbour Community College", ja: "ハーバー・コミュニティ・カレッジ" }), "harbourcc", blocks, {
+  return page(HARBOURCC_HOST, x({ en: "Harbour Community College", ko: "하버 커뮤니티 칼리지", "zh-TW": "港灣社區學院", es: "Harbour Community College", ja: "ハーバー・コミュニティ・カレッジ", "pt-BR": "Harbour Community College" }), "harbourcc", blocks, {
     headComments: [
       x({
         en: "site maintained by the Evening Studies office. please stop emailing us about the parking.",
@@ -64,6 +66,7 @@ function home(x: X): SitePage {
         "zh-TW": "本網站由夜間部辦公室維護。請不要再寄電子郵件來問停車的事了。",
         es: "sitio mantenido por la oficina de Estudios nocturnos. por favor, dejen de escribirnos por lo del estacionamiento.",
         ja: "夜間講座事務局が管理しているサイトです。駐車場の件でメールを送ってくるのはもうやめてください。",
+        "pt-BR": "site mantido pela secretaria dos Cursos noturnos. por favor, parem de mandar e-mail pra gente sobre o estacionamento.",
       }),
     ],
   });
@@ -72,7 +75,7 @@ function home(x: X): SitePage {
 function course(x: X): SitePage {
   const blocks: Block[] = [
     nav(x),
-    { type: "heading", level: 1, text: x({ en: "CS 110: How Computers Count", ko: "CS 110: 컴퓨터는 어떻게 셈을 하나", "zh-TW": "CS 110：電腦怎麼數數", es: "CS 110: Cómo cuentan las computadoras", ja: "CS 110：コンピューターはどう数えるか" }) },
+    { type: "heading", level: 1, text: x({ en: "CS 110: How Computers Count", ko: "CS 110: 컴퓨터는 어떻게 셈을 하나", "zh-TW": "CS 110：電腦怎麼數數", es: "CS 110: Cómo cuentan las computadoras", ja: "CS 110：コンピューターはどう数えるか", "pt-BR": "CS 110: Como os computadores contam" }) },
     {
       type: "paragraph",
       text: x({
@@ -81,19 +84,20 @@ function course(x: X): SitePage {
         "zh-TW": "每週二晚上 6:30 至 8:30，12 號教室。講師：W. 奧卡佛（Okafor）（白天是系統檔案研究員，晚上就是這個）。",
         es: "Martes, de 6:30 a 8:30 p. m., Aula 12. Instructora: W. Okafor (de día, archivista de sistemas; de noche, esto).",
         ja: "毎週火曜 午後6:30〜8:30、12号教室。講師：W・オカフォー（Okafor）（昼はシステム・アーキビスト、夜はこれ）。",
+        "pt-BR": "Terças, das 18h30 às 20h30, Sala 12. Instrutora: W. Okafor (de dia, arquivista de sistemas; à noite, isto aqui).",
       }),
     },
-    { type: "heading", level: 2, text: x({ en: "Lessons", ko: "수업", "zh-TW": "課程", es: "Lecciones", ja: "授業" }) },
+    { type: "heading", level: 2, text: x({ en: "Lessons", ko: "수업", "zh-TW": "課程", es: "Lecciones", ja: "授業", "pt-BR": "Aulas" }) },
     {
       type: "list",
       items: [
-        x({ en: "Week 1: What is a computer, really? (handout only)", ko: "1주차: 컴퓨터란 대체 뭘까? (유인물만)", "zh-TW": "第 1 週：電腦到底是什麼？（僅講義）", es: "Semana 1: ¿Qué es una computadora, en realidad? (solo material impreso)", ja: "第1週：そもそもコンピューターって何？（配布資料のみ）" }),
-        x({ en: "Week 2: Switches, on and off (handout only)", ko: "2주차: 스위치, 켜짐과 꺼짐 (유인물만)", "zh-TW": "第 2 週：開關，開與關（僅講義）", es: "Semana 2: Interruptores, encendido y apagado (solo material impreso)", ja: "第2週：スイッチ、オンとオフ（配布資料のみ）" }),
-        x({ en: "Week 3: Binary, counting with two fingers (online lesson below)", ko: "3주차: 이진법, 손가락 두 개로 세기 (아래 온라인 수업)", "zh-TW": "第 3 週：二進位，用兩根手指數數（線上課程見下方）", es: "Semana 3: Binario, contar con dos dedos (lección en línea abajo)", ja: "第3週：2進数、2本の指で数える（オンライン授業は下記）" }),
-        x({ en: "Week 4: Passwords, and why yours is bad (coming soon)", ko: "4주차: 비밀번호, 그리고 당신 비밀번호가 허술한 이유 (준비 중)", "zh-TW": "第 4 週：密碼，以及你的密碼為什麼很爛（即將推出）", es: "Semana 4: Contraseñas, y por qué la tuya es mala (próximamente)", ja: "第4週：パスワード、そしてあなたのパスワードがダメな理由（近日公開）" }),
+        x({ en: "Week 1: What is a computer, really? (handout only)", ko: "1주차: 컴퓨터란 대체 뭘까? (유인물만)", "zh-TW": "第 1 週：電腦到底是什麼？（僅講義）", es: "Semana 1: ¿Qué es una computadora, en realidad? (solo material impreso)", ja: "第1週：そもそもコンピューターって何？（配布資料のみ）", "pt-BR": "Semana 1: O que é um computador, afinal? (só apostila)" }),
+        x({ en: "Week 2: Switches, on and off (handout only)", ko: "2주차: 스위치, 켜짐과 꺼짐 (유인물만)", "zh-TW": "第 2 週：開關，開與關（僅講義）", es: "Semana 2: Interruptores, encendido y apagado (solo material impreso)", ja: "第2週：スイッチ、オンとオフ（配布資料のみ）", "pt-BR": "Semana 2: Interruptores, ligado e desligado (só apostila)" }),
+        x({ en: "Week 3: Binary, counting with two fingers (online lesson below)", ko: "3주차: 이진법, 손가락 두 개로 세기 (아래 온라인 수업)", "zh-TW": "第 3 週：二進位，用兩根手指數數（線上課程見下方）", es: "Semana 3: Binario, contar con dos dedos (lección en línea abajo)", ja: "第3週：2進数、2本の指で数える（オンライン授業は下記）", "pt-BR": "Semana 3: Binário, contando com dois dedos (aula on-line abaixo)" }),
+        x({ en: "Week 4: Passwords, and why yours is bad (coming soon)", ko: "4주차: 비밀번호, 그리고 당신 비밀번호가 허술한 이유 (준비 중)", "zh-TW": "第 4 週：密碼，以及你的密碼為什麼很爛（即將推出）", es: "Semana 4: Contraseñas, y por qué la tuya es mala (próximamente)", ja: "第4週：パスワード、そしてあなたのパスワードがダメな理由（近日公開）", "pt-BR": "Semana 4: Senhas, e por que a sua é ruim (em breve)" }),
       ],
     },
-    { type: "link", text: x({ en: "Week 3 lesson: Binary →", ko: "3주차 수업: 이진법 →", "zh-TW": "第 3 週課程：二進位 →", es: "Lección de la semana 3: Binario →", ja: "第3週の授業：2進数 →" }), href: `${HARBOURCC_HOST}/cs110/binary` },
+    { type: "link", text: x({ en: "Week 3 lesson: Binary →", ko: "3주차 수업: 이진법 →", "zh-TW": "第 3 週課程：二進位 →", es: "Lección de la semana 3: Binario →", ja: "第3週の授業：2進数 →", "pt-BR": "Aula da semana 3: Binário →" }), href: `${HARBOURCC_HOST}/cs110/binary` },
     {
       type: "paragraph",
       text: x({
@@ -102,11 +106,12 @@ function course(x: X): SitePage {
         "zh-TW": "通過第 3 週練習測驗，就能在自己的電腦上安裝課堂用的二進位翻譯器。",
         es: "Aprueba el cuestionario de práctica de la semana 3 y podrás instalar el traductor binario de la clase en tu propia máquina.",
         ja: "第3週の練習クイズに合格すると、授業用の2進数翻訳ツールを自分のマシンにインストールできます。",
+        "pt-BR": "Passe no quiz de prática da semana 3 e você poderá instalar o tradutor binário da turma na sua própria máquina.",
       }),
     },
     footer(x),
   ];
-  return page(`${HARBOURCC_HOST}/cs110`, x({ en: "CS 110: How Computers Count", ko: "CS 110: 컴퓨터는 어떻게 셈을 하나", "zh-TW": "CS 110：電腦怎麼數數", es: "CS 110: Cómo cuentan las computadoras", ja: "CS 110：コンピューターはどう数えるか" }), "harbourcc", blocks, {
+  return page(`${HARBOURCC_HOST}/cs110`, x({ en: "CS 110: How Computers Count", ko: "CS 110: 컴퓨터는 어떻게 셈을 하나", "zh-TW": "CS 110：電腦怎麼數數", es: "CS 110: Cómo cuentan las computadoras", ja: "CS 110：コンピューターはどう数えるか", "pt-BR": "CS 110: Como os computadores contam" }), "harbourcc", blocks, {
     bodyComments: [
       x({
         en: "attendance this term: 4. one of them is Ada, and she keeps asking about checksums. — W.",
@@ -114,6 +119,7 @@ function course(x: X): SitePage {
         "zh-TW": "本學期出席人數：4。其中一個是艾達，她一直追問校驗和的事。——W.",
         es: "asistencia este período: 4. una de ellas es Ada, y no deja de preguntar por las sumas de verificación. — W.",
         ja: "今学期の出席者：4人。そのうち一人がエイダで、チェックサムのことばかり聞いてくる。— W.",
+        "pt-BR": "frequência neste semestre: 4. uma delas é a Ada, e ela não para de perguntar sobre somas de verificação. — W.",
       }),
     ],
   });
@@ -129,7 +135,7 @@ function lesson(x: X, progress: RoomProgress): SitePage {
   const passed = progress.solved.includes("binary-lesson");
   const blocks: Block[] = [
     nav(x),
-    { type: "heading", level: 1, text: x({ en: "Week 3: Binary", ko: "3주차: 이진법", "zh-TW": "第 3 週：二進位", es: "Semana 3: Binario", ja: "第3週：2進数" }) },
+    { type: "heading", level: 1, text: x({ en: "Week 3: Binary", ko: "3주차: 이진법", "zh-TW": "第 3 週：二進位", es: "Semana 3: Binario", ja: "第3週：2進数", "pt-BR": "Semana 3: Binário" }) },
     {
       type: "paragraph",
       text: x({
@@ -138,9 +144,10 @@ function lesson(x: X, progress: RoomProgress): SitePage {
         "zh-TW": "電腦只有兩根手指：開關不是關（0）就是開（1）。所以電腦不是十個十個數，而是兩個兩個數。",
         es: "Las computadoras solo tienen dos dedos: un interruptor está apagado (0) o encendido (1). Así que, en lugar de contar de diez en diez, cuentan de dos en dos.",
         ja: "コンピューターには指が2本しかありません。スイッチはオフ（0）かオン（1）のどちらかです。だから10ずつではなく、2ずつ数えるのです。",
+        "pt-BR": "Computadores só têm dois dedos: um interruptor está desligado (0) ou ligado (1). Então, em vez de contar de dez em dez, eles contam de dois em dois.",
       }),
     },
-    { type: "heading", level: 2, text: x({ en: "Place values", ko: "자릿값", "zh-TW": "位值", es: "Valores posicionales", ja: "位の値" }) },
+    { type: "heading", level: 2, text: x({ en: "Place values", ko: "자릿값", "zh-TW": "位值", es: "Valores posicionales", ja: "位の値", "pt-BR": "Valores posicionais" }) },
     {
       type: "paragraph",
       text: x({
@@ -149,6 +156,7 @@ function lesson(x: X, progress: RoomProgress): SitePage {
         "zh-TW": "在我們的課堂密碼裡，每個字母由五個開關組成。由左到右，各開關的值分別是 16, 8, 4, 2, 1。把開著的開關的值加起來，那個數字就是字母：A 是 1，B 是 2，一路到 Z 是 26。",
         es: "En nuestro código de clase, cada letra son cinco interruptores. De izquierda a derecha, los interruptores valen 16, 8, 4, 2 y 1. Suma los valores de los interruptores encendidos. Ese número es la letra: la A es 1, la B es 2, y así hasta la Z, que es 26.",
         ja: "このクラスの暗号では、1文字がスイッチ5個でできています。左から順に、スイッチの値は 16, 8, 4, 2, 1 です。オンになっているスイッチの値を足しましょう。その数が文字を表します。A が 1、B が 2、と続いて Z が 26 です。",
+        "pt-BR": "No código da nossa turma, cada letra são cinco interruptores. Da esquerda para a direita, os interruptores valem 16, 8, 4, 2 e 1. Some os valores dos interruptores ligados. Esse número é a letra: A é 1, B é 2, e assim por diante até o Z, que é 26.",
       }),
     },
     {
@@ -159,19 +167,20 @@ function lesson(x: X, progress: RoomProgress): SitePage {
         "zh-TW": "範例：01000。只有 8 那個開關是開的，所以是 8，第 8 個字母是 H。再一個：10011 是 16 + 2 + 1 = 19，也就是 S。",
         es: "Ejemplo resuelto: 01000. Solo está encendido el interruptor del 8, así que es 8, y la 8.ª letra es la H. Otro: 10011 es 16 + 2 + 1 = 19, que es la S.",
         ja: "例題：01000。オンなのは 8 のスイッチだけなので 8、8番目の文字は H です。もう一つ：10011 は 16 + 2 + 1 = 19 で、S です。",
+        "pt-BR": "Exemplo resolvido: 01000. Só o interruptor do 8 está ligado, então é 8, e a 8ª letra é o H. Outro: 10011 é 16 + 2 + 1 = 19, que é o S.",
       }),
     },
-    { type: "heading", level: 2, text: x({ en: "Try it", ko: "직접 해 보기", "zh-TW": "動手試試", es: "Pruébalo", ja: "やってみよう" }) },
-    { type: "paragraph", text: x({ en: "Tap the switches to turn them on and off.", ko: "스위치를 탭해서 켜고 꺼 보세요.", "zh-TW": "點一下開關，把它們打開或關上。", es: "Toca los interruptores para encenderlos y apagarlos.", ja: "スイッチをタップして、オン・オフを切り替えてみましょう。" }) },
+    { type: "heading", level: 2, text: x({ en: "Try it", ko: "직접 해 보기", "zh-TW": "動手試試", es: "Pruébalo", ja: "やってみよう", "pt-BR": "Experimente" }) },
+    { type: "paragraph", text: x({ en: "Tap the switches to turn them on and off.", ko: "스위치를 탭해서 켜고 꺼 보세요.", "zh-TW": "點一下開關，把它們打開或關上。", es: "Toca los interruptores para encenderlos y apagarlos.", ja: "スイッチをタップして、オン・オフを切り替えてみましょう。", "pt-BR": "Toque nos interruptores para ligá-los e desligá-los." }) },
     { type: "bits" },
-    { type: "heading", level: 2, text: x({ en: "Decoding sheet", ko: "해독표", "zh-TW": "解碼表", es: "Hoja de decodificación", ja: "解読表" }) },
+    { type: "heading", level: 2, text: x({ en: "Decoding sheet", ko: "해독표", "zh-TW": "解碼表", es: "Hoja de decodificación", ja: "解読表", "pt-BR": "Tabela de decodificação" }) },
     {
       type: "table",
-      caption: x({ en: "Class code: one letter, five bits", ko: "수업 암호: 글자 하나에 5비트", "zh-TW": "課堂密碼：一個字母，五個位元", es: "Código de clase: una letra, cinco bits", ja: "クラスの暗号：1文字＝5ビット" }),
-      columns: [x({ en: "Letter", ko: "글자", "zh-TW": "字母", es: "Letra", ja: "文字" }), x({ en: "Number", ko: "숫자", "zh-TW": "數字", es: "Número", ja: "数" }), x({ en: "Binary", ko: "이진수", "zh-TW": "二進位", es: "Binario", ja: "2進数" })],
+      caption: x({ en: "Class code: one letter, five bits", ko: "수업 암호: 글자 하나에 5비트", "zh-TW": "課堂密碼：一個字母，五個位元", es: "Código de clase: una letra, cinco bits", ja: "クラスの暗号：1文字＝5ビット", "pt-BR": "Código da turma: uma letra, cinco bits" }),
+      columns: [x({ en: "Letter", ko: "글자", "zh-TW": "字母", es: "Letra", ja: "文字", "pt-BR": "Letra" }), x({ en: "Number", ko: "숫자", "zh-TW": "數字", es: "Número", ja: "数", "pt-BR": "Número" }), x({ en: "Binary", ko: "이진수", "zh-TW": "二進位", es: "Binario", ja: "2進数", "pt-BR": "Binário" })],
       rows: SHEET_ROWS,
     },
-    { type: "heading", level: 2, text: x({ en: "Practice quiz", ko: "연습 퀴즈", "zh-TW": "練習測驗", es: "Cuestionario de práctica", ja: "練習クイズ" }) },
+    { type: "heading", level: 2, text: x({ en: "Practice quiz", ko: "연습 퀴즈", "zh-TW": "練習測驗", es: "Cuestionario de práctica", ja: "練習クイズ", "pt-BR": "Quiz de prática" }) },
     passed
       ? {
           type: "notice",
@@ -182,6 +191,7 @@ function lesson(x: X, progress: RoomProgress): SitePage {
             "zh-TW": "測驗通過。課堂用的二進位翻譯器已安裝到你的解碼器。",
             es: "Cuestionario aprobado. El traductor binario de la clase está instalado en tu Decodificador.",
             ja: "クイズ合格。授業用の2進数翻訳ツールがデコーダーにインストールされました。",
+            "pt-BR": "Quiz concluído. O tradutor binário da turma está instalado no seu Decodificador.",
           }),
         }
       : {
@@ -192,12 +202,13 @@ function lesson(x: X, progress: RoomProgress): SitePage {
             "zh-TW": "用解碼表解出這個單字，然後輸入。通過後，課堂用的二進位翻譯器就會安裝到你的電腦上。",
             es: "Decodifica esta palabra con la hoja y luego escríbela. Si apruebas, el traductor binario de la clase se instala en tu máquina.",
             ja: "解読表を使ってこの単語を解読し、入力してください。合格すると、授業用の2進数翻訳ツールがあなたのマシンにインストールされます。",
+            "pt-BR": "Decodifique esta palavra com a tabela e depois digite-a. Se passar, o tradutor binário da turma é instalado na sua máquina.",
           }),
         },
     { type: "form", form: "binary-quiz", prompt: toBinary5(BINARY_PRACTICE_WORD) },
     footer(x),
   ];
-  return page(`${HARBOURCC_HOST}/cs110/binary`, x({ en: "Week 3: Binary", ko: "3주차: 이진법", "zh-TW": "第 3 週：二進位", es: "Semana 3: Binario", ja: "第3週：2進数" }), "harbourcc", blocks, {
+  return page(`${HARBOURCC_HOST}/cs110/binary`, x({ en: "Week 3: Binary", ko: "3주차: 이진법", "zh-TW": "第 3 週：二進位", es: "Semana 3: Binario", ja: "第3週：2進数", "pt-BR": "Semana 3: Binário" }), "harbourcc", blocks, {
     bodyComments: [
       x({
         en: "yes, real computers use 8 bits and a different table. this is a class, not a job. — W.O.",
@@ -205,6 +216,7 @@ function lesson(x: X, progress: RoomProgress): SitePage {
         "zh-TW": "對，真正的電腦用的是 8 位元和另一張表。這是上課，不是上班。——W.O.",
         es: "sí, las computadoras de verdad usan 8 bits y otra tabla. esto es una clase, no un trabajo. — W.O.",
         ja: "はい、本物のコンピューターは8ビットで、表も違います。これは授業であって、仕事じゃありません。— W.O.",
+        "pt-BR": "sim, computadores de verdade usam 8 bits e outra tabela. isto é uma aula, não um emprego. — W.O.",
       }),
     ],
   });

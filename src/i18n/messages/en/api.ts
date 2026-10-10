@@ -55,6 +55,8 @@ const messages = {
   "api.attempt.notReady": "Nothing happens. This isn't ready yet.",
   "api.attempt.rateLimited": "Too many attempts. Try again in {s}s.",
   "api.attempt.wrong": "That's not it.",
+  "api.attempt.lockedOut": "The system is locked after a wrong key. Try again in {s}s.",
+  "api.attempt.wrongLocked": "Wrong key. The system is locked for {s}s.",
   "api.attempt.solved.binaryLesson": "Quiz passed. The Binary translator is now in your Decoder.",
   "api.attempt.solved.adminConsole": "Admin console unlocked.",
   "api.decode.badShift": "shift must be an integer.",

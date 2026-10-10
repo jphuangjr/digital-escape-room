@@ -46,11 +46,11 @@ const messages: Record<keyof typeof en, string> = {
   "browser.form.correct": "정답이에요!",
   "browser.form.rejected": "틀렸어요. 다시 생각해 보세요.",
   "browser.form.retryIn": "{s}초 후 다시 시도할 수 있어요.",
-  "browser.form.previewFailed": "미리보기에 실패했어요",
   "browser.form.decreaseShift": "이동 값 줄이기",
   "browser.form.increaseShift": "이동 값 늘리기",
   "browser.form.shiftSolved": "✓ 방 전체에 목록이 해독됐어요.",
-  "browser.form.previewLabel": "미리보기 · 이동 {n} (나만 볼 수 있어요)",
+  "browser.form.lockNote": "주의: 틀린 키를 넣으면 모두의 시스템이 1분 동안 잠겨요. 먼저 풀어 보세요.",
+  "browser.form.locked": "잠김 · {s}초",
   "browser.form.binaryPassed": "✓ 통과했어요. 해독기를 열고 이진수 탭을 확인해 보세요.",
 };
 

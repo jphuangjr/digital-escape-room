@@ -56,6 +56,8 @@ const messages: Record<keyof typeof en, string> = {
   "api.attempt.notReady": "什麼事也沒發生，看來時機還沒到。",
   "api.attempt.rateLimited": "嘗試次數過多，請於 {s} 秒後再試。",
   "api.attempt.wrong": "不是這個。",
+  "api.attempt.lockedOut": "輸入錯誤的金鑰，系統已鎖定。請在 {s} 秒後再試。",
+  "api.attempt.wrongLocked": "金鑰錯誤。系統將鎖定 {s} 秒。",
   "api.attempt.solved.binaryLesson": "測驗通過！二進位轉換器已加入你的解碼器。",
   "api.attempt.solved.adminConsole": "管理員主控台已解鎖。",
   "api.decode.badShift": "位移必須是整數。",

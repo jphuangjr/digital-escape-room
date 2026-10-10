@@ -44,11 +44,11 @@ const messages = {
   "browser.form.correct": "Correct!",
   "browser.form.rejected": "Rejected. That's not it.",
   "browser.form.retryIn": "Retry in {s}s.",
-  "browser.form.previewFailed": "Preview failed",
   "browser.form.decreaseShift": "Decrease shift",
   "browser.form.increaseShift": "Increase shift",
   "browser.form.shiftSolved": "✓ Listings decoded for the whole room.",
-  "browser.form.previewLabel": "Preview · shift {n} (only you can see this)",
+  "browser.form.lockNote": "Careful: a wrong key locks the system for everyone for 1 minute. Work it out first.",
+  "browser.form.locked": "Locked · {s}s",
   "browser.form.binaryPassed": "✓ Passed. Open the Decoder and look for the Binary tab.",
 } as const;
 

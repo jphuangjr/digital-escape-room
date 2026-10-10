@@ -128,6 +128,7 @@ describe("answers", () => {
     expect(checkAnswer("tools-folder", "マーラ")).toBe(true);
     expect(checkAnswer("final-phrase", "レン-1987-0412")).toBe(true);
     expect(checkAnswer("shift-key", "なな")).toBe(true);
+    expect(checkAnswer("shift-key", "Sete")).toBe(true);
   });
   it("binary-lesson and admin-console", () => {
     expect(checkAnswer("binary-lesson", " Hello ")).toBe(true);

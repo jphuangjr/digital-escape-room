@@ -211,3 +211,18 @@ describe("chat", () => {
     expect(chatCooldownSec(new Date("2026-10-10T12:00:00.000Z"), now)).toBe(0);
   });
 });
+
+describe("wrong-answer lockout", () => {
+  it("counts down a minute from the last wrong key", async () => {
+    const { lockoutRemainingSec, WRONG_ANSWER_LOCKOUT_MS } = await import("@/lib/rules");
+    const ms = WRONG_ANSWER_LOCKOUT_MS["shift-key"]!;
+    expect(ms).toBe(60_000);
+    const wrong = new Date("2026-01-01T00:00:00Z");
+    expect(lockoutRemainingSec(wrong, new Date("2026-01-01T00:00:00.500Z"), ms)).toBe(60);
+    expect(lockoutRemainingSec(wrong, new Date("2026-01-01T00:00:59.100Z"), ms)).toBe(1);
+    expect(lockoutRemainingSec(wrong, new Date("2026-01-01T00:01:00Z"), ms)).toBe(0);
+    expect(lockoutRemainingSec(null, new Date(), ms)).toBe(0);
+    expect(lockoutRemainingSec(wrong.toISOString(), wrong.getTime() + 30_000, ms)).toBe(30);
+    expect(WRONG_ANSWER_LOCKOUT_MS["intranet-login"]).toBeUndefined();
+  });
+});
