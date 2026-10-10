@@ -7,6 +7,9 @@ import type { Block, ImageFileInfo, SitePage } from "@/lib/types";
 import type { GameCtx } from "@/lib/client/game";
 import { THEMES, type ThemeStyle } from "./themes";
 import { SiteForm } from "./SiteForms";
+import { PETS } from "./art/Pets";
+import { PHOTOS } from "./art/Photos";
+import { PORTRAITS } from "./art/Portraits";
 
 /** In-site (story) strings: `const x = useStory(); x({ en, ko })`. */
 function useStory() {
@@ -161,9 +164,15 @@ function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
           <p className={`mt-3 whitespace-pre-line ${t.p}`}>{b.body}</p>
         </article>
       );
-    case "listing":
+    case "listing": {
+      const Pet = b.petId ? PETS[b.petId] : undefined;
       return (
         <article className={t.card}>
+          {Pet && (
+            <div className="-mx-4 -mt-4 mb-3 aspect-[16/10] overflow-hidden rounded-t-2xl" role="img" aria-label={b.title}>
+              <Pet />
+            </div>
+          )}
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h3 className="text-lg font-bold">{b.title}</h3>
             {b.petId && (
@@ -176,6 +185,7 @@ function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
           <p className="mt-2 whitespace-pre-line font-mono text-sm leading-relaxed tracking-wide">{b.body}</p>
         </article>
       );
+    }
     case "diff":
       return (
         <figure className={t.card}>
@@ -312,12 +322,24 @@ function StaffPhoto({ photo, t, name }: { photo: string | null; t: ThemeStyle; n
   const x = useStory();
   if (!photo) {
     return (
-      <div className={`flex h-20 w-16 shrink-0 flex-col items-center justify-center ${t.frame}`} aria-label={x({ en: `${name}: no photo`, ko: `${name}: 사진 없음`, "zh-TW": `${name}：沒有照片`, es: `${name}: sin foto`, ja: `${name}：写真なし`, "pt-BR": `${name}: sem foto` })}>
+      <div className={`flex h-24 w-[4.8rem] shrink-0 flex-col items-center justify-center ${t.frame}`} aria-label={x({ en: `${name}: no photo`, ko: `${name}: 사진 없음`, "zh-TW": `${name}：沒有照片`, es: `${name}: sin foto`, ja: `${name}：写真なし`, "pt-BR": `${name}: sem foto` })}>
         <svg viewBox="0 0 40 40" className="h-10 w-10 opacity-40" aria-hidden>
           <circle cx="20" cy="14" r="7" fill="currentColor" />
           <path d="M6 38c0-8 6.3-13 14-13s14 5 14 13z" fill="currentColor" />
         </svg>
         <span className="mt-0.5 text-[9px] uppercase tracking-wider opacity-60">{x({ en: "no photo", ko: "사진 없음", "zh-TW": "沒有照片", es: "sin foto", ja: "写真なし", "pt-BR": "sem foto" })}</span>
+      </div>
+    );
+  }
+  const Drawing = PORTRAITS[photo];
+  if (Drawing) {
+    return (
+      <div
+        role="img"
+        className={`h-24 w-[4.8rem] shrink-0 overflow-hidden ${t.frame}`}
+        aria-label={x({ en: `Photo of ${name}`, ko: `${name}의 사진`, "zh-TW": `${name} 的照片`, es: `Foto de ${name}`, ja: `${name}の写真`, "pt-BR": `Foto de ${name}` })}
+      >
+        <Drawing />
       </div>
     );
   }
@@ -343,11 +365,16 @@ function ImageBlock({
 }) {
   const tr = useT();
   const [open, setOpen] = useState(false);
+  const Photo = PHOTOS[art];
   const isGlyph = [...art].length <= 6;
   return (
     <figure className="space-y-2">
       <div className={`relative flex aspect-[4/3] w-full max-w-md items-center justify-center overflow-hidden ${t.frame}`} role="img" aria-label={alt}>
-        {isGlyph ? (
+        {Photo ? (
+          <div className="absolute inset-0">
+            <Photo />
+          </div>
+        ) : isGlyph ? (
           <span className="text-7xl leading-none drop-shadow">{art}</span>
         ) : (
           <div className="flex flex-col items-center gap-2 opacity-70">
