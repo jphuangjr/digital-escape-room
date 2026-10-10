@@ -1,172 +1,422 @@
 import "server-only";
-import type { Locale } from "@/i18n/config";
+import { pick, type Locale } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
 
 export const MERIDIAN_HOST = "meridian-inst.net";
 
-const NAV: Block = {
+type X = ReturnType<typeof pick>;
+
+const nav = (x: X): Block => ({
   type: "nav",
   links: [
-    { text: "Home", href: MERIDIAN_HOST },
-    { text: "About", href: `${MERIDIAN_HOST}/about` },
-    { text: "Staff", href: `${MERIDIAN_HOST}/staff` },
-    { text: "Collections", href: `${MERIDIAN_HOST}/collections` },
-    { text: "Staff portal", href: "intranet.meridian-inst.net" },
+    { text: x({ en: "Home", ko: "홈" }), href: MERIDIAN_HOST },
+    { text: x({ en: "About", ko: "연구소 소개" }), href: `${MERIDIAN_HOST}/about` },
+    { text: x({ en: "Staff", ko: "직원" }), href: `${MERIDIAN_HOST}/staff` },
+    { text: x({ en: "Collections", ko: "소장품" }), href: `${MERIDIAN_HOST}/collections` },
+    { text: x({ en: "Staff portal", ko: "직원 포털" }), href: "intranet.meridian-inst.net" },
   ],
-};
+});
 
-const FOOTER: Block = {
+const footer = (x: X): Block => ({
   type: "footer",
-  text: "© since 1978. The Meridian Institute for Historical Continuity. All records verified. All records final.",
-};
+  text: x({
+    en: "© since 1978. The Meridian Institute for Historical Continuity. All records verified. All records final.",
+    ko: "© since 1978. 메리디언 역사연속성 연구소. 모든 기록은 검증되었습니다. 모든 기록은 확정되었습니다.",
+  }),
+});
 
-function home(): SitePage {
+function home(x: X): SitePage {
   const blocks: Block[] = [
-    NAV,
+    nav(x),
     { type: "compass" },
-    { type: "heading", level: 1, text: "The Meridian Institute" },
-    { type: "paragraph", text: "Keepers of the record. Guardians of continuity. Since our founding, the Meridian Institute has preserved the documents, photographs and testimonies that tell this city who it is." },
-    { type: "notice", tone: "info", text: "Notice: the Reading Room is closed until further notice while our archive migration is finalised. We thank patrons for their patience." },
-    { type: "heading", level: 2, text: "Our Mission" },
-    { type: "paragraph", text: "History is not what happened. History is what is kept. Every ledger, every deed, every faded photograph passes through our hands before it is entrusted to the public memory. We take that responsibility seriously. We take it personally." },
-    { type: "heading", level: 2, text: "From the Director" },
-    { type: "paragraph", text: "\"A city without a reliable past cannot have a stable future. The Institute exists so that no citizen ever has to wonder which version of events is true.\" — Director H. Calloway" },
-    { type: "heading", level: 2, text: "Recent Announcements" },
+    { type: "heading", level: 1, text: x({ en: "The Meridian Institute", ko: "메리디언 연구소" }) },
+    {
+      type: "paragraph",
+      text: x({
+        en: "Keepers of the record. Guardians of continuity. Since our founding, the Meridian Institute has preserved the documents, photographs and testimonies that tell this city who it is.",
+        ko: "기록의 수호자, 연속성의 파수꾼. 메리디언 연구소는 설립 이래 이 도시가 어떤 곳인지 말해 주는 문서와 사진, 증언을 보존해 왔습니다.",
+      }),
+    },
+    {
+      type: "notice",
+      tone: "info",
+      text: x({
+        en: "Notice: the Reading Room is closed until further notice while our archive migration is finalised. We thank patrons for their patience.",
+        ko: "안내: 아카이브 이전 작업이 마무리될 때까지 열람실을 별도 공지 시까지 휴관합니다. 이용자 여러분의 양해에 감사드립니다.",
+      }),
+    },
+    { type: "heading", level: 2, text: x({ en: "Our Mission", ko: "우리의 사명" }) },
+    {
+      type: "paragraph",
+      text: x({
+        en: "History is not what happened. History is what is kept. Every ledger, every deed, every faded photograph passes through our hands before it is entrusted to the public memory. We take that responsibility seriously. We take it personally.",
+        ko: "역사는 일어난 일이 아닙니다. 역사는 보관된 것입니다. 모든 장부와 증서, 빛바랜 사진 한 장까지도 공공의 기억에 맡겨지기 전에 반드시 저희 손을 거칩니다. 저희는 그 책임을 무겁게 여깁니다. 그리고 그 책임을 개인적인 일로 받아들입니다.",
+      }),
+    },
+    { type: "heading", level: 2, text: x({ en: "From the Director", ko: "소장 인사말" }) },
+    {
+      type: "paragraph",
+      text: x({
+        en: "\"A city without a reliable past cannot have a stable future. The Institute exists so that no citizen ever has to wonder which version of events is true.\" — Director H. Calloway",
+        ko: "\"믿을 수 있는 과거가 없는 도시에는 안정된 미래도 없습니다. 연구소는 어느 시민도 어떤 이야기가 진실인지 고민할 필요가 없도록 존재합니다.\" — 소장 H. 캘러웨이",
+      }),
+    },
+    { type: "heading", level: 2, text: x({ en: "Recent Announcements", ko: "최근 공지" }) },
     {
       type: "list",
       items: [
-        "Archivist Dr. Ada Voss is on extended leave. Enquiries regarding the Harbour Ledgers should be directed to the Office of the Director.",
-        "The 2019 digitisation programme is now complete. Physical originals have been retired.",
-        "Our compass emblem has been restored to the main stair. Please do not touch the needle.",
+        x({
+          en: "Archivist Dr. Ada Voss is on extended leave. Enquiries regarding the Harbour Ledgers should be directed to the Office of the Director.",
+          ko: "기록연구사 에이다 보스(Ada Voss) 박사는 장기 휴가 중입니다. 하버 장부 관련 문의는 소장실로 해 주십시오.",
+        }),
+        x({
+          en: "The 2019 digitisation programme is now complete. Physical originals have been retired.",
+          ko: "2019년 디지털화 사업이 완료되었습니다. 실물 원본은 폐기되었습니다.",
+        }),
+        x({
+          en: "Our compass emblem has been restored to the main stair. Please do not touch the needle.",
+          ko: "나침반 문장이 중앙 계단에 다시 설치되었습니다. 바늘을 만지지 마십시오.",
+        }),
       ],
     },
-    { type: "link", text: "Meet the people who keep the record →", href: `${MERIDIAN_HOST}/staff` },
-    FOOTER,
+    { type: "link", text: x({ en: "Meet the people who keep the record →", ko: "기록을 지키는 사람들 →" }), href: `${MERIDIAN_HOST}/staff` },
+    footer(x),
   ];
-  return page(MERIDIAN_HOST, "Meridian Institute — Keepers of the Record", "meridian", blocks, {
-    headComments: ["Meridian CMS v4.2 — template: civic-classic"],
-    meta: { description: "The Meridian Institute for Historical Continuity", generator: "Meridian CMS 4.2" },
-    inlineComments: {
-      1: ["emblem: seven notches, needle intentionally unrepaired per Director"],
-      4: ["archive migration complete: see /vault-2019"],
+  return page(MERIDIAN_HOST, x({ en: "Meridian Institute — Keepers of the Record", ko: "메리디언 연구소 — 기록의 수호자" }), "meridian", blocks, {
+    headComments: [x({ en: "Meridian CMS v4.2 — template: civic-classic", ko: "Meridian CMS v4.2 — 템플릿: civic-classic" })],
+    meta: {
+      description: x({ en: "The Meridian Institute for Historical Continuity", ko: "메리디언 역사연속성 연구소" }),
+      generator: "Meridian CMS 4.2",
     },
-    tailComments: ["analytics disabled per Records Directive 19"],
+    inlineComments: {
+      1: [x({ en: "emblem: seven notches, needle intentionally unrepaired per Director", ko: "문장: 눈금 일곱 개. 소장 지시로 바늘은 일부러 수리하지 않음" })],
+      4: [x({ en: "archive migration complete: see /vault-2019", ko: "아카이브 이전 완료: /vault-2019 참조" })],
+    },
+    tailComments: [x({ en: "analytics disabled per Records Directive 19", ko: "기록 지침 19호에 따라 분석 기능 비활성화" })],
     scripts: ["/static/meridian.min.js"],
   });
 }
 
-const STAFF: Extract<Block, { type: "staff" }>["people"] = [
-  { name: "Dr. Harriet Calloway", role: "Director", bio: "Has led the Institute for two decades. Believes the past is a public utility and should be maintained like one.", photo: "calloway.jpg" },
-  { name: "Dr. Ada Voss", role: "Senior Archivist (on leave)", bio: "Specialist in harbour-era ledgers and municipal deeds. Known for reading the footnotes nobody else reads.", photo: "voss.jpg" },
-  { name: "Wren Okafor", role: "Systems Archivist", bio: "Maintains the Institute's digital catalogue and access systems. Off the clock, she still holds the high score on Circuit Runner '94 — and will tell you so on runnerboard.net if you ask.", photo: null, link: { text: "runnerboard.net →", href: "runnerboard.net" } },
-  { name: "Thomas Kell", role: "Deputy Director, Continuity", bio: "Oversees reconciliation of conflicting records. \"Two truths are one too many.\"", photo: "kell.jpg" },
-  { name: "Priya Ramanathan", role: "Conservator", bio: "Restores paper, vellum and film. Can tell a forged watermark by the way it catches the light.", photo: "ramanathan.jpg" },
-  { name: "Lionel Ash", role: "Head of Security", bio: "Former harbour police. Responsible for the vaults, the keys and the people who ask about them.", photo: "ash.jpg" },
-  { name: "Margit Hollis", role: "Photographic Collections", bio: "Curates over two hundred thousand negatives. Prefers silver gelatin to pixels.", photo: "hollis.jpg" },
-  { name: "Samuel Oduya", role: "Oral Histories", bio: "Records the memories of long-time residents, then cross-checks them against the record. Usually the record wins.", photo: "oduya.jpg" },
-  { name: "Clémence Barre", role: "Public Programmes", bio: "Runs the Thursday lectures and the school visits. Has never once been asked a hard question by a child she couldn't answer.", photo: "barre.jpg" },
-  { name: "Ivo Strand", role: "Digitisation Lead", bio: "Led the 2019 migration of the physical archive to the new catalogue. Originals retired on schedule.", photo: "strand.jpg" },
-  { name: "Beatrice Lam", role: "Reading Room Supervisor", bio: "Has supervised the Reading Room for eleven years. The Reading Room is currently closed.", photo: "lam.jpg" },
-  { name: "Noel Ferrante", role: "Facilities", bio: "Keeps the lights on and the boilers quiet. Knows which doors stick and which ones are meant to.", photo: "ferrante.jpg" },
+type Person = Extract<Block, { type: "staff" }>["people"][number];
+
+const staffList = (x: X): Person[] => [
+  {
+    name: x({ en: "Dr. Harriet Calloway", ko: "해리엇 캘러웨이 박사 (Harriet Calloway)" }),
+    role: x({ en: "Director", ko: "소장" }),
+    bio: x({
+      en: "Has led the Institute for two decades. Believes the past is a public utility and should be maintained like one.",
+      ko: "20년째 연구소를 이끌고 있습니다. 과거는 공공 설비이며, 공공 설비처럼 관리되어야 한다고 믿습니다.",
+    }),
+    photo: "calloway.jpg",
+  },
+  {
+    name: x({ en: "Dr. Ada Voss", ko: "에이다 보스 박사 (Ada Voss)" }),
+    role: x({ en: "Senior Archivist (on leave)", ko: "수석 기록연구사 (휴가 중)" }),
+    bio: x({
+      en: "Specialist in harbour-era ledgers and municipal deeds. Known for reading the footnotes nobody else reads.",
+      ko: "항구 시대 장부와 시 소유 증서 전문가. 아무도 읽지 않는 각주까지 읽는 사람으로 유명합니다.",
+    }),
+    photo: "voss.jpg",
+  },
+  {
+    name: x({ en: "Wren Okafor", ko: "렌 오카포 (Wren Okafor)" }),
+    role: x({ en: "Systems Archivist", ko: "시스템 기록연구사" }),
+    bio: x({
+      en: "Maintains the Institute's digital catalogue and access systems. Off the clock, she still holds the high score on Circuit Runner '94 — and will tell you so on runnerboard.net if you ask.",
+      ko: "연구소의 디지털 목록과 접근 시스템을 관리합니다. 퇴근 후에는 지금도 Circuit Runner '94 최고 기록 보유자이며, 물어보면 runnerboard.net에서 직접 자랑할 겁니다.",
+    }),
+    photo: null,
+    link: { text: "runnerboard.net →", href: "runnerboard.net" },
+  },
+  {
+    name: x({ en: "Thomas Kell", ko: "토머스 켈 (Thomas Kell)" }),
+    role: x({ en: "Deputy Director, Continuity", ko: "연속성 담당 부국장" }),
+    bio: x({
+      en: "Oversees reconciliation of conflicting records. \"Two truths are one too many.\"",
+      ko: "상충하는 기록의 정리를 총괄합니다. \"진실이 둘이면 하나가 남는다.\"",
+    }),
+    photo: "kell.jpg",
+  },
+  {
+    name: x({ en: "Priya Ramanathan", ko: "프리야 라마나단 (Priya Ramanathan)" }),
+    role: x({ en: "Conservator", ko: "보존처리 전문가" }),
+    bio: x({
+      en: "Restores paper, vellum and film. Can tell a forged watermark by the way it catches the light.",
+      ko: "종이와 양피지, 필름을 복원합니다. 빛이 비치는 모양만 보고도 위조된 워터마크를 가려냅니다.",
+    }),
+    photo: "ramanathan.jpg",
+  },
+  {
+    name: x({ en: "Lionel Ash", ko: "라이어널 애시 (Lionel Ash)" }),
+    role: x({ en: "Head of Security", ko: "보안 책임자" }),
+    bio: x({
+      en: "Former harbour police. Responsible for the vaults, the keys and the people who ask about them.",
+      ko: "전직 항만 경찰. 금고와 열쇠, 그리고 그것들에 대해 묻는 사람들을 책임집니다.",
+    }),
+    photo: "ash.jpg",
+  },
+  {
+    name: x({ en: "Margit Hollis", ko: "마르기트 홀리스 (Margit Hollis)" }),
+    role: x({ en: "Photographic Collections", ko: "사진 소장품 담당" }),
+    bio: x({
+      en: "Curates over two hundred thousand negatives. Prefers silver gelatin to pixels.",
+      ko: "20만 장이 넘는 원판 필름을 관리합니다. 픽셀보다 젤라틴 실버 인화를 선호합니다.",
+    }),
+    photo: "hollis.jpg",
+  },
+  {
+    name: x({ en: "Samuel Oduya", ko: "새뮤얼 오두야 (Samuel Oduya)" }),
+    role: x({ en: "Oral Histories", ko: "구술사 담당" }),
+    bio: x({
+      en: "Records the memories of long-time residents, then cross-checks them against the record. Usually the record wins.",
+      ko: "오래된 주민들의 기억을 녹음한 뒤 기록과 대조합니다. 대개는 기록이 이깁니다.",
+    }),
+    photo: "oduya.jpg",
+  },
+  {
+    name: x({ en: "Clémence Barre", ko: "클레망스 바르 (Clémence Barre)" }),
+    role: x({ en: "Public Programmes", ko: "대중 프로그램 담당" }),
+    bio: x({
+      en: "Runs the Thursday lectures and the school visits. Has never once been asked a hard question by a child she couldn't answer.",
+      ko: "목요 강연과 학교 견학을 맡고 있습니다. 아이들이 던진 어려운 질문에 답하지 못한 적이 한 번도 없습니다.",
+    }),
+    photo: "barre.jpg",
+  },
+  {
+    name: x({ en: "Ivo Strand", ko: "이보 스트랜드 (Ivo Strand)" }),
+    role: x({ en: "Digitisation Lead", ko: "디지털화 책임자" }),
+    bio: x({
+      en: "Led the 2019 migration of the physical archive to the new catalogue. Originals retired on schedule.",
+      ko: "2019년 실물 아카이브의 신규 목록 이전을 지휘했습니다. 원본은 일정대로 폐기되었습니다.",
+    }),
+    photo: "strand.jpg",
+  },
+  {
+    name: x({ en: "Beatrice Lam", ko: "비어트리스 램 (Beatrice Lam)" }),
+    role: x({ en: "Reading Room Supervisor", ko: "열람실 관리자" }),
+    bio: x({
+      en: "Has supervised the Reading Room for eleven years. The Reading Room is currently closed.",
+      ko: "11년째 열람실을 관리하고 있습니다. 열람실은 현재 휴관 중입니다.",
+    }),
+    photo: "lam.jpg",
+  },
+  {
+    name: x({ en: "Noel Ferrante", ko: "노엘 페란테 (Noel Ferrante)" }),
+    role: x({ en: "Facilities", ko: "시설 관리" }),
+    bio: x({
+      en: "Keeps the lights on and the boilers quiet. Knows which doors stick and which ones are meant to.",
+      ko: "불을 밝히고 보일러를 조용히 돌봅니다. 어느 문이 뻑뻑한지, 어느 문이 일부러 뻑뻑하게 되어 있는지 압니다.",
+    }),
+    photo: "ferrante.jpg",
+  },
 ];
 
-function staff(): SitePage {
+function staff(x: X): SitePage {
   const blocks: Block[] = [
-    NAV,
+    nav(x),
     { type: "compass" },
-    { type: "heading", level: 1, text: "Staff Directory" },
-    { type: "paragraph", text: "The Institute's work is carried out by a small and dedicated team. Staff may be contacted through the Office of the Director." },
-    { type: "staff", people: STAFF },
-    FOOTER,
+    { type: "heading", level: 1, text: x({ en: "Staff Directory", ko: "직원 명부" }) },
+    {
+      type: "paragraph",
+      text: x({
+        en: "The Institute's work is carried out by a small and dedicated team. Staff may be contacted through the Office of the Director.",
+        ko: "연구소의 업무는 소수의 헌신적인 직원들이 수행합니다. 직원 연락은 소장실을 통해 주십시오.",
+      }),
+    },
+    { type: "staff", people: staffList(x) },
+    footer(x),
   ];
-  return page(`${MERIDIAN_HOST}/staff`, "Staff — Meridian Institute", "meridian", blocks, {
-    headComments: ["Meridian CMS v4.2 — template: directory"],
+  return page(`${MERIDIAN_HOST}/staff`, x({ en: "Staff — Meridian Institute", ko: "직원 — 메리디언 연구소" }), "meridian", blocks, {
+    headComments: [x({ en: "Meridian CMS v4.2 — template: directory", ko: "Meridian CMS v4.2 — 템플릿: directory" })],
     inlineComments: {
       4: [
-        "photo for W. Okafor removed pending review — do NOT re-upload",
-        "A. Voss status: on leave. Do not change to 'missing'. — T.K.",
+        x({
+          en: "photo for W. Okafor removed pending review — do NOT re-upload",
+          ko: "W. 오카포(Okafor) 사진은 검토 대기로 삭제됨 — 절대 다시 올리지 말 것",
+        }),
+        x({
+          en: "A. Voss status: on leave. Do not change to 'missing'. — T.K.",
+          ko: "A. 보스 상태: 휴가 중. '실종'으로 바꾸지 말 것. — T.K.",
+        }),
       ],
     },
   });
 }
 
-function about(): SitePage {
+function about(x: X): SitePage {
   const blocks: Block[] = [
-    NAV,
+    nav(x),
     { type: "compass" },
-    { type: "heading", level: 1, text: "About the Institute" },
-    { type: "paragraph", text: "Founded 1987." },
-    { type: "paragraph", text: "The Meridian Institute was established by civic charter to gather the scattered archives of the old harbour city under one roof. What began as three rooms above a shipping office is now the city's sole custodian of historical record." },
-    { type: "paragraph", text: "Our emblem, the compass, reminds us that a record is only as good as its bearing. Ours has seven notches — one for each of the founding collections. The needle was damaged in the move to our current building. We have chosen to leave it as it is." },
-    { type: "heading", level: 2, text: "Our Principles" },
+    { type: "heading", level: 1, text: x({ en: "About the Institute", ko: "연구소 소개" }) },
+    { type: "paragraph", text: x({ en: "Founded 1987.", ko: "1987년 설립." }) },
+    {
+      type: "paragraph",
+      text: x({
+        en: "The Meridian Institute was established by civic charter to gather the scattered archives of the old harbour city under one roof. What began as three rooms above a shipping office is now the city's sole custodian of historical record.",
+        ko: "메리디언 연구소는 옛 항구 도시 곳곳에 흩어진 기록물을 한 지붕 아래 모으기 위해 시 헌장에 따라 설립되었습니다. 해운 사무소 위층 방 세 칸에서 시작한 연구소는 이제 이 도시의 역사 기록을 관리하는 유일한 기관입니다.",
+      }),
+    },
+    {
+      type: "paragraph",
+      text: x({
+        en: "Our emblem, the compass, reminds us that a record is only as good as its bearing. Ours has seven notches — one for each of the founding collections. The needle was damaged in the move to our current building. We have chosen to leave it as it is.",
+        ko: "연구소의 문장인 나침반은 기록이 방향만큼만 믿을 수 있다는 사실을 일깨웁니다. 저희 나침반에는 창립 소장품 하나마다 하나씩, 모두 일곱 개의 눈금이 있습니다. 바늘은 현 건물로 이전하던 중 손상되었습니다. 저희는 그대로 두기로 했습니다.",
+      }),
+    },
+    { type: "heading", level: 2, text: x({ en: "Our Principles", ko: "운영 원칙" }) },
     {
       type: "list",
       items: [
-        "Continuity — the record must not contradict itself.",
-        "Custody — what we keep, we keep forever.",
-        "Discretion — not every truth is ready for every reader.",
+        x({ en: "Continuity — the record must not contradict itself.", ko: "연속성 — 기록은 스스로 모순되어서는 안 됩니다." }),
+        x({ en: "Custody — what we keep, we keep forever.", ko: "보관 — 한번 보관한 것은 영원히 보관합니다." }),
+        x({ en: "Discretion — not every truth is ready for every reader.", ko: "신중함 — 모든 진실이 모든 독자에게 준비된 것은 아닙니다." }),
       ],
     },
-    { type: "image", alt: "The first Institute offices, above a shipping agent", caption: "The original reading rooms, Harbour Street.", art: "archive-building", fileInfo: { filename: "harbour-street-offices.jpg", author: "Meridian Photographic Collections", camera: "Rolleiflex 2.8F", date: "1987-06-01", dimensions: "2400 × 1800", comment: "Opening week. Scanned 2019." } },
-    FOOTER,
+    {
+      type: "image",
+      alt: x({ en: "The first Institute offices, above a shipping agent", ko: "해운 대리점 위층에 있던 연구소의 첫 사무실" }),
+      caption: x({ en: "The original reading rooms, Harbour Street.", ko: "하버 스트리트(Harbour Street)의 초창기 열람실." }),
+      art: "archive-building",
+      fileInfo: {
+        filename: "harbour-street-offices.jpg",
+        author: x({ en: "Meridian Photographic Collections", ko: "메리디언 사진 소장품실" }),
+        camera: "Rolleiflex 2.8F",
+        date: "1987-06-01",
+        dimensions: "2400 × 1800",
+        comment: x({ en: "Opening week. Scanned 2019.", ko: "개관 주간. 2019년 스캔." }),
+      },
+    },
+    footer(x),
   ];
-  return page(`${MERIDIAN_HOST}/about`, "About — Meridian Institute", "meridian", blocks, {
-    headComments: ["Meridian CMS v4.2 — template: civic-classic"],
+  return page(`${MERIDIAN_HOST}/about`, x({ en: "About — Meridian Institute", ko: "소개 — 메리디언 연구소" }), "meridian", blocks, {
+    headComments: [x({ en: "Meridian CMS v4.2 — template: civic-classic", ko: "Meridian CMS v4.2 — 템플릿: civic-classic" })],
     inlineComments: {
-      3: ["copy approved by Office of the Director — footer to be reconciled at next continuity review"],
+      3: [
+        x({
+          en: "copy approved by Office of the Director — footer to be reconciled at next continuity review",
+          ko: "소장실 승인 문구 — 푸터는 다음 연속성 검토 때 정리할 것",
+        }),
+      ],
     },
   });
 }
 
-function vault(): SitePage {
+function vault(x: X): SitePage {
   const blocks: Block[] = [
-    NAV,
+    nav(x),
     { type: "compass" },
-    { type: "heading", level: 1, text: "Vault 2019 — Migration Staging" },
-    { type: "notice", tone: "warning", text: "Internal staging area. This page is not indexed. If you have reached it in error, please close your browser." },
-    { type: "paragraph", text: "Items below were held back from the public catalogue during the 2019 migration, pending continuity review." },
-    { type: "image", alt: "A woman at a reading-room table, face turned from the camera, a ledger open in front of her", caption: "Reading Room, late. Subject unidentified.", art: "photo-reading-room", fileInfo: { filename: "IMG_8841_draft.jpg", author: "A. Voss", camera: "Pentax K1000 (scanned)", date: "2019-01-02 23:41", dimensions: "3008 × 2000", comment: "draft uploaded to thedrift.blog" } },
-    { type: "image", alt: "A ledger page with a column of dates, one line scraped away", caption: "Harbour Ledger, vol. III, folio 12.", art: "photo-ledger", fileInfo: { filename: "ledger-iii-f12.tif", author: "Meridian Digitisation", camera: "Phase One IQ3", date: "2019-03-11", dimensions: "8000 × 6000", comment: "original retired" } },
-    { type: "list", items: ["Harbour Ledgers vol. I–IV — status: reconciled", "Founders' correspondence — status: sealed", "Staff photographs (1987–2019) — status: under review"] },
-    FOOTER,
+    { type: "heading", level: 1, text: x({ en: "Vault 2019 — Migration Staging", ko: "Vault 2019 — 이전 대기 구역" }) },
+    {
+      type: "notice",
+      tone: "warning",
+      text: x({
+        en: "Internal staging area. This page is not indexed. If you have reached it in error, please close your browser.",
+        ko: "내부 대기 구역입니다. 이 페이지는 검색되지 않습니다. 잘못 들어오셨다면 브라우저를 닫아 주십시오.",
+      }),
+    },
+    {
+      type: "paragraph",
+      text: x({
+        en: "Items below were held back from the public catalogue during the 2019 migration, pending continuity review.",
+        ko: "아래 자료는 2019년 이전 당시 연속성 검토를 이유로 공개 목록에서 보류된 것입니다.",
+      }),
+    },
+    {
+      type: "image",
+      alt: x({
+        en: "A woman at a reading-room table, face turned from the camera, a ledger open in front of her",
+        ko: "열람실 책상에 앉은 여자. 얼굴은 카메라 반대쪽을 향해 있고, 앞에는 장부가 펼쳐져 있다",
+      }),
+      caption: x({ en: "Reading Room, late. Subject unidentified.", ko: "늦은 밤의 열람실. 인물 미상." }),
+      art: "photo-reading-room",
+      fileInfo: {
+        filename: "IMG_8841_draft.jpg",
+        author: x({ en: "A. Voss", ko: "A. 보스 (A. Voss)" }),
+        camera: "Pentax K1000 (scanned)",
+        date: "2019-01-02 23:41",
+        dimensions: "3008 × 2000",
+        comment: x({ en: "draft uploaded to thedrift.blog", ko: "thedrift.blog에 초안 업로드함" }),
+      },
+    },
+    {
+      type: "image",
+      alt: x({ en: "A ledger page with a column of dates, one line scraped away", ko: "날짜가 세로로 적힌 장부 한 면. 한 줄이 긁혀 지워져 있다" }),
+      caption: x({ en: "Harbour Ledger, vol. III, folio 12.", ko: "하버 장부 제III권, 12장." }),
+      art: "photo-ledger",
+      fileInfo: {
+        filename: "ledger-iii-f12.tif",
+        author: x({ en: "Meridian Digitisation", ko: "메리디언 디지털화팀" }),
+        camera: "Phase One IQ3",
+        date: "2019-03-11",
+        dimensions: "8000 × 6000",
+        comment: x({ en: "original retired", ko: "원본 폐기됨" }),
+      },
+    },
+    {
+      type: "list",
+      items: [
+        x({ en: "Harbour Ledgers vol. I–IV — status: reconciled", ko: "하버 장부 제I–IV권 — 상태: 정리 완료" }),
+        x({ en: "Founders' correspondence — status: sealed", ko: "창립자 서신 — 상태: 봉인" }),
+        x({ en: "Staff photographs (1987–2019) — status: under review", ko: "직원 사진 (1987–2019) — 상태: 검토 중" }),
+      ],
+    },
+    footer(x),
   ];
-  return page(`${MERIDIAN_HOST}/vault-2019`, "Vault 2019 — Staging", "meridian", blocks, {
+  return page(`${MERIDIAN_HOST}/vault-2019`, x({ en: "Vault 2019 — Staging", ko: "Vault 2019 — 대기 구역" }), "meridian", blocks, {
     headComments: ["robots: noindex, nofollow"],
     meta: { robots: "noindex, nofollow" },
-    inlineComments: { 5: ["this one isn't ours. who uploaded it?  — I.S."] },
+    inlineComments: { 5: [x({ en: "this one isn't ours. who uploaded it?  — I.S.", ko: "이건 우리 게 아닌데. 누가 올렸지?  — I.S." })] },
   });
 }
 
-function collections(): SitePage {
+function collections(x: X): SitePage {
   const blocks: Block[] = [
-    NAV,
+    nav(x),
     { type: "compass" },
-    { type: "heading", level: 1, text: "Collections" },
-    { type: "paragraph", text: "The Institute's holdings are organised into seven founding collections. Following the 2019 migration, all collections are available exclusively through the digital catalogue." },
-    { type: "list", items: ["I. Harbour Ledgers", "II. Municipal Deeds", "III. Founders' Correspondence", "IV. Photographic Collections", "V. Oral Histories", "VI. Maps & Charts", "VII. [Collection withdrawn]"] },
-    { type: "notice", tone: "info", text: "Catalogue access is temporarily restricted to staff." },
-    FOOTER,
+    { type: "heading", level: 1, text: x({ en: "Collections", ko: "소장품" }) },
+    {
+      type: "paragraph",
+      text: x({
+        en: "The Institute's holdings are organised into seven founding collections. Following the 2019 migration, all collections are available exclusively through the digital catalogue.",
+        ko: "연구소의 소장 자료는 일곱 개의 창립 소장품으로 분류됩니다. 2019년 이전 이후 모든 소장품은 디지털 목록을 통해서만 열람할 수 있습니다.",
+      }),
+    },
+    {
+      type: "list",
+      items: [
+        x({ en: "I. Harbour Ledgers", ko: "I. 하버 장부" }),
+        x({ en: "II. Municipal Deeds", ko: "II. 시 소유 증서" }),
+        x({ en: "III. Founders' Correspondence", ko: "III. 창립자 서신" }),
+        x({ en: "IV. Photographic Collections", ko: "IV. 사진 소장품" }),
+        x({ en: "V. Oral Histories", ko: "V. 구술사" }),
+        x({ en: "VI. Maps & Charts", ko: "VI. 지도 및 해도" }),
+        x({ en: "VII. [Collection withdrawn]", ko: "VII. [소장품 회수됨]" }),
+      ],
+    },
+    { type: "notice", tone: "info", text: x({ en: "Catalogue access is temporarily restricted to staff.", ko: "목록 열람은 일시적으로 직원에게만 허용됩니다." }) },
+    footer(x),
   ];
-  return page(`${MERIDIAN_HOST}/collections`, "Collections — Meridian Institute", "meridian", blocks, {
-    inlineComments: { 4: ["VII withdrawn 2019 by order of the Deputy Director"] },
+  return page(`${MERIDIAN_HOST}/collections`, x({ en: "Collections — Meridian Institute", ko: "소장품 — 메리디언 연구소" }), "meridian", blocks, {
+    inlineComments: { 4: [x({ en: "VII withdrawn 2019 by order of the Deputy Director", ko: "VII은 2019년 부국장 지시로 회수됨" })] },
   });
 }
 
-export function resolveMeridian(path: string, _progress: RoomProgress, _loc: Locale): SitePage | null {
+export function resolveMeridian(path: string, _progress: RoomProgress, loc: Locale): SitePage | null {
+  const x = pick(loc);
   switch (path) {
     case "":
     case "/index.html":
     case "/home":
-      return home();
+      return home(x);
     case "/staff":
-      return staff();
+      return staff(x);
     case "/about":
-      return about();
+      return about(x);
     case "/vault-2019":
-      return vault();
+      return vault(x);
     case "/collections":
-      return collections();
+      return collections(x);
     default:
       return null;
   }
