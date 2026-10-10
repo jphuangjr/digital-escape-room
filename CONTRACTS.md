@@ -79,3 +79,9 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   Capacity is enforced with a conditional `UPDATE … WHERE useCount < maxUses`. If the user already owns the game,
   the code isn't consumed. Turned-off (`revokedAt`) or expired codes stop working; purchases already made stay.
 - Admin page `/admin`; APIs `GET|POST /api/admin/codes` (`kind: single|group`), `DELETE /api/admin/codes/[id]` (turn off).
+
+## Case log (room-wide discoveries)
+- `RoomProgress.discoveries` (JSON, capped at 200): a first visit to a site host (`kind: "site"`) and every puzzle
+  solve (`kind: "puzzle"`), with who and when. Written inside `mutateProgress` by `/api/resolve` and the attempt route.
+- Clients toast teammates' new discoveries (site toasts have an Open action), reload an open page whose content a
+  solve changes (`PUZZLE_AFFECTS_HOSTS`), and list everything in the Room sheet's Case log tab.

@@ -1,7 +1,7 @@
 import type { AttemptResponse, PuzzleId } from "@/lib/types";
 import { db } from "@/server/db";
 import { error, isResponse, json, readBody, requirePlayer } from "@/server/http";
-import { ATTEMPT_WINDOW_MS, isPuzzleId, parseProgress, rateLimitDecision, VOTE_DURATION_MS } from "@/server/logic";
+import { ATTEMPT_WINDOW_MS, isPuzzleId, parseProgress, rateLimitDecision, VOTE_DURATION_MS, withDiscovery } from "@/server/logic";
 import { mutateProgress } from "@/server/progress";
 import { publish } from "@/server/realtime";
 import { track } from "@/server/analytics";
@@ -64,7 +64,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   if (correct) {
     const res = await mutateProgress(room.id, ({ progress: cur, status }) => {
       if (cur.solved.includes(puzzleId)) return null;
-      const p = { ...cur, solved: [...cur.solved, puzzleId] };
+      const p = {
+        ...cur,
+        solved: [...cur.solved, puzzleId],
+        discoveries: withDiscovery(cur.discoveries, { kind: "puzzle", puzzleId, playerId: player.id, playerName: player.displayName }),
+      };
       if (puzzleId === "bonus-pin" && !p.badges.includes("compass")) p.badges = [...p.badges, "compass"];
       if (puzzleId === "tools-folder" && !p.unlockedApps.includes("decoder")) p.unlockedApps = [...p.unlockedApps, "decoder"];
       const data =

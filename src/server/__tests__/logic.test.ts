@@ -163,3 +163,30 @@ describe("decideVote", () => {
     });
   });
 });
+
+describe("case log", () => {
+  it("appends discoveries with unique ids and timestamps, oldest first", async () => {
+    const { withDiscovery } = await import("../logic");
+    const t = new Date("2026-10-10T12:00:00Z");
+    let log = withDiscovery([], { kind: "site", host: "thedrift.blog", playerId: "p1", playerName: "Lee" }, t);
+    log = withDiscovery(log, { kind: "puzzle", puzzleId: "shift-key", playerId: "p2", playerName: "Sam" }, t);
+    expect(log.map((d) => d.kind)).toEqual(["site", "puzzle"]);
+    expect(new Set(log.map((d) => d.id)).size).toBe(2);
+    expect(log[1]).toMatchObject({ puzzleId: "shift-key", playerName: "Sam", at: t.toISOString() });
+  });
+
+  it("caps the log and drops the oldest entries", async () => {
+    const { withDiscovery, MAX_DISCOVERIES } = await import("../logic");
+    let log: ReturnType<typeof withDiscovery> = [];
+    for (let i = 0; i < MAX_DISCOVERIES + 5; i++) {
+      log = withDiscovery(log, { kind: "site", host: `site${i}.net`, playerId: "p", playerName: "P" });
+    }
+    expect(log).toHaveLength(MAX_DISCOVERIES);
+    expect(log[0]).toMatchObject({ host: "site5.net" });
+  });
+
+  it("parses old progress without a case log", async () => {
+    const { parseProgress } = await import("../logic");
+    expect(parseProgress({ solved: ["shift-key"] }).discoveries).toEqual([]);
+  });
+});

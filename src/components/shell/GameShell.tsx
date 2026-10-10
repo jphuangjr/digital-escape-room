@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { describeDiscovery } from "@/lib/client/discoveries";
 import type { AppId, RoomState } from "@/lib/types";
 import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
 import { Browser } from "@/components/browser/Browser";
@@ -42,10 +43,11 @@ export function GameShell({
   );
 
   // ---------- toasts ----------
-  const toast = useCallback((msg: string, tone: "info" | "success" | "error" = "info") => {
+  const toast = useCallback<GameCtx["toast"]>((msg, tone = "info", action) => {
     const id = ++toastId.current;
-    setToasts((t) => [...t.slice(-3), { id, msg, tone }]);
-    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3800);
+    setToasts((t) => [...t.slice(-3), { id, msg, tone, action }]);
+    // Leave actionable toasts up a little longer so there's time to tap them.
+    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), action ? 7000 : 3800);
   }, []);
 
   // ---------- presence ----------
@@ -110,6 +112,23 @@ export function GameShell({
     if (now && !decoderWasUnlocked.current) toast("Decoder unlocked! Find it in your dock.", "success");
     decoderWasUnlocked.current = now;
   }, [unlocked, toast]);
+
+  // ---------- teammates' discoveries ----------
+  // Toast what other players find (the finder already knows). Seed with what's already in the log so
+  // joining or reloading mid-game doesn't replay the whole case.
+  const knownDiscoveries = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    const list = state.progress.discoveries;
+    if (knownDiscoveries.current) {
+      for (const d of list) {
+        if (knownDiscoveries.current.has(d.id) || d.playerId === state.me.id) continue;
+        const msg = `${d.playerName} ${describeDiscovery(d)}`;
+        if (d.kind === "site") toast(msg, "info", { label: "Open", onClick: () => openAddress(d.host) });
+        else toast(msg, "success");
+      }
+    }
+    knownDiscoveries.current = new Set(list.map((d) => d.id));
+  }, [state.progress.discoveries, state.me.id, toast, openAddress]);
 
   // ---------- email unread ----------
   useEffect(() => {
@@ -220,7 +239,11 @@ export function GameShell({
         />
 
         <RoomSheet ctx={ctx} open={roomOpen} onClose={() => setRoomOpen(false)} />
-        <Toasts items={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} />
+        <Toasts
+          items={toasts}
+          placement={roomOpen ? "top" : "bottom"}
+          onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))}
+        />
         <VoteOverlay ctx={ctx} />
       </div>
     </GameContext.Provider>

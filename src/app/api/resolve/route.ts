@@ -1,6 +1,6 @@
 import type { ResolveResponse } from "@/lib/types";
 import { error, isResponse, json, readBody, requirePlayer } from "@/server/http";
-import { canonicalAddress, hostOf, parseProgress } from "@/server/logic";
+import { canonicalAddress, hostOf, parseProgress, withDiscovery } from "@/server/logic";
 import { mutateProgress } from "@/server/progress";
 import { publish } from "@/server/realtime";
 import { track } from "@/server/analytics";
@@ -23,10 +23,14 @@ export async function POST(req: Request) {
   const res = await mutateProgress(room.id, ({ progress }) => {
     const visited = new Set(progress.visitedSites);
     const before = visited.size;
+    const newHost = !visited.has(host);
     visited.add(host);
     visited.add(page.address);
     if (visited.size === before) return null;
-    return { progress: { ...progress, visitedSites: [...visited] } };
+    const discoveries = newHost
+      ? withDiscovery(progress.discoveries, { kind: "site", host, playerId: player.id, playerName: player.displayName })
+      : progress.discoveries;
+    return { progress: { ...progress, visitedSites: [...visited], discoveries } };
   });
 
   track(room.id, player.id, "site.visit", { address: page.address, host });

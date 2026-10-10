@@ -27,6 +27,7 @@ const fresh = (solved: RoomProgress["solved"] = []): RoomProgress => ({
   visitedSites: [],
   solved,
   badges: [],
+  discoveries: [],
 });
 
 const listingBodies = (blocks: Block[]) =>

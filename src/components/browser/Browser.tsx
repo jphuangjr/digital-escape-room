@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ResolveResponse, SitePage } from "@/lib/types";
+import { PUZZLE_AFFECTS_HOSTS } from "@/lib/client/discoveries";
+import type { PuzzleId, ResolveResponse, SitePage } from "@/lib/types";
 import { normalizeAddress, type GameCtx } from "@/lib/client/game";
 import {
   BackIcon,
@@ -147,6 +148,19 @@ export function Browser({
   const reload = () => {
     if (current) void load(current, "stay", true);
   };
+
+  // A solve (by anyone in the room) can change what a site shows: reload the open page if it's affected.
+  const solvedKey = ctx.state.progress.solved.join(",");
+  const lastSolved = useRef<string[] | null>(null);
+  useEffect(() => {
+    const solved = solvedKey ? solvedKey.split(",") : [];
+    const prev = lastSolved.current;
+    lastSolved.current = solved;
+    if (!prev || !current) return;
+    const added = solved.filter((p) => !prev.includes(p)) as PuzzleId[];
+    const host = current.split("/")[0];
+    if (added.some((p) => PUZZLE_AFFECTS_HOSTS[p]?.includes(host))) void load(current, "stay", true);
+  }, [solvedKey, current, load]);
 
   const pageAddr = view.kind === "page" ? view.page.address : null;
   const isBookmarked = !!pageAddr && bookmarks.some((b) => b.address === pageAddr);
