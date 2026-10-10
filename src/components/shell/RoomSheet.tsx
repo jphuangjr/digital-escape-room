@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { QrCode } from "@/components/site/QrCode";
 import type { GameCtx } from "@/lib/client/game";
 import { AttemptLog } from "@/components/apps/AttemptLog";
+import { CaseLog } from "@/components/apps/CaseLog";
 import { HintsPanel } from "@/components/apps/HintsPanel";
 import { CloseIcon, CrownIcon, ShareIcon } from "./icons";
 
@@ -21,7 +22,7 @@ function describeView(view: string | null): string {
   return view;
 }
 
-type Tab = "people" | "attempts" | "hints";
+type Tab = "people" | "log" | "attempts" | "hints";
 
 export function RoomSheet({ ctx, open, onClose }: { ctx: GameCtx; open: boolean; onClose: () => void }) {
   const [tab, setTab] = useState<Tab>("people");
@@ -88,6 +89,7 @@ export function RoomSheet({ ctx, open, onClose }: { ctx: GameCtx; open: boolean;
           {(
             [
               ["people", `People (${state.players.filter((p) => p.online).length})`],
+              ["log", "Case log"],
               ["attempts", "Attempts"],
               ["hints", "Hints"],
             ] as [Tab, string][]
@@ -153,6 +155,7 @@ export function RoomSheet({ ctx, open, onClose }: { ctx: GameCtx; open: boolean;
               <InviteQr code={ctx.code} />
             </>
           )}
+          {tab === "log" && <CaseLog ctx={ctx} />}
           {tab === "attempts" && <AttemptLog ctx={ctx} />}
           {tab === "hints" && <HintsPanel ctx={ctx} />}
         </div>

@@ -1,6 +1,6 @@
 import "server-only";
 // Pure helpers (no DB, no Next). Unit-tested in src/server/__tests__.
-import type { AppId, Ending, FragmentTag, HintPuzzleId, PuzzleId, RoomProgress } from "@/lib/types";
+import type { AppId, Ending, FragmentTag, HintPuzzleId, PuzzleId, RoomProgress, Discovery } from "@/lib/types";
 
 // ---------- Room codes ----------
 
@@ -66,7 +66,7 @@ export const PUZZLE_IDS: PuzzleId[] = ["tools-folder", "shift-key", "intranet-lo
 export const FRAGMENT_TAGS: FragmentTag[] = ["name", "year", "id", "cipher", "address"];
 
 export function initialProgress(): RoomProgress {
-  return { unlockedApps: [...INITIAL_APPS], visitedSites: [], solved: [], badges: [] };
+  return { unlockedApps: [...INITIAL_APPS], visitedSites: [], solved: [], badges: [], discoveries: [] };
 }
 
 export function parseProgress(raw: unknown): RoomProgress {
@@ -77,8 +77,25 @@ export function parseProgress(raw: unknown): RoomProgress {
     visitedSites: arr<string>(p.visitedSites, []),
     solved: arr<PuzzleId>(p.solved, []),
     badges: arr<string>(p.badges, []),
+    discoveries: arr<Discovery>(p.discoveries, []),
   };
 }
+
+/** Keep the case log bounded; the oldest entries drop off first. */
+export const MAX_DISCOVERIES = 200;
+
+/** Append a discovery to the case log (returns a new array). */
+export function withDiscovery(
+  list: Discovery[],
+  d: DistributiveOmit<Discovery, "id" | "at">,
+  now = new Date(),
+): Discovery[] {
+  const id = `${now.getTime().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  const entry = { ...d, id, at: now.toISOString() } as Discovery;
+  return [...list, entry].slice(-MAX_DISCOVERIES);
+}
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
 export function isPuzzleId(v: unknown): v is PuzzleId {
   return typeof v === "string" && (PUZZLE_IDS as string[]).includes(v);

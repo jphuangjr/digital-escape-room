@@ -31,7 +31,14 @@ export interface RoomProgress {
   solved: PuzzleId[];
   /** Puzzle-revealed data the client may now show, e.g. decoded plaintext. */
   badges: string[]; // e.g. "compass"
+  /** Room-wide case log, oldest first (capped). Drives teammates' toasts and the Case log tab. */
+  discoveries: Discovery[];
 }
+
+/** Something a player found for the whole room: a new site, or a solved puzzle. */
+export type Discovery =
+  | { id: string; kind: "site"; host: string; playerId: string; playerName: string; at: string }
+  | { id: string; kind: "puzzle"; puzzleId: PuzzleId; playerId: string; playerName: string; at: string };
 
 export interface PlayerPublic {
   id: string;

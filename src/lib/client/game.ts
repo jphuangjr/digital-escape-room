@@ -9,6 +9,12 @@ export interface ApiResult<T = unknown> {
   data: T;
 }
 
+/** Optional tap action on a toast, e.g. "Open" a site a teammate found. */
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 export interface GameCtx {
   code: string;
   state: RoomState;
@@ -20,7 +26,7 @@ export interface GameCtx {
   openAddress: (address: string) => void;
   /** presence, e.g. "app:notes" or "browser:thedrift.blog" */
   setView: (view: string) => void;
-  toast: (msg: string, tone?: "info" | "success" | "error") => void;
+  toast: (msg: string, tone?: "info" | "success" | "error", action?: ToastAction) => void;
 }
 
 export const GameContext = createContext<GameCtx | null>(null);
