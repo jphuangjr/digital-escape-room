@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title,
   description,
   openGraph: { title, description },
-  twitter: { title, description },
+  twitter: { card: "summary_large_image", title, description },
   robots: { index: false, follow: false },
 };
 

@@ -5,7 +5,7 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
   const code = decodeURIComponent((await params).code).toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 12);
   const title = `Join room ${code} — The Vanishing of Dr. Ada Voss`;
   const description = "You're invited to investigate. Tap to join; sign in with Google or just enter a name.";
-  return { title, description, openGraph: { title, description }, twitter: { title, description } };
+  return { title, description, openGraph: { title, description }, twitter: { card: "summary_large_image", title, description } };
 }
 
 export const viewport: Viewport = {
