@@ -147,7 +147,7 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
       </div>
       <div className="flex flex-wrap justify-center gap-2">
         <button type="button" onClick={doPreview} disabled={previewing} className={`min-h-11 px-4 ${t.buttonGhost} disabled:opacity-60`}>
-          {previewing ? x({ en: "Decoding…", ko: "해독 중…" }) : x({ en: "Preview", ko: "미리 보기" })}
+          {previewing ? x({ en: "Decoding…", ko: "해독 중…", "zh-TW": "解碼中…" }) : x({ en: "Preview", ko: "미리 보기", "zh-TW": "預覽" })}
         </button>
         <button
           type="button"
@@ -155,7 +155,7 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
           disabled={a.busy || a.retryLeft > 0}
           className={`min-h-11 px-5 font-semibold ${t.button} disabled:opacity-60`}
         >
-          {a.busy ? x({ en: "Checking…", ko: "확인 중…" }) : x({ en: "Apply key", ko: "키 적용" })}
+          {a.busy ? x({ en: "Checking…", ko: "확인 중…", "zh-TW": "確認中…" }) : x({ en: "Apply key", ko: "키 적용", "zh-TW": "套用金鑰" })}
         </button>
       </div>
       <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
@@ -164,7 +164,7 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
           <div className="flex items-center justify-between">
             <p className={`text-xs uppercase tracking-wider ${t.muted}`}>{tr("browser.form.previewLabel", { n })}</p>
             <button type="button" onClick={() => setPreview(null)} className={`min-h-11 px-2 text-sm ${t.link}`}>
-              {x({ en: "Hide", ko: "숨기기" })}
+              {x({ en: "Hide", ko: "숨기기", "zh-TW": "隱藏" })}
             </button>
           </div>
           <BlockList blocks={preview} env={env} />
@@ -190,9 +190,9 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
       }}
     >
       <p className="font-semibold">{prompt}</p>
-      {a.solved && <p className="text-sm font-semibold text-emerald-600">{x({ en: "✓ Session active.", ko: "✓ 세션 활성화됨." })}</p>}
+      {a.solved && <p className="text-sm font-semibold text-emerald-600">{x({ en: "✓ Session active.", ko: "✓ 세션 활성화됨.", "zh-TW": "✓ 工作階段已啟用。" })}</p>}
       <label className="block text-sm">
-        {x({ en: "Username", ko: "사용자 이름" })}
+        {x({ en: "Username", ko: "사용자 이름", "zh-TW": "使用者名稱" })}
         <input
           {...inputProps}
           value={user}
@@ -202,7 +202,7 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         />
       </label>
       <label className="block text-sm">
-        {x({ en: "Vault code", ko: "볼트 코드" })}
+        {x({ en: "Vault code", ko: "볼트 코드", "zh-TW": "金庫代碼" })}
         <div className="mt-1 flex gap-2">
           <input
             {...inputProps}
@@ -218,7 +218,7 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
             aria-pressed={show}
             className={`min-h-11 px-3 text-sm ${t.buttonGhost}`}
           >
-            {show ? x({ en: "Hide", ko: "숨기기" }) : x({ en: "Show", ko: "보기" })}
+            {show ? x({ en: "Hide", ko: "숨기기", "zh-TW": "隱藏" }) : x({ en: "Show", ko: "보기", "zh-TW": "顯示" })}
           </button>
         </div>
       </label>
@@ -227,7 +227,7 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         disabled={a.busy || a.retryLeft > 0 || !user.trim() || !pass}
         className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
       >
-        {a.busy ? x({ en: "Signing in…", ko: "로그인 중…" }) : x({ en: "Sign in", ko: "로그인" })}
+        {a.busy ? x({ en: "Signing in…", ko: "로그인 중…", "zh-TW": "登入中…" }) : x({ en: "Sign in", ko: "로그인", "zh-TW": "登入" })}
       </button>
       <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
     </form>
@@ -268,7 +268,7 @@ function FinalPhraseForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         disabled={a.busy || a.retryLeft > 0 || !v.trim()}
         className={`min-h-12 w-full font-bold uppercase tracking-widest ${t.button} disabled:opacity-60`}
       >
-        {a.busy ? x({ en: "Transmitting…", ko: "전송 중…" }) : x({ en: "Transmit", ko: "전송" })}
+        {a.busy ? x({ en: "Transmitting…", ko: "전송 중…", "zh-TW": "傳送中…" }) : x({ en: "Transmit", ko: "전송", "zh-TW": "傳送" })}
       </button>
       <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
     </form>
@@ -290,7 +290,7 @@ function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
         if (v.trim()) void a.submit(v);
       }}
     >
-      <p className={`text-xs font-semibold uppercase tracking-wider ${t.muted}`}>{x({ en: "Decode this word", ko: "이 단어를 해독하세요" })}</p>
+      <p className={`text-xs font-semibold uppercase tracking-wider ${t.muted}`}>{x({ en: "Decode this word", ko: "이 단어를 해독하세요", "zh-TW": "解碼這個單字" })}</p>
       <p className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-lg font-bold tracking-wider">
         {code.split(" ").map((g, i) => (
           <span key={i}>{g}</span>
@@ -301,7 +301,7 @@ function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
       ) : (
         <>
           <label className="block text-sm">
-            {x({ en: "Your answer", ko: "답" })}
+            {x({ en: "Your answer", ko: "답", "zh-TW": "你的答案" })}
             <input
               {...inputProps}
               value={v}
@@ -315,7 +315,7 @@ function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
             disabled={a.busy || a.retryLeft > 0 || !v.trim()}
             className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
           >
-            {a.busy ? x({ en: "Checking…", ko: "확인 중…" }) : x({ en: "Check answer", ko: "정답 확인" })}
+            {a.busy ? x({ en: "Checking…", ko: "확인 중…", "zh-TW": "確認中…" }) : x({ en: "Check answer", ko: "정답 확인", "zh-TW": "檢查答案" })}
           </button>
         </>
       )}
@@ -352,7 +352,7 @@ function AdminLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
           className={`h-11 min-w-0 flex-1 px-3 text-base ${t.input}`}
         />
         <button type="button" onClick={() => setShow((v) => !v)} aria-pressed={show} className={`min-h-11 px-3 text-sm ${t.buttonGhost}`}>
-          {show ? x({ en: "Hide", ko: "숨기기" }) : x({ en: "Show", ko: "보기" })}
+          {show ? x({ en: "Hide", ko: "숨기기", "zh-TW": "隱藏" }) : x({ en: "Show", ko: "보기", "zh-TW": "顯示" })}
         </button>
       </div>
       <button
@@ -360,7 +360,7 @@ function AdminLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         disabled={a.busy || a.retryLeft > 0 || !pass.trim()}
         className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
       >
-        {a.busy ? x({ en: "Checking…", ko: "확인 중…" }) : x({ en: "Unlock console", ko: "콘솔 잠금 해제" })}
+        {a.busy ? x({ en: "Checking…", ko: "확인 중…", "zh-TW": "確認中…" }) : x({ en: "Unlock console", ko: "콘솔 잠금 해제", "zh-TW": "解鎖主控台" })}
       </button>
       <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
     </form>

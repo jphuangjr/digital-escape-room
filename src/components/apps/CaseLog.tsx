@@ -1,14 +1,15 @@
 "use client";
 
-import { useT } from "@/i18n/client";
+import { useLocale, useT } from "@/i18n/client";
 import type { GameCtx } from "@/lib/client/game";
-import { describeDiscovery, discoveryWho } from "@/lib/client/discoveries";
+import { describeDiscovery, discoverySeparator, discoveryWho } from "@/lib/client/discoveries";
 import { ColorDot, useNow, useRelativeTime } from "./shared";
 
 /** Everything the room has found, newest first: new sites (tap to open) and solved puzzles. */
 export function CaseLog({ ctx }: { ctx: GameCtx }) {
   const now = useNow(30_000);
   const t = useT();
+  const locale = useLocale();
   const relativeTime = useRelativeTime();
   const { discoveries } = ctx.state.progress;
   const colors = new Map(ctx.state.players.map((p) => [p.id, p.color]));
@@ -27,7 +28,8 @@ export function CaseLog({ ctx }: { ctx: GameCtx }) {
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-sm text-stone-200">
-                <span className="font-semibold">{discoveryWho(d, t, d.playerId === ctx.state.me.id)}</span>{" "}
+                <span className="font-semibold">{discoveryWho(d, t, d.playerId === ctx.state.me.id)}</span>
+                {discoverySeparator(locale)}
                 {describeDiscovery(d, t)}
               </span>
               <span className="block text-xs text-stone-500">{relativeTime(d.at, now)}</span>

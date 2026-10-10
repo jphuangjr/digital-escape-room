@@ -7,7 +7,7 @@ import type { PuzzleId } from "@/lib/types";
  */
 export const FRAGMENTS = { name: "wren", year: "1987", id: "0412" } as const;
 
-const SHIFT_ANSWERS = new Set(["7", "seven", "rot7", "shift7", "+7", "칠", "일곱"]);
+const SHIFT_ANSWERS = new Set(["7", "seven", "rot7", "shift7", "+7", "칠", "일곱", "七"]);
 const INTRANET_USER = "wren.okafor";
 const INTRANET_PASS = `${FRAGMENTS.year}${FRAGMENTS.id}`;
 const FINAL_PHRASE = `${FRAGMENTS.name}-${FRAGMENTS.year}-${FRAGMENTS.id}`;
@@ -21,8 +21,8 @@ const TOOLS_ANSWER = "mara";
  * always shows those in English.
  */
 const NAME_ALIASES: Record<string, string[]> = {
-  wren: ["렌"],
-  mara: ["마라"],
+  wren: ["렌", "芮恩"],
+  mara: ["마라", "瑪拉"],
 };
 const nameMatches = (input: string, name: string) =>
   normalize(input).replace(/[^a-z]/g, "") === name ||

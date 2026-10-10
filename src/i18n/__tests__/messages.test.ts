@@ -38,6 +38,9 @@ describe("pickLocale", () => {
     expect(pickLocale("en-US,en;q=0.9,ko;q=0.8")).toBe("en");
     expect(pickLocale("fr-FR,ko;q=0.5")).toBe("ko");
     expect(pickLocale("fr-FR")).toBe("en");
+    expect(pickLocale("zh-TW,zh;q=0.9")).toBe("zh-TW");
+    expect(pickLocale("zh-Hant-HK")).toBe("zh-TW");
+    expect(pickLocale("zh-CN,en;q=0.5")).toBe("zh-TW");
     expect(pickLocale(null)).toBe("en");
   });
 });
