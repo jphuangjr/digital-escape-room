@@ -112,6 +112,16 @@ function blockToHtml(b: Block, d: number): string[] {
         `${i}  <button type="submit">Submit</button>`,
         `${i}</form>`,
       ];
+    case "table":
+      return [
+        `${i}<table>`,
+        ...(b.caption ? [`${i}  <caption>${esc(b.caption)}</caption>`] : []),
+        `${i}  <tr>${b.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr>`,
+        ...b.rows.map((r) => `${i}  <tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`),
+        `${i}</table>`,
+      ];
+    case "bits":
+      return [`${i}<div class="bit-widget" data-bits="5"><!-- interactive: tap a switch to flip it --></div>`];
     case "notice":
       return [`${i}<div class="notice notice-${b.tone}">${esc(b.text)}</div>`];
     case "footer":

@@ -14,6 +14,20 @@ const FINAL_PHRASE = `${FRAGMENTS.name}-${FRAGMENTS.year}-${FRAGMENTS.id}`;
 const BONUS_PIN = "0314";
 /** "Who was Dad's weather?" (notes_on_mara.txt inside Ada's Personal). */
 const TOOLS_ANSWER = "mara";
+/** harbourcc.edu/cs110/binary practice quiz word, shown there in 5-bit binary. */
+export const BINARY_PRACTICE_WORD = "hello";
+/** Vault admin console password, shown in binary on Wren's dashboard notice. */
+export const ADMIN_PASSWORD = "lantern";
+
+/** "lantern" -> "01100 00001 01110 10100 00101 10010 01110" (5 bits per letter, A = 1). */
+export function toBinary5(word: string): string {
+  return word
+    .toLowerCase()
+    .replace(/[^a-z]/g, "")
+    .split("")
+    .map((c) => (c.charCodeAt(0) - 96).toString(2).padStart(5, "0"))
+    .join(" ");
+}
 
 /** Trim, lowercase, collapse internal whitespace to a single space. */
 export function normalize(input: string): string {
@@ -50,6 +64,10 @@ export function checkAnswer(puzzleId: PuzzleId, input: string): boolean {
       return input.replace(/\D/g, "") === BONUS_PIN;
     case "tools-folder":
       return normalize(input).replace(/[^a-z]/g, "") === TOOLS_ANSWER;
+    case "binary-lesson":
+      return normalize(input).replace(/[^a-z]/g, "") === BINARY_PRACTICE_WORD;
+    case "admin-console":
+      return normalize(input).replace(/[^a-z]/g, "") === ADMIN_PASSWORD;
     default:
       return false;
   }

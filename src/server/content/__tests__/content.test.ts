@@ -112,6 +112,12 @@ describe("answers", () => {
     }
     expect(checkAnswer("final-phrase", "wren-1978-0412")).toBe(false);
   });
+  it("binary-lesson and admin-console", () => {
+    expect(checkAnswer("binary-lesson", " Hello ")).toBe(true);
+    expect(checkAnswer("binary-lesson", "help")).toBe(false);
+    expect(checkAnswer("admin-console", "LANTERN")).toBe(true);
+    expect(checkAnswer("admin-console", "lanterns")).toBe(false);
+  });
   it("bonus-pin", () => {
     expect(checkAnswer("bonus-pin", "0314")).toBe(true);
     expect(checkAnswer("bonus-pin", "03/14")).toBe(true);
@@ -148,10 +154,11 @@ describe("sites & gating", () => {
     expect(img && img.type === "image" && img.fileInfo.comment).toBe("draft uploaded to thedrift.blog");
   });
 
-  it("switch unreachable before intranet-login", () => {
+  it("switch unreachable before the admin console", () => {
     expect(resolveSite("switch.ada-voss.net", fresh())).toBeNull();
     expect(resolveSite("switch.ada-voss.net", fresh(["shift-key"]))).toBeNull();
-    expect(resolveSite("switch.ada-voss.net", fresh(["intranet-login"]))).not.toBeNull();
+    expect(resolveSite("switch.ada-voss.net", fresh(["intranet-login"]))).toBeNull();
+    expect(resolveSite("switch.ada-voss.net", fresh(["intranet-login", "admin-console"]))).not.toBeNull();
   });
 
   it("intranet gated", () => {
@@ -160,8 +167,33 @@ describe("sites & gating", () => {
     expect(login.blocks.some((b) => b.type === "diff")).toBe(false);
     const dash = resolveSite("intranet.meridian-inst.net", fresh(["intranet-login"]))!;
     expect(dash.blocks.some((b) => b.type === "diff")).toBe(true);
-    const memo = dash.blocks.find((b) => b.type === "memo");
+    expect(JSON.stringify(dash.blocks)).not.toContain("switch.ada-voss.net");
+    expect(JSON.stringify(dash.blocks)).toContain("01100 00001 01110 10100 00101 10010 01110");
+    expect(dash.source).toContain("harbourcc.edu/cs110");
+    const memos = resolveSite("intranet.meridian-inst.net/memos", fresh(["intranet-login"]))!;
+    expect(JSON.stringify(memos.blocks)).not.toContain("switch.ada-voss.net");
+  });
+
+  it("admin console gated by its own password", () => {
+    expect(resolveSite("intranet.meridian-inst.net/admin", fresh())!.blocks.some((b) => b.type === "form" && b.form === "intranet-login")).toBe(true);
+    const gate = resolveSite("intranet.meridian-inst.net/admin", fresh(["intranet-login"]))!;
+    expect(gate.blocks.some((b) => b.type === "form" && b.form === "admin-login")).toBe(true);
+    expect(JSON.stringify(gate)).not.toContain("switch.ada-voss.net");
+    const open = resolveSite("intranet.meridian-inst.net/admin", fresh(["intranet-login", "admin-console"]))!;
+    const memo = open.blocks.find((b) => b.type === "memo");
     expect(memo && memo.type === "memo" && memo.parts.some((p) => "redacted" in p && p.redacted === "switch.ada-voss.net")).toBe(true);
+  });
+
+  it("binary lesson: sheet, quiz, and never shows the admin password", () => {
+    const lesson = resolveSite("harbourcc.edu/cs110/binary", fresh())!;
+    const sheet = lesson.blocks.find((b) => b.type === "table");
+    expect(sheet && sheet.type === "table" && sheet.rows.length).toBe(26);
+    expect(sheet && sheet.type === "table" && sheet.rows[7]).toEqual(["H", "8", "01000"]);
+    const quiz = lesson.blocks.find((b) => b.type === "form" && b.form === "binary-quiz");
+    expect(quiz && quiz.type === "form" && quiz.prompt).toBe("01000 00101 01100 01100 01111");
+    for (const p of ["", "/cs110", "/cs110/binary"]) {
+      expect(JSON.stringify(resolveSite(`harbourcc.edu${p}`, fresh())).toLowerCase()).not.toContain("lantern");
+    }
   });
 
   it("lostpaws ciphertext until shift-key solved", () => {
@@ -176,7 +208,7 @@ describe("sites & gating", () => {
   });
 
   it("every site resolves with source", () => {
-    for (const a of ["thedrift.blog", "runnerboard.net", "trapdoor.net", "lostpaws.net", "intranet.meridian-inst.net"]) {
+    for (const a of ["thedrift.blog", "runnerboard.net", "trapdoor.net", "lostpaws.net", "intranet.meridian-inst.net", "harbourcc.edu"]) {
       const p = resolveSite(a, fresh());
       expect(p).not.toBeNull();
       expect(p!.source.startsWith("<!DOCTYPE html>")).toBe(true);

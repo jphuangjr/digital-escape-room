@@ -1,6 +1,7 @@
 import "server-only";
 import type { RoomProgress, SitePage } from "@/lib/types";
 import { DRIFT_HOST, resolveDrift } from "./drift";
+import { HARBOURCC_HOST, resolveHarbourcc } from "./harbourcc";
 import { INTRANET_HOST, resolveIntranet } from "./intranet";
 import { LOSTPAWS_HOST, resolveLostpaws } from "./lostpaws";
 import { MERIDIAN_HOST, resolveMeridian } from "./meridian";
@@ -18,6 +19,7 @@ const SITES: Record<string, Resolver> = {
   [LOSTPAWS_HOST]: resolveLostpaws,
   [INTRANET_HOST]: resolveIntranet,
   [SWITCH_HOST]: resolveSwitch,
+  [HARBOURCC_HOST]: resolveHarbourcc,
 };
 
 export const SITE_HOSTS = Object.keys(SITES);

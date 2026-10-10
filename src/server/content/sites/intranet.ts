@@ -1,6 +1,7 @@
 import "server-only";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
+import { ADMIN_PASSWORD, toBinary5 } from "../answers";
 
 export const INTRANET_HOST = "intranet.meridian-inst.net";
 
@@ -32,6 +33,7 @@ const NAV: Block = {
     { text: "Dashboard", href: INTRANET_HOST },
     { text: "Record Changes", href: `${INTRANET_HOST}/records` },
     { text: "Memos", href: `${INTRANET_HOST}/memos` },
+    { text: "Admin", href: `${INTRANET_HOST}/admin` },
   ],
 };
 
@@ -55,6 +57,53 @@ const MEMO: Block = {
   ],
 };
 
+const SYSTEMS_NOTICE: Block = {
+  type: "notice",
+  tone: "info",
+  text: `SYSTEMS NOTICE (W. Okafor)\nAdmin console password rotated after Tuesday's badge incident. Flagged memos have moved there.\nNew password, written the way I teach it:\n${toBinary5(ADMIN_PASSWORD)}\nIf you skipped my class, that's on you.`,
+};
+
+function adminLogin(): SitePage {
+  const blocks: Block[] = [
+    NAV,
+    { type: "heading", level: 1, text: "Systems Admin Console" },
+    { type: "notice", tone: "warning", text: "Restricted. Flagged memos and badge logs. Admin password required, even for signed-in staff." },
+    { type: "form", form: "admin-login", prompt: "Admin password" },
+    { type: "paragraph", text: "Password rotated by Systems. See the pinned notice on the dashboard." },
+    FOOTER,
+  ];
+  return page(`${INTRANET_HOST}/admin`, "Systems Admin Console", "intranet", blocks, {
+    headComments: ["MeridianAuth 1.3 — elevated"],
+    bodyComments: ["letters only. no spaces. case doesn't matter. — W.O."],
+  });
+}
+
+function adminConsole(): SitePage {
+  const blocks: Block[] = [
+    NAV,
+    { type: "heading", level: 1, text: "Systems Admin Console" },
+    { type: "notice", tone: "success", text: "Elevated session active." },
+    { type: "heading", level: 2, text: "Badge log, Server Room B" },
+    {
+      type: "list",
+      items: [
+        "23:41 W. OKAFOR: badge in",
+        "23:52 W. OKAFOR: Vault sign-in (terminal 3)",
+        "23:58 A. VOSS: badge in (badge reported deactivated 3 days earlier)",
+        "00:06 outbound transfer, 2.4 GB, to an external host",
+        "00:09 A. VOSS: no badge out recorded",
+      ],
+    },
+    { type: "heading", level: 2, text: "Flagged memo" },
+    MEMO,
+    FOOTER,
+  ];
+  return page(`${INTRANET_HOST}/admin`, "Systems Admin Console", "intranet", blocks, {
+    headComments: ["MeridianAuth 1.3 — elevated session ok"],
+    tailComments: ["if you're reading this, Ada: I left the door open. — W."],
+  });
+}
+
 function dashboard(): SitePage {
   const blocks: Block[] = [
     NAV,
@@ -65,13 +114,19 @@ function dashboard(): SitePage {
     { type: "heading", level: 2, text: "Recent record changes" },
     ...DIFFS.slice(0, 3),
     { type: "link", text: "All record changes →", href: `${INTRANET_HOST}/records` },
-    { type: "heading", level: 2, text: "Flagged memo" },
-    MEMO,
+    { type: "heading", level: 2, text: "Pinned by Systems" },
+    SYSTEMS_NOTICE,
+    { type: "link", text: "Systems Admin console →", href: `${INTRANET_HOST}/admin` },
     FOOTER,
   ];
   return page(INTRANET_HOST, "The Vault — Dashboard", "intranet", blocks, {
     headComments: ["MeridianAuth 1.3 — session ok"],
     bodyComments: ["she used my account. I let her. — W."],
+    inlineComments: {
+      [blocks.indexOf(SYSTEMS_NOTICE)]: [
+        "five bits a letter, A is 00001. same as Tuesday nights. lesson notes: harbourcc.edu/cs110 — W.O.",
+      ],
+    },
   });
 }
 
@@ -93,7 +148,8 @@ function memos(): SitePage {
   const blocks: Block[] = [
     NAV,
     { type: "heading", level: 1, text: "Memos" },
-    MEMO,
+    { type: "notice", tone: "warning", text: "1 flagged memo (RE: Dr. A. Voss) has been moved to the Systems Admin console." },
+    { type: "link", text: "Systems Admin console →", href: `${INTRANET_HOST}/admin` },
     { type: "memo", heading: "MEMO — Director's Office — RE: public messaging", parts: [{ text: "If asked, Dr. Voss is on extended leave for personal reasons. Do not use the word 'missing'. Do not confirm or deny the existence of the Continuity Office." }] },
     FOOTER,
   ];
@@ -103,10 +159,11 @@ function memos(): SitePage {
 export function resolveIntranet(path: string, progress: RoomProgress): SitePage | null {
   const authed = progress.solved.includes("intranet-login");
   if (path === "" || path === "/login") return authed ? dashboard() : login();
-  const known = ["/dashboard", "/records", "/memos"];
+  const known = ["/dashboard", "/records", "/memos", "/admin"];
   if (!known.includes(path)) return null;
   if (!authed) return login(path);
   if (path === "/dashboard") return dashboard();
+  if (path === "/admin") return progress.solved.includes("admin-console") ? adminConsole() : adminLogin();
   if (path === "/records") return records();
   return memos();
 }

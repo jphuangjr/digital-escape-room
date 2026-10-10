@@ -4,7 +4,11 @@ import { useState } from "react";
 import type { GameCtx } from "@/lib/client/game";
 import {
   ALPHABET,
+  BIT_VALUES,
   a1z26ToLetters,
+  binaryToLetters,
+  lettersToBinary,
+  looksBinary,
   caesarDecode,
   caesarShift,
   caesarWheel,
@@ -234,8 +238,102 @@ function A1Z26Tool({ ctx }: { ctx: GameCtx }) {
   );
 }
 
+function BinaryTool({ ctx }: { ctx: GameCtx }) {
+  const [input, setInput] = useState("");
+  const [bits, setBits] = useState([0, 0, 0, 0, 0]);
+  const binary = looksBinary(input);
+  const output = !input.trim() ? "" : binary ? binaryToLetters(input) : lettersToBinary(input);
+  const value = bits.reduce((sum, b, i) => sum + b * BIT_VALUES[i], 0);
+  const letter = value >= 1 && value <= 26 ? ALPHABET[value - 1] : "?";
+
+  function addGroup() {
+    setInput((v) => {
+      const base = v && !looksBinary(v) ? "" : v;
+      return `${base}${base && !base.endsWith(" ") ? " " : ""}${bits.join("")} `;
+    });
+    setBits([0, 0, 0, 0, 0]);
+  }
+
+  return (
+    <div className="space-y-4 p-3">
+      <p className="text-xs text-zinc-500">Wren&apos;s class code: five bits per letter, worth 16 · 8 · 4 · 2 · 1. A = 1, Z = 26.</p>
+      <label className="block">
+        <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-zinc-400">Binary or letters</span>
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          rows={3}
+          placeholder="e.g. 01000 00101 01100 01100 01111"
+          inputMode={binary || !input ? "numeric" : "text"}
+          autoCapitalize="characters"
+          autoCorrect="off"
+          spellCheck={false}
+          className="w-full resize-y rounded-lg border border-zinc-700 bg-zinc-900 p-3 font-mono text-base text-zinc-100 placeholder:text-zinc-500 focus:border-amber-500 focus:outline-none"
+        />
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <button className={btnGhost} onClick={() => pasteInto(setInput, ctx)}>
+          Paste
+        </button>
+        <button className={btnGhost} disabled={!input} onClick={() => setInput("")}>
+          Clear
+        </button>
+        <span className="ml-auto self-center text-xs text-zinc-500">
+          {input.trim() ? (binary ? "binary → letters" : "letters → binary") : ""}
+        </span>
+      </div>
+      <div>
+        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">Result</div>
+        <OutputBox text={output} ctx={ctx} placeholder="Result appears here" />
+      </div>
+      <div>
+        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">
+          Tap switches <span className="font-normal normal-case tracking-normal text-zinc-500">(build one letter)</span>
+        </div>
+        <div className="grid grid-cols-5 gap-1.5">
+          {bits.map((b, i) => (
+            <button
+              key={i}
+              aria-pressed={b === 1}
+              aria-label={`Bit worth ${BIT_VALUES[i]}, ${b ? "on" : "off"}`}
+              onClick={() => setBits((cur) => cur.map((x, j) => (j === i ? 1 - x : x)))}
+              className={`flex min-h-14 flex-col items-center justify-center rounded-lg border font-mono ${
+                b ? "border-amber-500 bg-amber-500/20 text-amber-200" : "border-zinc-800 bg-zinc-900 text-zinc-400"
+              }`}
+            >
+              <span className="text-xl font-bold">{b}</span>
+              <span className="text-[10px] text-amber-400">{BIT_VALUES[i]}</span>
+            </button>
+          ))}
+        </div>
+        <div className="mt-2 flex items-center gap-3">
+          <p aria-live="polite" className="flex-1 font-mono text-sm text-zinc-300">
+            {bits.join("")} = {value} = <span className="text-lg font-bold text-amber-300">{letter}</span>
+          </p>
+          <button className={btnGhost} disabled={value === 0} onClick={addGroup}>
+            Add to input
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BinaryLocked() {
+  return (
+    <div className="space-y-2 p-8 text-center">
+      <div className="text-3xl" aria-hidden>
+        🔒
+      </div>
+      <p className="text-sm font-semibold text-zinc-200">Binary translator not installed</p>
+      <p className="text-xs text-zinc-500">It comes with a class Ada took. Her course notes might say where.</p>
+    </div>
+  );
+}
+
 export function DecoderApp({ ctx }: { ctx: GameCtx }) {
-  const [tab, setTab] = useState<"caesar" | "a1z26">("caesar");
+  const [tab, setTab] = useState<"caesar" | "a1z26" | "binary">("caesar");
+  const hasBinary = ctx.state.progress.badges.includes("binary");
   return (
     <div className="flex h-full min-h-0 flex-col bg-zinc-950 text-zinc-100">
       <div className="flex shrink-0 gap-1 border-b border-zinc-800 p-2" role="tablist">
@@ -243,6 +341,7 @@ export function DecoderApp({ ctx }: { ctx: GameCtx }) {
           [
             ["caesar", "Caesar shift"],
             ["a1z26", "A1Z26"],
+            ["binary", hasBinary ? "Binary" : "Binary 🔒"],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -265,6 +364,7 @@ export function DecoderApp({ ctx }: { ctx: GameCtx }) {
         <div hidden={tab !== "a1z26"}>
           <A1Z26Tool ctx={ctx} />
         </div>
+        <div hidden={tab !== "binary"}>{hasBinary ? <BinaryTool ctx={ctx} /> : <BinaryLocked />}</div>
       </div>
     </div>
   );

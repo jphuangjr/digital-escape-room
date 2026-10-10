@@ -6,6 +6,8 @@ export const PUZZLE_DISCOVERY: Record<PuzzleId, string> = {
   "tools-folder": "unlocked Ada's Tools",
   "shift-key": "cracked the Lost Paws cipher",
   "intranet-login": "got into the Vault",
+  "binary-lesson": "passed the binary lesson (Decoder now reads binary)",
+  "admin-console": "broke into the Vault's admin console",
   "final-phrase": "entered the proof of life",
 };
 
@@ -18,6 +20,8 @@ export const PUZZLE_AFFECTS_HOSTS: Record<PuzzleId, string[]> = {
   "bonus-pin": [],
   "tools-folder": [],
   "shift-key": ["lostpaws.net"],
-  "intranet-login": ["intranet.meridian-inst.net", "switch.ada-voss.net"],
+  "intranet-login": ["intranet.meridian-inst.net"],
+  "binary-lesson": ["harbourcc.edu"],
+  "admin-console": ["intranet.meridian-inst.net", "switch.ada-voss.net"],
   "final-phrase": ["switch.ada-voss.net"],
 };

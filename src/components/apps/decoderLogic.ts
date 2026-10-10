@@ -77,3 +77,40 @@ export function looksNumeric(input: string): boolean {
   const letters = (input.match(/[a-z]/gi) ?? []).length;
   return digits > 0 && digits >= letters;
 }
+
+// ---------- Binary (class code: 5 bits per letter, A = 1) ----------
+
+export const BIT_VALUES = [16, 8, 4, 2, 1];
+
+/** True when the input is only 0s, 1s and separators. */
+export function looksBinary(input: string): boolean {
+  return /[01]/.test(input) && /^[01\s,./|:;-]*$/.test(input);
+}
+
+/**
+ * Bits -> letters. Groups may be separated by anything; an unseparated run whose length is a
+ * multiple of 5 is split into 5-bit letters. Values outside 1..26 show as "?".
+ */
+export function binaryToLetters(input: string): string {
+  const runs = input.match(/[01]+/g);
+  if (!runs) return "";
+  const groups = runs.flatMap((r) => (r.length > 5 && r.length % 5 === 0 ? (r.match(/[01]{5}/g) ?? []) : [r]));
+  return groups.map((g) => numberToLetter(parseInt(g, 2)) ?? "?").join("");
+}
+
+/** Letters -> 5-bit groups, space separated; words separated by " / ". */
+export function lettersToBinary(input: string): string {
+  return input
+    .trim()
+    .split(/\s+/)
+    .map((w) =>
+      w
+        .split("")
+        .map(letterToNumber)
+        .filter((n): n is number => n !== null)
+        .map((n) => n.toString(2).padStart(5, "0"))
+        .join(" "),
+    )
+    .filter(Boolean)
+    .join(" / ");
+}
