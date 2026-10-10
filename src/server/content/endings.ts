@@ -7,7 +7,7 @@ type Paras = Record<Locale, string[]>;
 
 const ENDINGS: Record<Ending, { title: Tr; body: Paras }> = {
   EXPOSE: {
-    title: { en: "The Needle Points True", ko: "바늘은 진실을 가리킨다", "zh-TW": "指針指向真相" },
+    title: { en: "The Needle Points True", ko: "바늘은 진실을 가리킨다", "zh-TW": "指針指向真相", es: "La aguja señala la verdad" },
     body: {
       en: [
         "At 06:00 the switch fires on purpose. Ada lets it.",
@@ -33,10 +33,18 @@ const ENDINGS: Record<Ending, { title: Tr; body: Paras }> = {
         "艾達沒有現身。還不是時候。有些人會憤怒很久，其中幾個知道港口哪裡最深。她從一個一小時後就會失效的地址，寄了一行字到調查員的收件匣：「還不是時候。但快了。跟瑪拉說幫我留個位子。」",
         "紀錄公開了。就像真相通常的樣子：雜亂、矛盾，而且活著。在研究院空蕩蕩的大廳某處，終於有人把指南針取下來，送去修理指針。",
       ],
+      es: [
+        "A las 06:00 el interruptor se activa a propósito. Ada lo deja.",
+        "Cuatro mil ciento doce registros «conciliados» llegan a la bandeja de entrada de todas las redacciones de la ciudad, cada uno junto a su original: la carta fundacional firmada en 1978 por el Fideicomiso del Puerto, la declaración del vigilante nocturno sobre las lámparas encendidas en la oficina del Fideicomiso la noche en que ardió el almacén, la lista de fundadores con un apellido que a todos en el Instituto se les ordenó olvidar. Voss. El apellido de su padre.",
+        "Al mediodía, la portada del Instituto Meridian ya no muestra más que una línea sobre «mantenimiento técnico». Al anochecer hay camionetas de televisión estacionadas en la escalinata, bajo la brújula rota. El subdirector Kell renuncia por carta. La directora Calloway no renuncia: se la llevan escoltada.",
+        "Wren Okafor da su primera entrevista dando la cara. La foto que borraron sale en la portada de la edición matutina, algo granulada, inconfundiblemente ella.",
+        "Ada no sale. Todavía no. Hay gente que va a estar furiosa por mucho tiempo, y algunos saben dónde es más profundo el puerto. Desde una dirección que dejará de funcionar una hora después, envía una sola línea a la bandeja de entrada del investigador: «Todavía no. Pero pronto. Dile a Mara que me guarde un lugar».",
+        "El registro está abierto. Es desordenado, contradictorio y está vivo, como suele estarlo la verdad. En algún rincón del vestíbulo vacío del Instituto, alguien por fin descuelga la brújula para que le arreglen la aguja.",
+      ],
     },
   },
   PROTECT: {
-    title: { en: "A Record Kept Sealed", ko: "봉인된 채 남은 기록", "zh-TW": "封存的紀錄" },
+    title: { en: "A Record Kept Sealed", ko: "봉인된 채 남은 기록", "zh-TW": "封存的紀錄", es: "Un registro que sigue sellado" },
     body: {
       en: [
         "You let the timer run past its own deadline, and then you stop it. The unaltered records stay where Ada hid them: in the dark, unindexed, safe.",
@@ -65,6 +73,15 @@ const ENDINGS: Record<Ending, { title: Tr; body: Paras }> = {
         "「瑪拉，爸的文件那件事，對不起。你說得對，有些鬼魂最好就留在帳本裡；我也說得對，它們確實在那裡。我很安全。我沒辦法去派對，但3月14日那天，我會像以往一樣想著你。嫁給那個致詞爛透了的男人吧。要幸福得大聲一點，大聲到不管我在哪裡都聽得見。愛你的，那個會讀註腳的姊姊。— A.」",
         "瑪拉坐在廚房餐桌前讀著那封信，直到窗外的光線變了。然後，她還是在訂婚派對上多擺了一副餐具，讓那個位子空著，沒有告訴任何人為什麼。",
       ],
+      es: [
+        "Dejas que el temporizador pase de su propio plazo, y solo entonces lo detienes. Los registros sin alterar se quedan donde Ada los escondió: a oscuras, sin índice, a salvo.",
+        "El Instituto nunca sabrá lo cerca que estuvo. La Oficina de Continuidad sigue conciliando. El año de fundación sigue siendo 1987 en el sitio web y 1978 en la letra pequeña, y nadie lee la letra pequeña. Ese es el precio, y todos en la sala lo saben.",
+        "A cambio, Ada obtiene lo único que la verdad no podía darle: una salida. Para cuando la Oficina de Continuidad nota que su interruptor ha enmudecido, el servidor ya está borrado, sus cuentas están cerradas y la mujer que leía cada nota al pie se ha convertido en una.",
+        "Wren conserva su empleo y su récord. Publica en RunnerBoard una vez más: un único mensaje para compass_needle con la marca de tiempo 07:15. Nadie más lo entiende. Nunca fue para ellos.",
+        "Tres semanas después llega una carta sin remitente a nombre de Mara Voss. Dentro hay una ramita de lavanda prensada, cortada en el malecón del puerto, y una sola hoja con la letra de su hermana:",
+        "«Mara: perdóname lo de los papeles de papá. Tenías razón en que hay fantasmas que es mejor dejar en los libros de cuentas, y yo tenía razón en que estaban ahí. Estoy a salvo. No puedo ir a la fiesta, pero el 14 de marzo pensaré en ti, como siempre. Cásate con el hombre de los discursos terribles. Sé feliz tan fuerte que pueda oírte desde dondequiera que esté. Con todo mi amor, la hermana que lee las notas al pie. — A.»",
+        "Mara la lee en la mesa de la cocina hasta que cambia la luz. Luego, de todos modos, pone un lugar de más en la fiesta de compromiso, lo deja vacío y no le dice a nadie por qué.",
+      ],
     },
   },
 };
@@ -89,6 +106,11 @@ const EPILOGUE: Paras = {
     "在艾達的私人資料夾裡，在語音留言的逐字稿和她父親帳本的照片底下，還有一個檔案。那是一張孩子畫作的掃描檔：兩個女孩坐在港口堤防上，一起捧著一只指南針。指針畫得完完整整。",
     "背面是一行大人小心翼翼的字跡：「給你們兩個，等你們找到回家的路。— 爸爸，1987。」",
     "艾達從沒告訴任何人她留著這張畫。你已經有資格知道了。指南針徽章是你的。",
+  ],
+  es: [
+    "Dentro de la carpeta personal de Ada, debajo de las transcripciones de los mensajes de voz y las fotografías de los libros de cuentas de su padre, hay un archivo más. Es el escaneo de un dibujo infantil: dos niñas sobre el malecón del puerto, sosteniendo una brújula entre las dos. La aguja está dibujada entera.",
+    "Al reverso, con la letra cuidadosa de un adulto: «Para cuando las dos encuentren el camino de vuelta. — Papá, 1987».",
+    "Ada nunca le contó a nadie que lo había guardado. Te has ganado el derecho a saberlo. La insignia de la brújula es tuya.",
   ],
 };
 
@@ -121,6 +143,13 @@ const FILES: { name: string; body: Paras }[] = [
         "",
         "你說我走火入魔，你說得對。我說的也是對的。我不知道怎麼在電話裡同時說出這兩件事。快要訂婚了，恭喜。我滿喜歡湯姆的。別跟他說。",
       ],
+      es: [
+        "[Transcripción — grabado, nunca enviado]",
+        "",
+        "Mara. Soy yo. Empiezo esto y lo borro una y otra vez. Encontré el nombre de papá en las cartas de los fundadores. No como villano, sino como testigo. Vio lo que pasó en el almacén y le pagaron para que lo olvidara, y como no quiso, hicieron que el registro lo olvidara a él.",
+        "",
+        "Tenías razón en que estaba obsesionada. Y yo también tenía razón. No sé cómo decir las dos cosas por teléfono. Feliz casi compromiso. Tom me cae bien. No se lo digas.",
+      ],
     },
   },
   {
@@ -140,6 +169,11 @@ const FILES: { name: string; body: Paras }[] = [
         "[逐字稿 — 23:49]",
         "",
         "芮恩，我是艾達。我在 B 號伺服器機房。照你說的用你的帳號登入了，要是有人問，你人在電玩間，還有兩百萬分的不在場證明。謝謝你的鑰匙。我要把開關放在他們碰不到的地方。如果我沒了消息，不是因為他們找到我，而是我自己選擇的。",
+      ],
+      es: [
+        "[Transcripción — 23:49]",
+        "",
+        "Wren, soy Ada. Estoy en la Sala de Servidores B. Estoy usando tu usuario, como dijiste: si alguien pregunta, estabas en el salón de videojuegos y tienes una coartada de dos millones de puntos. Gracias por la llave. Voy a poner el interruptor donde no puedan alcanzarlo. Si me quedo callada, no es porque me hayan encontrado. Es porque yo lo elegí.",
       ],
     },
   },
@@ -161,6 +195,11 @@ const FILES: { name: string; body: Paras }[] = [
         "",
         "她在暴風雨的夜裡出生，所以爸叫她他的「天氣」。我是3月14日生的，爸叫我他的「指南針」。我們為了爸的文件不再說話。比起修正紀錄，我更想修好這件事。兩件都能做到最好。",
       ],
+      es: [
+        "Mara Voss. Cuatro años menor que yo. Da clases de natación en los baños del puerto. Nunca ha llegado a tiempo y nunca se ha perdido nada que importara.",
+        "",
+        "Nació la noche de la tormenta, así que papá la llamaba su clima. Yo nací el 14 de marzo; papá me llamaba su brújula. Dejamos de hablarnos por sus papeles. Quiero arreglar eso más que arreglar el registro. Las dos cosas, idealmente.",
+      ],
     },
   },
   {
@@ -180,6 +219,11 @@ const FILES: { name: string; body: Paras }[] = [
         "芮恩・奧卡佛（Wren Okafor）。系統檔案管理員。曾在2019年連續性調查委員會上作證，指出數位化過程正「有選擇地」遺漏紀錄。兩週後，她的照片從員工頁面消失，接著從名冊消失，再接著從大樓的識別證系統消失。",
         "",
         "她還是照常上班。Circuit Runner '94 的最高分紀錄也還是她的。她說訣竅跟檔案庫一樣：把關卡摸得夠熟，有人移動了一面牆你就會發現。",
+      ],
+      es: [
+        "Wren Okafor. Archivista de sistemas. Declaró ante la Comisión de Investigación de Continuidad de 2019 que la digitalización estaba perdiendo registros «de forma selectiva». Dos semanas después, su fotografía desapareció de la página del personal, luego del padrón y luego del sistema de identificación del edificio.",
+        "",
+        "Todavía va a trabajar. Todavía tiene el récord de Circuit Runner '94. Dice que el truco es el mismo que con el archivo: aprenderte el nivel tan bien que notes cuando alguien mueve una pared.",
       ],
     },
   },
@@ -201,6 +245,11 @@ const FILES: { name: string; body: Paras }[] = [
         "",
         "1987年，信託解散，研究院依市政條例「重新創立」：新的章程、新的董事會、新的創立日期。1987年以前的一切都成了史前時代。頁尾從來沒有更新。舊印刷廠裡有人把數字對調了，從此謊言和真相就共用同一頁。",
       ],
+      es: [
+        "El Instituto Meridian recibió su carta fundacional el 14 de junio de 1978 de manos del Fideicomiso del Puerto, una empresa privada con un incendio en un almacén que necesitaba que la ciudad olvidara.",
+        "",
+        "En 1987 el Fideicomiso se disolvió y el Instituto fue «refundado» por ordenanza municipal, con una nueva carta, una nueva junta y una nueva fecha de fundación. Todo lo anterior a 1987 se volvió prehistoria. El pie de página nunca se actualizó. Alguien en la vieja imprenta intercambió los dígitos, y desde entonces la mentira y la verdad comparten página.",
+      ],
     },
   },
   {
@@ -220,6 +269,11 @@ const FILES: { name: string; body: Paras }[] = [
         "七道刻痕，每一道代表一批創始館藏。第七批館藏，也就是信託自己的文件，在2019年被撤下。指針不是搬遷時弄斷的。是凱爾從軸心把它折斷，好讓它再也不會指向七號。",
         "",
         "斷掉的指針尖我帶回家了，就放在我的大衣口袋裡。等這一切結束，我會把它還回去。",
+      ],
+      es: [
+        "Siete muescas, una por cada colección fundacional. La séptima colección, los propios papeles del Fideicomiso, se retiró en 2019. La aguja no se rompió en la mudanza. Kell la partió a la altura del eje para que nunca volviera a señalar el número siete.",
+        "",
+        "Me llevé la punta rota a casa. Está en el bolsillo de mi abrigo. Cuando esto termine, la devolveré.",
       ],
     },
   },

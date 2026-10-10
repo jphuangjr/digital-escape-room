@@ -27,6 +27,14 @@ import zhApps from "./zh-TW/apps";
 import zhBrowser from "./zh-TW/browser";
 import zhAdmin from "./zh-TW/admin";
 import zhApi from "./zh-TW/api";
+import esCommon from "./es/common";
+import esSite from "./es/site";
+import esShell from "./es/shell";
+import esRoom from "./es/room";
+import esApps from "./es/apps";
+import esBrowser from "./es/browser";
+import esAdmin from "./es/admin";
+import esApi from "./es/api";
 
 export type Messages = Record<string, string>;
 
@@ -35,4 +43,6 @@ const ko: Messages = { ...koCommon, ...koSite, ...koShell, ...koRoom, ...koApps,
 
 const zhTW: Messages = { ...zhCommon, ...zhSite, ...zhShell, ...zhRoom, ...zhApps, ...zhBrowser, ...zhAdmin, ...zhApi };
 
-export const MESSAGES: Record<Locale, Messages> = { en, ko, "zh-TW": zhTW };
+const es: Messages = { ...esCommon, ...esSite, ...esShell, ...esRoom, ...esApps, ...esBrowser, ...esAdmin, ...esApi };
+
+export const MESSAGES: Record<Locale, Messages> = { en, ko, "zh-TW": zhTW, es };

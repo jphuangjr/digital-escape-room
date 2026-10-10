@@ -15,28 +15,28 @@ interface PetListing {
 /** Listing order matters: chunk i of the hidden message lives in listing i. */
 const PETS: PetListing[] = [
   {
-    title: { en: "Pepper — black Labrador, male", ko: "Pepper — 검은색 래브라도, 수컷", "zh-TW": "Pepper — 黑色拉布拉多，公" },
-    meta: { en: "Lost · Canal Row · 6 days ago · reward offered", ko: "실종 · 커낼 로(Canal Row) · 6일 전 · 사례금 있음", "zh-TW": "走失 · 運河街（Canal Row） · 6 天前 · 有酬謝" },
+    title: { en: "Pepper — black Labrador, male", ko: "Pepper — 검은색 래브라도, 수컷", "zh-TW": "Pepper — 黑色拉布拉多，公", es: "Pepper — labrador negro, macho" },
+    meta: { en: "Lost · Canal Row · 6 days ago · reward offered", ko: "실종 · 커낼 로(Canal Row) · 6일 전 · 사례금 있음", "zh-TW": "走失 · 運河街（Canal Row） · 6 天前 · 有酬謝", es: "Perdido · Canal Row · hace 6 días · se ofrece recompensa" },
     petId: "0219",
   },
   {
-    title: { en: "Biscuit — tabby, female, white socks", ko: "Biscuit — 태비, 암컷, 하얀 양말 무늬", "zh-TW": "Biscuit — 虎斑貓，母，白襪子花紋" },
-    meta: { en: "Lost · Harbour Street · 3 days ago · microchipped", ko: "실종 · 하버 스트리트(Harbour Street) · 3일 전 · 마이크로칩 있음", "zh-TW": "走失 · 港灣街（Harbour Street） · 3 天前 · 已植入晶片" },
+    title: { en: "Biscuit — tabby, female, white socks", ko: "Biscuit — 태비, 암컷, 하얀 양말 무늬", "zh-TW": "Biscuit — 虎斑貓，母，白襪子花紋", es: "Biscuit — atigrada, hembra, patitas blancas" },
+    meta: { en: "Lost · Harbour Street · 3 days ago · microchipped", ko: "실종 · 하버 스트리트(Harbour Street) · 3일 전 · 마이크로칩 있음", "zh-TW": "走失 · 港灣街（Harbour Street） · 3 天前 · 已植入晶片", es: "Perdida · Harbour Street · hace 3 días · con microchip" },
     petId: "0412",
   },
   {
-    title: { en: "Mr. Fennimore — grey rabbit", ko: "Mr. Fennimore — 회색 토끼", "zh-TW": "Mr. Fennimore — 灰色兔子" },
-    meta: { en: "Found · Old Customs House steps · 2 days ago", ko: "발견 · 옛 세관 건물 계단 · 2일 전", "zh-TW": "尋獲 · 舊海關大樓階梯 · 2 天前" },
+    title: { en: "Mr. Fennimore — grey rabbit", ko: "Mr. Fennimore — 회색 토끼", "zh-TW": "Mr. Fennimore — 灰色兔子", es: "Mr. Fennimore — conejo gris" },
+    meta: { en: "Found · Old Customs House steps · 2 days ago", ko: "발견 · 옛 세관 건물 계단 · 2일 전", "zh-TW": "尋獲 · 舊海關大樓階梯 · 2 天前", es: "Encontrado · escalinata de la antigua Aduana · hace 2 días" },
     petId: "0733",
   },
   {
-    title: { en: "Juno — collie mix, female", ko: "Juno — 콜리 믹스, 암컷", "zh-TW": "Juno — 牧羊犬混種，母" },
-    meta: { en: "Lost · Ferry Terminal · 9 days ago · shy, do not chase", ko: "실종 · 페리 터미널 · 9일 전 · 겁이 많음, 쫓지 마세요", "zh-TW": "走失 · 渡輪碼頭 · 9 天前 · 很怕生，請勿追趕" },
+    title: { en: "Juno — collie mix, female", ko: "Juno — 콜리 믹스, 암컷", "zh-TW": "Juno — 牧羊犬混種，母", es: "Juno — mestiza de collie, hembra" },
+    meta: { en: "Lost · Ferry Terminal · 9 days ago · shy, do not chase", ko: "실종 · 페리 터미널 · 9일 전 · 겁이 많음, 쫓지 마세요", "zh-TW": "走失 · 渡輪碼頭 · 9 天前 · 很怕生，請勿追趕", es: "Perdida · terminal del ferri · hace 9 días · es tímida, no la persigas" },
     petId: "1150",
   },
   {
-    title: { en: "Sardine — ginger cat, male", ko: "Sardine — 치즈 고양이, 수컷", "zh-TW": "Sardine — 橘貓，公" },
-    meta: { en: "Found · Meridian Institute loading dock · yesterday", ko: "발견 · 메리디언 연구소(Meridian Institute) 하역장 · 어제", "zh-TW": "尋獲 · 子午研究院（Meridian Institute）卸貨區 · 昨天" },
+    title: { en: "Sardine — ginger cat, male", ko: "Sardine — 치즈 고양이, 수컷", "zh-TW": "Sardine — 橘貓，公", es: "Sardine — gato naranja, macho" },
+    meta: { en: "Found · Meridian Institute loading dock · yesterday", ko: "발견 · 메리디언 연구소(Meridian Institute) 하역장 · 어제", "zh-TW": "尋獲 · 子午研究院（Meridian Institute）卸貨區 · 昨天", es: "Encontrado · muelle de carga del Instituto Meridian · ayer" },
     petId: "0868",
   },
 ];
@@ -69,6 +69,7 @@ function home(progress: RoomProgress, loc: Locale): SitePage {
         en: "A neighbourhood board for lost and found animals around the old harbour. Every listing is a little light left on in a window.",
         ko: "옛 항구 일대에서 잃어버리고 찾은 동물들을 위한 동네 게시판입니다. 글 하나하나가 창가에 켜 둔 작은 불빛이에요.",
         "zh-TW": "舊港口一帶走失與尋獲動物的社區佈告欄。每一則刊登，都是窗邊為牠們留著的一盞小燈。",
+        es: "Un tablón vecinal para animales perdidos y encontrados en los alrededores del viejo puerto. Cada anuncio es una lucecita que se deja encendida en una ventana.",
       }),
     },
     decoded
@@ -79,6 +80,7 @@ function home(progress: RoomProgress, loc: Locale): SitePage {
             en: "Listings restored. Our volunteer's descriptions now read correctly.",
             ko: "게시글이 복구되었습니다. 이제 봉사자가 쓴 설명이 제대로 보여요.",
             "zh-TW": "刊登內容已恢復。志工寫的描述現在可以正常閱讀了。",
+            es: "Anuncios restaurados. Las descripciones de nuestro voluntario ya se leen correctamente.",
           }),
         }
       : {
@@ -88,6 +90,7 @@ function home(progress: RoomProgress, loc: Locale): SitePage {
             en: "Our listing descriptions were scrambled after a volunteer changed a setting. They swear they only turned a dial a few notches. If you know the key, enter it below.",
             ko: "봉사자 한 분이 설정을 바꾼 뒤로 게시글 설명이 뒤죽박죽이 됐어요. 다이얼을 몇 칸 돌렸을 뿐이라고 하네요. 키를 아신다면 아래에 입력해 주세요.",
             "zh-TW": "一位志工改了某個設定之後，我們的刊登描述就全亂了。他發誓自己只是把轉盤轉了幾格。如果您知道金鑰，請在下方輸入。",
+            es: "Las descripciones de nuestros anuncios se desordenaron después de que un voluntario cambió una configuración. Jura que solo giró el dial unas cuantas muescas. Si conoces la clave, escríbela abajo.",
           }),
         },
     ...listingBlocks(decoded ? LOSTPAWS_PLAINTEXT_CHUNKS : LOSTPAWS_CIPHERTEXT_CHUNKS, loc),
@@ -101,6 +104,7 @@ function home(progress: RoomProgress, loc: Locale): SitePage {
               en: "Restore listings — how many notches was the dial turned?",
               ko: "게시글 복구 — 다이얼을 몇 칸 돌렸을까요?",
               "zh-TW": "恢復刊登內容——轉盤被轉了幾格？",
+              es: "Restaurar anuncios — ¿cuántas muescas se giró el dial?",
             }),
           } as Block,
         ]),
@@ -110,19 +114,21 @@ function home(progress: RoomProgress, loc: Locale): SitePage {
         en: "Microchipped pets are listed with their registry ID. If you find an animal, please do not feed it rich food — bring it to the Harbour Street shelter.",
         ko: "마이크로칩이 있는 동물은 등록 번호와 함께 올라갑니다. 동물을 발견하시면 기름진 음식은 주지 마시고 하버 스트리트(Harbour Street) 보호소로 데려와 주세요.",
         "zh-TW": "已植入晶片的寵物會附上登記編號。如果您發現動物，請不要餵牠吃油膩的食物——請帶到港灣街（Harbour Street）收容所。",
+        es: "Las mascotas con microchip aparecen con su número de registro. Si encuentras un animal, por favor no le des comida pesada: llévalo al refugio de Harbour Street.",
       }),
     },
-    { type: "footer", text: x({ en: "Lost Paws — run by volunteers. Bring them home.", ko: "Lost Paws — 봉사자들이 운영합니다. 집으로 데려다주세요.", "zh-TW": "Lost Paws — 由志工經營。帶牠們回家。" }) },
+    { type: "footer", text: x({ en: "Lost Paws — run by volunteers. Bring them home.", ko: "Lost Paws — 봉사자들이 운영합니다. 집으로 데려다주세요.", "zh-TW": "Lost Paws — 由志工經營。帶牠們回家。", es: "Lost Paws — gestionado por voluntarios. Llevémoslos a casa." }) },
   ];
-  return page(LOSTPAWS_HOST, x({ en: "Lost Paws — Harbour District", ko: "Lost Paws — 하버 지구", "zh-TW": "Lost Paws — 港灣區" }), "lostpaws", blocks, {
-    headComments: [x({ en: "lostpaws board — volunteer build", ko: "lostpaws 게시판 — 봉사자 제작", "zh-TW": "lostpaws 佈告欄 — 志工製作" })],
+  return page(LOSTPAWS_HOST, x({ en: "Lost Paws — Harbour District", ko: "Lost Paws — 하버 지구", "zh-TW": "Lost Paws — 港灣區", es: "Lost Paws — Distrito del Puerto" }), "lostpaws", blocks, {
+    headComments: [x({ en: "lostpaws board — volunteer build", ko: "lostpaws 게시판 — 봉사자 제작", "zh-TW": "lostpaws 佈告欄 — 志工製作", es: "tablón lostpaws — hecho por voluntarios" })],
     bodyComments: decoded
-      ? [x({ en: "descriptions restored", ko: "설명 복구됨", "zh-TW": "描述已恢復" })]
+      ? [x({ en: "descriptions restored", ko: "설명 복구됨", "zh-TW": "描述已恢復", es: "descripciones restauradas" })]
       : [
           x({
             en: "descriptions encoded with legacy rotate() — volunteer forgot the setting. it's a small number.",
             ko: "설명은 구형 rotate()로 인코딩됨 — 봉사자가 설정값을 잊어버림. 작은 숫자임.",
             "zh-TW": "描述以舊版 rotate() 編碼——志工忘了設定值。是個很小的數字。",
+            es: "descripciones codificadas con el antiguo rotate() — el voluntario olvidó la configuración. es un número pequeño.",
           }),
         ],
     tailComments: [
@@ -130,6 +136,7 @@ function home(progress: RoomProgress, loc: Locale): SitePage {
         en: "listing for Biscuit posted by a friend of the owner, owner 'can't come in person right now'",
         ko: "Biscuit 게시글은 주인의 친구가 올림. 주인은 '지금은 직접 올 수 없다'고 함",
         "zh-TW": "Biscuit 的刊登是飼主的朋友貼的，飼主「現在沒辦法親自過來」",
+        es: "el anuncio de Biscuit lo publicó una amistad de la dueña; la dueña 'no puede venir en persona ahora mismo'",
       }),
     ],
   });

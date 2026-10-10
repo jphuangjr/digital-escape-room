@@ -63,6 +63,20 @@ Fee: paid in advance. Questions: none, apparently.`,
 大家一起行動，把一切都記下來，重要的事要跟房間裡的其他人分享。
 
 酬勞：已預付。疑問：看來沒有。`,
+      es: `RESUMEN DEL CASO — CONFIDENCIAL
+Cliente: la hermana de la Dra. Ada Voss
+Asunto: Dra. Ada Voss, archivista, Instituto Meridian
+Estado: desaparecida, último contacto hace 48 horas
+
+Encargo:
+Averiguar qué le pasó a Ada. Dejó un solo mensaje:
+"Si estás leyendo esto, me acerqué demasiado. Empieza por el principio."
+
+Esta laptop es suya. El navegador todavía tiene sus marcadores. Su bandeja
+de entrada sigue sincronizándose. Trabajen juntos, anoten todo y compartan
+lo importante con el resto de la sala.
+
+Honorarios: pagados por adelantado. Preguntas: ninguna, al parecer.`,
     },
   },
   {
@@ -101,6 +115,18 @@ Fee: paid in advance. Questions: none, apparently.`,
 - 解碼器：艾達把它放在個人資料夾裡的「Ada's Tools」。
   她就是忍不住要設個安全提問。
 - 卡住了？可以在提示面板請艾達給點暗示。`,
+      es: `NOTAS DE CAMPO PARA QUIEN USE ESTA MÁQUINA
+
+- Navegador: escribe una dirección en la barra o toca un marcador.
+  Cada página tiene un botón "Ver código fuente". Las imágenes tienen
+  "Información del archivo". Las barras negras se pueden tocar para
+  revelar lo que hay debajo.
+- Notas: privadas por defecto. Toca "Compartir con la sala" cuando importe.
+  Etiqueta los fragmentos (nombre / año / ID / clave de cifrado / dirección).
+- Correo: no le quites el ojo. Ada deja mensajes de voz.
+- Decodificador: Ada lo guarda en "Ada's Tools", dentro de su carpeta
+  personal. Nunca pudo resistirse a una pregunta de seguridad.
+- ¿Atascado? En el panel de pistas puedes pedirle a Ada un empujón.`,
     },
   },
   {
@@ -118,6 +144,10 @@ Fee: paid in advance. Questions: none, apparently.`,
 - 回電給妹妹
 - 別再到處亂畫指南針了
 - 網域到期前記得續約`,
+      es: `- respaldar el archivo (otra vez)
+- devolverle la llamada a mi hermana
+- dejar de dibujar brújulas en todo
+- renovar el dominio antes de que venza`,
     },
   },
 ];
@@ -189,6 +219,27 @@ CS 110：電腦如何計數
 W. 現在「什麼都」用她課堂上的代碼寫。
 購物清單。門禁密碼。大概連密碼也是。
 學起來。`,
+    es: `HARBOUR COMMUNITY COLLEGE — ESTUDIOS NOCTURNOS
+CS 110: Cómo cuentan las computadoras
+Martes 6:30–8:30 p. m., Aula 12
+Instructora: W. Okafor
+
+Semana 1  ¿Qué es una computadora, en realidad?  (folleto)
+Semana 2  Interruptores: encendido y apagado     (folleto)
+Semana 3  Binario: contar con dos dedos
+          Lección + prueba de práctica en línea:
+          harbourcc.edu/cs110/binary
+          Aprueba la prueba para instalar en tu
+          equipo el traductor de binario de la clase.
+Semana 4  Contraseñas, y por qué la tuya es mala
+
+Trae un lápiz. Laptops bienvenidas. Teléfonos boca abajo.
+
+---
+(Ada, en el margen:)
+W. ahora escribe TODO en el código de su clase.
+Listas del súper. Códigos de puertas. Seguramente contraseñas.
+Apréndelo.`,
   },
 };
 
