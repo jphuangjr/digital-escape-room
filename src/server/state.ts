@@ -13,6 +13,8 @@ import type {
 } from "@/lib/types";
 import { db } from "./db";
 import { hintCooldownUntil, isFragmentTag, ONLINE_WINDOW_MS, parseProgress } from "./logic";
+import type { Locale } from "@/i18n/config";
+import { getLocale } from "@/i18n/server";
 import { baseEmails, getHint, voicemailsFor } from "./content";
 import { buildEnding, loadVoteState } from "./vote";
 
@@ -38,14 +40,15 @@ export async function loadHints(roomId: string) {
   return db.hintRequest.findMany({ where: { roomId }, orderBy: { createdAt: "asc" } });
 }
 
-export function hintDTO(h: { puzzleId: string; tier: number; createdAt: Date }): HintDTO {
+export function hintDTO(h: { puzzleId: string; tier: number; createdAt: Date }, loc: Locale): HintDTO {
   const tier = h.tier as 1 | 2 | 3;
   const puzzleId = h.puzzleId as HintPuzzleId;
-  return { puzzleId, tier, text: getHint(puzzleId, tier), unlockedAt: h.createdAt.toISOString() };
+  return { puzzleId, tier, text: getHint(puzzleId, tier, loc), unlockedAt: h.createdAt.toISOString() };
 }
 
 export async function buildRoomState(room: Room, player: Player): Promise<RoomState> {
   const now = new Date();
+  const loc = await getLocale();
   const [players, notes, attempts, hintRows, vote, ending] = await Promise.all([
     db.player.findMany({ where: { roomId: room.id }, orderBy: { createdAt: "asc" } }),
     db.note.findMany({
@@ -60,7 +63,7 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
 
   const byId = new Map(players.map((p) => [p.id, p]));
   const progress = parseProgress(room.progress);
-  const hints = hintRows.map(hintDTO);
+  const hints = hintRows.map((h) => hintDTO(h, loc));
 
   const hintCooldowns: Partial<Record<HintPuzzleId, string>> = {};
   const typedHintRows = hintRows.map((h) => ({ ...h, puzzleId: h.puzzleId as HintPuzzleId }));
@@ -114,7 +117,7 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
     attempts: attemptDTOs,
     hints,
     hintCooldowns,
-    emails: [...baseEmails(), ...voicemailsFor(progress, hints)],
+    emails: [...baseEmails(loc), ...voicemailsFor(progress, hints, loc)],
     vote,
     ending,
   };

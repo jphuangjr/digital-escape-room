@@ -1,4 +1,5 @@
 import "server-only";
+import { getLocale } from "@/i18n/server";
 import type { Room } from "@prisma/client";
 import type { Ending, EndingDTO, VoteState } from "@/lib/types";
 import { db } from "./db";
@@ -36,7 +37,8 @@ export async function buildEnding(room: Room): Promise<EndingDTO | null> {
   if (room.status !== "finished" || !isEnding(room.ending)) return null;
   const votes = await db.endingVote.findMany({ where: { roomId: room.id } });
   const summary = tally(votes);
-  const text = endingText(room.ending);
+  const loc = await getLocale();
+  const text = endingText(room.ending, loc);
   const progress = parseProgress(room.progress);
   return {
     ending: room.ending,
@@ -44,7 +46,7 @@ export async function buildEnding(room: Room): Promise<EndingDTO | null> {
     body: text.body,
     // A tie can only be resolved by the host, so equal counts imply a host tie-break.
     summary: { ...summary, tieBrokenByHost: summary.EXPOSE === summary.PROTECT },
-    bonusEpilogue: progress.solved.includes("bonus-pin") ? bonusEpilogue() : null,
+    bonusEpilogue: progress.solved.includes("bonus-pin") ? bonusEpilogue(loc) : null,
   };
 }
 

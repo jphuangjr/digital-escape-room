@@ -1,9 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useT } from "@/i18n/client";
+import { useLocale, useT } from "@/i18n/client";
+import { pick } from "@/i18n/config";
 import type { AttemptResponse, Block, PuzzleId, SiteFormId } from "@/lib/types";
 import { BlockList, type RenderEnv } from "./SiteRenderer";
+
+/** In-site (story) labels: `const x = useStory(); x({ en, ko })`. */
+function useStory() {
+  return pick(useLocale());
+}
 
 type Feedback = { tone: "success" | "error" | "info"; text: string } | null;
 
@@ -97,6 +103,7 @@ export function SiteForm({
 }
 
 function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
+  const x = useStory();
   const { t, ctx } = env;
   const tr = useT();
   const a = useAttempt(env, "shift-key");
@@ -140,7 +147,7 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
       </div>
       <div className="flex flex-wrap justify-center gap-2">
         <button type="button" onClick={doPreview} disabled={previewing} className={`min-h-11 px-4 ${t.buttonGhost} disabled:opacity-60`}>
-          {previewing ? "Decoding…" : "Preview"}
+          {previewing ? x({ en: "Decoding…", ko: "해독 중…" }) : x({ en: "Preview", ko: "미리 보기" })}
         </button>
         <button
           type="button"
@@ -148,7 +155,7 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
           disabled={a.busy || a.retryLeft > 0}
           className={`min-h-11 px-5 font-semibold ${t.button} disabled:opacity-60`}
         >
-          {a.busy ? "Checking…" : "Apply key"}
+          {a.busy ? x({ en: "Checking…", ko: "확인 중…" }) : x({ en: "Apply key", ko: "키 적용" })}
         </button>
       </div>
       <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
@@ -157,7 +164,7 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
           <div className="flex items-center justify-between">
             <p className={`text-xs uppercase tracking-wider ${t.muted}`}>{tr("browser.form.previewLabel", { n })}</p>
             <button type="button" onClick={() => setPreview(null)} className={`min-h-11 px-2 text-sm ${t.link}`}>
-              Hide
+              {x({ en: "Hide", ko: "숨기기" })}
             </button>
           </div>
           <BlockList blocks={preview} env={env} />
@@ -168,6 +175,7 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
 }
 
 function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
+  const x = useStory();
   const { t } = env;
   const a = useAttempt(env, "intranet-login");
   const [user, setUser] = useState("");
@@ -182,9 +190,9 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
       }}
     >
       <p className="font-semibold">{prompt}</p>
-      {a.solved && <p className="text-sm font-semibold text-emerald-600">✓ Session active.</p>}
+      {a.solved && <p className="text-sm font-semibold text-emerald-600">{x({ en: "✓ Session active.", ko: "✓ 세션 활성화됨." })}</p>}
       <label className="block text-sm">
-        Username
+        {x({ en: "Username", ko: "사용자 이름" })}
         <input
           {...inputProps}
           value={user}
@@ -194,7 +202,7 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         />
       </label>
       <label className="block text-sm">
-        Vault code
+        {x({ en: "Vault code", ko: "볼트 코드" })}
         <div className="mt-1 flex gap-2">
           <input
             {...inputProps}
@@ -210,7 +218,7 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
             aria-pressed={show}
             className={`min-h-11 px-3 text-sm ${t.buttonGhost}`}
           >
-            {show ? "Hide" : "Show"}
+            {show ? x({ en: "Hide", ko: "숨기기" }) : x({ en: "Show", ko: "보기" })}
           </button>
         </div>
       </label>
@@ -219,7 +227,7 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         disabled={a.busy || a.retryLeft > 0 || !user.trim() || !pass}
         className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
       >
-        {a.busy ? "Signing in…" : "Sign in"}
+        {a.busy ? x({ en: "Signing in…", ko: "로그인 중…" }) : x({ en: "Sign in", ko: "로그인" })}
       </button>
       <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
     </form>
@@ -227,6 +235,7 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
 }
 
 function FinalPhraseForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
+  const x = useStory();
   const { t } = env;
   const a = useAttempt(env, "final-phrase");
   const [v, setV] = useState("");
@@ -259,7 +268,7 @@ function FinalPhraseForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         disabled={a.busy || a.retryLeft > 0 || !v.trim()}
         className={`min-h-12 w-full font-bold uppercase tracking-widest ${t.button} disabled:opacity-60`}
       >
-        {a.busy ? "Transmitting…" : "Transmit"}
+        {a.busy ? x({ en: "Transmitting…", ko: "전송 중…" }) : x({ en: "Transmit", ko: "전송" })}
       </button>
       <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
     </form>
@@ -268,6 +277,7 @@ function FinalPhraseForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
 
 /** harbourcc.edu practice quiz. `code` is the binary word to decode. */
 function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
+  const x = useStory();
   const { t } = env;
   const tr = useT();
   const a = useAttempt(env, "binary-lesson");
@@ -280,7 +290,7 @@ function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
         if (v.trim()) void a.submit(v);
       }}
     >
-      <p className={`text-xs font-semibold uppercase tracking-wider ${t.muted}`}>Decode this word</p>
+      <p className={`text-xs font-semibold uppercase tracking-wider ${t.muted}`}>{x({ en: "Decode this word", ko: "이 단어를 해독하세요" })}</p>
       <p className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-lg font-bold tracking-wider">
         {code.split(" ").map((g, i) => (
           <span key={i}>{g}</span>
@@ -291,7 +301,7 @@ function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
       ) : (
         <>
           <label className="block text-sm">
-            Your answer
+            {x({ en: "Your answer", ko: "답" })}
             <input
               {...inputProps}
               value={v}
@@ -305,7 +315,7 @@ function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
             disabled={a.busy || a.retryLeft > 0 || !v.trim()}
             className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
           >
-            {a.busy ? "Checking…" : "Check answer"}
+            {a.busy ? x({ en: "Checking…", ko: "확인 중…" }) : x({ en: "Check answer", ko: "정답 확인" })}
           </button>
         </>
       )}
@@ -315,6 +325,7 @@ function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
 }
 
 function AdminLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
+  const x = useStory();
   const { t } = env;
   const a = useAttempt(env, "admin-console");
   const [pass, setPass] = useState("");
@@ -341,7 +352,7 @@ function AdminLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
           className={`h-11 min-w-0 flex-1 px-3 text-base ${t.input}`}
         />
         <button type="button" onClick={() => setShow((v) => !v)} aria-pressed={show} className={`min-h-11 px-3 text-sm ${t.buttonGhost}`}>
-          {show ? "Hide" : "Show"}
+          {show ? x({ en: "Hide", ko: "숨기기" }) : x({ en: "Show", ko: "보기" })}
         </button>
       </div>
       <button
@@ -349,7 +360,7 @@ function AdminLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         disabled={a.busy || a.retryLeft > 0 || !pass.trim()}
         className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
       >
-        {a.busy ? "Checking…" : "Unlock console"}
+        {a.busy ? x({ en: "Checking…", ko: "확인 중…" }) : x({ en: "Unlock console", ko: "콘솔 잠금 해제" })}
       </button>
       <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
     </form>

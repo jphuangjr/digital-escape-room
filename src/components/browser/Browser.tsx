@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { useT } from "@/i18n/client";
+import { useLocale, useT } from "@/i18n/client";
+import { pick } from "@/i18n/config";
 import { PUZZLE_AFFECTS_HOSTS } from "@/lib/client/discoveries";
 import type { PuzzleId, ResolveResponse, SitePage } from "@/lib/types";
 import { normalizeAddress, type GameCtx } from "@/lib/client/game";
@@ -23,6 +24,13 @@ interface Bookmark {
   title: string;
 }
 const DEFAULT_BOOKMARKS: Bookmark[] = [{ address: "meridian-inst.net", title: "Meridian Institute" }];
+
+/** The starter bookmark is stored in English; show it in the player's language. */
+function bookmarkTitle(b: Bookmark, x: ReturnType<typeof pick>): string {
+  return b.address === "meridian-inst.net" && b.title === "Meridian Institute"
+    ? x({ en: "Meridian Institute", ko: "메리디언 연구소" })
+    : b.title;
+}
 
 type View =
   | { kind: "newtab" }
@@ -52,6 +60,7 @@ export function Browser({
   onAddressChange?: (address: string | null) => void;
 }) {
   const t = useT();
+  const x = pick(useLocale());
   const { code } = ctx;
   const [history, setHistory] = useState<{ entries: string[]; idx: number }>({ entries: [], idx: -1 });
   const [view, setViewState] = useState<View>({ kind: "newtab" });
@@ -281,13 +290,13 @@ export function Browser({
                       void load(b.address, "push");
                     }}
                   >
-                    <span className="truncate text-sm text-stone-100">{b.title}</span>
+                    <span className="truncate text-sm text-stone-100">{bookmarkTitle(b, x)}</span>
                     <span className="truncate font-mono text-xs text-stone-500">{b.address}</span>
                   </button>
                   <button
                     className="flex h-11 w-11 items-center justify-center text-stone-500 active:bg-stone-800"
-                    aria-label={t("browser.menu.removeBookmark", { title: b.title })}
-                    onClick={() => saveBookmarks(bookmarks.filter((x) => x.address !== b.address))}
+                    aria-label={t("browser.menu.removeBookmark", { title: bookmarkTitle(b, x) })}
+                    onClick={() => saveBookmarks(bookmarks.filter((bm) => bm.address !== b.address))}
                   >
                     ✕
                   </button>
@@ -374,11 +383,12 @@ export function Browser({
 
 function NewTab({ bookmarks, onOpen }: { bookmarks: Bookmark[]; onOpen: (address: string) => void }) {
   const t = useT();
+  const x = pick(useLocale());
   return (
     <div className="mx-auto flex max-w-md flex-col items-center px-6 py-12 text-center">
       <CompassMark className="h-16 w-16 text-amber-500/60" />
       <p className="mt-4 font-serif text-lg text-stone-200">{t("browser.newTab.title")}</p>
-      <p className="mt-1 text-sm italic text-stone-500">&ldquo;Start at the beginning.&rdquo;</p>
+      <p className="mt-1 text-sm italic text-stone-500">&ldquo;{x({ en: "Start at the beginning.", ko: "처음부터 시작해." })}&rdquo;</p>
       <div className="mt-8 grid w-full grid-cols-2 gap-3">
         {bookmarks.map((b) => (
           <button
@@ -387,9 +397,9 @@ function NewTab({ bookmarks, onOpen }: { bookmarks: Bookmark[]; onOpen: (address
             className="flex min-h-20 flex-col items-center justify-center gap-1 rounded-xl border border-stone-800 bg-stone-900 p-3 active:bg-stone-800"
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/15 font-serif text-amber-300">
-              {b.title.charAt(0)}
+              {bookmarkTitle(b, x).charAt(0)}
             </span>
-            <span className="w-full truncate text-xs text-stone-300">{b.title}</span>
+            <span className="w-full truncate text-xs text-stone-300">{bookmarkTitle(b, x)}</span>
           </button>
         ))}
       </div>

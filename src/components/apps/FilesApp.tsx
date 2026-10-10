@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useT } from "@/i18n/client";
+import { useLocale, useT } from "@/i18n/client";
+import { pick, type Locale, type Tr } from "@/i18n/config";
 import type { GameCtx } from "@/lib/client/game";
 import type { AttemptResponse } from "@/lib/types";
 import { CompassBadge, btnGhost, useNow } from "./shared";
@@ -12,10 +13,16 @@ interface FileItem {
 }
 
 // Harmless, client-side flavor files. Contain NO puzzle answers.
-const LOCAL_FILES: FileItem[] = [
+interface LocalFile {
+  name: string;
+  body: Tr;
+}
+
+const LOCAL_FILES: LocalFile[] = [
   {
     name: "case_brief.txt",
-    body: `CASE BRIEF — CONFIDENTIAL
+    body: {
+      en: `CASE BRIEF — CONFIDENTIAL
 Client: the sister of Dr. Ada Voss
 Subject: Dr. Ada Voss, archivist, Meridian Institute
 Status: missing, last contact 48 hours ago
@@ -29,10 +36,26 @@ still syncing. Work together, write down everything, and share what
 matters with the rest of the room.
 
 Fee: paid in advance. Questions: none, apparently.`,
+      ko: `사건 개요 — 대외비
+의뢰인: 에이다 보스 박사의 여동생
+대상: 에이다 보스(Ada Voss) 박사, 메리디언 연구소 아키비스트
+상태: 실종, 마지막 연락 48시간 전
+
+임무:
+에이다에게 무슨 일이 있었는지 알아낼 것. 그녀가 남긴 메시지는 하나뿐이다.
+"이걸 읽고 있다면, 내가 너무 가까이 갔다는 뜻이야. 처음부터 시작해."
+
+이 노트북은 그녀의 것이다. 브라우저엔 아직 그녀의 북마크가 있고, 메일함은
+아직 동기화 중이다. 함께 움직이고, 전부 적어 두고, 중요한 건
+방 사람들과 나눌 것.
+
+보수: 선불 완료. 질문: 없음, 아마도.`,
+    },
   },
   {
     name: "readme.txt",
-    body: `FIELD NOTES FOR WHOEVER USES THIS MACHINE
+    body: {
+      en: `FIELD NOTES FOR WHOEVER USES THIS MACHINE
 
 - Browser: type an address in the bar, or tap a bookmark.
   Every page has a "View Source" button. Images have "File Info".
@@ -43,20 +66,39 @@ Fee: paid in advance. Questions: none, apparently.`,
 - Decoder: Ada keeps it in "Ada's Tools", inside her personal
   folder. She never could resist a security question.
 - Stuck? The hints panel can ask Ada for a nudge.`,
+      ko: `이 기계를 쓰는 누군가를 위한 현장 메모
+
+- 브라우저: 주소창에 주소를 입력하거나 북마크를 누를 것.
+  모든 페이지에 "소스 보기" 버튼이 있다. 이미지엔 "파일 정보"가 있다.
+  검은 줄은 누르면 아래 숨은 내용이 보인다.
+- 메모: 기본은 비공개. 중요하면 "방에 공유"를 누를 것.
+  조각에 태그를 달 것 (이름 / 연도 / ID / 암호 키 / 주소).
+- 이메일: 계속 확인할 것. 에이다가 음성 메시지를 남긴다.
+- 디코더: 에이다는 그걸 개인 폴더 안의 "Ada's Tools"에
+  넣어 뒀다. 보안 질문을 그냥 못 지나치는 사람이었다.
+- 막혔다면? 힌트 패널에서 에이다에게 귀띔을 부탁할 수 있다.`,
+    },
   },
   {
     name: "todo.txt",
-    body: `- back up the archive (again)
+    body: {
+      en: `- back up the archive (again)
 - call sis back
 - stop drawing compasses on everything
 - renew domain before it lapses`,
+      ko: `- 아카이브 백업 (또)
+- 동생한테 다시 전화하기
+- 아무 데나 나침반 그리는 버릇 고치기
+- 도메인 만료 전에 갱신하기`,
+    },
   },
 ];
 
 // In Ada's Tools. Points to the binary lesson; contains no answers.
-const SYLLABUS: FileItem = {
+const SYLLABUS: LocalFile = {
   name: "cs110_syllabus.txt",
-  body: `HARBOUR COMMUNITY COLLEGE — EVENING STUDIES
+  body: {
+    en: `HARBOUR COMMUNITY COLLEGE — EVENING STUDIES
 CS 110: How Computers Count
 Tuesdays 6:30–8:30pm, Room 12
 Instructor: W. Okafor
@@ -77,7 +119,31 @@ Bring a pencil. Laptops welcome. Phones face down.
 W. writes EVERYTHING in her class code now.
 Shopping lists. Door codes. Probably passwords.
 Learn it.`,
+    ko: `하버 커뮤니티 칼리지 — 야간 강좌
+CS 110: 컴퓨터는 어떻게 셀까
+매주 화요일 오후 6:30–8:30, 12호실
+강사: W. Okafor
+
+1주차  컴퓨터란 정말 무엇인가?           (유인물)
+2주차  스위치: 켜짐과 꺼짐               (유인물)
+3주차  2진법: 손가락 두 개로 세기
+        온라인 강의 + 연습 퀴즈:
+        harbourcc.edu/cs110/binary
+        퀴즈를 통과하면 수업용
+        2진법 번역기가 기기에 설치됩니다.
+4주차  비밀번호, 그리고 당신 것이 허술한 이유
+
+연필 지참. 노트북 환영. 휴대폰은 뒤집어 둘 것.
+
+---
+(여백에 에이다의 글씨:)
+W.는 요즘 '전부' 수업 코드로 적는다.
+장보기 목록. 현관 비밀번호. 아마 패스워드도.
+배워 둘 것.`,
+  },
 };
+
+const resolveFile = (f: LocalFile, loc: Locale): FileItem => ({ name: f.name, body: pick(loc)(f.body) });
 
 const PIN_LEN = 4;
 
@@ -283,12 +349,15 @@ type View =
 
 export function FilesApp({ ctx }: { ctx: GameCtx }) {
   const t = useT();
+  const locale = useLocale();
   const { state } = ctx;
   const unlocked = state.progress.solved.includes("bonus-pin");
   const toolsUnlocked = state.progress.solved.includes("tools-folder");
   const hasCompass = state.progress.badges.includes("compass");
   const [view, setView] = useState<View>({ kind: "root" });
-  const [personal, setPersonal] = useState<FileItem[] | null>(null);
+  // Cached per language, so switching language mid-game refetches Ada's files in the new one.
+  const [personalCache, setPersonalCache] = useState<{ locale: string; files: FileItem[] } | null>(null);
+  const personal = personalCache?.locale === locale ? personalCache.files : null;
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -299,14 +368,14 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
       .api<{ locked: true } | { locked: false; files: FileItem[] }>("/files")
       .then((res) => {
         if (cancelled) return;
-        if (res.ok && res.data && !res.data.locked) setPersonal(res.data.files);
+        if (res.ok && res.data && !res.data.locked) setPersonalCache({ locale, files: res.data.files });
         else ctx.toast(t("apps.files.openFolderFailed"), "error");
       })
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
     };
-  }, [unlocked, view.kind, personal, ctx, t]);
+  }, [unlocked, view.kind, personal, ctx, t, locale]);
 
   const header = (title: string, back?: () => void) => (
     <div className="flex shrink-0 items-center gap-2 border-b border-zinc-800 px-2 py-2">
@@ -365,7 +434,9 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
           ) : (
             <ul className="divide-y divide-zinc-900">
               {row("🧭", t("apps.files.decoderName"), t("apps.files.decoderSub"), () => ctx.openApp("decoder"))}
-              {row("📄", SYLLABUS.name, t("apps.files.textFile"), () => setView({ kind: "file", file: SYLLABUS, from: "tools" }))}
+              {row("📄", SYLLABUS.name, t("apps.files.textFile"), () =>
+                setView({ kind: "file", file: resolveFile(SYLLABUS, locale), from: "tools" }),
+              )}
             </ul>
           )}
         </div>
@@ -417,7 +488,9 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
           unlocked ? t("apps.files.folderUnlockedSub") : t("apps.files.folderPinSub"),
           () => setView({ kind: "personal" }),
         )}
-        {LOCAL_FILES.map((f) => row("📄", f.name, t("apps.files.textFile"), () => setView({ kind: "file", file: f, from: "root" })))}
+        {LOCAL_FILES.map((f) =>
+          row("📄", f.name, t("apps.files.textFile"), () => setView({ kind: "file", file: resolveFile(f, locale), from: "root" })),
+        )}
       </ul>
       <div className="shrink-0 border-t border-zinc-900 p-2 text-center">
         <button className={`${btnGhost} w-full`} onClick={() => ctx.openApp("notes")}>

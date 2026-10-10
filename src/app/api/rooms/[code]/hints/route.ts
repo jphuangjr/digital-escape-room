@@ -7,7 +7,7 @@ import { track } from "@/server/analytics";
 import { touchRoom } from "@/server/session";
 import { hintDTO } from "@/server/state";
 import { HINT_PUZZLES } from "@/server/content";
-import { getT } from "@/i18n/server";
+import { getT, getLocale } from "@/i18n/server";
 
 export async function POST(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
@@ -34,14 +34,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     await touchRoom(room);
     track(room.id, player.id, "hint", { puzzleId, tier });
     await publish(room.code, "hint.unlocked", { puzzleId, tier });
-    return json<HintDTO>(hintDTO(created), 201);
+    return json<HintDTO>(hintDTO(created, await getLocale()), 201);
   } catch (err) {
     // Someone else in the room unlocked this tier at the same moment: return that one.
     if ((err as { code?: string }).code === "P2002") {
       const existing = await db.hintRequest.findUnique({
         where: { roomId_puzzleId_tier: { roomId: room.id, puzzleId, tier } },
       });
-      if (existing) return json<HintDTO>(hintDTO(existing));
+      if (existing) return json<HintDTO>(hintDTO(existing, await getLocale()));
     }
     throw err;
   }

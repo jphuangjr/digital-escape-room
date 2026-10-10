@@ -9,7 +9,6 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.ada-voss.duration": "60–90분",
   "site.game.ada-voss.difficulty": "보통",
   "site.game.ada-voss.tone": "누아르 미스터리",
-  "site.game.storyEnglishOnly": "스토리는 현재 영어로만 제공돼요. 한국어 스토리는 곧 추가될 예정이에요.",
 
   "site.directory.eyebrow": "온라인 방탈출",
   "site.directory.intro": "각자 자기 휴대폰으로 함께 푸는 추리 퍼즐이에요. 사건을 고르고 친구들을 초대해서 탈출해 보세요.",

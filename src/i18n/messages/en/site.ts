@@ -8,7 +8,6 @@ const messages = {
   "site.game.ada-voss.duration": "60–90 min",
   "site.game.ada-voss.difficulty": "Medium",
   "site.game.ada-voss.tone": "Noir mystery",
-  "site.game.storyEnglishOnly": "Story available in English.",
 
   // Directory
   "site.directory.eyebrow": "Online escape rooms",

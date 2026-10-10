@@ -1,11 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useT } from "@/i18n/client";
+import { useLocale, useT } from "@/i18n/client";
+import { pick } from "@/i18n/config";
 import type { Block, ImageFileInfo, SitePage } from "@/lib/types";
 import type { GameCtx } from "@/lib/client/game";
 import { THEMES, type ThemeStyle } from "./themes";
 import { SiteForm } from "./SiteForms";
+
+/** In-site (story) strings: `const x = useStory(); x({ en, ko })`. */
+function useStory() {
+  return pick(useLocale());
+}
 
 export interface RenderEnv {
   t: ThemeStyle;
@@ -61,6 +67,7 @@ export function BlockList({ blocks, env }: { blocks: Block[]; env: RenderEnv }) 
 }
 
 function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
+  const x = useStory();
   const { t } = env;
   switch (b.type) {
     case "heading": {
@@ -149,7 +156,7 @@ function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
                 <span aria-hidden>🕒</span> {b.time}
               </span>
             )}
-            {b.author && <span className={`text-sm ${t.muted}`}>by {b.author}</span>}
+            {b.author && <span className={`text-sm ${t.muted}`}>{x({ en: `by ${b.author}`, ko: `작성자 ${b.author}` })}</span>}
           </div>
           <p className={`mt-3 whitespace-pre-line ${t.p}`}>{b.body}</p>
         </article>
@@ -161,7 +168,7 @@ function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
             <h3 className="text-lg font-bold">{b.title}</h3>
             {b.petId && (
               <span className={`rounded-full px-2.5 py-0.5 font-mono text-sm font-bold ${t.dark ? "bg-white/10" : "bg-black/5"}`}>
-                ID #{b.petId}
+                {x({ en: `ID #${b.petId}`, ko: `등록번호 #${b.petId}` })}
               </span>
             )}
           </div>
@@ -175,11 +182,11 @@ function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
           <figcaption className="mb-2 text-sm font-bold">{b.label}</figcaption>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
             <div className="rounded border border-red-400/50 bg-red-500/10 p-2">
-              <p className="text-xs font-bold uppercase tracking-wider text-red-600">− Before</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-red-600">{x({ en: "− Before", ko: "− 변경 전" })}</p>
               <p className="mt-1 whitespace-pre-line text-sm">{b.before}</p>
             </div>
             <div className="rounded border border-green-500/50 bg-green-500/10 p-2">
-              <p className="text-xs font-bold uppercase tracking-wider text-green-700">+ After</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-green-700">{x({ en: "+ After", ko: "+ 변경 후" })}</p>
               <p className="mt-1 whitespace-pre-line text-sm">{b.after}</p>
             </div>
           </div>
@@ -302,19 +309,20 @@ export function Redacted({ text, dark }: { text: string; dark?: boolean }) {
 }
 
 function StaffPhoto({ photo, t, name }: { photo: string | null; t: ThemeStyle; name: string }) {
+  const x = useStory();
   if (!photo) {
     return (
-      <div className={`flex h-20 w-16 shrink-0 flex-col items-center justify-center ${t.frame}`} aria-label={`${name}: no photo`}>
+      <div className={`flex h-20 w-16 shrink-0 flex-col items-center justify-center ${t.frame}`} aria-label={x({ en: `${name}: no photo`, ko: `${name}: 사진 없음` })}>
         <svg viewBox="0 0 40 40" className="h-10 w-10 opacity-40" aria-hidden>
           <circle cx="20" cy="14" r="7" fill="currentColor" />
           <path d="M6 38c0-8 6.3-13 14-13s14 5 14 13z" fill="currentColor" />
         </svg>
-        <span className="mt-0.5 text-[9px] uppercase tracking-wider opacity-60">no photo</span>
+        <span className="mt-0.5 text-[9px] uppercase tracking-wider opacity-60">{x({ en: "no photo", ko: "사진 없음" })}</span>
       </div>
     );
   }
   return (
-    <div className={`flex h-20 w-16 shrink-0 items-center justify-center text-3xl ${t.frame}`} aria-label={`Photo of ${name}`}>
+    <div className={`flex h-20 w-16 shrink-0 items-center justify-center text-3xl ${t.frame}`} aria-label={x({ en: `Photo of ${name}`, ko: `${name}의 사진` })}>
       {photo.length <= 4 ? photo : "👤"}
     </div>
   );
@@ -399,6 +407,7 @@ function ImageBlock({
 }
 
 export function Compass({ size = 120, className = "" }: { size?: number; className?: string }) {
+  const x = useStory();
   const notches = Array.from({ length: 7 }, (_, i) => {
     const a = (i / 7) * Math.PI * 2 - Math.PI / 2;
     return {
@@ -415,7 +424,7 @@ export function Compass({ size = 120, className = "" }: { size?: number; classNa
       height={size}
       className={className}
       role="img"
-      aria-label="A compass with a broken needle and seven notches"
+      aria-label={x({ en: "A compass with a broken needle and seven notches", ko: "바늘이 부러지고 눈금이 일곱 개인 나침반" })}
     >
       <circle cx="50" cy="50" r="47" fill="none" stroke="currentColor" strokeWidth="2.5" />
       <circle cx="50" cy="50" r="33" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
@@ -442,6 +451,7 @@ const PLACE_VALUES = [16, 8, 4, 2, 1];
 
 /** Tap-to-flip place-value demo for the binary lesson. Generic: 5 bits, A = 1. */
 function BitsWidget({ t }: { t: ThemeStyle }) {
+  const x = useStory();
   const [bits, setBits] = useState([0, 1, 0, 0, 0]);
   const value = bits.reduce((sum, b, i) => sum + b * PLACE_VALUES[i], 0);
   const letter = value >= 1 && value <= 26 ? String.fromCharCode(64 + value) : "?";
@@ -453,8 +463,12 @@ function BitsWidget({ t }: { t: ThemeStyle }) {
             key={i}
             type="button"
             aria-pressed={b === 1}
-            aria-label={`Switch worth ${PLACE_VALUES[i]}, ${b ? "on" : "off"}`}
-            onClick={() => setBits((cur) => cur.map((x, j) => (j === i ? 1 - x : x)))}
+            aria-label={
+              b
+                ? x({ en: `Switch worth ${PLACE_VALUES[i]}, on`, ko: `${PLACE_VALUES[i]}짜리 스위치, 켜짐` })
+                : x({ en: `Switch worth ${PLACE_VALUES[i]}, off`, ko: `${PLACE_VALUES[i]}짜리 스위치, 꺼짐` })
+            }
+            onClick={() => setBits((cur) => cur.map((v, j) => (j === i ? 1 - v : v)))}
             className={`flex min-h-16 flex-col items-center justify-center gap-0.5 font-mono ${b ? t.button : t.buttonGhost}`}
           >
             <span className="text-2xl font-bold">{b}</span>
@@ -466,12 +480,15 @@ function BitsWidget({ t }: { t: ThemeStyle }) {
         {bits.join("")} = {bits.map((b, i) => (b ? PLACE_VALUES[i] : null)).filter(Boolean).join(" + ") || "0"} = {value} ={" "}
         <span className={`text-2xl font-bold ${t.accent}`}>{letter}</span>
       </p>
-      {letter === "?" && <p className={`text-center text-xs ${t.muted}`}>{value === 0 ? "All off is zero, not a letter." : "Past 26: no letter for that one."}</p>}
+      {letter === "?" && <p className={`text-center text-xs ${t.muted}`}>{value === 0
+            ? x({ en: "All off is zero, not a letter.", ko: "전부 꺼지면 0이에요. 글자가 아니에요." })
+            : x({ en: "Past 26: no letter for that one.", ko: "26을 넘으면 해당하는 글자가 없어요." })}</p>}
     </div>
   );
 }
 
 function Countdown({ seconds, label, t }: { seconds: number; label: string; t: ThemeStyle }) {
+  const x = useStory();
   const start = Math.max(1, Math.floor(seconds));
   const [left, setLeft] = useState(start);
   const [holding, setHolding] = useState(false);
@@ -499,7 +516,7 @@ function Countdown({ seconds, label, t }: { seconds: number; label: string; t: T
     <div className={`text-center ${t.card}`} aria-live="off">
       <p className={`text-xs uppercase tracking-[0.3em] ${t.muted}`}>{label}</p>
       <p className={`mt-2 font-mono text-4xl font-bold tabular-nums sm:text-5xl ${holding ? "animate-pulse" : ""}`}>
-        {holding ? "SIGNAL HOLDING" : fmt(left)}
+        {holding ? x({ en: "SIGNAL HOLDING", ko: "신호 유지 중" }) : fmt(left)}
       </p>
     </div>
   );
