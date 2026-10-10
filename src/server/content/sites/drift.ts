@@ -11,7 +11,7 @@ export interface DriftPost {
   date: string;
   series: "Field Notes" | "Ada's Kitchen";
   body: string;
-  /** Translations. Field Notes titles stay English in every locale (their initials spell DRIFT); the Korean title adds a subtitle. */
+  /** Translations. Field Notes titles stay English in every locale (their initials spell DRIFT); the Korean and Chinese titles add a subtitle. */
   l10n: Record<Exclude<Locale, "en">, { title: string; date: string; body: string }>;
 }
 
@@ -45,6 +45,16 @@ export const DRIFT_POSTS: DriftPost[] = [
           "당신이 누구든: 그들은 작은 것부터 거짓말한다. 날짜. 이름. 한때 얼굴이 있던 사진 한 장.",
         ].join("\n"),
       },
+      "zh-TW": {
+        title: "True North Is a Rumour — 真北只是傳聞",
+        date: "2019年5月1日",
+        body: [
+          "我想，這是這個系列的最後一篇。也許是我在任何地方寫下的最後一篇。",
+          "單位的主樓梯上有一個指南針。七道刻痕，指針從軸心處斷了。他們跟訪客說是搬遷時摔壞的。不是。是有人把它弄斷，好讓它永遠指向他們想要的方向。",
+          "如果你是按順序讀這些文章的——真正的順序，照著日曆走的方向——那你已經知道該怎麼轉動轉盤了。數的是日子，不是文章。指針需要幾道刻痕，就有幾道。",
+          "不管你是誰：他們總是先從小事開始說謊。日期。名字。一張曾經有臉的照片。",
+        ].join("\n"),
+      },
     },
   },
   {
@@ -63,6 +73,14 @@ export const DRIFT_POSTS: DriftPost[] = [
         body: [
           "야간 근무를 위한 쇼트브레드. 차가운 버터 4큰술에 설탕을 넣고 손목이 투덜댈 때까지 크림처럼 휘젓는다. 그다음 밀가루를 넣는다. 끈적이기를 멈추고 정직해지기 시작할 때까지.",
           "가장자리가 오래된 종이 색이 될 때까지 굽는다. 책상에서 먹는다. 장부 위에 부스러기는 남기지 않는다.",
+        ].join("\n"),
+      },
+      "zh-TW": {
+        title: "艾達的廚房：奶油與耐心",
+        date: "2019年4月14日",
+        body: [
+          "給夜班的奶油酥餅。把 4 大匙冰奶油和糖一起打發，打到手腕開始抱怨，再加麵粉，直到它不再黏手、開始變得誠實。",
+          "烤到邊緣變成舊紙的顏色。在辦公桌前吃。別在帳冊上留下碎屑。",
         ].join("\n"),
       },
     },
@@ -87,6 +105,15 @@ export const DRIFT_POSTS: DriftPost[] = [
           "나도 나만의 각주를 쓰기 시작했다.",
         ].join("\n"),
       },
+      "zh-TW": {
+        title: "Footnotes for a Ghost — 寫給幽靈的註腳",
+        date: "2019年4月2日",
+        body: [
+          "我有一位同事，已經沒有臉了。不是字面上的意思。在員工合照裡，她原本站的位置是空的，彷彿她在快門按下前一秒走出了相框。",
+          "她每天早上仍然坐在自己的辦公桌前。仍然在那個荒謬的街機遊戲裡贏過所有人。但在紙面上，她正被一點一點抹淡，一次一條註腳。",
+          "我也開始寫我自己的註腳了。",
+        ].join("\n"),
+      },
     },
   },
   {
@@ -109,6 +136,15 @@ export const DRIFT_POSTS: DriftPost[] = [
           "누군가 고쳐 쓰다가 숫자를 거꾸로 적었다. 아니면 누군가 일부러 거꾸로 남겨 두었거나.",
         ].join("\n"),
       },
+      "zh-TW": {
+        title: "Ink That Moves — 會移動的墨水",
+        date: "2019年3月1日",
+        body: [
+          "墨水應該待在你放下它的地方。這就是全部的約定。",
+          "這個星期，創立年份在三個地方被改掉了，卻沒有人眨一下眼。大廳的牌匾、章程的掃描檔、「關於我們」頁面。舊的數字只倖存在沒人想到要看的地方——頁面最底下，小字裡，灰塵落定的地方。",
+          "有人在改寫時把數字的順序弄反了。或者，有人故意把它們留成反的。",
+        ].join("\n"),
+      },
     },
   },
   {
@@ -127,6 +163,14 @@ export const DRIFT_POSTS: DriftPost[] = [
         body: [
           "반죽할 기운도 없이 너무 늦게 귀가하는 사람을 위한 무반죽 빵. 따뜻한 우유에 달걀 2개를 풀고, 강력분 1컵과 소금 한 꼬집을 섞은 뒤 행주를 덮어 밤새 둔다.",
           "아침이면 아무도 지켜보지 않았는데도 부풀어 있을 것이다. 대부분의 일이 그렇다.",
+        ].join("\n"),
+      },
+      "zh-TW": {
+        title: "艾達的廚房：午夜麵包",
+        date: "2019年2月23日",
+        body: [
+          "給回家太晚、沒力氣揉麵的人的免揉麵包。把 2 顆蛋打進溫牛奶裡，拌入 1 杯高筋麵粉和一小撮鹽，蓋上茶巾放一整夜。",
+          "到了早上，它會在沒人看著的時候自己膨起來。大多數事情都是這樣。",
         ].join("\n"),
       },
     },
@@ -151,6 +195,15 @@ export const DRIFT_POSTS: DriftPost[] = [
           "계속 이 글을 쓸 생각이다. 순서대로. 누군가는 무언가를 순서대로 지켜야 하니까.",
         ].join("\n"),
       },
+      "zh-TW": {
+        title: "Redacted Weather — 被塗黑的天氣",
+        date: "2019年2月1日",
+        body: [
+          "今天我發現一份被黑條劃過的氣象報告。氣象報告。港口倉庫失火的那一晚，下雨這件事，顯然是機密。",
+          "從被剪掉的部分，你會開始看出一件事的形狀。像模版。像相片底片。",
+          "我會繼續寫下去。按順序。總得有人把某些東西維持在順序裡。",
+        ].join("\n"),
+      },
     },
   },
   {
@@ -169,6 +222,14 @@ export const DRIFT_POSTS: DriftPost[] = [
         body: [
           "동생 말로는 내가 책상에서 보온병에 든 수프만 먹는다고 한다. 그래서, 그 수프. 물 3컵에 양파 하나, 당근 하나, 월계수 잎 1장을 넣고 부엌에서 누군가 나를 사랑하는 냄새가 날 때까지 뭉근히 끓인다.",
           "소금은 입맛대로. 끓는 동안 뭔가를 읽는다. 일 말고. 절대 일은 말고.",
+        ].join("\n"),
+      },
+      "zh-TW": {
+        title: "艾達的廚房：檔案管理員的湯",
+        date: "2019年1月19日",
+        body: [
+          "我妹妹說我只會在辦公桌前喝保溫瓶裡的湯，所以，就是這碗湯。3 杯水加一顆洋蔥、一根紅蘿蔔和 1 片月桂葉，小火慢燉，直到廚房聞起來像是有人愛著你。",
+          "鹽依口味加。煮的時候讀點東西。不是工作。永遠不要是工作。",
         ].join("\n"),
       },
     },
@@ -193,6 +254,15 @@ export const DRIFT_POSTS: DriftPost[] = [
           "첫 번째 방위: 기록이 움직이고 있다. 두 번째 방위: 내가 상상하는 게 아니다.",
         ].join("\n"),
       },
+      "zh-TW": {
+        title: "Dead Reckoning — 航位推算",
+        date: "2019年1月2日",
+        body: [
+          "沒有星星可看的水手會用航位推算：你知道自己從哪裡出發，知道自己走了多遠，於是你相信算術勝過相信眼睛。",
+          "我開始寫一本筆記。不是研究院能稽核的那種。如果我出了什麼事，總會有人需要知道我是從哪裡出發的。",
+          "第一個方位：紀錄在移動。第二個方位：這不是我的想像。",
+        ].join("\n"),
+      },
     },
   },
 ];
@@ -200,8 +270,8 @@ export const DRIFT_POSTS: DriftPost[] = [
 const nav = (x: X): Block => ({
   type: "nav",
   links: [
-    { text: x({ en: "Home", ko: "홈" }), href: DRIFT_HOST },
-    { text: x({ en: "About", ko: "소개" }), href: `${DRIFT_HOST}/about` },
+    { text: x({ en: "Home", ko: "홈", "zh-TW": "首頁" }), href: DRIFT_HOST },
+    { text: x({ en: "About", ko: "소개", "zh-TW": "關於" }), href: `${DRIFT_HOST}/about` },
   ],
 });
 
@@ -210,12 +280,13 @@ const footer = (x: X): Block => ({
   text: x({
     en: "The Drift — notes from someone who reads the footnotes. Comments are closed.",
     ko: "The Drift — 각주까지 읽는 사람의 기록. 댓글은 닫혀 있습니다.",
+    "zh-TW": "The Drift — 一個會讀註腳的人的筆記。留言功能已關閉。",
   }),
 });
 
 const SERIES: Record<DriftPost["series"], Tr> = {
-  "Field Notes": { en: "Field Notes", ko: "필드 노트 · Field Notes" },
-  "Ada's Kitchen": { en: "Ada's Kitchen", ko: "에이다의 부엌 · Ada's Kitchen" },
+  "Field Notes": { en: "Field Notes", ko: "필드 노트 · Field Notes", "zh-TW": "田野筆記 · Field Notes" },
+  "Ada's Kitchen": { en: "Ada's Kitchen", ko: "에이다의 부엌 · Ada's Kitchen", "zh-TW": "艾達的廚房 · Ada's Kitchen" },
 };
 
 /** The post's text in `loc` (English fields as-is for "en"). */
@@ -239,18 +310,20 @@ function home(loc: Locale): SitePage {
       text: x({
         en: "Field notes, small hours, and the occasional recipe. Posts appear newest first — the way the world reads, and the wrong way to read a story.",
         ko: "현장 기록, 늦은 밤의 생각, 그리고 가끔 레시피. 글은 최신순으로 보인다 — 세상이 읽는 방식이고, 이야기를 읽기에는 틀린 방식이다.",
+        "zh-TW": "田野筆記、深夜的念頭，偶爾還有食譜。文章由新到舊排列——這是世界閱讀的方式，卻是讀一個故事的錯誤方式。",
       }),
     },
     ...DRIFT_POSTS.map((p) => postBlock(p, loc)),
     footer(x),
   ];
   return page(DRIFT_HOST, "The Drift", "drift", blocks, {
-    headComments: [x({ en: "static export — minimal-ink theme", ko: "정적 내보내기 — minimal-ink 테마" })],
-    bodyComments: [x({ en: "two series live here. only one of them is a map.", ko: "여기엔 시리즈가 두 개 있다. 지도는 그중 하나뿐." })],
+    headComments: [x({ en: "static export — minimal-ink theme", ko: "정적 내보내기 — minimal-ink 테마", "zh-TW": "靜態匯出 — minimal-ink 佈景主題" })],
+    bodyComments: [x({ en: "two series live here. only one of them is a map.", ko: "여기엔 시리즈가 두 개 있다. 지도는 그중 하나뿐.", "zh-TW": "這裡有兩個系列。只有其中一個是地圖。" })],
     tailComments: [
       x({
         en: "draft image IMG_8841 removed from header after upload — too recognisable",
         ko: "초안 이미지 IMG_8841, 업로드 후 헤더에서 제거 — 너무 알아보기 쉬움",
+        "zh-TW": "草稿圖片 IMG_8841 上傳後已從頁首移除——太容易被認出來",
       }),
     ],
   });
@@ -261,12 +334,13 @@ function about(loc: Locale): SitePage {
   const blocks: Block[] = [
     nav(x),
     { type: "compass" },
-    { type: "heading", level: 1, text: x({ en: "About", ko: "소개" }) },
+    { type: "heading", level: 1, text: x({ en: "About", ko: "소개", "zh-TW": "關於" }) },
     {
       type: "paragraph",
       text: x({
         en: "I work with old paper for a living. This is where I write the things I can't put in the official finding aids.",
         ko: "나는 오래된 종이를 다루는 일로 먹고산다. 공식 목록에는 적을 수 없는 것들을 여기에 쓴다.",
+        "zh-TW": "我靠處理舊紙張維生。官方檢索目錄裡寫不進去的東西，我寫在這裡。",
       }),
     },
     {
@@ -274,6 +348,7 @@ function about(loc: Locale): SitePage {
       text: x({
         en: "The Field Notes are a series. Read them from the first to the last. The first letter is where every bearing begins, and distance is measured in days.",
         ko: "필드 노트(Field Notes)는 연재다. 첫 글부터 마지막 글까지 순서대로 읽을 것. 모든 방위는 첫 글자에서 시작하고, 거리는 날짜로 잰다.",
+        "zh-TW": "田野筆記（Field Notes）是一個系列。請從第一篇讀到最後一篇。每個方位都從第一個字母開始，而距離以日子計算。",
       }),
     },
     {
@@ -281,11 +356,12 @@ function about(loc: Locale): SitePage {
       text: x({
         en: "The kitchen posts are just for my sister, who worries I don't eat.",
         ko: "부엌 글은 그냥 동생을 위한 것이다. 내가 밥을 안 먹는다고 걱정하니까.",
+        "zh-TW": "廚房的文章只是寫給我妹妹的，她總擔心我不吃飯。",
       }),
     },
     footer(x),
   ];
-  return page(`${DRIFT_HOST}/about`, x({ en: "About — The Drift", ko: "소개 — The Drift" }), "drift", blocks);
+  return page(`${DRIFT_HOST}/about`, x({ en: "About — The Drift", ko: "소개 — The Drift", "zh-TW": "關於 — The Drift" }), "drift", blocks);
 }
 
 function post(slug: string, loc: Locale): SitePage | null {
@@ -296,7 +372,7 @@ function post(slug: string, loc: Locale): SitePage | null {
   const blocks: Block[] = [
     nav(x),
     postBlock(p, loc),
-    { type: "link", text: x({ en: "← All posts", ko: "← 전체 글" }), href: DRIFT_HOST },
+    { type: "link", text: x({ en: "← All posts", ko: "← 전체 글", "zh-TW": "← 所有文章" }), href: DRIFT_HOST },
     footer(x),
   ];
   return page(`${DRIFT_HOST}/post/${p.slug}`, `${t.title} — The Drift`, "drift", blocks, {

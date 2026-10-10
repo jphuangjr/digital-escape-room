@@ -19,9 +19,20 @@ import koAdmin from "./ko/admin";
 import enApi from "./en/api";
 import koApi from "./ko/api";
 
+import zhCommon from "./zh-TW/common";
+import zhSite from "./zh-TW/site";
+import zhShell from "./zh-TW/shell";
+import zhRoom from "./zh-TW/room";
+import zhApps from "./zh-TW/apps";
+import zhBrowser from "./zh-TW/browser";
+import zhAdmin from "./zh-TW/admin";
+import zhApi from "./zh-TW/api";
+
 export type Messages = Record<string, string>;
 
 const en: Messages = { ...enCommon, ...enSite, ...enShell, ...enRoom, ...enApps, ...enBrowser, ...enAdmin, ...enApi };
 const ko: Messages = { ...koCommon, ...koSite, ...koShell, ...koRoom, ...koApps, ...koBrowser, ...koAdmin, ...koApi };
 
-export const MESSAGES: Record<Locale, Messages> = { en, ko };
+const zhTW: Messages = { ...zhCommon, ...zhSite, ...zhShell, ...zhRoom, ...zhApps, ...zhBrowser, ...zhAdmin, ...zhApi };
+
+export const MESSAGES: Record<Locale, Messages> = { en, ko, "zh-TW": zhTW };

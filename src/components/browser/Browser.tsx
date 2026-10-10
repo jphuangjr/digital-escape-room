@@ -28,7 +28,7 @@ const DEFAULT_BOOKMARKS: Bookmark[] = [{ address: "meridian-inst.net", title: "M
 /** The starter bookmark is stored in English; show it in the player's language. */
 function bookmarkTitle(b: Bookmark, x: ReturnType<typeof pick>): string {
   return b.address === "meridian-inst.net" && b.title === "Meridian Institute"
-    ? x({ en: "Meridian Institute", ko: "메리디언 연구소" })
+    ? x({ en: "Meridian Institute", ko: "메리디언 연구소", "zh-TW": "子午研究院" })
     : b.title;
 }
 
@@ -388,7 +388,7 @@ function NewTab({ bookmarks, onOpen }: { bookmarks: Bookmark[]; onOpen: (address
     <div className="mx-auto flex max-w-md flex-col items-center px-6 py-12 text-center">
       <CompassMark className="h-16 w-16 text-amber-500/60" />
       <p className="mt-4 font-serif text-lg text-stone-200">{t("browser.newTab.title")}</p>
-      <p className="mt-1 text-sm italic text-stone-500">&ldquo;{x({ en: "Start at the beginning.", ko: "처음부터 시작해." })}&rdquo;</p>
+      <p className="mt-1 text-sm italic text-stone-500">&ldquo;{x({ en: "Start at the beginning.", ko: "처음부터 시작해.", "zh-TW": "從頭開始。" })}&rdquo;</p>
       <div className="mt-8 grid w-full grid-cols-2 gap-3">
         {bookmarks.map((b) => (
           <button

@@ -124,3 +124,8 @@ button {
   word-break: keep-all;
   overflow-wrap: break-word;
 }
+
+/* Chinese: balance heading lines so a title doesn't leave one character alone on the last line. */
+:lang(zh) :is(h1, h2, h3) {
+  text-wrap: balance;
+}

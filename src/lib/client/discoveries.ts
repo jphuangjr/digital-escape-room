@@ -39,3 +39,8 @@ export const PUZZLE_AFFECTS_HOSTS: Record<PuzzleId, string[]> = {
   "admin-console": ["intranet.meridian-inst.net", "switch.ada-voss.net"],
   "final-phrase": ["switch.ada-voss.net"],
 };
+
+/** Space between "who" and "what" in a discovery line: none in Chinese, which doesn't use word spaces. */
+export function discoverySeparator(locale: string): string {
+  return locale.startsWith("zh") ? "" : " ";
+}

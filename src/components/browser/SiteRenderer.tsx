@@ -156,7 +156,7 @@ function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
                 <span aria-hidden>🕒</span> {b.time}
               </span>
             )}
-            {b.author && <span className={`text-sm ${t.muted}`}>{x({ en: `by ${b.author}`, ko: `작성자 ${b.author}` })}</span>}
+            {b.author && <span className={`text-sm ${t.muted}`}>{x({ en: `by ${b.author}`, ko: `작성자 ${b.author}`, "zh-TW": `作者：${b.author}` })}</span>}
           </div>
           <p className={`mt-3 whitespace-pre-line ${t.p}`}>{b.body}</p>
         </article>
@@ -168,7 +168,7 @@ function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
             <h3 className="text-lg font-bold">{b.title}</h3>
             {b.petId && (
               <span className={`rounded-full px-2.5 py-0.5 font-mono text-sm font-bold ${t.dark ? "bg-white/10" : "bg-black/5"}`}>
-                {x({ en: `ID #${b.petId}`, ko: `등록번호 #${b.petId}` })}
+                {x({ en: `ID #${b.petId}`, ko: `등록번호 #${b.petId}`, "zh-TW": `登記編號 #${b.petId}` })}
               </span>
             )}
           </div>
@@ -182,11 +182,11 @@ function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
           <figcaption className="mb-2 text-sm font-bold">{b.label}</figcaption>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
             <div className="rounded border border-red-400/50 bg-red-500/10 p-2">
-              <p className="text-xs font-bold uppercase tracking-wider text-red-600">{x({ en: "− Before", ko: "− 변경 전" })}</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-red-600">{x({ en: "− Before", ko: "− 변경 전", "zh-TW": "− 修改前" })}</p>
               <p className="mt-1 whitespace-pre-line text-sm">{b.before}</p>
             </div>
             <div className="rounded border border-green-500/50 bg-green-500/10 p-2">
-              <p className="text-xs font-bold uppercase tracking-wider text-green-700">{x({ en: "+ After", ko: "+ 변경 후" })}</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-green-700">{x({ en: "+ After", ko: "+ 변경 후", "zh-TW": "+ 修改後" })}</p>
               <p className="mt-1 whitespace-pre-line text-sm">{b.after}</p>
             </div>
           </div>
@@ -312,17 +312,17 @@ function StaffPhoto({ photo, t, name }: { photo: string | null; t: ThemeStyle; n
   const x = useStory();
   if (!photo) {
     return (
-      <div className={`flex h-20 w-16 shrink-0 flex-col items-center justify-center ${t.frame}`} aria-label={x({ en: `${name}: no photo`, ko: `${name}: 사진 없음` })}>
+      <div className={`flex h-20 w-16 shrink-0 flex-col items-center justify-center ${t.frame}`} aria-label={x({ en: `${name}: no photo`, ko: `${name}: 사진 없음`, "zh-TW": `${name}：沒有照片` })}>
         <svg viewBox="0 0 40 40" className="h-10 w-10 opacity-40" aria-hidden>
           <circle cx="20" cy="14" r="7" fill="currentColor" />
           <path d="M6 38c0-8 6.3-13 14-13s14 5 14 13z" fill="currentColor" />
         </svg>
-        <span className="mt-0.5 text-[9px] uppercase tracking-wider opacity-60">{x({ en: "no photo", ko: "사진 없음" })}</span>
+        <span className="mt-0.5 text-[9px] uppercase tracking-wider opacity-60">{x({ en: "no photo", ko: "사진 없음", "zh-TW": "沒有照片" })}</span>
       </div>
     );
   }
   return (
-    <div className={`flex h-20 w-16 shrink-0 items-center justify-center text-3xl ${t.frame}`} aria-label={x({ en: `Photo of ${name}`, ko: `${name}의 사진` })}>
+    <div className={`flex h-20 w-16 shrink-0 items-center justify-center text-3xl ${t.frame}`} aria-label={x({ en: `Photo of ${name}`, ko: `${name}의 사진`, "zh-TW": `${name} 的照片` })}>
       {photo.length <= 4 ? photo : "👤"}
     </div>
   );
@@ -424,7 +424,7 @@ export function Compass({ size = 120, className = "" }: { size?: number; classNa
       height={size}
       className={className}
       role="img"
-      aria-label={x({ en: "A compass with a broken needle and seven notches", ko: "바늘이 부러지고 눈금이 일곱 개인 나침반" })}
+      aria-label={x({ en: "A compass with a broken needle and seven notches", ko: "바늘이 부러지고 눈금이 일곱 개인 나침반", "zh-TW": "一個指針斷掉、有七道刻痕的指南針" })}
     >
       <circle cx="50" cy="50" r="47" fill="none" stroke="currentColor" strokeWidth="2.5" />
       <circle cx="50" cy="50" r="33" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
@@ -465,8 +465,8 @@ function BitsWidget({ t }: { t: ThemeStyle }) {
             aria-pressed={b === 1}
             aria-label={
               b
-                ? x({ en: `Switch worth ${PLACE_VALUES[i]}, on`, ko: `${PLACE_VALUES[i]}짜리 스위치, 켜짐` })
-                : x({ en: `Switch worth ${PLACE_VALUES[i]}, off`, ko: `${PLACE_VALUES[i]}짜리 스위치, 꺼짐` })
+                ? x({ en: `Switch worth ${PLACE_VALUES[i]}, on`, ko: `${PLACE_VALUES[i]}짜리 스위치, 켜짐`, "zh-TW": `代表 ${PLACE_VALUES[i]} 的開關，開` })
+                : x({ en: `Switch worth ${PLACE_VALUES[i]}, off`, ko: `${PLACE_VALUES[i]}짜리 스위치, 꺼짐`, "zh-TW": `代表 ${PLACE_VALUES[i]} 的開關，關` })
             }
             onClick={() => setBits((cur) => cur.map((v, j) => (j === i ? 1 - v : v)))}
             className={`flex min-h-16 flex-col items-center justify-center gap-0.5 font-mono ${b ? t.button : t.buttonGhost}`}
@@ -481,8 +481,8 @@ function BitsWidget({ t }: { t: ThemeStyle }) {
         <span className={`text-2xl font-bold ${t.accent}`}>{letter}</span>
       </p>
       {letter === "?" && <p className={`text-center text-xs ${t.muted}`}>{value === 0
-            ? x({ en: "All off is zero, not a letter.", ko: "전부 꺼지면 0이에요. 글자가 아니에요." })
-            : x({ en: "Past 26: no letter for that one.", ko: "26을 넘으면 해당하는 글자가 없어요." })}</p>}
+            ? x({ en: "All off is zero, not a letter.", ko: "전부 꺼지면 0이에요. 글자가 아니에요.", "zh-TW": "全部關掉是零，不是字母。" })
+            : x({ en: "Past 26: no letter for that one.", ko: "26을 넘으면 해당하는 글자가 없어요.", "zh-TW": "超過 26 就沒有對應的字母了。" })}</p>}
     </div>
   );
 }
@@ -516,7 +516,7 @@ function Countdown({ seconds, label, t }: { seconds: number; label: string; t: T
     <div className={`text-center ${t.card}`} aria-live="off">
       <p className={`text-xs uppercase tracking-[0.3em] ${t.muted}`}>{label}</p>
       <p className={`mt-2 font-mono text-4xl font-bold tabular-nums sm:text-5xl ${holding ? "animate-pulse" : ""}`}>
-        {holding ? x({ en: "SIGNAL HOLDING", ko: "신호 유지 중" }) : fmt(left)}
+        {holding ? x({ en: "SIGNAL HOLDING", ko: "신호 유지 중", "zh-TW": "訊號維持中" }) : fmt(left)}
       </p>
     </div>
   );

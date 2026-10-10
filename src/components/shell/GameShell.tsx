@@ -5,7 +5,7 @@ import { useLocale, useT } from "@/i18n/client";
 import { pick } from "@/i18n/config";
 import { useChat } from "@/lib/client/chat";
 import type { RoomTab } from "./RoomSheet";
-import { describeDiscovery, discoveryWho } from "@/lib/client/discoveries";
+import { describeDiscovery, discoverySeparator, discoveryWho } from "@/lib/client/discoveries";
 import type { AppId, RoomState } from "@/lib/types";
 import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
 import { Browser } from "@/components/browser/Browser";
@@ -42,6 +42,7 @@ export function GameShell({
   const [unreadEmails, setUnreadEmails] = useState(0);
   const toastId = useRef(0);
   const t = useT();
+  const locale = useLocale();
 
   const unlocked = state.progress.unlockedApps;
   const isUnlocked = useCallback(
@@ -129,13 +130,13 @@ export function GameShell({
     if (knownDiscoveries.current) {
       for (const d of list) {
         if (knownDiscoveries.current.has(d.id) || d.playerId === state.me.id) continue;
-        const msg = `${discoveryWho(d, t)} ${describeDiscovery(d, t)}`;
+        const msg = `${discoveryWho(d, t)}${discoverySeparator(locale)}${describeDiscovery(d, t)}`;
         if (d.kind === "site") toast(msg, "info", { label: t("shell.toast.open"), onClick: () => openAddress(d.host) });
         else toast(msg, "success");
       }
     }
     knownDiscoveries.current = new Set(list.map((d) => d.id));
-  }, [state.progress.discoveries, state.me.id, toast, openAddress, t]);
+  }, [state.progress.discoveries, state.me.id, toast, openAddress, t, locale]);
 
   // ---------- chat toasts (when the chat isn't on screen) ----------
   const chatVisible = roomOpen && roomTab === "chat";
@@ -361,6 +362,7 @@ function HomeScreen({
         {x({
           en: "If you're reading this, I got too close. Start at the beginning.",
           ko: "이걸 읽고 있다면, 내가 너무 가까이 갔다는 뜻이야. 처음부터 시작해.",
+          "zh-TW": "如果你正在讀這段話，代表我靠得太近了。從頭開始。",
         })}
         &rdquo;
       </p>
