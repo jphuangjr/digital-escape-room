@@ -41,6 +41,8 @@ describe("pickLocale", () => {
     expect(pickLocale("zh-TW,zh;q=0.9")).toBe("zh-TW");
     expect(pickLocale("es-MX,es;q=0.9,en;q=0.8")).toBe("es");
     expect(pickLocale("ja-JP,ja;q=0.9")).toBe("ja");
+    expect(pickLocale("pt-BR,pt;q=0.9")).toBe("pt-BR");
+    expect(pickLocale("pt-PT")).toBe("pt-BR");
     expect(pickLocale("zh-Hant-HK")).toBe("zh-TW");
     expect(pickLocale("zh-CN,en;q=0.5")).toBe("zh-TW");
     expect(pickLocale(null)).toBe("en");

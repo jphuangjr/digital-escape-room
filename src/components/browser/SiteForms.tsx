@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useLocale, useT } from "@/i18n/client";
 import { pick } from "@/i18n/config";
 import type { AttemptResponse, Block, PuzzleId, SiteFormId } from "@/lib/types";
-import { BlockList, type RenderEnv } from "./SiteRenderer";
+import { lockoutRemainingSec, WRONG_ANSWER_LOCKOUT_MS } from "@/lib/rules";
+import { useNow } from "@/components/apps/shared";
+import type { RenderEnv } from "./SiteRenderer";
 
 /** In-site (story) labels: `const x = useStory(); x({ en, ko })`. */
 function useStory() {
@@ -60,6 +62,10 @@ function useAttempt(env: RenderEnv, puzzleId: PuzzleId) {
       env.onSolved();
     } else {
       setFeedback({ tone: "error", text: res.data.message ?? tr("browser.form.rejected") });
+      if (res.data.retryAfterSec) {
+        setNow(Date.now());
+        setRetryUntil(Date.now() + res.data.retryAfterSec * 1000);
+      }
     }
   }
 
@@ -108,22 +114,22 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
   const tr = useT();
   const a = useAttempt(env, "shift-key");
   const [n, setN] = useState(1);
-  const [preview, setPreview] = useState<Block[] | null>(null);
-  const [previewing, setPreviewing] = useState(false);
   const wrap = (v: number) => ((v % 26) + 26) % 26;
-
-  async function doPreview() {
-    setPreviewing(true);
-    const res = await ctx.api<{ blocks: Block[] }>("/decode", { method: "POST", body: { shift: n } });
-    setPreviewing(false);
-    if (res.ok && res.data?.blocks) setPreview(res.data.blocks);
-    else ctx.toast(tr("browser.form.previewFailed"), "error");
-  }
+  // The lock is room-wide: count down from the latest wrong key in the shared attempt log,
+  // so teammates' phones lock too, not just the phone that guessed.
+  const now = useNow(500);
+  const lastWrong = ctx.state.attempts.find((at) => at.puzzleId === "shift-key" && !at.correct)?.createdAt;
+  const roomLock = lockoutRemainingSec(lastWrong, now, WRONG_ANSWER_LOCKOUT_MS["shift-key"] ?? 0);
+  const lockLeft = Math.max(roomLock, a.retryLeft);
 
   return (
     <section className={`${t.card} space-y-3`}>
       <p className="font-semibold">{prompt}</p>
-      {a.solved && <p className="text-sm font-semibold text-emerald-600">{tr("browser.form.shiftSolved")}</p>}
+      {a.solved ? (
+        <p className="text-sm font-semibold text-emerald-600">{tr("browser.form.shiftSolved")}</p>
+      ) : (
+        <p className={`text-sm ${t.muted}`}>{tr("browser.form.lockNote")}</p>
+      )}
       <div className="flex items-center justify-center gap-3">
         <button
           type="button"
@@ -145,31 +151,21 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
           +
         </button>
       </div>
-      <div className="flex flex-wrap justify-center gap-2">
-        <button type="button" onClick={doPreview} disabled={previewing} className={`min-h-11 px-4 ${t.buttonGhost} disabled:opacity-60`}>
-          {previewing ? x({ en: "Decoding…", ko: "해독 중…", "zh-TW": "解碼中…", es: "Decodificando…", ja: "デコード中…" }) : x({ en: "Preview", ko: "미리 보기", "zh-TW": "預覽", es: "Vista previa", ja: "プレビュー" })}
-        </button>
+      <div className="flex justify-center">
         <button
           type="button"
           onClick={() => a.submit(String(n))}
-          disabled={a.busy || a.retryLeft > 0}
+          disabled={a.busy || lockLeft > 0}
           className={`min-h-11 px-5 font-semibold ${t.button} disabled:opacity-60`}
         >
-          {a.busy ? x({ en: "Checking…", ko: "확인 중…", "zh-TW": "確認中…", es: "Comprobando…", ja: "確認中…" }) : x({ en: "Apply key", ko: "키 적용", "zh-TW": "套用金鑰", es: "Aplicar clave", ja: "キーを適用" })}
+          {a.busy
+            ? x({ en: "Checking…", ko: "확인 중…", "zh-TW": "確認中…", es: "Comprobando…", ja: "確認中…", "pt-BR": "Verificando…" })
+            : lockLeft > 0
+              ? tr("browser.form.locked", { s: lockLeft })
+              : x({ en: "Apply key", ko: "키 적용", "zh-TW": "套用金鑰", es: "Aplicar clave", ja: "キーを適用", "pt-BR": "Aplicar chave" })}
         </button>
       </div>
-      <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
-      {preview && (
-        <div className="space-y-3 border-t border-current/20 pt-3">
-          <div className="flex items-center justify-between">
-            <p className={`text-xs uppercase tracking-wider ${t.muted}`}>{tr("browser.form.previewLabel", { n })}</p>
-            <button type="button" onClick={() => setPreview(null)} className={`min-h-11 px-2 text-sm ${t.link}`}>
-              {x({ en: "Hide", ko: "숨기기", "zh-TW": "隱藏", es: "Ocultar", ja: "隠す" })}
-            </button>
-          </div>
-          <BlockList blocks={preview} env={env} />
-        </div>
-      )}
+      <FeedbackLine feedback={a.feedback} retryLeft={0} />
     </section>
   );
 }
@@ -190,9 +186,9 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
       }}
     >
       <p className="font-semibold">{prompt}</p>
-      {a.solved && <p className="text-sm font-semibold text-emerald-600">{x({ en: "✓ Session active.", ko: "✓ 세션 활성화됨.", "zh-TW": "✓ 工作階段已啟用。", es: "✓ Sesión activa.", ja: "✓ セッション有効。" })}</p>}
+      {a.solved && <p className="text-sm font-semibold text-emerald-600">{x({ en: "✓ Session active.", ko: "✓ 세션 활성화됨.", "zh-TW": "✓ 工作階段已啟用。", es: "✓ Sesión activa.", ja: "✓ セッション有効。", "pt-BR": "✓ Sessão ativa." })}</p>}
       <label className="block text-sm">
-        {x({ en: "Username", ko: "사용자 이름", "zh-TW": "使用者名稱", es: "Nombre de usuario", ja: "ユーザー名" })}
+        {x({ en: "Username", ko: "사용자 이름", "zh-TW": "使用者名稱", es: "Nombre de usuario", ja: "ユーザー名", "pt-BR": "Nome de usuário" })}
         <input
           {...inputProps}
           value={user}
@@ -202,7 +198,7 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         />
       </label>
       <label className="block text-sm">
-        {x({ en: "Vault code", ko: "볼트 코드", "zh-TW": "金庫代碼", es: "Código de la Bóveda", ja: "金庫コード" })}
+        {x({ en: "Vault code", ko: "볼트 코드", "zh-TW": "金庫代碼", es: "Código de la Bóveda", ja: "金庫コード", "pt-BR": "Código do Cofre" })}
         <div className="mt-1 flex gap-2">
           <input
             {...inputProps}
@@ -218,7 +214,7 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
             aria-pressed={show}
             className={`min-h-11 px-3 text-sm ${t.buttonGhost}`}
           >
-            {show ? x({ en: "Hide", ko: "숨기기", "zh-TW": "隱藏", es: "Ocultar", ja: "隠す" }) : x({ en: "Show", ko: "보기", "zh-TW": "顯示", es: "Mostrar", ja: "表示" })}
+            {show ? x({ en: "Hide", ko: "숨기기", "zh-TW": "隱藏", es: "Ocultar", ja: "隠す", "pt-BR": "Ocultar" }) : x({ en: "Show", ko: "보기", "zh-TW": "顯示", es: "Mostrar", ja: "表示", "pt-BR": "Mostrar" })}
           </button>
         </div>
       </label>
@@ -227,7 +223,7 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         disabled={a.busy || a.retryLeft > 0 || !user.trim() || !pass}
         className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
       >
-        {a.busy ? x({ en: "Signing in…", ko: "로그인 중…", "zh-TW": "登入中…", es: "Iniciando sesión…", ja: "ログイン中…" }) : x({ en: "Sign in", ko: "로그인", "zh-TW": "登入", es: "Iniciar sesión", ja: "ログイン" })}
+        {a.busy ? x({ en: "Signing in…", ko: "로그인 중…", "zh-TW": "登入中…", es: "Iniciando sesión…", ja: "ログイン中…", "pt-BR": "Entrando…" }) : x({ en: "Sign in", ko: "로그인", "zh-TW": "登入", es: "Iniciar sesión", ja: "ログイン", "pt-BR": "Entrar" })}
       </button>
       <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
     </form>
@@ -268,7 +264,7 @@ function FinalPhraseForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         disabled={a.busy || a.retryLeft > 0 || !v.trim()}
         className={`min-h-12 w-full font-bold uppercase tracking-widest ${t.button} disabled:opacity-60`}
       >
-        {a.busy ? x({ en: "Transmitting…", ko: "전송 중…", "zh-TW": "傳送中…", es: "Transmitiendo…", ja: "送信中…" }) : x({ en: "Transmit", ko: "전송", "zh-TW": "傳送", es: "Transmitir", ja: "送信" })}
+        {a.busy ? x({ en: "Transmitting…", ko: "전송 중…", "zh-TW": "傳送中…", es: "Transmitiendo…", ja: "送信中…", "pt-BR": "Transmitindo…" }) : x({ en: "Transmit", ko: "전송", "zh-TW": "傳送", es: "Transmitir", ja: "送信", "pt-BR": "Transmitir" })}
       </button>
       <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
     </form>
@@ -290,7 +286,7 @@ function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
         if (v.trim()) void a.submit(v);
       }}
     >
-      <p className={`text-xs font-semibold uppercase tracking-wider ${t.muted}`}>{x({ en: "Decode this word", ko: "이 단어를 해독하세요", "zh-TW": "解碼這個單字", es: "Decodifica esta palabra", ja: "この単語をデコードせよ" })}</p>
+      <p className={`text-xs font-semibold uppercase tracking-wider ${t.muted}`}>{x({ en: "Decode this word", ko: "이 단어를 해독하세요", "zh-TW": "解碼這個單字", es: "Decodifica esta palabra", ja: "この単語をデコードせよ", "pt-BR": "Decodifique esta palavra" })}</p>
       <p className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-lg font-bold tracking-wider">
         {code.split(" ").map((g, i) => (
           <span key={i}>{g}</span>
@@ -301,7 +297,7 @@ function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
       ) : (
         <>
           <label className="block text-sm">
-            {x({ en: "Your answer", ko: "답", "zh-TW": "你的答案", es: "Tu respuesta", ja: "あなたの答え" })}
+            {x({ en: "Your answer", ko: "답", "zh-TW": "你的答案", es: "Tu respuesta", ja: "あなたの答え", "pt-BR": "Sua resposta" })}
             <input
               {...inputProps}
               value={v}
@@ -315,7 +311,7 @@ function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
             disabled={a.busy || a.retryLeft > 0 || !v.trim()}
             className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
           >
-            {a.busy ? x({ en: "Checking…", ko: "확인 중…", "zh-TW": "確認中…", es: "Comprobando…", ja: "確認中…" }) : x({ en: "Check answer", ko: "정답 확인", "zh-TW": "檢查答案", es: "Comprobar respuesta", ja: "答え合わせ" })}
+            {a.busy ? x({ en: "Checking…", ko: "확인 중…", "zh-TW": "確認中…", es: "Comprobando…", ja: "確認中…", "pt-BR": "Verificando…" }) : x({ en: "Check answer", ko: "정답 확인", "zh-TW": "檢查答案", es: "Comprobar respuesta", ja: "答え合わせ", "pt-BR": "Verificar resposta" })}
           </button>
         </>
       )}
@@ -352,7 +348,7 @@ function AdminLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
           className={`h-11 min-w-0 flex-1 px-3 text-base ${t.input}`}
         />
         <button type="button" onClick={() => setShow((v) => !v)} aria-pressed={show} className={`min-h-11 px-3 text-sm ${t.buttonGhost}`}>
-          {show ? x({ en: "Hide", ko: "숨기기", "zh-TW": "隱藏", es: "Ocultar", ja: "隠す" }) : x({ en: "Show", ko: "보기", "zh-TW": "顯示", es: "Mostrar", ja: "表示" })}
+          {show ? x({ en: "Hide", ko: "숨기기", "zh-TW": "隱藏", es: "Ocultar", ja: "隠す", "pt-BR": "Ocultar" }) : x({ en: "Show", ko: "보기", "zh-TW": "顯示", es: "Mostrar", ja: "表示", "pt-BR": "Mostrar" })}
         </button>
       </div>
       <button
@@ -360,7 +356,7 @@ function AdminLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         disabled={a.busy || a.retryLeft > 0 || !pass.trim()}
         className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
       >
-        {a.busy ? x({ en: "Checking…", ko: "확인 중…", "zh-TW": "確認中…", es: "Comprobando…", ja: "確認中…" }) : x({ en: "Unlock console", ko: "콘솔 잠금 해제", "zh-TW": "解鎖主控台", es: "Desbloquear consola", ja: "コンソールのロックを解除" })}
+        {a.busy ? x({ en: "Checking…", ko: "확인 중…", "zh-TW": "確認中…", es: "Comprobando…", ja: "確認中…", "pt-BR": "Verificando…" }) : x({ en: "Unlock console", ko: "콘솔 잠금 해제", "zh-TW": "解鎖主控台", es: "Desbloquear consola", ja: "コンソールのロックを解除", "pt-BR": "Desbloquear console" })}
       </button>
       <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
     </form>

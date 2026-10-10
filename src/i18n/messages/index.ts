@@ -43,6 +43,14 @@ import jaApps from "./ja/apps";
 import jaBrowser from "./ja/browser";
 import jaAdmin from "./ja/admin";
 import jaApi from "./ja/api";
+import ptCommon from "./pt-BR/common";
+import ptSite from "./pt-BR/site";
+import ptShell from "./pt-BR/shell";
+import ptRoom from "./pt-BR/room";
+import ptApps from "./pt-BR/apps";
+import ptBrowser from "./pt-BR/browser";
+import ptAdmin from "./pt-BR/admin";
+import ptApi from "./pt-BR/api";
 
 export type Messages = Record<string, string>;
 
@@ -55,4 +63,6 @@ const es: Messages = { ...esCommon, ...esSite, ...esShell, ...esRoom, ...esApps,
 
 const ja: Messages = { ...jaCommon, ...jaSite, ...jaShell, ...jaRoom, ...jaApps, ...jaBrowser, ...jaAdmin, ...jaApi };
 
-export const MESSAGES: Record<Locale, Messages> = { en, ko, "zh-TW": zhTW, es, ja };
+const ptBR: Messages = { ...ptCommon, ...ptSite, ...ptShell, ...ptRoom, ...ptApps, ...ptBrowser, ...ptAdmin, ...ptApi };
+
+export const MESSAGES: Record<Locale, Messages> = { en, ko, "zh-TW": zhTW, es, ja, "pt-BR": ptBR };

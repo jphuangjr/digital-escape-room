@@ -57,6 +57,8 @@ const messages: Record<keyof typeof en, string> = {
   "api.attempt.notReady": "No pasa nada. Esto todavía no está listo.",
   "api.attempt.rateLimited": "Demasiados intentos. Vuelve a intentarlo en {s} s.",
   "api.attempt.wrong": "No es eso.",
+  "api.attempt.lockedOut": "El sistema está bloqueado tras una clave incorrecta. Inténtalo de nuevo en {s} s.",
+  "api.attempt.wrongLocked": "Clave incorrecta. El sistema queda bloqueado {s} s.",
   "api.attempt.solved.binaryLesson": "Prueba aprobada. El traductor binario ya está en tu Decodificador.",
   "api.attempt.solved.adminConsole": "Consola de administración desbloqueada.",
   "api.decode.badShift": "El desplazamiento debe ser un número entero.",

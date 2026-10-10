@@ -16,16 +16,16 @@ export const HINT_PUZZLES: HintPuzzleId[] = [
 ];
 
 export const HINT_TITLES: Record<HintPuzzleId, Tr> = {
-  "find-blog": { en: "Where I wrote it down", ko: "내가 적어 둔 곳", "zh-TW": "我寫下來的地方", es: "Donde lo anoté", ja: "書き残した場所" },
-  "shift-key": { en: "The dial", ko: "다이얼", "zh-TW": "轉盤", es: "El dial", ja: "ダイヤル" },
-  "find-pets": { en: "The forum", ko: "포럼", "zh-TW": "論壇", es: "El foro", ja: "フォーラム" },
-  "pet-id": { en: "The cat", ko: "고양이", "zh-TW": "那隻貓", es: "La gata", ja: "あの猫" },
-  "intranet-login": { en: "The door", ko: "문", "zh-TW": "那扇門", es: "La puerta", ja: "扉" },
-  "final-phrase": { en: "Proof of life", ko: "생존 증명", "zh-TW": "生存證明", es: "Prueba de vida", ja: "生存証明" },
-  "bonus-pin": { en: "My folder", ko: "내 폴더", "zh-TW": "我的資料夾", es: "Mi carpeta", ja: "わたしのフォルダ" },
-  "tools-folder": { en: "My tools", ko: "내 도구", "zh-TW": "我的工具", es: "Mis herramientas", ja: "わたしの道具" },
-  "binary-lesson": { en: "Night school", ko: "야간 수업", "zh-TW": "夜間課程", es: "Clases nocturnas", ja: "夜間講座" },
-  "admin-console": { en: "Ones and zeros", ko: "0과 1", "zh-TW": "一和零", es: "Unos y ceros", ja: "1と0" },
+  "find-blog": { en: "Where I wrote it down", ko: "내가 적어 둔 곳", "zh-TW": "我寫下來的地方", es: "Donde lo anoté", ja: "書き残した場所", "pt-BR": "Onde eu anotei" },
+  "shift-key": { en: "The dial", ko: "다이얼", "zh-TW": "轉盤", es: "El dial", ja: "ダイヤル", "pt-BR": "O mostrador" },
+  "find-pets": { en: "The forum", ko: "포럼", "zh-TW": "論壇", es: "El foro", ja: "フォーラム", "pt-BR": "O fórum" },
+  "pet-id": { en: "The cat", ko: "고양이", "zh-TW": "那隻貓", es: "La gata", ja: "あの猫", "pt-BR": "A gata" },
+  "intranet-login": { en: "The door", ko: "문", "zh-TW": "那扇門", es: "La puerta", ja: "扉", "pt-BR": "A porta" },
+  "final-phrase": { en: "Proof of life", ko: "생존 증명", "zh-TW": "生存證明", es: "Prueba de vida", ja: "生存証明", "pt-BR": "Prova de vida" },
+  "bonus-pin": { en: "My folder", ko: "내 폴더", "zh-TW": "我的資料夾", es: "Mi carpeta", ja: "わたしのフォルダ", "pt-BR": "A minha pasta" },
+  "tools-folder": { en: "My tools", ko: "내 도구", "zh-TW": "我的工具", es: "Mis herramientas", ja: "わたしの道具", "pt-BR": "As minhas ferramentas" },
+  "binary-lesson": { en: "Night school", ko: "야간 수업", "zh-TW": "夜間課程", es: "Clases nocturnas", ja: "夜間講座", "pt-BR": "Curso noturno" },
+  "admin-console": { en: "Ones and zeros", ko: "0과 1", "zh-TW": "一和零", es: "Unos y ceros", ja: "1と0", "pt-BR": "Uns e zeros" },
 };
 
 /** Ada's voicemails. Tier 1 = nudge, 2 = bigger nudge, 3 = near-answer. */
@@ -37,6 +37,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "是我。如果你在研究院的網站上，別只是讀它——看看它底下。每個頁面都有皮膚和骨架。骨架說謊的本事永遠比不上皮膚。",
       es: "Soy yo. Si estás en el sitio del Instituto, no te limites a leerlo: mira lo que hay debajo. Toda página tiene una piel y un esqueleto. El esqueleto nunca miente tan bien como la piel.",
       ja: "わたし。研究所のサイトにいるなら、ただ読むだけじゃだめ——その下を見て。どのページにも皮膚と骨格がある。骨格は、皮膚ほど上手に嘘をつけない。",
+      "pt-BR": "Sou eu. Se você está no site do Instituto, não se limite a ler: olhe o que tem por baixo. Toda página tem uma pele e um esqueleto. O esqueleto nunca mente tão bem quanto a pele.",
     },
     {
       en: "Me again. Open the source of the Institute's front page. Somebody on the migration team left a note to themselves about where the old archive went. Follow it.",
@@ -44,6 +45,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "又是我。打開研究院首頁的原始碼。遷移小組裡有人留了一則給自己的備註，寫著舊檔案庫搬到哪裡去了。跟著它走。",
       es: "Soy yo otra vez. Abre el código fuente de la página principal del Instituto. Alguien del equipo de migración se dejó una nota sobre adónde fue a parar el archivo antiguo. Síguela.",
       ja: "またわたし。研究所のトップページのソースを開いて。移行チームの誰かが、古いアーカイブの移転先を自分用のメモに残してる。それをたどって。",
+      "pt-BR": "Sou eu de novo. Abra o código-fonte da página inicial do Instituto. Alguém da equipe de migração deixou um lembrete para si mesmo sobre para onde foi o arquivo antigo. Siga esse lembrete.",
     },
     {
       en: "Okay. Go to meridian-inst.net/vault-2019. There's a photograph there that isn't theirs — it's mine. Open its file info. I left the address of my notebook in the comment.",
@@ -51,6 +53,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "好。去 meridian-inst.net/vault-2019。那裡有一張不屬於他們的照片——是我的。打開它的檔案資訊。我把筆記的網址留在註解欄位裡了。",
       es: "Bien. Ve a meridian-inst.net/vault-2019. Ahí hay una fotografía que no es de ellos: es mía. Abre su información del archivo. Dejé la dirección de mi cuaderno en el comentario.",
       ja: "いい？ meridian-inst.net/vault-2019 へ行って。そこに彼らのものじゃない写真が一枚ある——わたしのもの。ファイル情報を開いて。コメント欄にわたしのノートのアドレスを残しておいた。",
+      "pt-BR": "Certo. Vá para meridian-inst.net/vault-2019. Lá tem uma fotografia que não é deles: é minha. Abra as informações do arquivo. Deixei o endereço do meu caderno no comentário.",
     },
   ],
   "shift-key": [
@@ -60,6 +63,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "部落格上有兩個系列。一個是湯。別跟著湯走。跟著 Field Notes 走，照時間流動的方向讀——從最舊的開始。",
       es: "El blog tiene dos series. Una es de sopa. No sigas la sopa. Sigue las Field Notes y léelas como corre el tiempo: de la más antigua a la más reciente.",
       ja: "ブログにはシリーズが二つある。ひとつはスープの話。スープは追わないで。Field Notes を追って、時間が流れる順に読んで——古いものから。",
+      "pt-BR": "O blog tem duas séries. Uma é de sopa. Não siga a sopa. Siga as Field Notes e leia do jeito que o tempo corre: da mais antiga para a mais recente.",
     },
     {
       en: "Read my Field Notes oldest to newest. Look at the first letter of each title. Then look at the dates — just the day of the month. Add them up. The compass has the same number of notches.",
@@ -67,6 +71,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "把我的 Field Notes 從最舊讀到最新。看每個標題的第一個字母。然後看日期——只看是幾號。把它們加起來。指南針上的刻痕也是這個數。",
       es: "Lee mis Field Notes de la más antigua a la más reciente. Fíjate en la primera letra de cada título. Luego mira las fechas, solo el día del mes. Súmalos. La brújula tiene el mismo número de muescas.",
       ja: "わたしの Field Notes を古い順に読んで。各タイトルの最初の文字を見て。それから日付——日にちだけを見て。足し合わせる。コンパスにも同じ数だけ刻み目がある。",
+      "pt-BR": "Leia minhas Field Notes da mais antiga para a mais recente. Repare na primeira letra de cada título. Depois olhe as datas, só o dia do mês. Some tudo. A bússola tem o mesmo número de entalhes.",
     },
     {
       en: "The titles spell DRIFT. The days are two, one, one, two, one. That's seven. Seven notches on the compass, seven turns of the dial. Ignore the kitchen — eleven is a trap.",
@@ -74,6 +79,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "標題的第一個字母拼出 DRIFT。日期是 2、1、1、2、1 號。加起來是 7。指南針上七道刻痕，轉盤也轉七格。別管廚房那些——11 是陷阱。",
       es: "Los títulos forman DRIFT. Los días son 2, 1, 1, 2, 1. Eso da 7. Siete muescas en la brújula, siete vueltas del dial. Ignora la cocina: el 11 es una trampa.",
       ja: "タイトルの頭文字は DRIFT。日にちは2、1、1、2、1。合計で7。コンパスの刻み目は七つ、ダイヤルも七目盛り。台所の記事は無視して——11は罠だから。",
+      "pt-BR": "Os títulos formam DRIFT. Os dias são 2, 1, 1, 2, 1. Isso dá 7. Sete entalhes na bússola, sete voltas no mostrador. Ignore a cozinha: o 11 é uma armadilha.",
     },
   ],
   "find-pets": [
@@ -83,6 +89,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "芮恩（Wren）到現在還是那款街機遊戲的霸主。她的朋友們都聚在一個討論那款遊戲的論壇上。我也在那裡出沒，用的名字你只要看過那個指南針就認得出來。",
       es: "Wren sigue ganándoles a todos en ese juego de arcade. Sus amigos se juntan en un foro sobre el juego. Yo también andaba por ahí, con un nombre que reconocerías si has visto la brújula.",
       ja: "レン（Wren）はいまでもあのアーケードゲームで誰にも負けない。彼女の友だちはそのゲームのフォーラムに集まってる。わたしもそこにいた。コンパスを見たことがあるなら、ぴんとくる名前で。",
+      "pt-BR": "A Wren continua ganhando de todo mundo naquele fliperama. Os amigos dela se encontram num fórum sobre o jogo. Eu também andava por lá, com um nome que você reconheceria se já viu a bússola.",
     },
     {
       en: "On RunnerBoard there are two of us with almost the same name. One is me. One is them. Mine came first. Whoever I am, I only talk in my own posts — and I talk with the clock.",
@@ -90,6 +97,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "RunnerBoard 上有兩個名字幾乎一樣的帳號。一個是我，一個是他們。我的比較早出現。不管我是誰，我只在自己的文章裡說話——而且我用時鐘說話。",
       es: "En RunnerBoard hay dos cuentas con casi el mismo nombre. Una soy yo. La otra son ellos. La mía llegó primero. Sea quien sea, solo hablo en mis propias publicaciones, y hablo con el reloj.",
       ja: "RunnerBoard には、ほとんど同じ名前のアカウントが二つある。ひとつはわたし。もうひとつは彼ら。わたしのほうが先。わたしは自分の投稿の中でしか話さない——それも、時計で話す。",
+      "pt-BR": "No RunnerBoard tem duas contas com quase o mesmo nome. Uma sou eu. A outra são eles. A minha veio primeiro. Seja eu quem for, só falo nos meus próprios posts, e falo com o relógio.",
     },
     {
       en: "Take compass_needle's post times — hours and minutes — and turn each number into a letter: one is A, twenty-six is Z. Twelve fifteen is L-O. Keep going. It spells a website. The other account spells a trap.",
@@ -97,6 +105,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "把 compass_needle 每篇文章的發文時間——小時和分鐘——各自換成字母：1 是 A，26 是 Z。12:15 就是 L-O。繼續下去，會拼出 LOSTPAWS，一個網站：lostpaws.net。另一個帳號拼出來的是陷阱。",
       es: "Toma las horas de las publicaciones de compass_needle (horas y minutos) y convierte cada número en una letra: 1 es A, 26 es Z. 12:15 es L-O. Sigue. Forma LOSTPAWS, un sitio web: lostpaws.net. La otra cuenta forma una trampa.",
       ja: "compass_needle の投稿時刻——時と分——をそれぞれ文字に変えて。1がA、26がZ。12:15ならL-O。続けると LOSTPAWS、ウェブサイトの名前になる：lostpaws.net。もうひとつのアカウントが綴るのは罠。",
+      "pt-BR": "Pegue os horários dos posts de compass_needle (horas e minutos) e transforme cada número numa letra: 1 é A, 26 é Z. 12:15 é L-O. Continue. Forma LOSTPAWS, um site: lostpaws.net. A outra conta forma uma armadilha.",
     },
   ],
   "pet-id": [
@@ -106,6 +115,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "我在論壇上問過一隻貓的事。她是真的，是朋友的貓，而刊登她的那個佈告欄比我還了解她。",
       es: "Pregunté por una gata en el foro. Es real, es de una amiga, y el tablón donde está anunciada la conoce mejor que yo.",
       ja: "フォーラムで猫のことを尋ねた。本当にいる猫で、友だちの子。あの子が載っている掲示板のほうが、わたしよりあの子に詳しい。",
+      "pt-BR": "Perguntei sobre uma gata no fórum. Ela existe, é de uma amiga, e o mural onde ela está anunciada a conhece melhor do que eu.",
     },
     {
       en: "Find Biscuit on Lost Paws. Every chipped animal has a registry number. Write hers down — it's one of the three things you'll need at the end.",
@@ -113,6 +123,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "去 Lost Paws 找 Biscuit。每隻植入晶片的動物都有登記編號。把她的抄下來——那是你最後需要的三樣東西之一。",
       es: "Busca a Biscuit en Lost Paws. Todo animal con microchip tiene un número de registro. Anota el suyo: es una de las tres cosas que vas a necesitar al final.",
       ja: "Lost Paws で Biscuit を探して。チップの入った動物にはみんな登録番号がある。あの子の番号を書き留めて——最後に必要になる三つのうちのひとつだから。",
+      "pt-BR": "Procure a Biscuit no Lost Paws. Todo animal com microchip tem um número de registro. Anote o dela: é uma das três coisas de que você vai precisar no final.",
     },
     {
       en: "Biscuit the tabby. Her registry ID is the number on her listing. Four digits, starts with a zero. That's your third fragment.",
@@ -120,6 +131,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "虎斑貓 Biscuit。她的登記編號（registry ID）就是刊登上的那個數字：0412，四位數，0 開頭。那是你的第三塊碎片。",
       es: "Biscuit, la gata atigrada. Su número de registro (registry ID) es el que aparece en su anuncio: 0412, cuatro dígitos, empieza con cero. Ese es tu tercer fragmento.",
       ja: "キジトラの Biscuit。登録番号（registry ID）は掲載に書いてある数字：0412。四桁で、0から始まる。それが三つ目のかけら。",
+      "pt-BR": "Biscuit, a gata rajada. O número de registro dela (registry ID) é o que aparece no anúncio: 0412, quatro dígitos, começa com zero. Esse é o seu terceiro fragmento.",
     },
   ],
   "intranet-login": [
@@ -129,6 +141,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "有一個員工入口網站。芮恩讓我用她的帳號。解碼後的刊登內容會告訴你那是誰的鑰匙，以及密碼是由什麼組成的。",
       es: "Hay un portal para el personal. Wren me dejaba usar su cuenta. Los anuncios descifrados te dicen de quién es la llave y de qué está hecho el código.",
       ja: "職員ポータルがある。レンが自分のアカウントを使わせてくれた。解読した掲載文が、誰の鍵なのか、コードが何でできているのかを教えてくれる。",
+      "pt-BR": "Existe um portal para funcionários. A Wren me deixava usar a conta dela. Os anúncios decifrados dizem de quem é a chave e do que o código é feito.",
     },
     {
       en: "Username is the standard staff format: first name, dot, last name, lowercase. The code is two numbers stuck together — the year they lied about, then the cat's number.",
@@ -136,6 +149,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "使用者名稱是標準的員工格式：名字、點、姓氏，全部小寫。密碼是兩個數字接在一起——他們說謊的那個年份，再接那隻貓的編號。",
       es: "El usuario sigue el formato estándar del personal: nombre, punto, apellido, todo en minúsculas. El código son dos números pegados: el año sobre el que mintieron y luego el número de la gata.",
       ja: "ユーザー名は職員の標準形式：名、ドット、姓、全部小文字。コードは二つの数字をくっつけたもの——彼らが嘘をついた年、次に猫の番号。",
+      "pt-BR": "O usuário segue o formato padrão dos funcionários: nome, ponto, sobrenome, tudo em minúsculas. O código são dois números grudados: o ano sobre o qual eles mentiram e depois o número da gata.",
     },
     {
       en: "Wren Okafor. The Institute says 1987 — that's the true year, the footer was the lie, they swapped the digits. Then add Biscuit's four digits. wren.okafor, then founding-year-then-ID, no spaces.",
@@ -143,6 +157,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "芮恩・奧卡佛（Wren Okafor）。研究院說是 1987——那才是真正的年份，頁尾才是謊言，他們把數字對調了。再接上 Biscuit 的四位數。使用者名稱 wren.okafor，密碼是創立年份接登記編號，不留空格：19870412。",
       es: "Wren Okafor. El Instituto dice 1987: ese es el año verdadero; la mentira estaba en el pie de página, donde invirtieron los dígitos. Luego agrega los cuatro dígitos de Biscuit. Usuario wren.okafor; el código es el año de fundación y luego el número de registro, sin espacios: 19870412.",
       ja: "レン・オカフォー（Wren Okafor）。研究所は1987と言う——それが本当の年で、嘘はフッターのほう。数字を入れ替えたの。そこに Biscuit の四桁をつなげる。ユーザー名は wren.okafor、コードは創立年のあとに登録番号、スペースなし：19870412。",
+      "pt-BR": "Wren Okafor. O Instituto diz 1987: esse é o ano verdadeiro; a mentira estava no rodapé, onde inverteram os algarismos. Depois acrescente os quatro dígitos da Biscuit. Usuário wren.okafor; o código é o ano de fundação e depois o número de registro, sem espaços: 19870412.",
     },
   ],
   "final-phrase": [
@@ -152,6 +167,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "那個開關要的是我還活著的證明。只有走完我整條路的人才會知道。三塊碎片。你已經全部拿到了。",
       es: "El interruptor quiere una prueba de que sigo viva. Solo alguien que haya recorrido todo mi camino podría saberla. Tres piezas. Ya las tienes todas.",
       ja: "スイッチは、わたしが生きている証拠を求めてる。わたしの道を最後まで歩いた人にしかわからないもの。かけらは三つ。あなたはもう全部持ってる。",
+      "pt-BR": "O interruptor quer uma prova de que estou viva. Só alguém que percorreu todo o meu caminho poderia saber. Três peças. Você já tem todas.",
     },
     {
       en: "Name, year, number. The name who has the key. The year they lied. The number on the collar. Joined by dashes.",
@@ -159,6 +175,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "名字、年份、數字。握有鑰匙的那個人的名字。他們說謊的年份。項圈上的號碼。用連字號串起來。",
       es: "Nombre, año, número. El nombre de quien tiene la llave. El año en que mintieron. El número del collar. Unidos con guiones.",
       ja: "名前、年、番号。鍵を持っている人の名前。彼らが嘘をついた年。首輪の番号。ハイフンでつないで。",
+      "pt-BR": "Nome, ano, número. O nome de quem tem a chave. O ano em que mentiram. O número da coleira. Unidos por hífens.",
     },
     {
       en: "Her first name, the true founding year, Biscuit's ID — lowercase, dashes between. Name-year-number. That's me, still breathing.",
@@ -166,6 +183,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "她的英文名字（first name）、真正的創立年份、Biscuit 的編號——小寫，中間用連字號。名字-年份-編號：wren-1987-0412。那就是我，還在呼吸。",
       es: "Su nombre de pila (first name), el año de fundación verdadero, el número de Biscuit: en minúsculas, con guiones entre medio. Nombre-año-número: wren-1987-0412. Esa soy yo, todavía respirando.",
       ja: "彼女の英語の名前（first name）、本当の創立年、Biscuit の番号——小文字で、間にハイフン。名前-年-番号：wren-1987-0412。それが、まだ息をしているわたし。",
+      "pt-BR": "O primeiro nome dela (first name), o ano de fundação verdadeiro, o número da Biscuit: em minúsculas, com hífens no meio. Nome-ano-número: wren-1987-0412. Essa sou eu, ainda respirando.",
     },
   ],
   "binary-lesson": [
@@ -175,6 +193,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "芮恩在社區學院開了一門夜間課。我修過。我的課程大綱還在我的工具資料夾裡。",
       es: "Wren da una clase nocturna en el Harbour Community College. Yo la tomé. Mi programa del curso sigue en mi carpeta de herramientas.",
       ja: "レンはハーバー・コミュニティ・カレッジで夜間講座を教えてる。わたしも受けた。そのシラバスがまだわたしの道具フォルダに入ってる。",
+      "pt-BR": "A Wren é professora de um curso noturno no Harbour Community College. Eu fiz o curso. O meu programa da disciplina ainda está na minha pasta de ferramentas.",
     },
     {
       en: "The syllabus points to the class website. Week three is the one about binary. Read the lesson, then take the practice quiz.",
@@ -182,6 +201,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "課程大綱會帶你到課程網站。第三週講的是二進位。讀完課程內容，再做練習小考。",
       es: "El programa del curso lleva al sitio web de la clase. La semana tres es la del binario. Lee la lección y luego haz el cuestionario de práctica.",
       ja: "シラバスに講座のウェブサイトが載ってる。第3週が二進法の回。授業を読んでから、練習クイズを解いて。",
+      "pt-BR": "O programa da disciplina leva ao site do curso. A semana três é a do binário. Leia a lição e depois faça o questionário de prática.",
     },
     {
       en: "Go to harbourcc.edu/cs110/binary. Use the decoding sheet on the quiz word. It's the first word every programmer types: hello. Pass it and Wren's translator installs into my decoder.",
@@ -189,6 +209,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "去 harbourcc.edu/cs110/binary。用解碼表解開小考的那個單字。那是每個程式設計師打的第一個字：hello。通過之後，芮恩的翻譯器就會安裝到我的解碼器裡。",
       es: "Ve a harbourcc.edu/cs110/binary. Usa la tabla de decodificación con la palabra del cuestionario. Es la primera palabra que escribe todo programador: hello. Apruébalo y el traductor de Wren se instala en mi Decodificador.",
       ja: "harbourcc.edu/cs110/binary へ行って。クイズの単語に解読表を使って。プログラマーなら誰もが最初に打つ単語：hello。合格すれば、レンの翻訳ツールがわたしのデコーダーに入る。",
+      "pt-BR": "Vá para harbourcc.edu/cs110/binary. Use a tabela de decodificação na palavra do questionário. É a primeira palavra que todo programador digita: hello. Passe no teste e o tradutor da Wren é instalado no meu Decodificador.",
     },
   ],
   "admin-console": [
@@ -198,6 +219,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "你需要的備忘錄鎖在管理主控台裡。芮恩把新密碼釘在儀表板上。她記東西的方式，就跟她教課的方式一樣。",
       es: "El memorándum que necesitas está bajo llave en la consola de administración. Wren dejó la nueva contraseña fijada en el panel. Anota las cosas igual que las enseña.",
       ja: "必要なメモは管理コンソールの中に鍵をかけてしまってある。レンが新しいパスワードをダッシュボードに固定してくれた。彼女は教えるときと同じやり方で書き留めるの。",
+      "pt-BR": "O memorando de que você precisa está trancado no console de administração. A Wren deixou a nova senha fixada no painel. Ela anota as coisas do mesmo jeito que ensina.",
     },
     {
       en: "Those ones and zeros come in fives. Each group of five is one letter: add up the place values with a one in them, sixteen, eight, four, two, one, and A is one. Or let the decoder do it once you've passed her quiz.",
@@ -205,6 +227,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "那些一和零是五個一組。每五個一組代表一個字母：把有 1 的位值加起來，16、8、4、2、1，A 是 1。或者等你通過她的小考後，交給解碼器處理。",
       es: "Esos unos y ceros vienen de cinco en cinco. Cada grupo de cinco es una letra: suma los valores de las posiciones que tienen un uno (dieciséis, ocho, cuatro, dos, uno), y la A es uno. O deja que lo haga el Decodificador cuando hayas aprobado su cuestionario.",
       ja: "その1と0は五つずつまとまってる。五つでひと文字：1がある位の値——16、8、4、2、1——を足して、Aが1。あるいは、彼女のクイズに合格したあとならデコーダーに任せて。",
+      "pt-BR": "Esses uns e zeros vêm de cinco em cinco. Cada grupo de cinco é uma letra: some os valores das posições que têm um (dezesseis, oito, quatro, dois, um), e A é um. Ou deixe o Decodificador fazer isso depois de passar no questionário dela.",
     },
     {
       en: "01100 is eight plus four: twelve, L. 00001 is A. Keep going and it spells LANTERN, like the watchman's lamps. Type it into the admin console.",
@@ -212,6 +235,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "01100 是 8 加 4：12，也就是 L。00001 是 A。繼續下去，會拼出 LANTERN，就像守夜人的提燈（lantern）。把它輸入管理主控台。",
       es: "01100 es ocho más cuatro: doce, la L. 00001 es la A. Sigue y forma LANTERN, como los faroles del vigilante (lantern). Escríbelo en la consola de administración.",
       ja: "01100は8足す4で12、つまりL。00001はA。続けると LANTERN になる。見張り番の灯り（lantern）みたいに。それを管理コンソールに入力して。",
+      "pt-BR": "01100 é oito mais quatro: doze, a L. 00001 é a A. Continue e forma LANTERN, como as lanternas do vigia (lantern). Digite no console de administração.",
     },
   ],
   "bonus-pin": [
@@ -221,6 +245,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "我的個人資料夾用一個只有家人才想得到的東西鎖著。我妹妹提到我的次數比我希望的還多。",
       es: "Mi carpeta personal está cerrada con algo que solo se le ocurriría a la familia. Mi hermana habla de mí más de lo que me gustaría.",
       ja: "わたしの個人フォルダは、家族しか思いつかないもので鍵をかけてある。妹は、わたしが望む以上にわたしの話をする。",
+      "pt-BR": "A minha pasta pessoal está trancada com algo que só a família pensaria. A minha irmã fala de mim mais do que eu gostaria.",
     },
     {
       en: "Read my sister's email again. She mentions a date that's mine and no one else's.",
@@ -228,6 +253,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "再讀一次我妹妹的信。她提到一個日子，屬於我，不屬於任何其他人。",
       es: "Vuelve a leer el correo de mi hermana. Menciona una fecha que es mía y de nadie más.",
       ja: "妹のメールをもう一度読んで。わたしだけの、ほかの誰のものでもない日付が出てくる。",
+      "pt-BR": "Leia de novo o e-mail da minha irmã. Ela menciona uma data que é minha e de mais ninguém.",
     },
     {
       en: "My birthday. March fourteenth. Month then day, four digits, with the zero in front.",
@@ -235,6 +261,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "我的生日。3月14日。先月後日，四位數，前面補零：0314。",
       es: "Mi cumpleaños. El 14 de marzo. Primero el mes y luego el día, cuatro dígitos, con el cero adelante: 0314.",
       ja: "わたしの誕生日。3月14日。月、日の順で、頭に0をつけて四桁：0314。",
+      "pt-BR": "Meu aniversário. 14 de março. Primeiro o mês, depois o dia, quatro dígitos, com o zero na frente: 0314.",
     },
   ],
   "tools-folder": [
@@ -244,6 +271,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "再往前走之前，你會需要我的解碼器。我把它鎖在一個只有家人答得出來的問題後面。答案在我的個人資料夾裡。",
       es: "Vas a querer mi Decodificador antes de avanzar mucho más. Lo cerré detrás de una pregunta que solo la familia podría responder. La respuesta está en mi carpeta personal.",
       ja: "先へ進む前に、わたしのデコーダーが必要になる。家族にしか答えられない質問の奥に鍵をかけておいた。答えはわたしの個人フォルダにある。",
+      "pt-BR": "Você vai querer o meu Decodificador antes de ir muito mais longe. Tranquei atrás de uma pergunta que só a família saberia responder. A resposta está na minha pasta pessoal.",
     },
     {
       en: "Open my personal folder and read what I wrote about my sister. Dad had a nickname for each of us.",
@@ -251,6 +279,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "打開我的個人資料夾，讀我寫我妹妹的那段。爸爸給我們每個人都取了綽號。",
       es: "Abre mi carpeta personal y lee lo que escribí sobre mi hermana. Papá tenía un apodo para cada una de nosotras.",
       ja: "わたしの個人フォルダを開いて、妹について書いたものを読んで。父さんはわたしたち一人ひとりにあだ名をつけてた。",
+      "pt-BR": "Abra a minha pasta pessoal e leia o que escrevi sobre a minha irmã. O papai tinha um apelido para cada uma de nós.",
     },
     {
       en: "Dad called me his compass and my sister his weather. The answer is her name: Mara.",
@@ -258,6 +287,7 @@ const HINTS: Record<HintPuzzleId, [Tr, Tr, Tr]> = {
       "zh-TW": "爸爸叫我他的指南針（compass），叫我妹妹他的天氣（weather）。答案是她的名字：瑪拉（Mara）。",
       es: "Papá me llamaba su brújula, y a mi hermana, su clima. La respuesta es su nombre: Mara.",
       ja: "父さんはわたしを自分のコンパス、妹を自分の天気と呼んでた。答えは妹の名前：マーラ（Mara）。",
+      "pt-BR": "O papai me chamava de bússola dele, e a minha irmã de clima dele. A resposta é o nome dela: Mara.",
     },
   ],
 };

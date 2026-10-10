@@ -46,11 +46,11 @@ const messages: Record<keyof typeof en, string> = {
   "browser.form.correct": "¡Correcto!",
   "browser.form.rejected": "Rechazado. No es eso.",
   "browser.form.retryIn": "Vuelve a intentarlo en {s} s.",
-  "browser.form.previewFailed": "No se pudo generar la vista previa",
   "browser.form.decreaseShift": "Reducir desplazamiento",
   "browser.form.increaseShift": "Aumentar desplazamiento",
   "browser.form.shiftSolved": "✓ Anuncios descifrados para toda la sala.",
-  "browser.form.previewLabel": "Vista previa · desplazamiento {n} (solo tú puedes verla)",
+  "browser.form.lockNote": "Cuidado: una clave incorrecta bloquea el sistema para todos durante 1 minuto. Resuélvelo primero.",
+  "browser.form.locked": "Bloqueado · {s} s",
   "browser.form.binaryPassed": "✓ Aprobado. Abre el Decodificador y busca la pestaña Binario.",
 };
 

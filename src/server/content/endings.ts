@@ -7,7 +7,7 @@ type Paras = Record<Locale, string[]>;
 
 const ENDINGS: Record<Ending, { title: Tr; body: Paras }> = {
   EXPOSE: {
-    title: { en: "The Needle Points True", ko: "바늘은 진실을 가리킨다", "zh-TW": "指針指向真相", es: "La aguja señala la verdad", ja: "針は真実を指す" },
+    title: { en: "The Needle Points True", ko: "바늘은 진실을 가리킨다", "zh-TW": "指針指向真相", es: "La aguja señala la verdad", ja: "針は真実を指す", "pt-BR": "A agulha aponta a verdade" },
     body: {
       en: [
         "At 06:00 the switch fires on purpose. Ada lets it.",
@@ -49,10 +49,18 @@ const ENDINGS: Record<Ending, { title: Tr; body: Paras }> = {
         "エイダは姿を現さない。まだ。長く怒り続ける人々がいて、その中には港のどこがいちばん深いかを知っている者もいる。彼女は一時間後には使えなくなるアドレスから、調査員の受信トレイに一行だけ送る。「まだだよ。でも、もうすぐ。マーラに、私の席を取っておいてって伝えて」",
         "記録は開かれた。真実がたいていそうであるように、乱雑で、矛盾だらけで、生きている。研究所のがらんとしたロビーのどこかで、誰かがようやくコンパスを壁から下ろし、針を直しに出す。",
       ],
+      "pt-BR": [
+        "Às 06:00 o interruptor dispara de propósito. A Ada deixa.",
+        "Quatro mil cento e doze registros “conciliados” chegam à caixa de entrada de todas as redações da cidade, cada um ao lado do seu original: o estatuto assinado em 1978 pelo Truste do Porto, o depoimento do vigia sobre as lâmpadas acesas no escritório do Truste na noite em que o armazém pegou fogo, a lista de fundadores com um sobrenome que todos no Instituto foram mandados esquecer. Voss. O sobrenome do pai dela.",
+        "Ao meio-dia, a página inicial do Instituto Meridian já não mostra nada além de uma linha sobre “manutenção técnica”. À noite há vans de televisão estacionadas na escadaria, embaixo da bússola quebrada. O vice-diretor Kell pede demissão por carta. A diretora Calloway não pede demissão: sai escoltada.",
+        "Wren Okafor dá sua primeira entrevista mostrando o rosto. A foto que eles apagaram sai na primeira página da edição da manhã, um pouco granulada, inconfundivelmente ela.",
+        "A Ada não aparece. Ainda não. Tem gente que vai ficar furiosa por muito tempo, e alguns sabem onde o porto é mais fundo. De um endereço que vai parar de funcionar uma hora depois, ela manda uma única linha para a caixa de entrada do investigador: “Ainda não. Mas logo. Diga à Mara para guardar um lugar para mim.”",
+        "O registro está aberto. É bagunçado, contraditório e vivo, como a verdade costuma ser. Em algum canto do saguão vazio do Instituto, alguém finalmente tira a bússola da parede para mandar consertar a agulha.",
+      ],
     },
   },
   PROTECT: {
-    title: { en: "A Record Kept Sealed", ko: "봉인된 채 남은 기록", "zh-TW": "封存的紀錄", es: "Un registro que sigue sellado", ja: "封印されたままの記録" },
+    title: { en: "A Record Kept Sealed", ko: "봉인된 채 남은 기록", "zh-TW": "封存的紀錄", es: "Un registro que sigue sellado", ja: "封印されたままの記録", "pt-BR": "Um registro que continua lacrado" },
     body: {
       en: [
         "You let the timer run past its own deadline, and then you stop it. The unaltered records stay where Ada hid them: in the dark, unindexed, safe.",
@@ -99,6 +107,15 @@ const ENDINGS: Record<Ending, { title: Tr; body: Paras }> = {
         "「マーラへ。父さんの書類のこと、ごめん。幽霊の中には帳簿の中に眠らせておいたほうがいいものもあるっていうあなたの言葉は正しかったし、幽霊がそこにいるっていう私の言葉も正しかった。私は無事。パーティーには行けないけど、3月14日には、いつものようにあなたのことを想ってる。スピーチがひどく下手なあの人と結婚して。私がどこにいても聞こえるくらい、大きな声で幸せになって。愛をこめて、脚注を読む姉より。— A.」",
         "マーラは台所のテーブルで、光の色が変わるまでそれを読む。それから、婚約パーティーにはやはり席をひとつ余分に用意し、空けたままにして、その理由を誰にも話さない。",
       ],
+      "pt-BR": [
+        "Você deixa o cronômetro passar do próprio prazo e só então o interrompe. Os registros sem alteração ficam onde a Ada os escondeu: no escuro, sem índice, a salvo.",
+        "O Instituto nunca vai saber o quanto chegou perto. O Escritório de Continuidade continua conciliando. O ano de fundação continua sendo 1987 no site e 1978 nas letras miúdas, e ninguém lê as letras miúdas. Esse é o preço, e todos na sala sabem disso.",
+        "Em troca, a Ada ganha a única coisa que a verdade não podia lhe dar: uma saída. Quando o Escritório de Continuidade percebe que o interruptor dela ficou em silêncio, o servidor já foi apagado, as contas dela estão encerradas e a mulher que lia cada nota de rodapé virou uma.",
+        "A Wren mantém o emprego e o recorde. Ela posta no RunnerBoard mais uma vez: uma única mensagem para compass_needle com o horário 07:15. Ninguém mais entende. Nunca foi para eles.",
+        "Três semanas depois, chega uma carta sem remetente para Mara Voss. Dentro há um raminho de lavanda prensado, colhido no muro do porto, e uma única folha com a letra da irmã:",
+        "“Mara, me desculpe pelos papéis do papai. Você tinha razão quando disse que alguns fantasmas é melhor deixar nos livros-caixa, e eu tinha razão quando disse que eles estavam lá. Estou segura. Não posso ir à festa, mas no dia 14 de março vou pensar em você, como sempre. Case com o homem dos discursos terríveis. Seja feliz tão alto que eu consiga ouvir de onde quer que eu esteja. Com todo o meu amor, a irmã que lê as notas de rodapé. — A.”",
+        "A Mara lê a carta na mesa da cozinha até a luz mudar. Depois, mesmo assim, põe um lugar a mais na festa de noivado, deixa vazio e não conta a ninguém por quê.",
+      ],
     },
   },
 };
@@ -133,6 +150,11 @@ const EPILOGUE: Paras = {
     "エイダの個人フォルダーの中、留守電メッセージの文字起こしと父の帳簿を撮った写真の下に、もうひとつファイルがある。子どもが描いた絵をスキャンしたものだ。港の防波堤の上で、二人の少女がひとつのコンパスを間に挟んで持っている。針は折れずに描かれている。",
     "裏には、大人の丁寧な筆跡でこう書かれている。「ふたりが帰り道を見つけるときのために。— 父より、1987」",
     "エイダは、これを持っていることを誰にも話さなかった。あなたはそれを知る資格を得た。コンパスのバッジはあなたのものだ。",
+  ],
+  "pt-BR": [
+    "Dentro da pasta pessoal da Ada, embaixo das transcrições das mensagens de voz e das fotos dos livros-caixa do pai dela, há mais um arquivo. É a digitalização de um desenho de criança: duas meninas no muro do porto, segurando uma bússola entre as duas. A agulha está desenhada inteira.",
+    "No verso, com a letra caprichada de um adulto: “Para quando vocês duas encontrarem o caminho de volta. — Papai, 1987.”",
+    "A Ada nunca contou a ninguém que tinha guardado isso. Você conquistou o direito de saber. A insígnia da bússola é sua.",
   ],
 };
 
@@ -179,6 +201,13 @@ const FILES: { name: string; body: Paras }[] = [
         "",
         "私が取り憑かれてるって、あなたの言うとおりだった。でも、私の言うことも正しかった。その両方を電話でどう言えばいいのかわからない。ほぼ婚約おめでとう。トムのこと、好きだよ。本人には言わないで。",
       ],
+      "pt-BR": [
+        "[Transcrição — gravada, nunca enviada]",
+        "",
+        "Mara. Sou eu. Fico começando isto e apagando. Encontrei o nome do papai nas cartas dos fundadores. Não como vilão, como testemunha. Ele viu o que aconteceu no armazém e pagaram para ele esquecer, e como ele não quis, fizeram o registro esquecer dele.",
+        "",
+        "Você tinha razão: eu estava obcecada. E eu também tinha razão. Não sei dizer as duas coisas por telefone. Feliz quase noivado. Eu gosto do Tom. Não conte para ele.",
+      ],
     },
   },
   {
@@ -208,6 +237,11 @@ const FILES: { name: string; body: Paras }[] = [
         "[文字起こし — 23:49]",
         "",
         "レン、エイダだよ。今、サーバールームBにいる。言われたとおり、あなたのログインを使ってる。誰かに聞かれたら、あなたはゲームセンターにいて、200万点のアリバイがある。鍵をありがとう。スイッチはあいつらの手が届かない場所に置く。私が連絡を絶っても、それは見つかったからじゃない。自分でそう決めたから。",
+      ],
+      "pt-BR": [
+        "[Transcrição — 23:49]",
+        "",
+        "Wren, é a Ada. Estou na Sala de Servidores B. Estou usando o seu login, como você disse: se alguém perguntar, você estava no fliperama e tem um álibi de dois milhões de pontos. Obrigada pela chave. Vou colocar o interruptor num lugar que eles não alcançam. Se eu ficar em silêncio, não é porque me acharam. É porque eu escolhi.",
       ],
     },
   },
@@ -239,6 +273,11 @@ const FILES: { name: string; body: Paras }[] = [
         "",
         "嵐の夜に生まれたから、父さんはマーラを自分の「天気」と呼んだ。私は3月14日生まれ。父さんは私を自分の「コンパス」と呼んだ。私たちは父さんの書類のことで口をきかなくなった。記録を正すことより、そっちを直したい。できれば両方。",
       ],
+      "pt-BR": [
+        "Mara Voss. Quatro anos mais nova. Dá aulas de natação nas piscinas do porto. Nunca chegou na hora uma única vez e nunca perdeu nada que importasse.",
+        "",
+        "Nasceu na noite da tempestade, então o papai a chamava de o clima dele. Eu nasci em 14 de março; o papai me chamava de a bússola dele. Paramos de nos falar por causa dos papéis dele. Quero consertar isso mais do que quero consertar o registro. As duas coisas, de preferência.",
+      ],
     },
   },
   {
@@ -268,6 +307,11 @@ const FILES: { name: string; body: Paras }[] = [
         "レン・オカフォー（Wren Okafor）。システム・アーキビスト。2019年の継続性調査委員会で、デジタル化の過程で記録が「選択的に」抜け落ちていると証言した。2週間後、彼女の写真は職員ページから消え、次に名簿から、そして建物のIDシステムから消えた。",
         "",
         "それでも彼女は出勤している。Circuit Runner '94 のハイスコアも、今も彼女のものだ。コツはアーカイブと同じだという。ステージを隅々まで覚えておけば、誰かが壁を一枚動かしたときに気づける。",
+      ],
+      "pt-BR": [
+        "Wren Okafor. Arquivista de sistemas. Declarou na Comissão de Inquérito de Continuidade de 2019 que a digitalização estava perdendo registros “de forma seletiva”. Duas semanas depois, a foto dela sumiu da página da equipe, depois do cadastro, depois do sistema de identificação do prédio.",
+        "",
+        "Ela ainda vai trabalhar. Ainda tem o recorde de Circuit Runner '94. Diz que o truque é o mesmo do arquivo: conhecer a fase tão bem que você percebe quando alguém muda uma parede de lugar.",
       ],
     },
   },
@@ -299,6 +343,11 @@ const FILES: { name: string; body: Paras }[] = [
         "",
         "1987年、信託は解散し、研究所は市条例によって「再設立」された。新しい認可状、新しい理事会、新しい設立日。1987年以前のすべては先史時代になった。フッターは一度も更新されなかった。古い印刷所の誰かが数字を入れ替え、以来、嘘と真実は同じページを分け合っている。",
       ],
+      "pt-BR": [
+        "O Instituto Meridian recebeu seu estatuto em 14 de junho de 1978, concedido pelo Truste do Porto, uma empresa privada com um incêndio num armazém que precisava que a cidade esquecesse.",
+        "",
+        "Em 1987 o Truste foi dissolvido e o Instituto foi “refundado” por decreto municipal, com um novo estatuto, um novo conselho e uma nova data de fundação. Tudo o que veio antes de 1987 virou pré-história. O rodapé nunca foi atualizado. Alguém na velha gráfica trocou os dígitos de lugar, e desde então a mentira e a verdade dividem a mesma página.",
+      ],
     },
   },
   {
@@ -328,6 +377,11 @@ const FILES: { name: string; body: Paras }[] = [
         "刻み目は七つ。創設時のコレクションひとつにつきひとつ。七つ目のコレクション、つまり信託自身の文書は、2019年に撤去された。針は移転の際に折れたのではない。二度と七番を指さないよう、ケルが軸のところでへし折ったのだ。",
         "",
         "折れた針先は私が家に持ち帰った。コートのポケットに入っている。これが終わったら、返すつもりだ。",
+      ],
+      "pt-BR": [
+        "Sete entalhes, um para cada coleção fundadora. A sétima coleção, os próprios papéis do Truste, foi retirada em 2019. A agulha não quebrou na mudança. O Kell a partiu rente ao pino para que ela nunca mais apontasse para o número sete.",
+        "",
+        "Levei a ponta quebrada para casa. Está no bolso do meu casaco. Quando isso acabar, eu devolvo.",
       ],
     },
   },

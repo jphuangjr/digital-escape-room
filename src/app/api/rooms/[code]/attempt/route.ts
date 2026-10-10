@@ -7,6 +7,7 @@ import { publish } from "@/server/realtime";
 import { track } from "@/server/analytics";
 import { checkAnswer } from "@/server/content";
 import { recordFinishedCase } from "@/server/cases";
+import { lockoutRemainingSec, WRONG_ANSWER_LOCKOUT_MS } from "@/lib/rules";
 import { getT } from "@/i18n/server";
 
 const PREREQS: Partial<Record<PuzzleId, PuzzleId>> = {
@@ -67,6 +68,23 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     );
   }
 
+  const lockoutMs = WRONG_ANSWER_LOCKOUT_MS[puzzleId];
+  if (lockoutMs) {
+    const lastWrong = await db.attempt.findFirst({
+      where: { roomId: room.id, puzzleId, correct: false, createdAt: { gte: new Date(now.getTime() - lockoutMs) } },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    });
+    const left = lockoutRemainingSec(lastWrong?.createdAt, now, lockoutMs);
+    if (left > 0) {
+      return json<AttemptResponse>(
+        { correct: false, rateLimited: true, retryAfterSec: left, message: t("api.attempt.lockedOut", { s: left }), progress },
+        429,
+        { "Retry-After": String(left) },
+      );
+    }
+  }
+
   const correct = checkAnswer(puzzleId, input);
   const attempt = await db.attempt.create({ data: { roomId: room.id, playerId: player.id, puzzleId, input, correct } });
   track(room.id, player.id, "attempt", { puzzleId, correct });
@@ -111,7 +129,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
 
   return json<AttemptResponse>({
     correct,
-    message: correct ? (SOLVED_MESSAGES[puzzleId] ? t(SOLVED_MESSAGES[puzzleId]) : undefined) : t("api.attempt.wrong"),
+    message: correct
+      ? SOLVED_MESSAGES[puzzleId]
+        ? t(SOLVED_MESSAGES[puzzleId])
+        : undefined
+      : lockoutMs
+        ? t("api.attempt.wrongLocked", { s: lockoutMs / 1000 })
+        : t("api.attempt.wrong"),
+    // A wrong answer on a lockout puzzle starts the room-wide lock; tell the client how long.
+    ...(!correct && lockoutMs ? { retryAfterSec: lockoutMs / 1000 } : {}),
     progress: nextProgress,
   });
 }

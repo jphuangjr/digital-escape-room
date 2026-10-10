@@ -46,11 +46,11 @@ const messages: Record<keyof typeof en, string> = {
   "browser.form.correct": "答對了！",
   "browser.form.rejected": "被拒絕了，答案不是這個。",
   "browser.form.retryIn": "請於 {s} 秒後再試。",
-  "browser.form.previewFailed": "預覽失敗",
   "browser.form.decreaseShift": "減少位移",
   "browser.form.increaseShift": "增加位移",
   "browser.form.shiftSolved": "✓ 已為整個房間解碼刊登內容。",
-  "browser.form.previewLabel": "預覽 · 位移 {n}（只有你看得到）",
+  "browser.form.lockNote": "注意：輸入錯誤的金鑰，所有人的系統都會鎖定 1 分鐘。請先解出來。",
+  "browser.form.locked": "已鎖定 · {s} 秒",
   "browser.form.binaryPassed": "✓ 通過了。請開啟解碼器，找找二進位分頁。",
 };
 

@@ -56,6 +56,8 @@ const messages: Record<keyof typeof en, string> = {
   "api.attempt.notReady": "아무 일도 일어나지 않아요. 아직은 때가 아닌가 봐요.",
   "api.attempt.rateLimited": "시도가 너무 많아요. {s}초 후에 다시 시도해 주세요.",
   "api.attempt.wrong": "정답이 아니에요.",
+  "api.attempt.lockedOut": "잘못된 키 때문에 시스템이 잠겼어요. {s}초 후에 다시 시도해 주세요.",
+  "api.attempt.wrongLocked": "틀린 키예요. 시스템이 {s}초 동안 잠겨요.",
   "api.attempt.solved.binaryLesson": "퀴즈 통과! 이제 해독기에서 이진수 변환기를 쓸 수 있어요.",
   "api.attempt.solved.adminConsole": "관리자 콘솔이 열렸어요.",
   "api.decode.badShift": "이동 값은 정수여야 해요.",

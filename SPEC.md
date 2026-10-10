@@ -55,7 +55,7 @@ Site 2 "The Drift" (`thedrift.blog`) [Branch A]: Real series: 5 posts, first let
 
 Site 3 RunnerBoard (`runnerboard.net`) [Branch B]: Real user `compass_needle`: 4 posts with timestamps HH:MM decoded with A1Z26 spell LOSTPAWS: 12:15 LO, 19:20 ST, 16:01 PA, 23:19 WS → `lostpaws.net`. A post mentions "has anyone seen Biscuit?". Decoy user `needle_compass`: 20:18, 01:16, 04:15, 15:18 → TRAPDOOR; `trapdoor.net` is an Institute honeypot telling players they've been misled, nudging back.
 
-Site 4 Lost Paws (`lostpaws.net`): Listing descriptions are Caesar shift 7. Decoded message: "WREN HAS THE KEY. VAULT CODE IS THE YEAR THEY LIED." Generate ciphertext from plaintext with a utility; don't hand-encode. Biscuit (tabby) listing shows pet ID 0412 (fragment C).
+Site 4 Lost Paws (`lostpaws.net`): Listing descriptions are Caesar shift 7. The site's form only accepts a shift number (no preview): a wrong key locks the form for the whole room for 1 minute, so players work the shift out with the Decoder's Caesar tool first. Decoded message: "WREN HAS THE KEY. VAULT CODE IS THE YEAR THEY LIED." Generate ciphertext from plaintext with a utility; don't hand-encode. Biscuit (tabby) listing shows pet ID 0412 (fragment C).
 
 Site 5 Intranet (`intranet.meridian-inst.net`): login username `wren.okafor`, password `19870412`. Contains record-diff evidence (before/after historical entries). The dashboard pins a Systems notice from W. Okafor with the admin password in 5-bit binary. `/admin` (Systems Admin console) asks for that password (`lantern`, shown as `01100 00001 01110 10100 00101 10010 01110`) and holds the badge log and the redacted memo; tap-to-reveal discloses address of Site 6. Site 6 and the final phrase require the admin console.
 

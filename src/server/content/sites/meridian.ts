@@ -10,11 +10,11 @@ type X = ReturnType<typeof pick>;
 const nav = (x: X): Block => ({
   type: "nav",
   links: [
-    { text: x({ en: "Home", ko: "홈", "zh-TW": "首頁", es: "Inicio", ja: "ホーム" }), href: MERIDIAN_HOST },
-    { text: x({ en: "About", ko: "연구소 소개", "zh-TW": "關於本院", es: "Acerca de", ja: "研究所について" }), href: `${MERIDIAN_HOST}/about` },
-    { text: x({ en: "Staff", ko: "직원", "zh-TW": "職員", es: "Personal", ja: "職員" }), href: `${MERIDIAN_HOST}/staff` },
-    { text: x({ en: "Collections", ko: "소장품", "zh-TW": "館藏", es: "Colecciones", ja: "収蔵品" }), href: `${MERIDIAN_HOST}/collections` },
-    { text: x({ en: "Staff portal", ko: "직원 포털", "zh-TW": "職員入口", es: "Portal del personal", ja: "職員ポータル" }), href: "intranet.meridian-inst.net" },
+    { text: x({ en: "Home", ko: "홈", "zh-TW": "首頁", es: "Inicio", ja: "ホーム", "pt-BR": "Início" }), href: MERIDIAN_HOST },
+    { text: x({ en: "About", ko: "연구소 소개", "zh-TW": "關於本院", es: "Acerca de", ja: "研究所について", "pt-BR": "Sobre" }), href: `${MERIDIAN_HOST}/about` },
+    { text: x({ en: "Staff", ko: "직원", "zh-TW": "職員", es: "Personal", ja: "職員", "pt-BR": "Equipe" }), href: `${MERIDIAN_HOST}/staff` },
+    { text: x({ en: "Collections", ko: "소장품", "zh-TW": "館藏", es: "Colecciones", ja: "収蔵品", "pt-BR": "Acervos" }), href: `${MERIDIAN_HOST}/collections` },
+    { text: x({ en: "Staff portal", ko: "직원 포털", "zh-TW": "職員入口", es: "Portal del personal", ja: "職員ポータル", "pt-BR": "Portal dos funcionários" }), href: "intranet.meridian-inst.net" },
   ],
 });
 
@@ -26,6 +26,7 @@ const footer = (x: X): Block => ({
     "zh-TW": "© since 1978。子午歷史連續性研究院。所有紀錄皆已查核。所有紀錄皆為定本。",
     es: "© since 1978. Instituto Meridian para la Continuidad Histórica. Todos los registros verificados. Todos los registros definitivos.",
     ja: "© since 1978. メリディアン歴史継続性研究所。すべての記録は検証済みです。すべての記録は確定済みです。",
+    "pt-BR": "© since 1978. Instituto Meridian para a Continuidade Histórica. Todos os registros verificados. Todos os registros definitivos.",
   }),
 });
 
@@ -33,7 +34,7 @@ function home(x: X): SitePage {
   const blocks: Block[] = [
     nav(x),
     { type: "compass" },
-    { type: "heading", level: 1, text: x({ en: "The Meridian Institute", ko: "메리디언 연구소", "zh-TW": "子午研究院", es: "Instituto Meridian", ja: "メリディアン研究所" }) },
+    { type: "heading", level: 1, text: x({ en: "The Meridian Institute", ko: "메리디언 연구소", "zh-TW": "子午研究院", es: "Instituto Meridian", ja: "メリディアン研究所", "pt-BR": "Instituto Meridian" }) },
     {
       type: "paragraph",
       text: x({
@@ -42,6 +43,7 @@ function home(x: X): SitePage {
         "zh-TW": "紀錄的守護者，連續性的看守人。子午研究院自創立以來，始終保存著那些告訴這座城市「你是誰」的文件、照片與證詞。",
         es: "Custodios del registro. Guardianes de la continuidad. Desde su fundación, el Instituto Meridian ha preservado los documentos, las fotografías y los testimonios que le dicen a esta ciudad quién es.",
         ja: "記録の守り手。継続性の番人。メリディアン研究所は設立以来、この街が何者であるかを語る文書、写真、証言を保存してまいりました。",
+        "pt-BR": "Guardiões do registro. Protetores da continuidade. Desde a sua fundação, o Instituto Meridian preserva os documentos, as fotografias e os testemunhos que dizem a esta cidade quem ela é.",
       }),
     },
     {
@@ -53,9 +55,10 @@ function home(x: X): SitePage {
         "zh-TW": "公告：檔案遷移作業完成前，閱覽室暫停開放，恢復日期另行公告。感謝各位讀者耐心配合。",
         es: "Aviso: la Sala de Lectura permanecerá cerrada hasta nuevo aviso mientras concluye la migración de nuestro archivo. Agradecemos a nuestros usuarios su paciencia.",
         ja: "お知らせ：アーカイブ移行作業が完了するまで、閲覧室は当面のあいだ閉室いたします。利用者の皆様のご理解に感謝申し上げます。",
+        "pt-BR": "Aviso: a Sala de Leitura está fechada até segunda ordem enquanto concluímos a migração do nosso arquivo. Agradecemos a paciência de nossos usuários.",
       }),
     },
-    { type: "heading", level: 2, text: x({ en: "Our Mission", ko: "우리의 사명", "zh-TW": "我們的使命", es: "Nuestra misión", ja: "私たちの使命" }) },
+    { type: "heading", level: 2, text: x({ en: "Our Mission", ko: "우리의 사명", "zh-TW": "我們的使命", es: "Nuestra misión", ja: "私たちの使命", "pt-BR": "Nossa missão" }) },
     {
       type: "paragraph",
       text: x({
@@ -64,9 +67,10 @@ function home(x: X): SitePage {
         "zh-TW": "歷史不是發生過的事。歷史是被保存下來的事。每一本帳冊、每一份契據、每一張褪色的照片，在交付公眾記憶之前，都必須經過我們的手。我們嚴肅看待這份責任，也把它當成自己的事。",
         es: "La historia no es lo que ocurrió. La historia es lo que se conserva. Cada libro de cuentas, cada escritura, cada fotografía desvaída pasa por nuestras manos antes de confiarse a la memoria pública. Nos tomamos esa responsabilidad en serio. Nos la tomamos como algo personal.",
         ja: "歴史とは、起きたことではありません。歴史とは、保管されたものです。あらゆる帳簿、あらゆる証書、色褪せた一枚の写真に至るまで、公共の記憶に託される前に必ず私たちの手を経ます。私たちはその責任を重く受け止めています。そして、我がこととして引き受けています。",
+        "pt-BR": "A história não é o que aconteceu. A história é o que se guarda. Cada livro-razão, cada escritura, cada fotografia desbotada passa por nossas mãos antes de ser confiada à memória pública. Levamos essa responsabilidade a sério. Levamos para o lado pessoal.",
       }),
     },
-    { type: "heading", level: 2, text: x({ en: "From the Director", ko: "소장 인사말", "zh-TW": "所長的話", es: "Palabras de la directora", ja: "所長あいさつ" }) },
+    { type: "heading", level: 2, text: x({ en: "From the Director", ko: "소장 인사말", "zh-TW": "所長的話", es: "Palabras de la directora", ja: "所長あいさつ", "pt-BR": "Palavras da diretora" }) },
     {
       type: "paragraph",
       text: x({
@@ -75,9 +79,10 @@ function home(x: X): SitePage {
         "zh-TW": "「一座沒有可靠過去的城市，不可能擁有穩定的未來。本院存在的意義，就是讓每一位市民永遠不必懷疑哪個版本才是真相。」——卡洛威所長（H. Calloway）",
         es: "“Una ciudad sin un pasado fiable no puede tener un futuro estable. El Instituto existe para que ningún ciudadano tenga que preguntarse jamás cuál versión de los hechos es la verdadera.” — Directora H. Calloway",
         ja: "「信頼できる過去を持たない街に、安定した未来はありません。どの市民も、どちらの出来事が真実なのかと迷わずに済むように。当研究所はそのために存在しています。」——所長 H・キャロウェイ",
+        "pt-BR": "“Uma cidade sem um passado confiável não pode ter um futuro estável. O Instituto existe para que nenhum cidadão jamais precise se perguntar qual versão dos fatos é a verdadeira.” — Diretora H. Calloway",
       }),
     },
-    { type: "heading", level: 2, text: x({ en: "Recent Announcements", ko: "최근 공지", "zh-TW": "近期公告", es: "Anuncios recientes", ja: "最近のお知らせ" }) },
+    { type: "heading", level: 2, text: x({ en: "Recent Announcements", ko: "최근 공지", "zh-TW": "近期公告", es: "Anuncios recientes", ja: "最近のお知らせ", "pt-BR": "Comunicados recentes" }) },
     {
       type: "list",
       items: [
@@ -87,6 +92,7 @@ function home(x: X): SitePage {
           "zh-TW": "檔案研究員艾達・佛斯博士（Dr. Ada Voss）目前長期休假。有關港灣帳冊之詢問，請洽所長辦公室。",
           es: "La archivista Dra. Ada Voss se encuentra en licencia prolongada. Las consultas sobre los Libros del Puerto deben dirigirse a la Oficina de la Dirección.",
           ja: "アーキビストのエイダ・ヴォス（Ada Voss）博士は長期休暇中です。ハーバー台帳に関するお問い合わせは所長室までお寄せください。",
+          "pt-BR": "A arquivista Dra. Ada Voss está em licença prolongada. Consultas sobre os Livros-Razão do Porto devem ser encaminhadas ao Gabinete da Diretoria.",
         }),
         x({
           en: "The 2019 digitisation programme is now complete. Physical originals have been retired.",
@@ -94,6 +100,7 @@ function home(x: X): SitePage {
           "zh-TW": "2019 年數位化計畫已全數完成。實體原件已汰除。",
           es: "El programa de digitalización de 2019 ha concluido. Los originales físicos han sido retirados.",
           ja: "2019年のデジタル化事業は完了しました。実物の原本は廃棄されました。",
+          "pt-BR": "O programa de digitalização de 2019 foi concluído. Os originais físicos foram retirados.",
         }),
         x({
           en: "Our compass emblem has been restored to the main stair. Please do not touch the needle.",
@@ -101,23 +108,24 @@ function home(x: X): SitePage {
           "zh-TW": "本院的指南針徽章已重新安置於主樓梯。請勿觸摸指針。",
           es: "Nuestro emblema de la brújula ha sido restaurado en la escalera principal. Por favor, no toque la aguja.",
           ja: "当研究所のコンパスの紋章を中央階段に再設置いたしました。針には触れないでください。",
+          "pt-BR": "Nosso emblema da bússola foi restaurado na escadaria principal. Por favor, não toque na agulha.",
         }),
       ],
     },
-    { type: "link", text: x({ en: "Meet the people who keep the record →", ko: "기록을 지키는 사람들 →", "zh-TW": "認識守護紀錄的人們 →", es: "Conozca a quienes custodian el registro →", ja: "記録を守る人々 →" }), href: `${MERIDIAN_HOST}/staff` },
+    { type: "link", text: x({ en: "Meet the people who keep the record →", ko: "기록을 지키는 사람들 →", "zh-TW": "認識守護紀錄的人們 →", es: "Conozca a quienes custodian el registro →", ja: "記録を守る人々 →", "pt-BR": "Conheça as pessoas que guardam o registro →" }), href: `${MERIDIAN_HOST}/staff` },
     footer(x),
   ];
-  return page(MERIDIAN_HOST, x({ en: "Meridian Institute — Keepers of the Record", ko: "메리디언 연구소 — 기록의 수호자", "zh-TW": "子午研究院 — 紀錄的守護者", es: "Instituto Meridian — Custodios del registro", ja: "メリディアン研究所 — 記録の守り手" }), "meridian", blocks, {
-    headComments: [x({ en: "Meridian CMS v4.2 — template: civic-classic", ko: "Meridian CMS v4.2 — 템플릿: civic-classic", "zh-TW": "Meridian CMS v4.2 — 樣板：civic-classic", es: "Meridian CMS v4.2 — plantilla: civic-classic", ja: "Meridian CMS v4.2 — テンプレート: civic-classic" })],
+  return page(MERIDIAN_HOST, x({ en: "Meridian Institute — Keepers of the Record", ko: "메리디언 연구소 — 기록의 수호자", "zh-TW": "子午研究院 — 紀錄的守護者", es: "Instituto Meridian — Custodios del registro", ja: "メリディアン研究所 — 記録の守り手", "pt-BR": "Instituto Meridian — Guardiões do registro" }), "meridian", blocks, {
+    headComments: [x({ en: "Meridian CMS v4.2 — template: civic-classic", ko: "Meridian CMS v4.2 — 템플릿: civic-classic", "zh-TW": "Meridian CMS v4.2 — 樣板：civic-classic", es: "Meridian CMS v4.2 — plantilla: civic-classic", ja: "Meridian CMS v4.2 — テンプレート: civic-classic", "pt-BR": "Meridian CMS v4.2 — modelo: civic-classic" })],
     meta: {
-      description: x({ en: "The Meridian Institute for Historical Continuity", ko: "메리디언 역사연속성 연구소", "zh-TW": "子午歷史連續性研究院", es: "Instituto Meridian para la Continuidad Histórica", ja: "メリディアン歴史継続性研究所" }),
+      description: x({ en: "The Meridian Institute for Historical Continuity", ko: "메리디언 역사연속성 연구소", "zh-TW": "子午歷史連續性研究院", es: "Instituto Meridian para la Continuidad Histórica", ja: "メリディアン歴史継続性研究所", "pt-BR": "Instituto Meridian para a Continuidade Histórica" }),
       generator: "Meridian CMS 4.2",
     },
     inlineComments: {
-      1: [x({ en: "emblem: seven notches, needle intentionally unrepaired per Director", ko: "문장: 눈금 일곱 개. 소장 지시로 바늘은 일부러 수리하지 않음", "zh-TW": "徽章：七道刻痕。依所長指示，指針刻意不予修復", es: "emblema: siete muescas, aguja sin reparar a propósito por orden de la Directora", ja: "紋章：刻み目は七つ。所長の指示により、針はあえて修理していない" })],
-      4: [x({ en: "archive migration complete: see /vault-2019", ko: "아카이브 이전 완료: /vault-2019 참조", "zh-TW": "檔案遷移完成：見 /vault-2019", es: "migración del archivo completada: ver /vault-2019", ja: "アーカイブ移行完了：/vault-2019 を参照" })],
+      1: [x({ en: "emblem: seven notches, needle intentionally unrepaired per Director", ko: "문장: 눈금 일곱 개. 소장 지시로 바늘은 일부러 수리하지 않음", "zh-TW": "徽章：七道刻痕。依所長指示，指針刻意不予修復", es: "emblema: siete muescas, aguja sin reparar a propósito por orden de la Directora", ja: "紋章：刻み目は七つ。所長の指示により、針はあえて修理していない", "pt-BR": "emblema: sete entalhes, agulha deixada sem reparo de propósito por ordem da Diretora" })],
+      4: [x({ en: "archive migration complete: see /vault-2019", ko: "아카이브 이전 완료: /vault-2019 참조", "zh-TW": "檔案遷移完成：見 /vault-2019", es: "migración del archivo completada: ver /vault-2019", ja: "アーカイブ移行完了：/vault-2019 を参照", "pt-BR": "migração do arquivo concluída: ver /vault-2019" })],
     },
-    tailComments: [x({ en: "analytics disabled per Records Directive 19", ko: "기록 지침 19호에 따라 분석 기능 비활성화", "zh-TW": "依紀錄指令第 19 號，分析功能已停用", es: "analítica desactivada según la Directiva de Registros 19", ja: "記録指令第19号により解析機能を無効化" })],
+    tailComments: [x({ en: "analytics disabled per Records Directive 19", ko: "기록 지침 19호에 따라 분석 기능 비활성화", "zh-TW": "依紀錄指令第 19 號，分析功能已停用", es: "analítica desactivada según la Directiva de Registros 19", ja: "記録指令第19号により解析機能を無効化", "pt-BR": "análise de acessos desativada conforme a Diretiva de Registros 19" })],
     scripts: ["/static/meridian.min.js"],
   });
 }
@@ -126,147 +134,159 @@ type Person = Extract<Block, { type: "staff" }>["people"][number];
 
 const staffList = (x: X): Person[] => [
   {
-    name: x({ en: "Dr. Harriet Calloway", ko: "해리엇 캘러웨이 박사 (Harriet Calloway)", "zh-TW": "哈莉特・卡洛威博士（Harriet Calloway）", es: "Dra. Harriet Calloway", ja: "ハリエット・キャロウェイ博士（Harriet Calloway）" }),
-    role: x({ en: "Director", ko: "소장", "zh-TW": "所長", es: "Directora", ja: "所長" }),
+    name: x({ en: "Dr. Harriet Calloway", ko: "해리엇 캘러웨이 박사 (Harriet Calloway)", "zh-TW": "哈莉特・卡洛威博士（Harriet Calloway）", es: "Dra. Harriet Calloway", ja: "ハリエット・キャロウェイ博士（Harriet Calloway）", "pt-BR": "Dra. Harriet Calloway" }),
+    role: x({ en: "Director", ko: "소장", "zh-TW": "所長", es: "Directora", ja: "所長", "pt-BR": "Diretora" }),
     bio: x({
       en: "Has led the Institute for two decades. Believes the past is a public utility and should be maintained like one.",
       ko: "20년째 연구소를 이끌고 있습니다. 과거는 공공 설비이며, 공공 설비처럼 관리되어야 한다고 믿습니다.",
       "zh-TW": "領導本院已二十年。她相信過去是一種公共設施，也應該像公共設施一樣維護。",
       es: "Dirige el Instituto desde hace dos décadas. Cree que el pasado es un servicio público y que debe mantenerse como tal.",
       ja: "二十年にわたり研究所を率いる。過去は公共インフラであり、公共インフラと同じように維持されるべきだと考えている。",
+      "pt-BR": "Dirige o Instituto há duas décadas. Acredita que o passado é um serviço público e deve ser mantido como tal.",
     }),
     photo: "calloway.jpg",
   },
   {
-    name: x({ en: "Dr. Ada Voss", ko: "에이다 보스 박사 (Ada Voss)", "zh-TW": "艾達・佛斯博士（Ada Voss）", es: "Dra. Ada Voss", ja: "エイダ・ヴォス博士（Ada Voss）" }),
-    role: x({ en: "Senior Archivist (on leave)", ko: "수석 기록연구사 (휴가 중)", "zh-TW": "資深檔案研究員（休假中）", es: "Archivista sénior (de licencia)", ja: "主任アーキビスト（休暇中）" }),
+    name: x({ en: "Dr. Ada Voss", ko: "에이다 보스 박사 (Ada Voss)", "zh-TW": "艾達・佛斯博士（Ada Voss）", es: "Dra. Ada Voss", ja: "エイダ・ヴォス博士（Ada Voss）", "pt-BR": "Dra. Ada Voss" }),
+    role: x({ en: "Senior Archivist (on leave)", ko: "수석 기록연구사 (휴가 중)", "zh-TW": "資深檔案研究員（休假中）", es: "Archivista sénior (de licencia)", ja: "主任アーキビスト（休暇中）", "pt-BR": "Arquivista sênior (de licença)" }),
     bio: x({
       en: "Specialist in harbour-era ledgers and municipal deeds. Known for reading the footnotes nobody else reads.",
       ko: "항구 시대 장부와 시 소유 증서 전문가. 아무도 읽지 않는 각주까지 읽는 사람으로 유명합니다.",
       "zh-TW": "專精港灣時代的帳冊與市府契據。以會讀別人都不讀的註腳聞名。",
       es: "Especialista en libros de cuentas de la época portuaria y escrituras municipales. Conocida por leer las notas al pie que nadie más lee.",
       ja: "港湾時代の台帳と市有地証書の専門家。誰も読まない脚注まで読むことで知られる。",
+      "pt-BR": "Especialista em livros-razão da época portuária e escrituras municipais. Conhecida por ler as notas de rodapé que ninguém mais lê.",
     }),
     photo: "voss.jpg",
   },
   {
-    name: x({ en: "Wren Okafor", ko: "렌 오카포 (Wren Okafor)", "zh-TW": "芮恩・奧卡佛（Wren Okafor）", es: "Wren Okafor", ja: "レン・オカフォー（Wren Okafor）" }),
-    role: x({ en: "Systems Archivist", ko: "시스템 기록연구사", "zh-TW": "系統檔案研究員", es: "Archivista de sistemas", ja: "システム・アーキビスト" }),
+    name: x({ en: "Wren Okafor", ko: "렌 오카포 (Wren Okafor)", "zh-TW": "芮恩・奧卡佛（Wren Okafor）", es: "Wren Okafor", ja: "レン・オカフォー（Wren Okafor）", "pt-BR": "Wren Okafor" }),
+    role: x({ en: "Systems Archivist", ko: "시스템 기록연구사", "zh-TW": "系統檔案研究員", es: "Archivista de sistemas", ja: "システム・アーキビスト", "pt-BR": "Arquivista de sistemas" }),
     bio: x({
       en: "Maintains the Institute's digital catalogue and access systems. Off the clock, she still holds the high score on Circuit Runner '94 — and will tell you so on runnerboard.net if you ask.",
       ko: "연구소의 디지털 목록과 접근 시스템을 관리합니다. 퇴근 후에는 지금도 Circuit Runner '94 최고 기록 보유자이며, 물어보면 runnerboard.net에서 직접 자랑할 겁니다.",
       "zh-TW": "負責維護本院的數位目錄與存取系統。下班後，她至今仍保有 Circuit Runner '94 的最高分紀錄——只要你問，她就會在 runnerboard.net 上親口告訴你。",
       es: "Mantiene el catálogo digital y los sistemas de acceso del Instituto. Fuera del horario laboral, todavía tiene el récord de Circuit Runner '94, y si usted se lo pregunta, ella misma se lo dirá en runnerboard.net.",
       ja: "研究所のデジタル目録とアクセスシステムを管理。勤務時間外では今も Circuit Runner '94 のハイスコア保持者で、尋ねれば runnerboard.net で本人が教えてくれるはずだ。",
+      "pt-BR": "Mantém o catálogo digital e os sistemas de acesso do Instituto. Fora do expediente, ainda detém o recorde de Circuit Runner '94 — e, se você perguntar, ela mesma conta no runnerboard.net.",
     }),
     photo: null,
     link: { text: "runnerboard.net →", href: "runnerboard.net" },
   },
   {
-    name: x({ en: "Thomas Kell", ko: "토머스 켈 (Thomas Kell)", "zh-TW": "湯瑪斯・凱爾（Thomas Kell）", es: "Thomas Kell", ja: "トーマス・ケル（Thomas Kell）" }),
-    role: x({ en: "Deputy Director, Continuity", ko: "연속성 담당 부국장", "zh-TW": "副所長（連續性事務）", es: "Subdirector de Continuidad", ja: "副所長（継続性担当）" }),
+    name: x({ en: "Thomas Kell", ko: "토머스 켈 (Thomas Kell)", "zh-TW": "湯瑪斯・凱爾（Thomas Kell）", es: "Thomas Kell", ja: "トーマス・ケル（Thomas Kell）", "pt-BR": "Thomas Kell" }),
+    role: x({ en: "Deputy Director, Continuity", ko: "연속성 담당 부국장", "zh-TW": "副所長（連續性事務）", es: "Subdirector de Continuidad", ja: "副所長（継続性担当）", "pt-BR": "Vice-diretor de Continuidade" }),
     bio: x({
       en: "Oversees reconciliation of conflicting records. \"Two truths are one too many.\"",
       ko: "상충하는 기록의 정리를 총괄합니다. \"진실은 하나면 충분하다.\"",
       "zh-TW": "負責統整彼此矛盾的紀錄。「兩個真相，就多了一個。」",
       es: "Supervisa la conciliación de registros contradictorios. “Dos verdades son una de más.”",
       ja: "食い違う記録の整合を統括。「真実は二つでは一つ多すぎる。」",
+      "pt-BR": "Supervisiona a conciliação de registros conflitantes. “Duas verdades são uma a mais.”",
     }),
     photo: "kell.jpg",
   },
   {
-    name: x({ en: "Priya Ramanathan", ko: "프리야 라마나단 (Priya Ramanathan)", "zh-TW": "普莉雅・拉馬納坦（Priya Ramanathan）", es: "Priya Ramanathan", ja: "プリヤ・ラマナタン（Priya Ramanathan）" }),
-    role: x({ en: "Conservator", ko: "보존처리 전문가", "zh-TW": "文物修復師", es: "Conservadora", ja: "保存修復師" }),
+    name: x({ en: "Priya Ramanathan", ko: "프리야 라마나단 (Priya Ramanathan)", "zh-TW": "普莉雅・拉馬納坦（Priya Ramanathan）", es: "Priya Ramanathan", ja: "プリヤ・ラマナタン（Priya Ramanathan）", "pt-BR": "Priya Ramanathan" }),
+    role: x({ en: "Conservator", ko: "보존처리 전문가", "zh-TW": "文物修復師", es: "Conservadora", ja: "保存修復師", "pt-BR": "Conservadora" }),
     bio: x({
       en: "Restores paper, vellum and film. Can tell a forged watermark by the way it catches the light.",
       ko: "종이와 양피지, 필름을 복원합니다. 빛이 비치는 모양만 보고도 위조된 워터마크를 가려냅니다.",
       "zh-TW": "修復紙張、羊皮紙與底片。光看浮水印反光的樣子，就能認出偽造品。",
       es: "Restaura papel, pergamino y película. Distingue una marca de agua falsificada por cómo refleja la luz.",
       ja: "紙、羊皮紙、フィルムを修復する。光の反射の具合だけで、偽造された透かしを見抜く。",
+      "pt-BR": "Restaura papel, pergaminho e filme. Reconhece uma marca d'água falsificada pela forma como ela reflete a luz.",
     }),
     photo: "ramanathan.jpg",
   },
   {
-    name: x({ en: "Lionel Ash", ko: "라이어널 애시 (Lionel Ash)", "zh-TW": "萊諾・艾許（Lionel Ash）", es: "Lionel Ash", ja: "ライオネル・アッシュ（Lionel Ash）" }),
-    role: x({ en: "Head of Security", ko: "보안 책임자", "zh-TW": "保安主任", es: "Jefe de Seguridad", ja: "警備責任者" }),
+    name: x({ en: "Lionel Ash", ko: "라이어널 애시 (Lionel Ash)", "zh-TW": "萊諾・艾許（Lionel Ash）", es: "Lionel Ash", ja: "ライオネル・アッシュ（Lionel Ash）", "pt-BR": "Lionel Ash" }),
+    role: x({ en: "Head of Security", ko: "보안 책임자", "zh-TW": "保安主任", es: "Jefe de Seguridad", ja: "警備責任者", "pt-BR": "Chefe de Segurança" }),
     bio: x({
       en: "Former harbour police. Responsible for the vaults, the keys and the people who ask about them.",
       ko: "전직 항만 경찰. 금고와 열쇠, 그리고 그것들에 대해 묻는 사람들을 책임집니다.",
       "zh-TW": "前港務警察。負責金庫、鑰匙，以及打聽這些東西的人。",
       es: "Expolicía portuario. Responsable de las bóvedas, de las llaves y de las personas que preguntan por ellas.",
       ja: "元港湾警察。金庫と鍵、そしてそれらについて尋ねてくる人々を担当する。",
+      "pt-BR": "Ex-policial portuário. Responsável pelos cofres, pelas chaves e pelas pessoas que perguntam por eles.",
     }),
     photo: "ash.jpg",
   },
   {
-    name: x({ en: "Margit Hollis", ko: "마르기트 홀리스 (Margit Hollis)", "zh-TW": "瑪姬特・霍利斯（Margit Hollis）", es: "Margit Hollis", ja: "マルギット・ホリス（Margit Hollis）" }),
-    role: x({ en: "Photographic Collections", ko: "사진 소장품 담당", "zh-TW": "攝影典藏", es: "Colecciones Fotográficas", ja: "写真コレクション担当" }),
+    name: x({ en: "Margit Hollis", ko: "마르기트 홀리스 (Margit Hollis)", "zh-TW": "瑪姬特・霍利斯（Margit Hollis）", es: "Margit Hollis", ja: "マルギット・ホリス（Margit Hollis）", "pt-BR": "Margit Hollis" }),
+    role: x({ en: "Photographic Collections", ko: "사진 소장품 담당", "zh-TW": "攝影典藏", es: "Colecciones Fotográficas", ja: "写真コレクション担当", "pt-BR": "Acervos Fotográficos" }),
     bio: x({
       en: "Curates over two hundred thousand negatives. Prefers silver gelatin to pixels.",
       ko: "20만 장이 넘는 원판 필름을 관리합니다. 픽셀보다 젤라틴 실버 인화를 선호합니다.",
       "zh-TW": "管理超過二十萬張底片。比起像素，她更偏愛銀鹽相紙。",
       es: "Cura más de doscientos mil negativos. Prefiere la gelatina de plata a los píxeles.",
       ja: "二十万枚を超えるネガを管理する。ピクセルよりもゼラチン・シルバー・プリントを好む。",
+      "pt-BR": "Cuida de mais de duzentos mil negativos. Prefere a gelatina de prata aos pixels.",
     }),
     photo: "hollis.jpg",
   },
   {
-    name: x({ en: "Samuel Oduya", ko: "새뮤얼 오두야 (Samuel Oduya)", "zh-TW": "山繆・歐杜亞（Samuel Oduya）", es: "Samuel Oduya", ja: "サミュエル・オドゥヤ（Samuel Oduya）" }),
-    role: x({ en: "Oral Histories", ko: "구술사 담당", "zh-TW": "口述歷史", es: "Historia Oral", ja: "オーラル・ヒストリー担当" }),
+    name: x({ en: "Samuel Oduya", ko: "새뮤얼 오두야 (Samuel Oduya)", "zh-TW": "山繆・歐杜亞（Samuel Oduya）", es: "Samuel Oduya", ja: "サミュエル・オドゥヤ（Samuel Oduya）", "pt-BR": "Samuel Oduya" }),
+    role: x({ en: "Oral Histories", ko: "구술사 담당", "zh-TW": "口述歷史", es: "Historia Oral", ja: "オーラル・ヒストリー担当", "pt-BR": "História Oral" }),
     bio: x({
       en: "Records the memories of long-time residents, then cross-checks them against the record. Usually the record wins.",
       ko: "오래된 주민들의 기억을 녹음한 뒤 기록과 대조합니다. 대개는 기록이 이깁니다.",
       "zh-TW": "錄下老居民的記憶，再與紀錄交叉比對。通常是紀錄勝出。",
       es: "Graba los recuerdos de los vecinos de toda la vida y luego los coteja con el registro. Casi siempre gana el registro.",
       ja: "古くからの住民の記憶を録音し、記録と照合する。たいていは記録が勝つ。",
+      "pt-BR": "Grava as memórias de moradores antigos e depois as confronta com o registro. Quase sempre o registro vence.",
     }),
     photo: "oduya.jpg",
   },
   {
-    name: x({ en: "Clémence Barre", ko: "클레망스 바르 (Clémence Barre)", "zh-TW": "克蕾蒙絲・巴爾（Clémence Barre）", es: "Clémence Barre", ja: "クレマンス・バール（Clémence Barre）" }),
-    role: x({ en: "Public Programmes", ko: "대중 프로그램 담당", "zh-TW": "公共推廣", es: "Programas Públicos", ja: "普及事業担当" }),
+    name: x({ en: "Clémence Barre", ko: "클레망스 바르 (Clémence Barre)", "zh-TW": "克蕾蒙絲・巴爾（Clémence Barre）", es: "Clémence Barre", ja: "クレマンス・バール（Clémence Barre）", "pt-BR": "Clémence Barre" }),
+    role: x({ en: "Public Programmes", ko: "대중 프로그램 담당", "zh-TW": "公共推廣", es: "Programas Públicos", ja: "普及事業担当", "pt-BR": "Programas Públicos" }),
     bio: x({
       en: "Runs the Thursday lectures and the school visits. Has never once been asked a hard question by a child she couldn't answer.",
       ko: "목요 강연과 학교 견학을 맡고 있습니다. 아이들이 던진 어려운 질문에 답하지 못한 적이 한 번도 없습니다.",
       "zh-TW": "負責週四講座與學校參訪。孩子們丟出的難題，她從來沒有答不出來過。",
       es: "Organiza las conferencias de los jueves y las visitas escolares. Jamás un niño le ha hecho una pregunta difícil que no supiera responder.",
       ja: "木曜講座と学校見学を担当。子どもに難しい質問をされて答えられなかったことは、一度もない。",
+      "pt-BR": "Organiza as palestras de quinta-feira e as visitas escolares. Nunca uma criança lhe fez uma pergunta difícil que ela não soubesse responder.",
     }),
     photo: "barre.jpg",
   },
   {
-    name: x({ en: "Ivo Strand", ko: "이보 스트랜드 (Ivo Strand)", "zh-TW": "伊沃・史川德（Ivo Strand）", es: "Ivo Strand", ja: "イーヴォ・ストランド（Ivo Strand）" }),
-    role: x({ en: "Digitisation Lead", ko: "디지털화 책임자", "zh-TW": "數位化計畫主持人", es: "Responsable de Digitalización", ja: "デジタル化責任者" }),
+    name: x({ en: "Ivo Strand", ko: "이보 스트랜드 (Ivo Strand)", "zh-TW": "伊沃・史川德（Ivo Strand）", es: "Ivo Strand", ja: "イーヴォ・ストランド（Ivo Strand）", "pt-BR": "Ivo Strand" }),
+    role: x({ en: "Digitisation Lead", ko: "디지털화 책임자", "zh-TW": "數位化計畫主持人", es: "Responsable de Digitalización", ja: "デジタル化責任者", "pt-BR": "Responsável pela Digitalização" }),
     bio: x({
       en: "Led the 2019 migration of the physical archive to the new catalogue. Originals retired on schedule.",
       ko: "2019년 실물 아카이브의 신규 목록 이전을 지휘했습니다. 원본은 일정대로 폐기되었습니다.",
       "zh-TW": "主導 2019 年將實體檔案遷移至新目錄的工作。原件已如期汰除。",
       es: "Dirigió en 2019 la migración del archivo físico al nuevo catálogo. Originales retirados según lo previsto.",
       ja: "2019年、実物アーカイブの新目録への移行を指揮した。原本は予定どおり廃棄された。",
+      "pt-BR": "Conduziu em 2019 a migração do arquivo físico para o novo catálogo. Originais retirados dentro do cronograma.",
     }),
     photo: "strand.jpg",
   },
   {
-    name: x({ en: "Beatrice Lam", ko: "비어트리스 램 (Beatrice Lam)", "zh-TW": "碧翠絲・林（Beatrice Lam）", es: "Beatrice Lam", ja: "ベアトリス・ラム（Beatrice Lam）" }),
-    role: x({ en: "Reading Room Supervisor", ko: "열람실 관리자", "zh-TW": "閱覽室主管", es: "Supervisora de la Sala de Lectura", ja: "閲覧室主任" }),
+    name: x({ en: "Beatrice Lam", ko: "비어트리스 램 (Beatrice Lam)", "zh-TW": "碧翠絲・林（Beatrice Lam）", es: "Beatrice Lam", ja: "ベアトリス・ラム（Beatrice Lam）", "pt-BR": "Beatrice Lam" }),
+    role: x({ en: "Reading Room Supervisor", ko: "열람실 관리자", "zh-TW": "閱覽室主管", es: "Supervisora de la Sala de Lectura", ja: "閲覧室主任", "pt-BR": "Supervisora da Sala de Leitura" }),
     bio: x({
       en: "Has supervised the Reading Room for eleven years. The Reading Room is currently closed.",
       ko: "11년째 열람실을 관리하고 있습니다. 열람실은 현재 휴관 중입니다.",
       "zh-TW": "督導閱覽室已十一年。閱覽室目前暫停開放。",
       es: "Supervisa la Sala de Lectura desde hace once años. La Sala de Lectura está cerrada actualmente.",
       ja: "十一年にわたり閲覧室を監督している。閲覧室は現在閉室中である。",
+      "pt-BR": "Supervisiona a Sala de Leitura há onze anos. A Sala de Leitura está fechada no momento.",
     }),
     photo: "lam.jpg",
   },
   {
-    name: x({ en: "Noel Ferrante", ko: "노엘 페란테 (Noel Ferrante)", "zh-TW": "諾爾・費蘭特（Noel Ferrante）", es: "Noel Ferrante", ja: "ノエル・フェランテ（Noel Ferrante）" }),
-    role: x({ en: "Facilities", ko: "시설 관리", "zh-TW": "設施管理", es: "Mantenimiento", ja: "施設管理" }),
+    name: x({ en: "Noel Ferrante", ko: "노엘 페란테 (Noel Ferrante)", "zh-TW": "諾爾・費蘭特（Noel Ferrante）", es: "Noel Ferrante", ja: "ノエル・フェランテ（Noel Ferrante）", "pt-BR": "Noel Ferrante" }),
+    role: x({ en: "Facilities", ko: "시설 관리", "zh-TW": "設施管理", es: "Mantenimiento", ja: "施設管理", "pt-BR": "Manutenção" }),
     bio: x({
       en: "Keeps the lights on and the boilers quiet. Knows which doors stick and which ones are meant to.",
       ko: "불을 밝히고 보일러를 조용히 돌봅니다. 어느 문이 뻑뻑한지, 어느 문이 일부러 뻑뻑하게 되어 있는지 압니다.",
       "zh-TW": "讓燈亮著、讓鍋爐安靜。知道哪些門會卡，也知道哪些門是故意卡住的。",
       es: "Mantiene las luces encendidas y las calderas en silencio. Sabe qué puertas se atascan y cuáles están hechas para atascarse.",
       ja: "明かりを絶やさず、ボイラーを静かに保つ。どの扉が引っかかるか、どの扉がわざと引っかかるようにしてあるかを知っている。",
+      "pt-BR": "Mantém as luzes acesas e as caldeiras em silêncio. Sabe quais portas emperram e quais foram feitas para emperrar.",
     }),
     photo: "ferrante.jpg",
   },
@@ -276,7 +296,7 @@ function staff(x: X): SitePage {
   const blocks: Block[] = [
     nav(x),
     { type: "compass" },
-    { type: "heading", level: 1, text: x({ en: "Staff Directory", ko: "직원 명부", "zh-TW": "職員名錄", es: "Directorio del personal", ja: "職員名簿" }) },
+    { type: "heading", level: 1, text: x({ en: "Staff Directory", ko: "직원 명부", "zh-TW": "職員名錄", es: "Directorio del personal", ja: "職員名簿", "pt-BR": "Diretório da equipe" }) },
     {
       type: "paragraph",
       text: x({
@@ -285,13 +305,14 @@ function staff(x: X): SitePage {
         "zh-TW": "本院工作由一支精簡而盡責的團隊執行。如需聯繫職員，請透過所長辦公室。",
         es: "El trabajo del Instituto lo realiza un equipo pequeño y comprometido. Para contactar al personal, diríjase a la Oficina de la Dirección.",
         ja: "当研究所の業務は、少数の献身的なチームによって担われています。職員へのご連絡は所長室を通してください。",
+        "pt-BR": "O trabalho do Instituto é realizado por uma equipe pequena e dedicada. Para contatar os funcionários, dirija-se ao Gabinete da Diretoria.",
       }),
     },
     { type: "staff", people: staffList(x) },
     footer(x),
   ];
-  return page(`${MERIDIAN_HOST}/staff`, x({ en: "Staff — Meridian Institute", ko: "직원 — 메리디언 연구소", "zh-TW": "職員 — 子午研究院", es: "Personal — Instituto Meridian", ja: "職員 — メリディアン研究所" }), "meridian", blocks, {
-    headComments: [x({ en: "Meridian CMS v4.2 — template: directory", ko: "Meridian CMS v4.2 — 템플릿: directory", "zh-TW": "Meridian CMS v4.2 — 樣板：directory", es: "Meridian CMS v4.2 — plantilla: directory", ja: "Meridian CMS v4.2 — テンプレート: directory" })],
+  return page(`${MERIDIAN_HOST}/staff`, x({ en: "Staff — Meridian Institute", ko: "직원 — 메리디언 연구소", "zh-TW": "職員 — 子午研究院", es: "Personal — Instituto Meridian", ja: "職員 — メリディアン研究所", "pt-BR": "Equipe — Instituto Meridian" }), "meridian", blocks, {
+    headComments: [x({ en: "Meridian CMS v4.2 — template: directory", ko: "Meridian CMS v4.2 — 템플릿: directory", "zh-TW": "Meridian CMS v4.2 — 樣板：directory", es: "Meridian CMS v4.2 — plantilla: directory", ja: "Meridian CMS v4.2 — テンプレート: directory", "pt-BR": "Meridian CMS v4.2 — modelo: directory" })],
     inlineComments: {
       4: [
         x({
@@ -300,6 +321,7 @@ function staff(x: X): SitePage {
           "zh-TW": "W. 奧卡佛（Okafor）的照片已撤下待審——絕對不要重新上傳",
           es: "foto de W. Okafor retirada pendiente de revisión — NO volver a subirla",
           ja: "W・オカフォー（Okafor）の写真は審査待ちのため削除 — 絶対に再アップロードしないこと",
+          "pt-BR": "foto de W. Okafor removida até revisão — NÃO enviar de novo",
         }),
         x({
           en: "A. Voss status: on leave. Do not change to 'missing'. — T.K.",
@@ -307,6 +329,7 @@ function staff(x: X): SitePage {
           "zh-TW": "A. 佛斯狀態：休假中。不得改為「失蹤」。——T.K.",
           es: "Estado de A. Voss: de licencia. No cambiar a 'desaparecida'. — T.K.",
           ja: "A・ヴォスのステータス：休暇中。「失踪」に変更しないこと。— T.K.",
+          "pt-BR": "Situação de A. Voss: de licença. Não alterar para 'desaparecida'. — T.K.",
         }),
       ],
     },
@@ -317,8 +340,8 @@ function about(x: X): SitePage {
   const blocks: Block[] = [
     nav(x),
     { type: "compass" },
-    { type: "heading", level: 1, text: x({ en: "About the Institute", ko: "연구소 소개", "zh-TW": "關於本院", es: "Acerca del Instituto", ja: "研究所について" }) },
-    { type: "paragraph", text: x({ en: "Founded 1987.", ko: "1987년 설립.", "zh-TW": "創立於 1987 年。", es: "Fundado en 1987.", ja: "1987年設立。" }) },
+    { type: "heading", level: 1, text: x({ en: "About the Institute", ko: "연구소 소개", "zh-TW": "關於本院", es: "Acerca del Instituto", ja: "研究所について", "pt-BR": "Sobre o Instituto" }) },
+    { type: "paragraph", text: x({ en: "Founded 1987.", ko: "1987년 설립.", "zh-TW": "創立於 1987 年。", es: "Fundado en 1987.", ja: "1987年設立。", "pt-BR": "Fundado em 1987." }) },
     {
       type: "paragraph",
       text: x({
@@ -327,6 +350,7 @@ function about(x: X): SitePage {
         "zh-TW": "子午研究院依市府憲章設立，宗旨是將舊港城散落各處的檔案集中於同一屋簷下。本院從一間航運辦公室樓上的三個房間起家，如今已是本市唯一的歷史紀錄保管機構。",
         es: "El Instituto Meridian se creó por carta municipal para reunir bajo un mismo techo los archivos dispersos de la antigua ciudad portuaria. Lo que comenzó como tres salas encima de una oficina naviera es hoy el único custodio del registro histórico de la ciudad.",
         ja: "メリディアン研究所は、旧港湾都市に散らばった記録を一つ屋根の下に集めるため、市の憲章により設立されました。海運事務所の上階の三部屋から始まった当研究所は、いまや本市の歴史記録を管理する唯一の機関です。",
+        "pt-BR": "O Instituto Meridian foi criado por carta municipal para reunir sob o mesmo teto os arquivos dispersos da antiga cidade portuária. O que começou como três salas em cima de um escritório de navegação é hoje o único guardião do registro histórico da cidade.",
       }),
     },
     {
@@ -337,35 +361,36 @@ function about(x: X): SitePage {
         "zh-TW": "本院的徽章是一只指南針，提醒我們：一份紀錄可信與否，端看它的方位是否正確。我們的指南針有七道刻痕，每一道代表一個創始館藏。指針在遷入現址時受損。我們選擇讓它維持原樣。",
         es: "Nuestro emblema, la brújula, nos recuerda que un registro vale tanto como su rumbo. La nuestra tiene siete muescas, una por cada colección fundacional. La aguja se dañó durante el traslado a nuestro edificio actual. Hemos decidido dejarla tal como está.",
         ja: "当研究所の紋章であるコンパスは、記録の価値はその方位の確かさで決まることを思い出させてくれます。私たちのコンパスには、創設時の収蔵品群ひとつにつき一つずつ、計七つの刻み目があります。針は現在の建物へ移転する際に損傷しました。私たちは、あえてそのままにしておくことを選びました。",
+        "pt-BR": "Nosso emblema, a bússola, nos lembra de que um registro vale tanto quanto o seu rumo. A nossa tem sete entalhes — um para cada coleção fundadora. A agulha foi danificada na mudança para o nosso prédio atual. Decidimos deixá-la como está.",
       }),
     },
-    { type: "heading", level: 2, text: x({ en: "Our Principles", ko: "운영 원칙", "zh-TW": "我們的原則", es: "Nuestros principios", ja: "私たちの原則" }) },
+    { type: "heading", level: 2, text: x({ en: "Our Principles", ko: "운영 원칙", "zh-TW": "我們的原則", es: "Nuestros principios", ja: "私たちの原則", "pt-BR": "Nossos princípios" }) },
     {
       type: "list",
       items: [
-        x({ en: "Continuity — the record must not contradict itself.", ko: "연속성 — 기록은 스스로 모순되어서는 안 됩니다.", "zh-TW": "連續性——紀錄不得自相矛盾。", es: "Continuidad: el registro no debe contradecirse.", ja: "継続性 — 記録はそれ自体と矛盾してはならない。" }),
-        x({ en: "Custody — what we keep, we keep forever.", ko: "보관 — 한번 보관한 것은 영원히 보관합니다.", "zh-TW": "保管——凡我們保存的，便永久保存。", es: "Custodia: lo que conservamos, lo conservamos para siempre.", ja: "保管 — 一度保管したものは、永遠に保管する。" }),
-        x({ en: "Discretion — not every truth is ready for every reader.", ko: "신중함 — 모든 진실이 모든 독자에게 준비된 것은 아닙니다.", "zh-TW": "審慎——並非每一個真相，都已準備好面對每一位讀者。", es: "Discreción: no toda verdad está lista para todo lector.", ja: "慎重さ — すべての真実が、すべての読者に向けて準備できているわけではない。" }),
+        x({ en: "Continuity — the record must not contradict itself.", ko: "연속성 — 기록은 스스로 모순되어서는 안 됩니다.", "zh-TW": "連續性——紀錄不得自相矛盾。", es: "Continuidad: el registro no debe contradecirse.", ja: "継続性 — 記録はそれ自体と矛盾してはならない。", "pt-BR": "Continuidade: o registro não deve contradizer a si mesmo." }),
+        x({ en: "Custody — what we keep, we keep forever.", ko: "보관 — 한번 보관한 것은 영원히 보관합니다.", "zh-TW": "保管——凡我們保存的，便永久保存。", es: "Custodia: lo que conservamos, lo conservamos para siempre.", ja: "保管 — 一度保管したものは、永遠に保管する。", "pt-BR": "Custódia: o que guardamos, guardamos para sempre." }),
+        x({ en: "Discretion — not every truth is ready for every reader.", ko: "신중함 — 모든 진실이 모든 독자에게 준비된 것은 아닙니다.", "zh-TW": "審慎——並非每一個真相，都已準備好面對每一位讀者。", es: "Discreción: no toda verdad está lista para todo lector.", ja: "慎重さ — すべての真実が、すべての読者に向けて準備できているわけではない。", "pt-BR": "Discrição: nem toda verdade está pronta para todo leitor." }),
       ],
     },
     {
       type: "image",
-      alt: x({ en: "The first Institute offices, above a shipping agent", ko: "해운 대리점 위층에 있던 연구소의 첫 사무실", "zh-TW": "研究院最早的辦公室，位於一家航運代理行樓上", es: "Las primeras oficinas del Instituto, encima de una agencia naviera", ja: "海運代理店の上階にあった研究所の最初の事務所" }),
-      caption: x({ en: "The original reading rooms, Harbour Street.", ko: "하버 스트리트(Harbour Street)의 초창기 열람실.", "zh-TW": "港灣街（Harbour Street）的初代閱覽室。", es: "Las salas de lectura originales, Harbour Street.", ja: "ハーバー・ストリート（Harbour Street）にあった初代閲覧室。" }),
+      alt: x({ en: "The first Institute offices, above a shipping agent", ko: "해운 대리점 위층에 있던 연구소의 첫 사무실", "zh-TW": "研究院最早的辦公室，位於一家航運代理行樓上", es: "Las primeras oficinas del Instituto, encima de una agencia naviera", ja: "海運代理店の上階にあった研究所の最初の事務所", "pt-BR": "Os primeiros escritórios do Instituto, em cima de uma agência de navegação" }),
+      caption: x({ en: "The original reading rooms, Harbour Street.", ko: "하버 스트리트(Harbour Street)의 초창기 열람실.", "zh-TW": "港灣街（Harbour Street）的初代閱覽室。", es: "Las salas de lectura originales, Harbour Street.", ja: "ハーバー・ストリート（Harbour Street）にあった初代閲覧室。", "pt-BR": "As salas de leitura originais, Harbour Street." }),
       art: "archive-building",
       fileInfo: {
         filename: "harbour-street-offices.jpg",
-        author: x({ en: "Meridian Photographic Collections", ko: "메리디언 사진 소장품실", "zh-TW": "子午研究院攝影典藏室", es: "Colecciones Fotográficas Meridian", ja: "メリディアン写真コレクション室" }),
+        author: x({ en: "Meridian Photographic Collections", ko: "메리디언 사진 소장품실", "zh-TW": "子午研究院攝影典藏室", es: "Colecciones Fotográficas Meridian", ja: "メリディアン写真コレクション室", "pt-BR": "Acervos Fotográficos Meridian" }),
         camera: "Rolleiflex 2.8F",
         date: "1987-06-01",
         dimensions: "2400 × 1800",
-        comment: x({ en: "Opening week. Scanned 2019.", ko: "개관 주간. 2019년 스캔.", "zh-TW": "開館週。2019 年掃描。", es: "Semana de inauguración. Escaneada en 2019.", ja: "開館週。2019年スキャン。" }),
+        comment: x({ en: "Opening week. Scanned 2019.", ko: "개관 주간. 2019년 스캔.", "zh-TW": "開館週。2019 年掃描。", es: "Semana de inauguración. Escaneada en 2019.", ja: "開館週。2019年スキャン。", "pt-BR": "Semana de inauguração. Digitalizada em 2019." }),
       },
     },
     footer(x),
   ];
-  return page(`${MERIDIAN_HOST}/about`, x({ en: "About — Meridian Institute", ko: "소개 — 메리디언 연구소", "zh-TW": "關於 — 子午研究院", es: "Acerca de — Instituto Meridian", ja: "研究所について — メリディアン研究所" }), "meridian", blocks, {
-    headComments: [x({ en: "Meridian CMS v4.2 — template: civic-classic", ko: "Meridian CMS v4.2 — 템플릿: civic-classic", "zh-TW": "Meridian CMS v4.2 — 樣板：civic-classic", es: "Meridian CMS v4.2 — plantilla: civic-classic", ja: "Meridian CMS v4.2 — テンプレート: civic-classic" })],
+  return page(`${MERIDIAN_HOST}/about`, x({ en: "About — Meridian Institute", ko: "소개 — 메리디언 연구소", "zh-TW": "關於 — 子午研究院", es: "Acerca de — Instituto Meridian", ja: "研究所について — メリディアン研究所", "pt-BR": "Sobre — Instituto Meridian" }), "meridian", blocks, {
+    headComments: [x({ en: "Meridian CMS v4.2 — template: civic-classic", ko: "Meridian CMS v4.2 — 템플릿: civic-classic", "zh-TW": "Meridian CMS v4.2 — 樣板：civic-classic", es: "Meridian CMS v4.2 — plantilla: civic-classic", ja: "Meridian CMS v4.2 — テンプレート: civic-classic", "pt-BR": "Meridian CMS v4.2 — modelo: civic-classic" })],
     inlineComments: {
       3: [
         x({
@@ -374,6 +399,7 @@ function about(x: X): SitePage {
           "zh-TW": "文案經所長辦公室核可——頁尾待下次連續性審查時統一",
           es: "texto aprobado por la Oficina de la Dirección — el pie de página se conciliará en la próxima revisión de continuidad",
           ja: "所長室承認済みの文言 — フッターは次回の継続性審査で整合すること",
+          "pt-BR": "texto aprovado pelo Gabinete da Diretoria — rodapé a ser conciliado na próxima revisão de continuidade",
         }),
       ],
     },
@@ -384,7 +410,7 @@ function vault(x: X): SitePage {
   const blocks: Block[] = [
     nav(x),
     { type: "compass" },
-    { type: "heading", level: 1, text: x({ en: "Vault 2019 — Migration Staging", ko: "Vault 2019 — 이전 대기 구역", "zh-TW": "Vault 2019 — 遷移暫存區", es: "Vault 2019 — Área de preparación de la migración", ja: "Vault 2019 — 移行待機エリア" }) },
+    { type: "heading", level: 1, text: x({ en: "Vault 2019 — Migration Staging", ko: "Vault 2019 — 이전 대기 구역", "zh-TW": "Vault 2019 — 遷移暫存區", es: "Vault 2019 — Área de preparación de la migración", ja: "Vault 2019 — 移行待機エリア", "pt-BR": "Vault 2019 — Área de preparação da migração" }) },
     {
       type: "notice",
       tone: "warning",
@@ -394,6 +420,7 @@ function vault(x: X): SitePage {
         "zh-TW": "內部暫存區。本頁面不會被搜尋引擎收錄。若您誤入此頁，請關閉瀏覽器。",
         es: "Área de preparación interna. Esta página no está indexada. Si llegó aquí por error, cierre su navegador.",
         ja: "内部の待機エリアです。このページは検索エンジンに登録されていません。誤ってアクセスされた場合は、ブラウザを閉じてください。",
+        "pt-BR": "Área de preparação interna. Esta página não é indexada. Se você chegou aqui por engano, feche o seu navegador.",
       }),
     },
     {
@@ -404,6 +431,7 @@ function vault(x: X): SitePage {
         "zh-TW": "以下項目於 2019 年遷移期間暫緩列入公開目錄，待連續性審查。",
         es: "Los elementos siguientes se retuvieron del catálogo público durante la migración de 2019, a la espera de revisión de continuidad.",
         ja: "以下の資料は、2019年の移行時に継続性審査待ちとして公開目録への掲載を保留されたものです。",
+        "pt-BR": "Os itens abaixo foram retidos do catálogo público durante a migração de 2019, aguardando revisão de continuidade.",
       }),
     },
     {
@@ -414,46 +442,47 @@ function vault(x: X): SitePage {
         "zh-TW": "閱覽室桌前的一名女子，臉背對鏡頭，面前攤著一本帳冊",
         es: "Una mujer ante una mesa de la sala de lectura, el rostro apartado de la cámara, con un libro de cuentas abierto delante",
         ja: "閲覧室の机に向かう女性。顔はカメラから背けられ、目の前には台帳が開かれている",
+        "pt-BR": "Uma mulher a uma mesa da sala de leitura, o rosto virado para longe da câmera, com um livro-razão aberto à sua frente",
       }),
-      caption: x({ en: "Reading Room, late. Subject unidentified.", ko: "늦은 밤의 열람실. 인물 미상.", "zh-TW": "深夜的閱覽室。人物身分不明。", es: "Sala de Lectura, de noche. Persona no identificada.", ja: "深夜の閲覧室。人物不詳。" }),
+      caption: x({ en: "Reading Room, late. Subject unidentified.", ko: "늦은 밤의 열람실. 인물 미상.", "zh-TW": "深夜的閱覽室。人物身分不明。", es: "Sala de Lectura, de noche. Persona no identificada.", ja: "深夜の閲覧室。人物不詳。", "pt-BR": "Sala de Leitura, tarde da noite. Pessoa não identificada." }),
       art: "photo-reading-room",
       fileInfo: {
         filename: "IMG_8841_draft.jpg",
-        author: x({ en: "A. Voss", ko: "A. 보스 (A. Voss)", "zh-TW": "A. 佛斯（A. Voss）", es: "A. Voss", ja: "A・ヴォス（A. Voss）" }),
+        author: x({ en: "A. Voss", ko: "A. 보스 (A. Voss)", "zh-TW": "A. 佛斯（A. Voss）", es: "A. Voss", ja: "A・ヴォス（A. Voss）", "pt-BR": "A. Voss" }),
         camera: "Pentax K1000 (scanned)",
         date: "2019-01-02 23:41",
         dimensions: "3008 × 2000",
-        comment: x({ en: "draft uploaded to thedrift.blog", ko: "thedrift.blog에 초안 업로드함", "zh-TW": "草稿已上傳至 thedrift.blog", es: "borrador subido a thedrift.blog", ja: "下書きを thedrift.blog にアップロード済み" }),
+        comment: x({ en: "draft uploaded to thedrift.blog", ko: "thedrift.blog에 초안 업로드함", "zh-TW": "草稿已上傳至 thedrift.blog", es: "borrador subido a thedrift.blog", ja: "下書きを thedrift.blog にアップロード済み", "pt-BR": "rascunho enviado para thedrift.blog" }),
       },
     },
     {
       type: "image",
-      alt: x({ en: "A ledger page with a column of dates, one line scraped away", ko: "날짜가 세로로 적힌 장부 한 면. 한 줄이 긁혀 지워져 있다", "zh-TW": "一頁帳冊，上面直直列著一欄日期，其中一行被刮除", es: "Una página de un libro de cuentas con una columna de fechas; una línea raspada", ja: "日付が縦に並ぶ台帳の一ページ。一行が削り取られている" }),
-      caption: x({ en: "Harbour Ledger, vol. III, folio 12.", ko: "하버 장부 제III권, 12장.", "zh-TW": "港灣帳冊，第 III 卷，第 12 頁。", es: "Libro del Puerto, vol. III, folio 12.", ja: "ハーバー台帳 第III巻 第12葉。" }),
+      alt: x({ en: "A ledger page with a column of dates, one line scraped away", ko: "날짜가 세로로 적힌 장부 한 면. 한 줄이 긁혀 지워져 있다", "zh-TW": "一頁帳冊，上面直直列著一欄日期，其中一行被刮除", es: "Una página de un libro de cuentas con una columna de fechas; una línea raspada", ja: "日付が縦に並ぶ台帳の一ページ。一行が削り取られている", "pt-BR": "Uma página de livro-razão com uma coluna de datas; uma linha raspada" }),
+      caption: x({ en: "Harbour Ledger, vol. III, folio 12.", ko: "하버 장부 제III권, 12장.", "zh-TW": "港灣帳冊，第 III 卷，第 12 頁。", es: "Libro del Puerto, vol. III, folio 12.", ja: "ハーバー台帳 第III巻 第12葉。", "pt-BR": "Livro-Razão do Porto, vol. III, fólio 12." }),
       art: "photo-ledger",
       fileInfo: {
         filename: "ledger-iii-f12.tif",
-        author: x({ en: "Meridian Digitisation", ko: "메리디언 디지털화팀", "zh-TW": "子午研究院數位化小組", es: "Digitalización Meridian", ja: "メリディアン・デジタル化チーム" }),
+        author: x({ en: "Meridian Digitisation", ko: "메리디언 디지털화팀", "zh-TW": "子午研究院數位化小組", es: "Digitalización Meridian", ja: "メリディアン・デジタル化チーム", "pt-BR": "Digitalização Meridian" }),
         camera: "Phase One IQ3",
         date: "2019-03-11",
         dimensions: "8000 × 6000",
-        comment: x({ en: "original retired", ko: "원본 폐기됨", "zh-TW": "原件已汰除", es: "original retirado", ja: "原本廃棄済み" }),
+        comment: x({ en: "original retired", ko: "원본 폐기됨", "zh-TW": "原件已汰除", es: "original retirado", ja: "原本廃棄済み", "pt-BR": "original retirado" }),
       },
     },
     {
       type: "list",
       items: [
-        x({ en: "Harbour Ledgers vol. I–IV — status: reconciled", ko: "하버 장부 제I–IV권 — 상태: 정리 완료", "zh-TW": "港灣帳冊第 I–IV 卷——狀態：已統整", es: "Libros del Puerto vol. I–IV — estado: conciliados", ja: "ハーバー台帳 第I–IV巻 — ステータス：整合済み" }),
-        x({ en: "Founders' correspondence — status: sealed", ko: "창립자 서신 — 상태: 봉인", "zh-TW": "創始人書信——狀態：已封存", es: "Correspondencia de los fundadores — estado: sellada", ja: "創設者書簡 — ステータス：封印" }),
-        x({ en: "Staff photographs (1987–2019) — status: under review", ko: "직원 사진 (1987–2019) — 상태: 검토 중", "zh-TW": "職員照片（1987–2019）——狀態：審查中", es: "Fotografías del personal (1987–2019) — estado: en revisión", ja: "職員写真（1987–2019）— ステータス：審査中" }),
+        x({ en: "Harbour Ledgers vol. I–IV — status: reconciled", ko: "하버 장부 제I–IV권 — 상태: 정리 완료", "zh-TW": "港灣帳冊第 I–IV 卷——狀態：已統整", es: "Libros del Puerto vol. I–IV — estado: conciliados", ja: "ハーバー台帳 第I–IV巻 — ステータス：整合済み", "pt-BR": "Livros-Razão do Porto vol. I–IV — situação: conciliados" }),
+        x({ en: "Founders' correspondence — status: sealed", ko: "창립자 서신 — 상태: 봉인", "zh-TW": "創始人書信——狀態：已封存", es: "Correspondencia de los fundadores — estado: sellada", ja: "創設者書簡 — ステータス：封印", "pt-BR": "Correspondência dos fundadores — situação: lacrada" }),
+        x({ en: "Staff photographs (1987–2019) — status: under review", ko: "직원 사진 (1987–2019) — 상태: 검토 중", "zh-TW": "職員照片（1987–2019）——狀態：審查中", es: "Fotografías del personal (1987–2019) — estado: en revisión", ja: "職員写真（1987–2019）— ステータス：審査中", "pt-BR": "Fotografias da equipe (1987–2019) — situação: em revisão" }),
       ],
     },
     footer(x),
   ];
-  return page(`${MERIDIAN_HOST}/vault-2019`, x({ en: "Vault 2019 — Staging", ko: "Vault 2019 — 대기 구역", "zh-TW": "Vault 2019 — 暫存區", es: "Vault 2019 — Área de preparación", ja: "Vault 2019 — 待機エリア" }), "meridian", blocks, {
+  return page(`${MERIDIAN_HOST}/vault-2019`, x({ en: "Vault 2019 — Staging", ko: "Vault 2019 — 대기 구역", "zh-TW": "Vault 2019 — 暫存區", es: "Vault 2019 — Área de preparación", ja: "Vault 2019 — 待機エリア", "pt-BR": "Vault 2019 — Área de preparação" }), "meridian", blocks, {
     headComments: ["robots: noindex, nofollow"],
     meta: { robots: "noindex, nofollow" },
-    inlineComments: { 5: [x({ en: "this one isn't ours. who uploaded it?  — I.S.", ko: "이건 우리 게 아닌데. 누가 올렸지?  — I.S.", "zh-TW": "這張不是我們的。誰上傳的？ ——I.S.", es: "esta no es nuestra. ¿quién la subió?  — I.S.", ja: "これはうちのじゃない。誰がアップしたんだ？　— I.S." })] },
+    inlineComments: { 5: [x({ en: "this one isn't ours. who uploaded it?  — I.S.", ko: "이건 우리 게 아닌데. 누가 올렸지?  — I.S.", "zh-TW": "這張不是我們的。誰上傳的？ ——I.S.", es: "esta no es nuestra. ¿quién la subió?  — I.S.", ja: "これはうちのじゃない。誰がアップしたんだ？　— I.S.", "pt-BR": "esta não é nossa. quem enviou?  — I.S." })] },
   });
 }
 
@@ -461,7 +490,7 @@ function collections(x: X): SitePage {
   const blocks: Block[] = [
     nav(x),
     { type: "compass" },
-    { type: "heading", level: 1, text: x({ en: "Collections", ko: "소장품", "zh-TW": "館藏", es: "Colecciones", ja: "収蔵品" }) },
+    { type: "heading", level: 1, text: x({ en: "Collections", ko: "소장품", "zh-TW": "館藏", es: "Colecciones", ja: "収蔵品", "pt-BR": "Acervos" }) },
     {
       type: "paragraph",
       text: x({
@@ -470,25 +499,26 @@ function collections(x: X): SitePage {
         "zh-TW": "本院館藏分為七個創始館藏。自 2019 年遷移後，所有館藏僅能透過數位目錄查閱。",
         es: "Los fondos del Instituto se organizan en siete colecciones fundacionales. Tras la migración de 2019, todas las colecciones pueden consultarse únicamente a través del catálogo digital.",
         ja: "当研究所の所蔵資料は、創設時からの七つの収蔵品群に分類されています。2019年の移行以降、すべての収蔵品はデジタル目録を通じてのみ閲覧いただけます。",
+        "pt-BR": "O acervo do Instituto está organizado em sete coleções fundadoras. Após a migração de 2019, todas as coleções estão disponíveis exclusivamente pelo catálogo digital.",
       }),
     },
     {
       type: "list",
       items: [
-        x({ en: "I. Harbour Ledgers", ko: "I. 하버 장부", "zh-TW": "I. 港灣帳冊", es: "I. Libros del Puerto", ja: "I. ハーバー台帳" }),
-        x({ en: "II. Municipal Deeds", ko: "II. 시 소유 증서", "zh-TW": "II. 市府契據", es: "II. Escrituras Municipales", ja: "II. 市有地証書" }),
-        x({ en: "III. Founders' Correspondence", ko: "III. 창립자 서신", "zh-TW": "III. 創始人書信", es: "III. Correspondencia de los Fundadores", ja: "III. 創設者書簡" }),
-        x({ en: "IV. Photographic Collections", ko: "IV. 사진 소장품", "zh-TW": "IV. 攝影典藏", es: "IV. Colecciones Fotográficas", ja: "IV. 写真コレクション" }),
-        x({ en: "V. Oral Histories", ko: "V. 구술사", "zh-TW": "V. 口述歷史", es: "V. Historia Oral", ja: "V. オーラル・ヒストリー" }),
-        x({ en: "VI. Maps & Charts", ko: "VI. 지도 및 해도", "zh-TW": "VI. 地圖與海圖", es: "VI. Mapas y Cartas Náuticas", ja: "VI. 地図・海図" }),
-        x({ en: "VII. [Collection withdrawn]", ko: "VII. [소장품 회수됨]", "zh-TW": "VII. [館藏已撤回]", es: "VII. [Colección retirada]", ja: "VII. [収蔵品撤回]" }),
+        x({ en: "I. Harbour Ledgers", ko: "I. 하버 장부", "zh-TW": "I. 港灣帳冊", es: "I. Libros del Puerto", ja: "I. ハーバー台帳", "pt-BR": "I. Livros-Razão do Porto" }),
+        x({ en: "II. Municipal Deeds", ko: "II. 시 소유 증서", "zh-TW": "II. 市府契據", es: "II. Escrituras Municipales", ja: "II. 市有地証書", "pt-BR": "II. Escrituras Municipais" }),
+        x({ en: "III. Founders' Correspondence", ko: "III. 창립자 서신", "zh-TW": "III. 創始人書信", es: "III. Correspondencia de los Fundadores", ja: "III. 創設者書簡", "pt-BR": "III. Correspondência dos Fundadores" }),
+        x({ en: "IV. Photographic Collections", ko: "IV. 사진 소장품", "zh-TW": "IV. 攝影典藏", es: "IV. Colecciones Fotográficas", ja: "IV. 写真コレクション", "pt-BR": "IV. Acervos Fotográficos" }),
+        x({ en: "V. Oral Histories", ko: "V. 구술사", "zh-TW": "V. 口述歷史", es: "V. Historia Oral", ja: "V. オーラル・ヒストリー", "pt-BR": "V. História Oral" }),
+        x({ en: "VI. Maps & Charts", ko: "VI. 지도 및 해도", "zh-TW": "VI. 地圖與海圖", es: "VI. Mapas y Cartas Náuticas", ja: "VI. 地図・海図", "pt-BR": "VI. Mapas e Cartas Náuticas" }),
+        x({ en: "VII. [Collection withdrawn]", ko: "VII. [소장품 회수됨]", "zh-TW": "VII. [館藏已撤回]", es: "VII. [Colección retirada]", ja: "VII. [収蔵品撤回]", "pt-BR": "VII. [Coleção retirada]" }),
       ],
     },
-    { type: "notice", tone: "info", text: x({ en: "Catalogue access is temporarily restricted to staff.", ko: "목록 열람은 일시적으로 직원에게만 허용됩니다.", "zh-TW": "目錄查閱暫時僅限職員。", es: "El acceso al catálogo está restringido temporalmente al personal.", ja: "目録の閲覧は、一時的に職員のみに制限されています。" }) },
+    { type: "notice", tone: "info", text: x({ en: "Catalogue access is temporarily restricted to staff.", ko: "목록 열람은 일시적으로 직원에게만 허용됩니다.", "zh-TW": "目錄查閱暫時僅限職員。", es: "El acceso al catálogo está restringido temporalmente al personal.", ja: "目録の閲覧は、一時的に職員のみに制限されています。", "pt-BR": "O acesso ao catálogo está temporariamente restrito aos funcionários." }) },
     footer(x),
   ];
-  return page(`${MERIDIAN_HOST}/collections`, x({ en: "Collections — Meridian Institute", ko: "소장품 — 메리디언 연구소", "zh-TW": "館藏 — 子午研究院", es: "Colecciones — Instituto Meridian", ja: "収蔵品 — メリディアン研究所" }), "meridian", blocks, {
-    inlineComments: { 4: [x({ en: "VII withdrawn 2019 by order of the Deputy Director", ko: "VII은 2019년 부국장 지시로 회수됨", "zh-TW": "VII 於 2019 年依副所長命令撤回", es: "VII retirada en 2019 por orden del Subdirector", ja: "VIIは2019年、副所長の命により撤回" })] },
+  return page(`${MERIDIAN_HOST}/collections`, x({ en: "Collections — Meridian Institute", ko: "소장품 — 메리디언 연구소", "zh-TW": "館藏 — 子午研究院", es: "Colecciones — Instituto Meridian", ja: "収蔵品 — メリディアン研究所", "pt-BR": "Acervos — Instituto Meridian" }), "meridian", blocks, {
+    inlineComments: { 4: [x({ en: "VII withdrawn 2019 by order of the Deputy Director", ko: "VII은 2019년 부국장 지시로 회수됨", "zh-TW": "VII 於 2019 年依副所長命令撤回", es: "VII retirada en 2019 por orden del Subdirector", ja: "VIIは2019年、副所長の命により撤回", "pt-BR": "VII retirada em 2019 por ordem do Vice-diretor" })] },
   });
 }
 
