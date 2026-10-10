@@ -176,7 +176,9 @@ export function RoomSheet({
               ))}
               </ul>
               <InviteQr code={ctx.code} />
-              <LanguageSwitcher tone="shell" className="mt-3 justify-center" />
+              <div className="mt-3 flex justify-center">
+                <LanguageSwitcher tone="shell" />
+              </div>
             </>
           )}
           {tab === "log" && <CaseLog ctx={ctx} />}

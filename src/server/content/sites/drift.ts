@@ -11,7 +11,7 @@ export interface DriftPost {
   date: string;
   series: "Field Notes" | "Ada's Kitchen";
   body: string;
-  /** Translations. Field Notes titles stay English in every locale (their initials spell DRIFT); the Korean, Chinese and Spanish titles add a subtitle. */
+  /** Translations. Field Notes titles stay English in every locale (their initials spell DRIFT); the Korean, Chinese, Spanish and Japanese titles add a subtitle. */
   l10n: Record<Exclude<Locale, "en">, { title: string; date: string; body: string }>;
 }
 
@@ -65,6 +65,16 @@ export const DRIFT_POSTS: DriftPost[] = [
           "Seas quien seas: primero mienten sobre las cosas pequeñas. Fechas. Nombres. Una fotografía en la que antes había un rostro.",
         ].join("\n"),
       },
+      ja: {
+        title: "True North Is a Rumour — 真北は噂にすぎない",
+        date: "2019年5月1日",
+        body: [
+          "たぶん、これがこのシリーズ最後の記事になる。もしかすると、どこに書くものであれ最後かもしれない。",
+          "職場の正面階段にコンパスがある。刻み目は七つ、針は軸のところで折れている。来客には移転のときに壊れたと説明している。嘘だ。誰かが、いつも自分の望む方角を指すように折ったのだ。",
+          "これを順番どおりに読んできたなら——本当に順番どおりに、暦が流れる向きに——ダイヤルの回し方はもうわかっているはずだ。数えるのは記事ではなく日付だ。針には必要なだけの刻み目がある。",
+          "あなたが誰であれ。彼らはまず小さなことから嘘をつく。日付。名前。かつて顔が写っていた一枚の写真。",
+        ].join("\n"),
+      },
     },
   },
   {
@@ -99,6 +109,14 @@ export const DRIFT_POSTS: DriftPost[] = [
         body: [
           "Galletas de mantequilla para el turno de noche. Bate 4 cucharadas de mantequilla fría con azúcar hasta que la muñeca se queje; luego agrega harina hasta que la masa deje de ser pegajosa y empiece a ser honesta.",
           "Hornea hasta que los bordes tomen el color del papel viejo. Cómelas en tu escritorio. No dejes migas sobre los libros de registro.",
+        ].join("\n"),
+      },
+      ja: {
+        title: "エイダの台所：バターと忍耐",
+        date: "2019年4月14日",
+        body: [
+          "夜勤のためのショートブレッド。冷たいバター大さじ4に砂糖を加え、手首が文句を言いだすまで練る。それから小麦粉を、べたつくのをやめて正直になりはじめるまで加える。",
+          "縁が古い紙の色になるまで焼く。机で食べる。帳簿の上にくずは残さないこと。",
         ].join("\n"),
       },
     },
@@ -141,6 +159,15 @@ export const DRIFT_POSTS: DriftPost[] = [
           "Yo también empecé a escribir mis propias notas al pie.",
         ].join("\n"),
       },
+      ja: {
+        title: "Footnotes for a Ghost — 幽霊のための脚注",
+        date: "2019年4月2日",
+        body: [
+          "同僚に、もう顔のない人がいる。文字どおりの意味ではない。職員写真の中で、彼女が立っていた場所が空白になっている。シャッターが切られるほんの一瞬前に、額縁の外へ歩み出たかのように。",
+          "彼女はいまも毎朝自分の机にいる。いまもあのばかげたアーケードゲームで誰よりも強い。だが書類の上では、脚注ひとつずつ、少しずつ薄められている。",
+          "わたしも自分の脚注をつけはじめた。",
+        ].join("\n"),
+      },
     },
   },
   {
@@ -181,6 +208,15 @@ export const DRIFT_POSTS: DriftPost[] = [
           "Alguien puso los dígitos al revés cuando lo reescribió. O alguien los dejó al revés a propósito.",
         ].join("\n"),
       },
+      ja: {
+        title: "Ink That Moves — 動くインク",
+        date: "2019年3月1日",
+        body: [
+          "インクは置いた場所にとどまるはずのものだ。それが契約のすべてである。",
+          "今週、創立年が三か所で書き換えられたのに、誰ひとり瞬きもしなかった。ロビーの銘板、定款のスキャン、「概要」ページ。古い数字が生き残っているのは、誰も見ようと思わなかった場所だけだ——ページのいちばん下、小さな文字の中、埃の積もるところ。",
+          "誰かが書き直すときに数字を逆にした。あるいは、誰かがわざと逆のまま残したのだ。",
+        ].join("\n"),
+      },
     },
   },
   {
@@ -215,6 +251,14 @@ export const DRIFT_POSTS: DriftPost[] = [
         body: [
           "Pan sin amasar para quienes llegan a casa demasiado tarde para amasar. Bate 2 huevos en leche tibia, incorpora 1 taza de harina de fuerza y una pizca de sal, y déjalo toda la noche bajo un paño de cocina.",
           "Por la mañana habrá crecido sin que nadie lo mirara. Casi todo hace lo mismo.",
+        ].join("\n"),
+      },
+      ja: {
+        title: "エイダの台所：真夜中のパン",
+        date: "2019年2月23日",
+        body: [
+          "こねる気力もないほど遅く帰る人のための、こねないパン。温かい牛乳に卵2個を溶きほぐし、強力粉1カップとひとつまみの塩をさっくり混ぜ、布巾をかけてひと晩置く。",
+          "朝には、誰も見ていないうちにふくらんでいる。たいていのものはそうだ。",
         ].join("\n"),
       },
     },
@@ -257,6 +301,15 @@ export const DRIFT_POSTS: DriftPost[] = [
           "Voy a seguir escribiendo estas entradas. En orden. Alguien tiene que mantener algo en orden.",
         ].join("\n"),
       },
+      ja: {
+        title: "Redacted Weather — 塗りつぶされた天気",
+        date: "2019年2月1日",
+        body: [
+          "今日、黒い線で塗りつぶされた気象報告を見つけた。気象報告を、である。港の倉庫が燃えた夜の雨は、どうやら機密だったらしい。",
+          "何が切り取られたかを見れば、そのものの形が見えてくる。ステンシルのように。写真のネガのように。",
+          "これからも書きつづけるつもりだ。順番どおりに。誰かが、何かを順番どおりに保たなければならない。",
+        ].join("\n"),
+      },
     },
   },
   {
@@ -291,6 +344,14 @@ export const DRIFT_POSTS: DriftPost[] = [
         body: [
           "Mi hermana dice que lo único que como es sopa de un termo en mi escritorio, así que aquí está la sopa. Cuece a fuego lento 3 tazas de agua con una cebolla, una zanahoria y 1 hoja de laurel hasta que la cocina huela a que alguien te quiere.",
           "Sal al gusto. Lee algo mientras se cocina. Nada del trabajo. Nunca del trabajo.",
+        ].join("\n"),
+      },
+      ja: {
+        title: "エイダの台所：アーキビストのスープ",
+        date: "2019年1月19日",
+        body: [
+          "妹に言わせると、わたしは机で魔法瓶のスープばかり飲んでいるらしい。だから、そのスープを。水3カップに玉ねぎをひとつ、にんじんを一本、ローリエ1枚を入れ、台所が誰かに愛されている匂いになるまでことこと煮る。",
+          "塩は好みで。煮えるあいだに何か読む。仕事ではないものを。決して仕事ではなく。",
         ].join("\n"),
       },
     },
@@ -333,6 +394,15 @@ export const DRIFT_POSTS: DriftPost[] = [
           "Primer rumbo: los registros se están moviendo. Segundo rumbo: no lo estoy imaginando.",
         ].join("\n"),
       },
+      ja: {
+        title: "Dead Reckoning — 推測航法",
+        date: "2019年1月2日",
+        body: [
+          "星の見えない船乗りは推測航法を使った。どこから出発したかを知り、どれだけ進んだかを知っていれば、目よりも計算を信じる。",
+          "ノートをつけはじめる。研究所が監査できる類のものではないノートを。わたしに何かあったら、誰かがわたしの出発点を知る必要があるだろうから。",
+          "第一の方位。記録が動いている。第二の方位。わたしの思い過ごしではない。",
+        ].join("\n"),
+      },
     },
   },
 ];
@@ -340,8 +410,8 @@ export const DRIFT_POSTS: DriftPost[] = [
 const nav = (x: X): Block => ({
   type: "nav",
   links: [
-    { text: x({ en: "Home", ko: "홈", "zh-TW": "首頁", es: "Inicio" }), href: DRIFT_HOST },
-    { text: x({ en: "About", ko: "소개", "zh-TW": "關於", es: "Acerca de" }), href: `${DRIFT_HOST}/about` },
+    { text: x({ en: "Home", ko: "홈", "zh-TW": "首頁", es: "Inicio", ja: "ホーム" }), href: DRIFT_HOST },
+    { text: x({ en: "About", ko: "소개", "zh-TW": "關於", es: "Acerca de", ja: "概要" }), href: `${DRIFT_HOST}/about` },
   ],
 });
 
@@ -352,12 +422,13 @@ const footer = (x: X): Block => ({
     ko: "The Drift — 각주까지 읽는 사람의 기록. 댓글은 닫혀 있습니다.",
     "zh-TW": "The Drift — 一個會讀註腳的人的筆記。留言功能已關閉。",
     es: "The Drift — notas de alguien que lee las notas al pie. Los comentarios están cerrados.",
+    ja: "The Drift — 脚注まで読む者の覚え書き。コメントは締め切っています。",
   }),
 });
 
 const SERIES: Record<DriftPost["series"], Tr> = {
-  "Field Notes": { en: "Field Notes", ko: "필드 노트 · Field Notes", "zh-TW": "田野筆記 · Field Notes", es: "Notas de campo · Field Notes" },
-  "Ada's Kitchen": { en: "Ada's Kitchen", ko: "에이다의 부엌 · Ada's Kitchen", "zh-TW": "艾達的廚房 · Ada's Kitchen", es: "La cocina de Ada · Ada's Kitchen" },
+  "Field Notes": { en: "Field Notes", ko: "필드 노트 · Field Notes", "zh-TW": "田野筆記 · Field Notes", es: "Notas de campo · Field Notes", ja: "フィールドノート · Field Notes" },
+  "Ada's Kitchen": { en: "Ada's Kitchen", ko: "에이다의 부엌 · Ada's Kitchen", "zh-TW": "艾達的廚房 · Ada's Kitchen", es: "La cocina de Ada · Ada's Kitchen", ja: "エイダの台所 · Ada's Kitchen" },
 };
 
 /** The post's text in `loc` (English fields as-is for "en"). */
@@ -383,20 +454,22 @@ function home(loc: Locale): SitePage {
         ko: "현장 기록, 늦은 밤의 생각, 그리고 가끔 레시피. 글은 최신순으로 보인다 — 세상이 읽는 방식이고, 이야기를 읽기에는 틀린 방식이다.",
         "zh-TW": "田野筆記、深夜的念頭，偶爾還有食譜。文章由新到舊排列——這是世界閱讀的方式，卻是讀一個故事的錯誤方式。",
         es: "Notas de campo, horas de madrugada y alguna que otra receta. Las entradas aparecen de la más reciente a la más antigua: así lee el mundo, y es la forma equivocada de leer una historia.",
+        ja: "フィールドノート、夜更けの思索、ときどきレシピ。記事は新しい順に並ぶ——それが世界の読み方であり、物語を読むには間違った読み方である。",
       }),
     },
     ...DRIFT_POSTS.map((p) => postBlock(p, loc)),
     footer(x),
   ];
   return page(DRIFT_HOST, "The Drift", "drift", blocks, {
-    headComments: [x({ en: "static export — minimal-ink theme", ko: "정적 내보내기 — minimal-ink 테마", "zh-TW": "靜態匯出 — minimal-ink 佈景主題", es: "exportación estática — tema minimal-ink" })],
-    bodyComments: [x({ en: "two series live here. only one of them is a map.", ko: "여기엔 시리즈가 두 개 있다. 지도는 그중 하나뿐.", "zh-TW": "這裡有兩個系列。只有其中一個是地圖。", es: "aquí viven dos series. solo una de ellas es un mapa." })],
+    headComments: [x({ en: "static export — minimal-ink theme", ko: "정적 내보내기 — minimal-ink 테마", "zh-TW": "靜態匯出 — minimal-ink 佈景主題", es: "exportación estática — tema minimal-ink", ja: "静的エクスポート — minimal-ink テーマ" })],
+    bodyComments: [x({ en: "two series live here. only one of them is a map.", ko: "여기엔 시리즈가 두 개 있다. 지도는 그중 하나뿐.", "zh-TW": "這裡有兩個系列。只有其中一個是地圖。", es: "aquí viven dos series. solo una de ellas es un mapa.", ja: "ここにはシリーズが二つある。地図はそのうちひとつだけ。" })],
     tailComments: [
       x({
         en: "draft image IMG_8841 removed from header after upload — too recognisable",
         ko: "초안 이미지 IMG_8841, 업로드 후 헤더에서 제거 — 너무 알아보기 쉬움",
         "zh-TW": "草稿圖片 IMG_8841 上傳後已從頁首移除——太容易被認出來",
         es: "imagen de borrador IMG_8841 quitada del encabezado después de subirla — demasiado reconocible",
+        ja: "下書き画像 IMG_8841、アップロード後にヘッダーから削除 — 誰だか分かりすぎる",
       }),
     ],
   });
@@ -407,7 +480,7 @@ function about(loc: Locale): SitePage {
   const blocks: Block[] = [
     nav(x),
     { type: "compass" },
-    { type: "heading", level: 1, text: x({ en: "About", ko: "소개", "zh-TW": "關於", es: "Acerca de" }) },
+    { type: "heading", level: 1, text: x({ en: "About", ko: "소개", "zh-TW": "關於", es: "Acerca de", ja: "概要" }) },
     {
       type: "paragraph",
       text: x({
@@ -415,6 +488,7 @@ function about(loc: Locale): SitePage {
         ko: "나는 오래된 종이를 다루는 일로 먹고산다. 공식 목록에는 적을 수 없는 것들을 여기에 쓴다.",
         "zh-TW": "我靠處理舊紙張維生。官方檢索目錄裡寫不進去的東西，我寫在這裡。",
         es: "Me gano la vida trabajando con papel viejo. Aquí escribo lo que no puedo poner en los instrumentos de descripción oficiales.",
+        ja: "わたしは古い紙を扱って生計を立てている。公式の目録には書けないことを、ここに書く。",
       }),
     },
     {
@@ -424,6 +498,7 @@ function about(loc: Locale): SitePage {
         ko: "필드 노트(Field Notes)는 연재다. 첫 글부터 마지막 글까지 순서대로 읽을 것. 모든 방위는 첫 글자에서 시작하고, 거리는 날짜로 잰다.",
         "zh-TW": "田野筆記（Field Notes）是一個系列。請從第一篇讀到最後一篇。每個方位都從第一個字母開始，而距離以日子計算。",
         es: "Las Notas de campo (Field Notes) son una serie. Léelas de la primera a la última. Cada rumbo empieza en la primera letra, y la distancia se mide en días.",
+        ja: "フィールドノート（Field Notes）は連載である。最初の記事から最後の記事まで順に読むこと。すべての方位は最初の文字から始まり、距離は日数で測る。",
       }),
     },
     {
@@ -433,11 +508,12 @@ function about(loc: Locale): SitePage {
         ko: "부엌 글은 그냥 동생을 위한 것이다. 내가 밥을 안 먹는다고 걱정하니까.",
         "zh-TW": "廚房的文章只是寫給我妹妹的，她總擔心我不吃飯。",
         es: "Las entradas de cocina son solo para mi hermana, que se preocupa porque cree que no como.",
+        ja: "台所の記事は妹のためだけに書いている。わたしがちゃんと食べていないと心配するから。",
       }),
     },
     footer(x),
   ];
-  return page(`${DRIFT_HOST}/about`, x({ en: "About — The Drift", ko: "소개 — The Drift", "zh-TW": "關於 — The Drift", es: "Acerca de — The Drift" }), "drift", blocks);
+  return page(`${DRIFT_HOST}/about`, x({ en: "About — The Drift", ko: "소개 — The Drift", "zh-TW": "關於 — The Drift", es: "Acerca de — The Drift", ja: "概要 — The Drift" }), "drift", blocks);
 }
 
 function post(slug: string, loc: Locale): SitePage | null {
@@ -448,7 +524,7 @@ function post(slug: string, loc: Locale): SitePage | null {
   const blocks: Block[] = [
     nav(x),
     postBlock(p, loc),
-    { type: "link", text: x({ en: "← All posts", ko: "← 전체 글", "zh-TW": "← 所有文章", es: "← Todas las entradas" }), href: DRIFT_HOST },
+    { type: "link", text: x({ en: "← All posts", ko: "← 전체 글", "zh-TW": "← 所有文章", es: "← Todas las entradas", ja: "← すべての記事" }), href: DRIFT_HOST },
     footer(x),
   ];
   return page(`${DRIFT_HOST}/post/${p.slug}`, `${t.title} — The Drift`, "drift", blocks, {

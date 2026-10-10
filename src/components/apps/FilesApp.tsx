@@ -77,6 +77,20 @@ de entrada sigue sincronizándose. Trabajen juntos, anoten todo y compartan
 lo importante con el resto de la sala.
 
 Honorarios: pagados por adelantado. Preguntas: ninguna, al parecer.`,
+      ja: `事件概要 — 極秘
+依頼人：エイダ・ヴォス博士の妹
+対象：エイダ・ヴォス（Ada Voss）博士、メリディアン研究所アーキビスト
+状況：行方不明、最後の連絡は48時間前
+
+任務：
+エイダの身に何が起きたのかを突き止めること。彼女が残したメッセージはひとつだけ。
+「これを読んでいるなら、私は近づきすぎた。最初から始めて。」
+
+このノートPCは彼女のものだ。ブラウザには彼女のブックマークが残り、受信箱は
+まだ同期を続けている。協力し、すべてを書き留め、重要なことは
+ルームのメンバーと共有すること。
+
+報酬：前払い済み。質問：どうやら無用。`,
     },
   },
   {
@@ -127,6 +141,17 @@ Honorarios: pagados por adelantado. Preguntas: ninguna, al parecer.`,
 - Decodificador: Ada lo guarda en "Ada's Tools", dentro de su carpeta
   personal. Nunca pudo resistirse a una pregunta de seguridad.
 - ¿Atascado? En el panel de pistas puedes pedirle a Ada un empujón.`,
+      ja: `このマシンを使う誰かへの現場メモ
+
+- ブラウザ：アドレスバーにアドレスを入力するか、ブックマークをタップ。
+  どのページにも「ソースを表示」ボタンがある。画像には「ファイル情報」がある。
+  黒塗りの部分はタップすると下に隠れた内容が見える。
+- メモ：初期設定では非公開。大事なときは「ルームに共有」をタップ。
+  断片にはタグを付けること（名前／年／ID／暗号キー／アドレス）。
+- メール：こまめに確認すること。エイダは留守電メッセージを残す。
+- デコーダー：エイダは個人フォルダの中の「Ada's Tools」にしまっている。
+  セキュリティの質問を設定せずにはいられない人だった。
+- 行き詰まったら？ ヒントパネルからエイダにそれとなく助けを頼める。`,
     },
   },
   {
@@ -148,6 +173,10 @@ Honorarios: pagados por adelantado. Preguntas: ninguna, al parecer.`,
 - devolverle la llamada a mi hermana
 - dejar de dibujar brújulas en todo
 - renovar el dominio antes de que venza`,
+      ja: `- アーカイブをバックアップ（また）
+- 妹に折り返し電話
+- 何にでもコンパスを描くクセをやめる
+- 期限切れの前にドメインを更新`,
     },
   },
 ];
@@ -240,6 +269,27 @@ Trae un lápiz. Laptops bienvenidas. Teléfonos boca abajo.
 W. ahora escribe TODO en el código de su clase.
 Listas del súper. Códigos de puertas. Seguramente contraseñas.
 Apréndelo.`,
+    ja: `ハーバー・コミュニティ・カレッジ — 夜間講座
+CS 110：コンピューターはどう数えるか
+毎週火曜 6:30–8:30pm、12番教室
+講師：W. Okafor
+
+第1週  コンピューターとは、本当は何か？   （配布資料）
+第2週  スイッチ：オンとオフ               （配布資料）
+第3週  2進数：指2本で数える
+        オンライン授業＋練習クイズ：
+        harbourcc.edu/cs110/binary
+        クイズに合格すると、授業用の
+        2進数翻訳ツールがマシンにインストールされます。
+第4週  パスワード、そしてあなたのがダメな理由
+
+鉛筆持参。ノートPC歓迎。スマホは伏せておくこと。
+
+---
+（エイダの余白の書き込み：）
+W.は最近「何でも」授業のコードで書く。
+買い物リスト。ドアの暗証番号。たぶんパスワードも。
+覚えておくこと。`,
   },
 };
 
