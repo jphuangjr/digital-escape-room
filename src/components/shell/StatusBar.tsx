@@ -20,11 +20,13 @@ export function StatusBar({
   active,
   onRoom,
   onHome,
+  chatUnread = 0,
 }: {
   ctx: GameCtx;
   active: AppId | null;
   onRoom: () => void;
   onHome: () => void;
+  chatUnread?: number;
 }) {
   const now = useClock();
   const online = ctx.state.players.filter((p) => p.online);
@@ -74,6 +76,11 @@ export function StatusBar({
           </span>
           <PeopleIcon className="hidden h-5 w-5 text-stone-400 md:block" />
           <span className="text-xs text-stone-400">{online.length}</span>
+          {chatUnread > 0 && (
+            <span className="ml-1 rounded-full bg-red-600 px-1.5 text-[10px] font-bold leading-4 text-white" aria-label={`${chatUnread} unread messages`}>
+              {chatUnread > 9 ? "9+" : chatUnread}
+            </span>
+          )}
         </button>
         {now && (
           <time className="hidden font-mono text-xs text-stone-500 md:inline">

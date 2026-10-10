@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import type { MeResponse, RoomState } from "@/lib/types";
 import { apiFetch } from "@/lib/client/game";
 import { useRoomChannel } from "@/lib/realtime/client";
+import { CHAT_MESSAGE_EVENT, CHAT_POLL_EVENT } from "@/lib/client/chat";
 import { GameShell } from "@/components/shell/GameShell";
 import { CompassMark } from "@/components/shell/icons";
 
@@ -74,7 +75,13 @@ export function RoomClient({ code }: { code: string }) {
 
 function LiveRoom({ code, state, load }: { code: string; state: RoomState; load: () => Promise<void> }) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const onEvent = useCallback(() => {
+  const onEvent = useCallback((event: string, payload: unknown) => {
+    // Chat messages carry their own content: hand them to the chat, don't refetch the whole room.
+    if (event === "chat.message") {
+      window.dispatchEvent(new CustomEvent(CHAT_MESSAGE_EVENT, { detail: payload }));
+      return;
+    }
+    if (event === "poll") window.dispatchEvent(new Event(CHAT_POLL_EVENT));
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       timer.current = null;

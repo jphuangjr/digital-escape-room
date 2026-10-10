@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useChat } from "@/lib/client/chat";
+import type { RoomTab } from "./RoomSheet";
 import { describeDiscovery } from "@/lib/client/discoveries";
 import type { AppId, RoomState } from "@/lib/types";
 import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
@@ -32,6 +34,8 @@ export function GameShell({
   const [navRequest, setNavRequest] = useState<{ address: string; n: number } | null>(null);
   const [browserAddress, setBrowserAddress] = useState<string | null>(null);
   const [roomOpen, setRoomOpen] = useState(false);
+  const [roomTab, setRoomTab] = useState<RoomTab>("people");
+  const chat = useChat(code, state.me.id);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [unreadEmails, setUnreadEmails] = useState(0);
   const toastId = useRef(0);
@@ -130,6 +134,27 @@ export function GameShell({
     knownDiscoveries.current = new Set(list.map((d) => d.id));
   }, [state.progress.discoveries, state.me.id, toast, openAddress]);
 
+  // ---------- chat toasts (when the chat isn't on screen) ----------
+  const chatVisible = roomOpen && roomTab === "chat";
+  const knownChat = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    if (!chat.loaded) return;
+    if (knownChat.current && !chatVisible) {
+      for (const m of chat.messages) {
+        if (knownChat.current.has(m.id) || m.playerId === state.me.id) continue;
+        const preview = m.body.length > 70 ? `${m.body.slice(0, 70)}…` : m.body;
+        toast(`${m.playerName}: ${preview}`, "info", {
+          label: "Reply",
+          onClick: () => {
+            setRoomTab("chat");
+            setRoomOpen(true);
+          },
+        });
+      }
+    }
+    knownChat.current = new Set(chat.messages.map((m) => m.id));
+  }, [chat.messages, chat.loaded, chatVisible, state.me.id, toast]);
+
   // ---------- email unread ----------
   useEffect(() => {
     const recompute = () => setUnreadEmails(unreadCount(code, state.emails));
@@ -165,6 +190,7 @@ export function GameShell({
         <StatusBar
           ctx={ctx}
           active={active}
+          chatUnread={chat.unread}
           onRoom={() => setRoomOpen(true)}
           onHome={() => setActive(null)}
         />
@@ -236,9 +262,17 @@ export function GameShell({
           onOpen={openApp}
           onRoom={() => setRoomOpen(true)}
           onlineCount={state.players.filter((p) => p.online).length}
+          chatUnread={chat.unread}
         />
 
-        <RoomSheet ctx={ctx} open={roomOpen} onClose={() => setRoomOpen(false)} />
+        <RoomSheet
+          ctx={ctx}
+          open={roomOpen}
+          onClose={() => setRoomOpen(false)}
+          tab={roomTab}
+          setTab={setRoomTab}
+          chat={chat}
+        />
         <Toasts
           items={toasts}
           placement={roomOpen ? "top" : "bottom"}

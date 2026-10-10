@@ -5,6 +5,8 @@ import { QrCode } from "@/components/site/QrCode";
 import type { GameCtx } from "@/lib/client/game";
 import { AttemptLog } from "@/components/apps/AttemptLog";
 import { CaseLog } from "@/components/apps/CaseLog";
+import { ChatPanel } from "@/components/apps/ChatPanel";
+import type { Chat } from "@/lib/client/chat";
 import { HintsPanel } from "@/components/apps/HintsPanel";
 import { CloseIcon, CrownIcon, ShareIcon } from "./icons";
 
@@ -22,10 +24,24 @@ function describeView(view: string | null): string {
   return view;
 }
 
-type Tab = "people" | "log" | "attempts" | "hints";
+export type RoomTab = "people" | "chat" | "log" | "attempts" | "hints";
+type Tab = RoomTab;
 
-export function RoomSheet({ ctx, open, onClose }: { ctx: GameCtx; open: boolean; onClose: () => void }) {
-  const [tab, setTab] = useState<Tab>("people");
+export function RoomSheet({
+  ctx,
+  open,
+  onClose,
+  tab,
+  setTab,
+  chat,
+}: {
+  ctx: GameCtx;
+  open: boolean;
+  onClose: () => void;
+  tab: RoomTab;
+  setTab: (t: RoomTab) => void;
+  chat: Chat;
+}) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -89,7 +105,8 @@ export function RoomSheet({ ctx, open, onClose }: { ctx: GameCtx; open: boolean;
           {(
             [
               ["people", `People (${state.players.filter((p) => p.online).length})`],
-              ["log", "Case log"],
+              ["chat", chat.unread ? `Chat (${chat.unread})` : "Chat"],
+              ["log", "Log"],
               ["attempts", "Attempts"],
               ["hints", "Hints"],
             ] as [Tab, string][]
@@ -108,7 +125,10 @@ export function RoomSheet({ ctx, open, onClose }: { ctx: GameCtx; open: boolean;
           ))}
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-3">
+        <div
+          className={`min-h-0 flex-1 overflow-x-hidden px-4 py-3 ${tab === "chat" ? "flex flex-col" : "overflow-y-auto"}`}
+        >
+          {tab === "chat" && <ChatPanel ctx={ctx} chat={chat} />}
           {tab === "people" && (
             <>
               <ul className="space-y-1">

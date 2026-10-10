@@ -190,3 +190,24 @@ describe("case log", () => {
     expect(parseProgress({ solved: ["shift-key"] }).discoveries).toEqual([]);
   });
 });
+
+describe("chat", () => {
+  it("cleans message bodies", async () => {
+    const { cleanChatBody, CHAT_MAX_LEN } = await import("../logic");
+    expect(cleanChatBody("  hi there  ")).toEqual({ ok: true, body: "hi there" });
+    expect(cleanChatBody("a\r\n\n\n\nb")).toEqual({ ok: true, body: "a\n\nb" });
+    expect(cleanChatBody("zero​width\u0007")).toEqual({ ok: true, body: "zerowidth" });
+    expect(cleanChatBody("   ").ok).toBe(false);
+    expect(cleanChatBody(42).ok).toBe(false);
+    expect(cleanChatBody("x".repeat(CHAT_MAX_LEN)).ok).toBe(true);
+    expect(cleanChatBody("x".repeat(CHAT_MAX_LEN + 1)).ok).toBe(false);
+  });
+
+  it("rate-limits to one message per second per player", async () => {
+    const { chatCooldownSec } = await import("../logic");
+    const now = new Date("2026-10-10T12:00:01.000Z");
+    expect(chatCooldownSec(null, now)).toBe(0);
+    expect(chatCooldownSec(new Date("2026-10-10T12:00:00.500Z"), now)).toBe(1);
+    expect(chatCooldownSec(new Date("2026-10-10T12:00:00.000Z"), now)).toBe(0);
+  });
+});
