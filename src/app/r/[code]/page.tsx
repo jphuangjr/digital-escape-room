@@ -1,9 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { RoomClient } from "./RoomClient";
 
-export const metadata: Metadata = {
-  title: "Ada's Laptop — The Vanishing of Dr. Ada Voss",
-};
+export async function generateMetadata({ params }: { params: Promise<{ code: string }> }): Promise<Metadata> {
+  const code = decodeURIComponent((await params).code).toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 12);
+  const title = `Join room ${code} — The Vanishing of Dr. Ada Voss`;
+  const description = "You're invited to investigate. Tap to join; sign in with Google or just enter a name.";
+  return { title, description, openGraph: { title, description }, twitter: { title, description } };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
