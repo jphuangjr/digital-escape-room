@@ -12,7 +12,7 @@ const INTRANET_USER = "wren.okafor";
 const INTRANET_PASS = `${FRAGMENTS.year}${FRAGMENTS.id}`;
 const FINAL_PHRASE = `${FRAGMENTS.name}-${FRAGMENTS.year}-${FRAGMENTS.id}`;
 const BONUS_PIN = "0314";
-/** "Who was Dad's weather?" (notes_on_mara.txt inside Ada's Personal). */
+/** "What's the weather?" (notes_on_mara.txt inside Ada's Personal). */
 const TOOLS_ANSWER = "mara";
 /** harbourcc.edu/cs110/binary practice quiz word, shown there in 5-bit binary. */
 export const BINARY_PRACTICE_WORD = "hello";

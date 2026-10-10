@@ -238,7 +238,7 @@ function SecurityQuestion({ ctx }: { ctx: GameCtx }) {
         </div>
         <h3 className="text-base font-semibold text-zinc-100">Ada&apos;s Tools</h3>
         <p className="mt-3 text-xs uppercase tracking-widest text-zinc-500">Security question</p>
-        <p className="mt-1 font-serif text-lg text-zinc-100">Who was Dad&apos;s weather?</p>
+        <p className="mt-1 font-serif text-lg text-zinc-100">What&apos;s the weather?</p>
       </div>
       <input
         value={answer}
