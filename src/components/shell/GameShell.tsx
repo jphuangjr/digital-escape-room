@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useT } from "@/i18n/client";
+import { useLocale, useT } from "@/i18n/client";
+import { pick } from "@/i18n/config";
 import { useChat } from "@/lib/client/chat";
 import type { RoomTab } from "./RoomSheet";
 import { describeDiscovery, discoveryWho } from "@/lib/client/discoveries";
@@ -351,11 +352,17 @@ function HomeScreen({
   badges: Partial<Record<AppId, number>>;
   openApp: (a: AppId) => void;
 }) {
+  const x = pick(useLocale());
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-8">
       <CompassMark className="h-24 w-24 text-amber-500/30" />
       <p className="mt-3 max-w-xs text-center font-serif text-sm italic text-stone-500">
-        &ldquo;If you&apos;re reading this, I got too close. Start at the beginning.&rdquo;
+        &ldquo;
+        {x({
+          en: "If you're reading this, I got too close. Start at the beginning.",
+          ko: "이걸 읽고 있다면, 내가 너무 가까이 갔다는 뜻이야. 처음부터 시작해.",
+        })}
+        &rdquo;
       </p>
       <div className="mt-8 grid grid-cols-3 gap-2 md:hidden">
         {APP_ORDER.map((app) => (

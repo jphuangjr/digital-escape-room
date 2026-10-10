@@ -1,5 +1,5 @@
 import "server-only";
-import { pick, type Locale } from "@/i18n/config";
+import { pick, type Locale, type Tr } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
 
@@ -58,7 +58,7 @@ export const DRIFT_POSTS: DriftPost[] = [
     ].join("\n"),
     l10n: {
       ko: {
-        title: "Ada's Kitchen: 버터와 인내",
+        title: "에이다의 부엌: 버터와 인내",
         date: "2019년 4월 14일",
         body: [
           "야간 근무를 위한 쇼트브레드. 차가운 버터 4큰술에 설탕을 넣고 손목이 투덜댈 때까지 크림처럼 휘젓는다. 그다음 밀가루를 넣는다. 끈적이기를 멈추고 정직해지기 시작할 때까지.",
@@ -122,7 +122,7 @@ export const DRIFT_POSTS: DriftPost[] = [
     ].join("\n"),
     l10n: {
       ko: {
-        title: "Ada's Kitchen: 한밤의 빵",
+        title: "에이다의 부엌: 한밤의 빵",
         date: "2019년 2월 23일",
         body: [
           "반죽할 기운도 없이 너무 늦게 귀가하는 사람을 위한 무반죽 빵. 따뜻한 우유에 달걀 2개를 풀고, 강력분 1컵과 소금 한 꼬집을 섞은 뒤 행주를 덮어 밤새 둔다.",
@@ -164,7 +164,7 @@ export const DRIFT_POSTS: DriftPost[] = [
     ].join("\n"),
     l10n: {
       ko: {
-        title: "Ada's Kitchen: 기록 보관인의 수프",
+        title: "에이다의 부엌: 기록 보관인의 수프",
         date: "2019년 1월 19일",
         body: [
           "동생 말로는 내가 책상에서 보온병에 든 수프만 먹는다고 한다. 그래서, 그 수프. 물 3컵에 양파 하나, 당근 하나, 월계수 잎 1장을 넣고 부엌에서 누군가 나를 사랑하는 냄새가 날 때까지 뭉근히 끓인다.",
@@ -197,62 +197,117 @@ export const DRIFT_POSTS: DriftPost[] = [
   },
 ];
 
-const NAV: Block = {
+const nav = (x: X): Block => ({
   type: "nav",
   links: [
-    { text: "Home", href: DRIFT_HOST },
-    { text: "About", href: `${DRIFT_HOST}/about` },
+    { text: x({ en: "Home", ko: "홈" }), href: DRIFT_HOST },
+    { text: x({ en: "About", ko: "소개" }), href: `${DRIFT_HOST}/about` },
   ],
+});
+
+const footer = (x: X): Block => ({
+  type: "footer",
+  text: x({
+    en: "The Drift — notes from someone who reads the footnotes. Comments are closed.",
+    ko: "The Drift — 각주까지 읽는 사람의 기록. 댓글은 닫혀 있습니다.",
+  }),
+});
+
+const SERIES: Record<DriftPost["series"], Tr> = {
+  "Field Notes": { en: "Field Notes", ko: "필드 노트 · Field Notes" },
+  "Ada's Kitchen": { en: "Ada's Kitchen", ko: "에이다의 부엌 · Ada's Kitchen" },
 };
 
-const FOOTER: Block = { type: "footer", text: "The Drift — notes from someone who reads the footnotes. Comments are closed." };
-
-function postBlock(p: DriftPost): Block {
-  return { type: "post", title: p.title, author: "A.", date: p.date, body: p.body, series: p.series };
+/** The post's text in `loc` (English fields as-is for "en"). */
+function localized(p: DriftPost, loc: Locale): { title: string; date: string; body: string } {
+  return loc === "en" ? { title: p.title, date: p.date, body: p.body } : p.l10n[loc];
 }
 
-function home(): SitePage {
+function postBlock(p: DriftPost, loc: Locale): Block {
+  const t = localized(p, loc);
+  return { type: "post", title: t.title, author: "A.", date: t.date, body: t.body, series: pick(loc)(SERIES[p.series]) };
+}
+
+function home(loc: Locale): SitePage {
+  const x = pick(loc);
   const blocks: Block[] = [
-    NAV,
+    nav(x),
     { type: "compass" },
     { type: "heading", level: 1, text: "The Drift" },
-    { type: "paragraph", text: "Field notes, small hours, and the occasional recipe. Posts appear newest first — the way the world reads, and the wrong way to read a story." },
-    ...DRIFT_POSTS.map(postBlock),
-    FOOTER,
+    {
+      type: "paragraph",
+      text: x({
+        en: "Field notes, small hours, and the occasional recipe. Posts appear newest first — the way the world reads, and the wrong way to read a story.",
+        ko: "현장 기록, 늦은 밤의 생각, 그리고 가끔 레시피. 글은 최신순으로 보인다 — 세상이 읽는 방식이고, 이야기를 읽기에는 틀린 방식이다.",
+      }),
+    },
+    ...DRIFT_POSTS.map((p) => postBlock(p, loc)),
+    footer(x),
   ];
   return page(DRIFT_HOST, "The Drift", "drift", blocks, {
-    headComments: ["static export — minimal-ink theme"],
-    bodyComments: ["two series live here. only one of them is a map."],
-    tailComments: ["draft image IMG_8841 removed from header after upload — too recognisable"],
+    headComments: [x({ en: "static export — minimal-ink theme", ko: "정적 내보내기 — minimal-ink 테마" })],
+    bodyComments: [x({ en: "two series live here. only one of them is a map.", ko: "여기엔 시리즈가 두 개 있다. 지도는 그중 하나뿐." })],
+    tailComments: [
+      x({
+        en: "draft image IMG_8841 removed from header after upload — too recognisable",
+        ko: "초안 이미지 IMG_8841, 업로드 후 헤더에서 제거 — 너무 알아보기 쉬움",
+      }),
+    ],
   });
 }
 
-function about(): SitePage {
+function about(loc: Locale): SitePage {
+  const x = pick(loc);
   const blocks: Block[] = [
-    NAV,
+    nav(x),
     { type: "compass" },
-    { type: "heading", level: 1, text: "About" },
-    { type: "paragraph", text: "I work with old paper for a living. This is where I write the things I can't put in the official finding aids." },
-    { type: "paragraph", text: "The Field Notes are a series. Read them from the first to the last. The first letter is where every bearing begins, and distance is measured in days." },
-    { type: "paragraph", text: "The kitchen posts are just for my sister, who worries I don't eat." },
-    FOOTER,
+    { type: "heading", level: 1, text: x({ en: "About", ko: "소개" }) },
+    {
+      type: "paragraph",
+      text: x({
+        en: "I work with old paper for a living. This is where I write the things I can't put in the official finding aids.",
+        ko: "나는 오래된 종이를 다루는 일로 먹고산다. 공식 목록에는 적을 수 없는 것들을 여기에 쓴다.",
+      }),
+    },
+    {
+      type: "paragraph",
+      text: x({
+        en: "The Field Notes are a series. Read them from the first to the last. The first letter is where every bearing begins, and distance is measured in days.",
+        ko: "필드 노트(Field Notes)는 연재다. 첫 글부터 마지막 글까지 순서대로 읽을 것. 모든 방위는 첫 글자에서 시작하고, 거리는 날짜로 잰다.",
+      }),
+    },
+    {
+      type: "paragraph",
+      text: x({
+        en: "The kitchen posts are just for my sister, who worries I don't eat.",
+        ko: "부엌 글은 그냥 동생을 위한 것이다. 내가 밥을 안 먹는다고 걱정하니까.",
+      }),
+    },
+    footer(x),
   ];
-  return page(`${DRIFT_HOST}/about`, "About — The Drift", "drift", blocks);
+  return page(`${DRIFT_HOST}/about`, x({ en: "About — The Drift", ko: "소개 — The Drift" }), "drift", blocks);
 }
 
-function post(slug: string): SitePage | null {
-  const p = DRIFT_POSTS.find((x) => x.slug === slug);
+function post(slug: string, loc: Locale): SitePage | null {
+  const x = pick(loc);
+  const p = DRIFT_POSTS.find((q) => q.slug === slug);
   if (!p) return null;
-  const blocks: Block[] = [NAV, postBlock(p), { type: "link", text: "← All posts", href: DRIFT_HOST }, FOOTER];
-  return page(`${DRIFT_HOST}/post/${p.slug}`, `${p.title} — The Drift`, "drift", blocks, {
-    meta: { "article:published_time": p.date, "article:section": p.series },
+  const t = localized(p, loc);
+  const blocks: Block[] = [
+    nav(x),
+    postBlock(p, loc),
+    { type: "link", text: x({ en: "← All posts", ko: "← 전체 글" }), href: DRIFT_HOST },
+    footer(x),
+  ];
+  return page(`${DRIFT_HOST}/post/${p.slug}`, `${t.title} — The Drift`, "drift", blocks, {
+    meta: { "article:published_time": t.date, "article:section": x(SERIES[p.series]) },
   });
 }
 
-export function resolveDrift(path: string, _progress: RoomProgress, _loc: Locale): SitePage | null {
-  if (path === "") return home();
-  if (path === "/about") return about();
+export function resolveDrift(path: string, _progress: RoomProgress, loc: Locale): SitePage | null {
+  if (path === "") return home(loc);
+  if (path === "/about") return about(loc);
   const m = path.match(/^\/post\/([a-z0-9-]+)$/);
-  if (m) return post(m[1]);
+  if (m) return post(m[1], loc);
   return null;
 }

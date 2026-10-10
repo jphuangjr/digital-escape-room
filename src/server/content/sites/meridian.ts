@@ -134,7 +134,7 @@ const staffList = (x: X): Person[] => [
     role: x({ en: "Deputy Director, Continuity", ko: "연속성 담당 부국장" }),
     bio: x({
       en: "Oversees reconciliation of conflicting records. \"Two truths are one too many.\"",
-      ko: "상충하는 기록의 정리를 총괄합니다. \"진실이 둘이면 하나가 남는다.\"",
+      ko: "상충하는 기록의 정리를 총괄합니다. \"진실은 하나면 충분하다.\"",
     }),
     photo: "kell.jpg",
   },

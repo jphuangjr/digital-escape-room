@@ -2,10 +2,10 @@ import Link from "next/link";
 import { GAMES, SITE_NAME, gameText, type GameInfo, type Translate } from "@/lib/games";
 import { Compass } from "@/components/site/Compass";
 import { LanguageSwitcher } from "@/i18n/client";
-import { getLocale, getT } from "@/i18n/server";
+import { getT } from "@/i18n/server";
 import { DirectoryAccount, DirectoryCases, JoinBox } from "./DirectoryClient";
 
-function GameCard({ game, t, englishOnlyNote }: { game: GameInfo; t: Translate; englishOnlyNote: boolean }) {
+function GameCard({ game, t }: { game: GameInfo; t: Translate }) {
   const live = game.status === "live";
   const body = (
     <article
@@ -24,7 +24,6 @@ function GameCard({ game, t, englishOnlyNote }: { game: GameInfo; t: Translate; 
         </div>
       </div>
       <p className="text-sm leading-relaxed text-noir-ink-dim">{gameText(t, game, "blurb")}</p>
-      {englishOnlyNote && <p className="text-xs text-noir-ink-faint">{t("site.game.storyEnglishOnly")}</p>}
       <ul className="flex flex-wrap gap-2 text-xs text-noir-ink-dim">
         {(["players", "duration", "difficulty"] as const).map((f) => (
           <li key={f} className="rounded-full border border-noir-line px-3 py-1">
@@ -50,7 +49,6 @@ function GameCard({ game, t, englishOnlyNote }: { game: GameInfo; t: Translate; 
 
 export default async function Directory() {
   const t = await getT();
-  const englishOnlyNote = (await getLocale()) !== "en";
   return (
     <main className="noir-vignette min-h-dvh pt-safe pb-safe px-safe">
       <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 pb-10 pt-10">
@@ -74,7 +72,7 @@ export default async function Directory() {
           </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {GAMES.map((g) => (
-              <GameCard key={g.id} game={g} t={t} englishOnlyNote={englishOnlyNote} />
+              <GameCard key={g.id} game={g} t={t} />
             ))}
             <div className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-noir-line/70 p-5 text-center">
               <Compass className="h-10 w-10 text-noir-ink-faint" />

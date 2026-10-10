@@ -8,7 +8,7 @@ import { AccountBar, GoogleButton, MyCases } from "@/components/site/Account";
 import { Compass } from "@/components/site/Compass";
 import { ReplaceRoomDialog } from "@/components/site/ReplaceRoomDialog";
 import { RedeemBox } from "@/components/site/RedeemBox";
-import { LanguageSwitcher, useLocale, useT } from "@/i18n/client";
+import { LanguageSwitcher, useT } from "@/i18n/client";
 import { getGame, gameText } from "@/lib/games";
 import { FormattedMessage } from "react-intl";
 
@@ -26,7 +26,6 @@ function normalizeCode(raw: string): string {
 export function AdaLanding() {
   const router = useRouter();
   const t = useT();
-  const locale = useLocale();
   const game = getGame(GAME_ID)!;
   const [name, setName] = useState("");
   const [color, setColor] = useState(COLORS[0]);
@@ -180,7 +179,6 @@ export function AdaLanding() {
             &ldquo;{t("site.ada.quote")}&rdquo;
           </blockquote>
           <p className="text-sm text-noir-ink-faint">{t("site.ada.solo")}</p>
-          {locale !== "en" && <p className="text-sm text-noir-ink-faint">{t("site.game.storyEnglishOnly")}</p>}
         </section>
 
         <AccountBar me={me} callbackUrl="/play/ada-voss" fallbackColor={color} />
