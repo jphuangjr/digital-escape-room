@@ -25,6 +25,7 @@ model Room {
   attempts       Attempt[]
   hints          HintRequest[]
   votes          EndingVote[]
+  chat           ChatMessage[]
   events         AnalyticsEvent[]
 }
 
@@ -184,4 +185,16 @@ model AnalyticsEvent {
   createdAt DateTime @default(now())
 
   @@index([type, createdAt])
+}
+
+/// Room chat. Deleted with the room (48h inactivity or replaced by the host).
+model ChatMessage {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  playerId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([roomId, createdAt])
 }

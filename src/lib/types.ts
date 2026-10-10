@@ -224,3 +224,13 @@ export interface AdminCodeDTO {
   status: "active" | "used" | "expired" | "revoked";
   redemptions: { email: string; at: string }[]; // newest first, up to 50
 }
+
+/** One room chat message. Delivered live over the realtime channel as the `chat.message` payload. */
+export interface ChatMessageDTO {
+  id: string;
+  playerId: string;
+  playerName: string;
+  playerColor: string;
+  body: string;
+  createdAt: string;
+}

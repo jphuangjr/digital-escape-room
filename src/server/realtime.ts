@@ -10,7 +10,8 @@ export type RoomEvent =
   | "hint.unlocked"
   | "vote.updated"
   | "ending.resolved"
-  | "room.closed"; // host started a new room; clients refetch and get 404
+  | "room.closed" // host started a new room; clients refetch and get 404
+  | "chat.message"; // payload is the full ChatMessageDTO; clients append it without refetching state
 
 /** Server-side publisher interface so the provider can be swapped. */
 export interface RealtimePublisher {

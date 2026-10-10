@@ -215,3 +215,30 @@ export function median(nums: number[]): number | null {
   const m = Math.floor(s.length / 2);
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
+
+// ---------- Chat ----------
+
+export const CHAT_MAX_LEN = 500;
+export const CHAT_HISTORY = 100;
+/** Minimum gap between one player's messages. */
+export const CHAT_MIN_INTERVAL_MS = 1000;
+
+/** Trim, strip control characters (keeping newlines), collapse runs of blank lines. */
+export function cleanChatBody(raw: unknown): { ok: true; body: string } | { ok: false; error: string } {
+  if (typeof raw !== "string") return { ok: false, error: "Message is empty." };
+  const body = raw
+    .replace(/\r\n?/g, "\n")
+    .replace(/[\u0000-\u0009\u000B-\u001F\u007F\u200B-\u200F\u2028-\u202E\u2060-\u206F\uFEFF]/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  if (!body) return { ok: false, error: "Message is empty." };
+  if (body.length > CHAT_MAX_LEN) return { ok: false, error: `Messages can be up to ${CHAT_MAX_LEN} characters.` };
+  return { ok: true, body };
+}
+
+/** Seconds to wait before this player may send again, or 0. */
+export function chatCooldownSec(lastSentAt: Date | null, now = new Date()): number {
+  if (!lastSentAt) return 0;
+  const wait = CHAT_MIN_INTERVAL_MS - (now.getTime() - lastSentAt.getTime());
+  return wait > 0 ? Math.ceil(wait / 1000) : 0;
+}

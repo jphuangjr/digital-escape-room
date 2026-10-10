@@ -10,6 +10,7 @@ export function Dock({
   onOpen,
   onRoom,
   onlineCount,
+  chatUnread = 0,
 }: {
   active: AppId | null;
   isUnlocked: (a: AppId) => boolean;
@@ -17,6 +18,7 @@ export function Dock({
   onOpen: (a: AppId) => void;
   onRoom: () => void;
   onlineCount: number;
+  chatUnread?: number;
 }) {
   return (
     <nav
@@ -62,13 +64,17 @@ export function Dock({
         <li className="flex-1">
           <button
             onClick={onRoom}
-            aria-label={`Room: ${onlineCount} online`}
+            aria-label={`Room: ${onlineCount} online${chatUnread ? `, ${chatUnread} unread messages` : ""}`}
             className="flex min-h-14 w-full flex-col items-center justify-center gap-0.5 py-1.5 text-stone-400 active:bg-stone-900"
           >
             <span className="relative">
               <PeopleIcon className="h-6 w-6" />
-              <span className="absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-600 px-1 text-[10px] font-bold leading-none text-white">
-                {onlineCount}
+              <span
+                className={`absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold leading-none text-white ${
+                  chatUnread ? "bg-red-600" : "bg-emerald-600"
+                }`}
+              >
+                {chatUnread ? (chatUnread > 9 ? "9+" : chatUnread) : onlineCount}
               </span>
             </span>
             <span className="text-[10px] tracking-wide">Room</span>
