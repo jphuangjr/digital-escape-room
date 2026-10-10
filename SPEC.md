@@ -65,7 +65,7 @@ Normalization: trim, lowercase, collapse whitespace, treat `_`/`-`/space as equi
 
 ## 9. Opening puzzle: Ada's Personal → Ada's Tools → Decoder
 Files → "Ada's Personal" PIN = 0314, found in Email: sister's engagement email mentions Ada's birthday March 14. Contents: voicemail transcripts, lore about sister, Wren, Institute; reward: epilogue + compass badge.
-Files → "Ada's Tools" asks "Who was Dad's weather?" Answer `mara` (notes_on_mara.txt in Ada's Personal: "Dad called her his weather"). Requires Ada's Personal solved first. Solving it unlocks the Decoder for the room, so players have the A1Z26 tool before RunnerBoard.
+Files → Ada's Personal → "Ada's Tools" (a subfolder, only visible once Ada's Personal is open) asks "Who was Dad's weather?" Answer `mara` (notes_on_mara.txt in Ada's Personal: "Dad called her his weather"). Requires Ada's Personal solved first. Solving it unlocks the Decoder for the room, so players have the A1Z26 tool before RunnerBoard.
 
 ## 9a. Binary: Wren's night class
 Ada's Tools also holds `cs110_syllabus.txt` (Harbour Community College, CS 110, instructor W. Okafor). Week 3 points to `harbourcc.edu/cs110/binary`: a lesson on 5-bit place values (16 8 4 2 1, A = 1), a tap-the-switches demo, a 26-row decoding sheet and a practice quiz (`01000 00101 01100 01100 01111` = `hello`). Passing the quiz (puzzle `binary-lesson`) adds the `binary` badge, which installs a Binary tab in the Decoder for the whole room. The dashboard's View Source also links the class site, so players who skipped the syllabus can still find it.
