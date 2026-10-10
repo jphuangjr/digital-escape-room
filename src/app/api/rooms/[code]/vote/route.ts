@@ -4,18 +4,20 @@ import { error, isResponse, json, readBody, requirePlayer } from "@/server/http"
 import { isEnding } from "@/server/logic";
 import { publish } from "@/server/realtime";
 import { loadVoteState, maybeCloseVote } from "@/server/vote";
+import { getT } from "@/i18n/server";
 
 export async function POST(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   const ctx = await requirePlayer(code);
   if (isResponse(ctx)) return ctx;
   const { player } = ctx;
+  const t = await getT();
   const body = await readBody(req);
-  if (!body) return error(400, "Invalid JSON body.");
-  if (!isEnding(body.choice)) return error(400, "choice must be EXPOSE or PROTECT.");
+  if (!body) return error(400, t("api.common.invalidJson"));
+  if (!isEnding(body.choice)) return error(400, t("api.vote.badChoice"));
 
   let room = await maybeCloseVote(ctx.room);
-  if (room.status !== "voting") return error(409, "Voting is not open.", { status: room.status });
+  if (room.status !== "voting") return error(409, t("api.vote.notOpen"), { status: room.status });
 
   await db.endingVote.upsert({
     where: { roomId_playerId: { roomId: room.id, playerId: player.id } },

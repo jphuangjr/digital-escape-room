@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useT } from "@/i18n/client";
 import type { GameCtx } from "@/lib/client/game";
 import type { EmailDTO } from "@/lib/types";
 import { readJSON, writeJSON } from "./shared";
@@ -59,9 +60,10 @@ export function linkifyAddresses(text: string, onOpen: (address: string) => void
 }
 
 function VoicemailIcon() {
+  const t = useT();
   return (
     <span
-      aria-label="Voicemail"
+      aria-label={t("apps.email.voicemail")}
       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-300"
     >
       ▶
@@ -70,14 +72,16 @@ function VoicemailIcon() {
 }
 
 function MailIcon() {
+  const t = useT();
   return (
-    <span aria-label="Email" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-300">
+    <span aria-label={t("apps.email.email")} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-300">
       ✉
     </span>
   );
 }
 
 export function EmailApp({ ctx }: { ctx: GameCtx }) {
+  const t = useT();
   const { code, state } = ctx;
   const emails = state.emails;
   const [openId, setOpenId] = useState<string | null>(null);
@@ -116,7 +120,7 @@ export function EmailApp({ ctx }: { ctx: GameCtx }) {
             onClick={() => setOpenId(null)}
             className="min-h-11 min-w-11 rounded-lg px-3 text-sm font-semibold text-amber-300 active:bg-zinc-900"
           >
-            ‹ Inbox
+            {t("apps.email.backToInbox")}
           </button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
@@ -130,7 +134,7 @@ export function EmailApp({ ctx }: { ctx: GameCtx }) {
           </div>
           {open.kind === "voicemail" && (
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-500/30 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-300">
-              Voicemail · transcript
+              {t("apps.email.voicemailTranscript")}
             </div>
           )}
           <div
@@ -157,16 +161,17 @@ export function EmailApp({ ctx }: { ctx: GameCtx }) {
     <div className="flex h-full min-h-0 flex-col bg-zinc-950 text-zinc-100">
       <div className="flex shrink-0 items-center justify-between gap-2 border-b border-zinc-800 px-3 py-2">
         <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
-          Inbox {unread > 0 && <span className="text-amber-300">· {unread} new</span>}
+          {t("apps.email.inbox")}{" "}
+          {unread > 0 && <span className="text-amber-300">{t("apps.email.newCount", { count: unread })}</span>}
         </h2>
         {unread > 0 && (
           <button onClick={markAllRead} className="min-h-11 rounded-lg px-3 text-xs font-semibold text-zinc-400 active:bg-zinc-900">
-            Mark all read
+            {t("apps.email.markAllRead")}
           </button>
         )}
       </div>
       <ul className="min-h-0 flex-1 divide-y divide-zinc-900 overflow-y-auto overscroll-contain">
-        {ordered.length === 0 && <li className="p-10 text-center text-sm text-zinc-500">No messages.</li>}
+        {ordered.length === 0 && <li className="p-10 text-center text-sm text-zinc-500">{t("apps.email.empty")}</li>}
         {ordered.map((e) => {
           const isUnread = !read.has(e.id);
           const preview = e.body.replace(/\s+/g, " ").slice(0, 90);
@@ -185,14 +190,14 @@ export function EmailApp({ ctx }: { ctx: GameCtx }) {
                   <div className={`truncate text-sm ${isUnread ? "font-semibold text-amber-200" : "text-zinc-400"}`}>
                     {e.kind === "voicemail" && (
                       <span className="mr-1.5 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-300">
-                        transcript
+                        {t("apps.email.transcript")}
                       </span>
                     )}
                     {e.subject}
                   </div>
                   <div className="truncate text-xs text-zinc-500">{preview}</div>
                 </div>
-                {isUnread && <span aria-label="Unread" className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-amber-400" />}
+                {isUnread && <span aria-label={t("apps.email.unread")} className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-amber-400" />}
               </button>
             </li>
           );

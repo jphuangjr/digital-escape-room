@@ -152,6 +152,7 @@ export function HomeIcon(props: P) {
   );
 }
 
+/** `label` is English reference data; the UI shows the translated `shell.app.<id>` message. */
 export const APP_META: Record<AppId, { label: string; Icon: (p: P) => React.ReactElement }> = {
   browser: { label: "Browser", Icon: BrowserIcon },
   notes: { label: "Notes", Icon: NotesIcon },

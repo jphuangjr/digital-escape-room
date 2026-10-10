@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useIntl, type IntlShape } from "react-intl";
+import { useT } from "@/i18n/client";
 
 /** Re-render every `ms` milliseconds; returns current time. */
 export function useNow(ms = 1000): number {
@@ -12,10 +14,25 @@ export function useNow(ms = 1000): number {
   return now;
 }
 
-export function relativeTime(iso: string, now: number = Date.now()): string {
+/**
+ * "5m ago" / "5분 전". Pass `intl` (from `useIntl()`, or use `useRelativeTime()`) for the viewer's language;
+ * without it the result is English.
+ */
+export function relativeTime(iso: string, now: number = Date.now(), intl?: IntlShape): string {
   const t = new Date(iso).getTime();
   if (!Number.isFinite(t)) return "";
   const s = Math.max(0, Math.round((now - t) / 1000));
+  if (intl) {
+    if (s < 10) return intl.formatMessage({ id: "room.time.justNow" });
+    const ago = (n: number, unit: "second" | "minute" | "hour" | "day") =>
+      intl.formatRelativeTime(-n, unit, { style: "narrow" });
+    if (s < 60) return ago(s, "second");
+    const m = Math.floor(s / 60);
+    if (m < 60) return ago(m, "minute");
+    const h = Math.floor(m / 60);
+    if (h < 24) return ago(h, "hour");
+    return ago(Math.floor(h / 24), "day");
+  }
   if (s < 10) return "just now";
   if (s < 60) return `${s}s ago`;
   const m = Math.floor(s / 60);
@@ -23,6 +40,12 @@ export function relativeTime(iso: string, now: number = Date.now()): string {
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h ago`;
   return `${Math.floor(h / 24)}d ago`;
+}
+
+/** `const rel = useRelativeTime(); rel(iso, now)`: relativeTime in the viewer's language. */
+export function useRelativeTime() {
+  const intl = useIntl();
+  return (iso: string, now?: number) => relativeTime(iso, now, intl);
 }
 
 export function formatCountdown(ms: number): string {
@@ -42,7 +65,8 @@ export function ColorDot({ color, size = 10 }: { color: string; size?: number })
   );
 }
 
-export function CompassBadge({ label = "Compass badge" }: { label?: string }) {
+export function CompassBadge({ label }: { label?: string }) {
+  const t = useT();
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/50 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-300">
       <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden>
@@ -64,7 +88,7 @@ export function CompassBadge({ label = "Compass badge" }: { label?: string }) {
         <path d="M12 12 L15 6" stroke="currentColor" strokeWidth="1.5" />
         <path d="M12 12 L10 15.5" stroke="currentColor" strokeWidth="1.5" strokeDasharray="1.5 1.5" />
       </svg>
-      {label}
+      {label ?? t("room.compassBadge")}
     </span>
   );
 }

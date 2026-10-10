@@ -7,25 +7,27 @@ import { track } from "@/server/analytics";
 import { touchRoom } from "@/server/session";
 import { hintDTO } from "@/server/state";
 import { HINT_PUZZLES } from "@/server/content";
+import { getT } from "@/i18n/server";
 
 export async function POST(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   const ctx = await requirePlayer(code);
   if (isResponse(ctx)) return ctx;
   const { room, player } = ctx;
+  const t = await getT();
   const body = await readBody(req);
-  if (!body) return error(400, "Invalid JSON body.");
+  if (!body) return error(400, t("api.common.invalidJson"));
   const puzzleId = body.puzzleId as HintPuzzleId;
-  if (typeof puzzleId !== "string" || !HINT_PUZZLES.includes(puzzleId)) return error(400, "Unknown hint puzzle.");
+  if (typeof puzzleId !== "string" || !HINT_PUZZLES.includes(puzzleId)) return error(400, t("api.hints.unknownPuzzle"));
 
   const rows = (await db.hintRequest.findMany({ where: { roomId: room.id, puzzleId } })).map((h) => ({
     ...h,
     puzzleId: h.puzzleId as HintPuzzleId,
   }));
   const tier = nextHintTier(rows.map((r) => r.tier));
-  if (tier === null) return error(409, "No more hints for this puzzle.", { maxed: true });
+  if (tier === null) return error(409, t("api.hints.maxed"), { maxed: true });
   const until = hintCooldownUntil(rows, puzzleId, new Date());
-  if (until) return error(429, "Ada needs a moment before calling again.", { cooldownUntil: until.toISOString() });
+  if (until) return error(429, t("api.hints.cooldown"), { cooldownUntil: until.toISOString() });
 
   try {
     const created = await db.hintRequest.create({ data: { roomId: room.id, puzzleId, tier, playerId: player.id } });

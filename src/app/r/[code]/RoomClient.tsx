@@ -9,12 +9,15 @@ import { useRoomChannel } from "@/lib/realtime/client";
 import { CHAT_MESSAGE_EVENT, CHAT_POLL_EVENT } from "@/lib/client/chat";
 import { GameShell } from "@/components/shell/GameShell";
 import { CompassMark } from "@/components/shell/icons";
+import { FormattedMessage } from "react-intl";
+import { LanguageSwitcher, useT } from "@/i18n/client";
+import { getGame, gameText } from "@/lib/games";
 
 type Phase =
   | { kind: "loading" }
   | { kind: "join" }
   | { kind: "notfound" }
-  | { kind: "error"; message: string }
+  | { kind: "error"; status: number }
   | { kind: "ready"; state: RoomState };
 
 export const AVATAR_COLORS = [
@@ -29,6 +32,7 @@ export const AVATAR_COLORS = [
 ];
 
 export function RoomClient({ code }: { code: string }) {
+  const t = useT();
   const [phase, setPhase] = useState<Phase>({ kind: "loading" });
 
   const load = useCallback(async () => {
@@ -41,7 +45,7 @@ export function RoomClient({ code }: { code: string }) {
       setPhase({ kind: "notfound" });
     } else {
       setPhase((p) =>
-        p.kind === "ready" ? p : { kind: "error", message: res.status ? `Server error (${res.status})` : "Network error" },
+        p.kind === "ready" ? p : { kind: "error", status: res.status },
       );
     }
   }, [code]);
@@ -52,10 +56,10 @@ export function RoomClient({ code }: { code: string }) {
 
   return (
     <div className="min-h-[100dvh] bg-[#0b0a08] text-stone-200">
-      {phase.kind === "loading" && <Splash text="Booting Ada's laptop…" />}
+      {phase.kind === "loading" && <Splash text={t("site.room.booting")} />}
       {phase.kind === "notfound" && <NotFound />}
       {phase.kind === "error" && (
-        <Splash text={phase.message}>
+        <Splash text={phase.status ? t("site.room.serverError", { status: phase.status }) : t("site.room.networkError")}>
           <button
             onClick={() => {
               setPhase({ kind: "loading" });
@@ -63,7 +67,7 @@ export function RoomClient({ code }: { code: string }) {
             }}
             className="mt-6 min-h-11 rounded-md border border-amber-500/60 px-5 text-amber-300 active:bg-amber-500/10"
           >
-            Retry
+            {t("common.retry")}
           </button>
         </Splash>
       )}
@@ -109,18 +113,19 @@ function Splash({ text, children }: { text: string; children?: React.ReactNode }
 }
 
 function NotFound() {
+  const t = useT();
   return (
     <div className="flex min-h-[100dvh] flex-col items-center justify-center px-6 text-center">
       <CompassMark className="h-16 w-16 text-stone-600" />
-      <h1 className="mt-6 font-serif text-2xl text-stone-100">This room is closed</h1>
+      <h1 className="mt-6 font-serif text-2xl text-stone-100">{t("site.room.closedTitle")}</h1>
       <p className="mt-2 max-w-sm text-sm text-stone-400">
-        The trail has gone cold. The host may have started a new room, or it sat idle for 48 hours.
+        {t("site.room.closedBody")}
       </p>
       <Link
         href="/"
         className="mt-8 inline-flex min-h-11 items-center rounded-md bg-amber-500 px-6 font-semibold text-black active:bg-amber-400"
       >
-        All escape rooms
+        {t("site.allRooms")}
       </Link>
     </div>
   );
@@ -135,6 +140,7 @@ function JoinForm({
   onJoined: () => Promise<void>;
   onNotFound: () => void;
 }) {
+  const t = useT();
   const [name, setName] = useState("");
   const [color, setColor] = useState(AVATAR_COLORS[0]);
   const [busy, setBusy] = useState(false);
@@ -165,7 +171,7 @@ function JoinForm({
     e.preventDefault();
     const displayName = name.trim();
     if (!displayName) {
-      setError("Pick a name so the others know who you are.");
+      setError(t("site.room.errName"));
       return;
     }
     setBusy(true);
@@ -180,7 +186,7 @@ function JoinForm({
     }
     if (!res.ok) {
       setBusy(false);
-      setError(res.data?.error ?? "Couldn't join the room. Try again.");
+      setError(res.data?.error ?? t("site.room.errJoin"));
       return;
     }
     try {
@@ -195,6 +201,7 @@ function JoinForm({
       className="flex min-h-[100dvh] flex-col items-center justify-center px-4"
       style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
     >
+      <LanguageSwitcher tone="shell" className="mb-2 w-full max-w-sm justify-end" />
       <form
         onSubmit={submit}
         className="w-full max-w-sm rounded-xl border border-stone-800 bg-stone-950/80 p-6 shadow-2xl shadow-black"
@@ -202,17 +209,19 @@ function JoinForm({
         <div className="flex items-center gap-3">
           <CompassMark className="h-10 w-10 text-amber-500" />
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-amber-500/80">Case file</p>
-            <h1 className="font-serif text-xl text-stone-100">The Vanishing of Dr. Ada Voss</h1>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-amber-500/80">{t("site.room.caseFile")}</p>
+            <h1 className="font-serif text-xl text-stone-100">{gameText(t, getGame("ada-voss")!, "title")}</h1>
           </div>
         </div>
         <p className="mt-4 text-sm text-stone-400">
-          You&apos;ve been invited to investigate in room{" "}
-          <span className="font-mono font-semibold text-amber-300">{code}</span>.
+          <FormattedMessage
+            id="site.room.invited"
+            values={{ code: <span className="font-mono font-semibold text-amber-300">{code}</span> }}
+          />
         </p>
 
         <label className="mt-6 block text-xs font-semibold uppercase tracking-wider text-stone-400" htmlFor="join-name">
-          Your name
+          {t("site.form.yourName")}
         </label>
         <input
           id="join-name"
@@ -222,11 +231,11 @@ function JoinForm({
           autoComplete="nickname"
           enterKeyHint="go"
           className="mt-2 h-12 w-full rounded-md border border-stone-700 bg-black px-3 text-base text-stone-100 outline-none focus:border-amber-500"
-          placeholder="e.g. Marlowe"
+          placeholder={t("site.room.namePlaceholder")}
         />
 
         <fieldset className="mt-5">
-          <legend className="text-xs font-semibold uppercase tracking-wider text-stone-400">Avatar color</legend>
+          <legend className="text-xs font-semibold uppercase tracking-wider text-stone-400">{t("site.form.avatarColor")}</legend>
           <div className="mt-2 flex flex-wrap gap-2">
             {AVATAR_COLORS.map((c) => (
               <button
@@ -234,7 +243,7 @@ function JoinForm({
                 key={c}
                 onClick={() => setColor(c)}
                 aria-pressed={color === c}
-                aria-label={`Color ${c}`}
+                aria-label={t("site.form.colorAria", { color: c })}
                 className={`h-11 w-11 rounded-full border-2 transition ${
                   color === c ? "scale-105 border-white" : "border-transparent"
                 }`}
@@ -251,24 +260,24 @@ function JoinForm({
           disabled={busy}
           className="mt-6 h-12 w-full rounded-md bg-amber-500 font-semibold text-black active:bg-amber-400 disabled:opacity-60"
         >
-          {busy ? "Joining…" : "Join the investigation"}
+          {busy ? t("site.room.joining") : t("site.form.joinInvestigation")}
         </button>
 
         {me?.googleEnabled && !me.user && (
           <div className="mt-5 border-t border-stone-800 pt-4 text-center">
-            <p className="text-xs text-stone-500">Optional: keep your progress and times, and rejoin from any device.</p>
+            <p className="text-xs text-stone-500">{t("site.room.optionalSignIn")}</p>
             <button
               type="button"
               onClick={() => signIn("google", { callbackUrl: `/r/${code}` })}
               className="mt-2 min-h-11 px-3 text-sm font-semibold text-amber-300 underline"
             >
-              Sign in with Google
+              {t("site.room.signInGoogle")}
             </button>
           </div>
         )}
         {me?.user && (
           <p className="mt-4 text-center text-xs text-stone-500">
-            Signed in as {me.user.name || me.user.email}. You&apos;ll join as yourself.
+            {t("site.room.signedInAs", { name: me.user.name || me.user.email || "" })}
           </p>
         )}
       </form>

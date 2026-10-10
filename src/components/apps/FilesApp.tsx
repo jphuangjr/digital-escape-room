@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useT } from "@/i18n/client";
 import type { GameCtx } from "@/lib/client/game";
 import type { AttemptResponse } from "@/lib/types";
 import { CompassBadge, btnGhost, useNow } from "./shared";
@@ -81,6 +82,7 @@ Learn it.`,
 const PIN_LEN = 4;
 
 function PinPad({ ctx }: { ctx: GameCtx }) {
+  const t = useT();
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -102,26 +104,26 @@ function PinPad({ ctx }: { ctx: GameCtx }) {
       if (res.status === 429 || d?.rateLimited) {
         const sec = d?.retryAfterSec ?? 60;
         setRetryUntil(Date.now() + sec * 1000);
-        setError(d?.message ?? "Too many attempts.");
+        setError(d?.message ?? t("apps.files.tooManyAttempts"));
         setPin("");
         return;
       }
       if (!res.ok || !d) {
-        setError("Couldn't reach the server. Try again.");
+        setError(t("apps.files.unreachable"));
         setPin("");
         return;
       }
       if (d.correct) {
-        ctx.toast("Folder unlocked", "success");
+        ctx.toast(t("apps.files.folderUnlocked"), "success");
         await ctx.refresh();
       } else {
-        setError(d.message ?? "Wrong PIN.");
+        setError(d.message ?? t("apps.files.wrongPin"));
         setShake(true);
         setTimeout(() => setShake(false), 400);
         setPin("");
       }
     },
-    [ctx],
+    [ctx, t],
   );
 
   function press(d: string) {
@@ -142,9 +144,9 @@ function PinPad({ ctx }: { ctx: GameCtx }) {
           🔒
         </div>
         <h3 className="text-base font-semibold text-zinc-100">Ada&apos;s Personal</h3>
-        <p className="text-xs text-zinc-500">Enter 4-digit PIN</p>
+        <p className="text-xs text-zinc-500">{t("apps.files.enterPin")}</p>
       </div>
-      <div className={`flex gap-4 ${shake ? "animate-pulse" : ""}`} aria-label={`${pin.length} of 4 digits entered`}>
+      <div className={`flex gap-4 ${shake ? "animate-pulse" : ""}`} aria-label={t("apps.files.pinProgress", { count: pin.length })}>
         {Array.from({ length: PIN_LEN }).map((_, i) => (
           <span
             key={i}
@@ -157,10 +159,10 @@ function PinPad({ ctx }: { ctx: GameCtx }) {
       <div className="min-h-5 text-center text-sm" aria-live="polite">
         {waiting ? (
           <span className="text-amber-300">
-            Locked out. Retry in {Math.ceil(((retryUntil ?? 0) - now) / 1000)}s
+            {t("apps.files.lockedOut", { s: Math.ceil(((retryUntil ?? 0) - now) / 1000) })}
           </span>
         ) : busy ? (
-          <span className="text-zinc-400">Checking…</span>
+          <span className="text-zinc-400">{t("apps.files.checking")}</span>
         ) : error ? (
           <span className="text-red-400">{error}</span>
         ) : null}
@@ -172,6 +174,7 @@ function PinPad({ ctx }: { ctx: GameCtx }) {
             <button
               key={k}
               type="button"
+              aria-label={k === "del" ? t("apps.files.pinDelete") : undefined}
               disabled={busy || waiting || (!isDigit && pin.length === 0)}
               onClick={() => {
                 if (isDigit) press(k);
@@ -184,7 +187,7 @@ function PinPad({ ctx }: { ctx: GameCtx }) {
                   : "border-transparent text-sm uppercase tracking-wider text-zinc-400 active:bg-zinc-900"
               }`}
             >
-              {k === "del" ? "⌫" : k}
+              {k === "del" ? "⌫" : k === "clear" ? t("apps.files.pinClear") : k}
             </button>
           );
         })}
@@ -194,6 +197,7 @@ function PinPad({ ctx }: { ctx: GameCtx }) {
 }
 
 function SecurityQuestion({ ctx }: { ctx: GameCtx }) {
+  const t = useT();
   const [answer, setAnswer] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -215,18 +219,18 @@ function SecurityQuestion({ ctx }: { ctx: GameCtx }) {
     const d = res.data;
     if (res.status === 429 || d?.rateLimited) {
       setRetryUntil(Date.now() + (d?.retryAfterSec ?? 60) * 1000);
-      setError(d?.message ?? "Too many attempts.");
+      setError(d?.message ?? t("apps.files.tooManyAttempts"));
       return;
     }
     if (!d) {
-      setError("Couldn't reach the server. Try again.");
+      setError(t("apps.files.unreachable"));
       return;
     }
     if (d.correct) {
-      ctx.toast("Folder unlocked", "success");
+      ctx.toast(t("apps.files.folderUnlocked"), "success");
       await ctx.refresh();
     } else {
-      setError(d.message ?? "That's not it.");
+      setError(d.message ?? t("apps.files.wrongAnswer"));
     }
   }
 
@@ -237,18 +241,18 @@ function SecurityQuestion({ ctx }: { ctx: GameCtx }) {
           🔒
         </div>
         <h3 className="text-base font-semibold text-zinc-100">Ada&apos;s Tools</h3>
-        <p className="mt-3 text-xs uppercase tracking-widest text-zinc-500">Security question</p>
-        <p className="mt-1 font-serif text-lg text-zinc-100">What&apos;s the weather?</p>
+        <p className="mt-3 text-xs uppercase tracking-widest text-zinc-500">{t("apps.files.securityQuestion")}</p>
+        <p className="mt-1 font-serif text-lg text-zinc-100">{t("apps.files.weatherQuestion")}</p>
       </div>
       <input
         value={answer}
         onChange={(e) => setAnswer(e.target.value)}
-        placeholder="Answer"
+        placeholder={t("apps.files.answerPlaceholder")}
         autoCapitalize="off"
         autoCorrect="off"
         spellCheck={false}
         enterKeyHint="go"
-        aria-label="Security answer"
+        aria-label={t("apps.files.answerAria")}
         className="min-h-12 rounded-lg border border-zinc-700 bg-zinc-900 px-3 text-zinc-100 placeholder:text-zinc-600"
       />
       <button
@@ -256,11 +260,13 @@ function SecurityQuestion({ ctx }: { ctx: GameCtx }) {
         disabled={busy || waiting || !answer.trim()}
         className="min-h-12 rounded-lg bg-amber-400 font-semibold text-zinc-950 disabled:opacity-50"
       >
-        {busy ? "Checking…" : "Unlock"}
+        {busy ? t("apps.files.checking") : t("apps.files.unlock")}
       </button>
       <div className="min-h-5 text-center text-sm" aria-live="polite">
         {waiting ? (
-          <span className="text-amber-300">Locked out. Retry in {Math.ceil(((retryUntil ?? 0) - now) / 1000)}s</span>
+          <span className="text-amber-300">
+            {t("apps.files.lockedOut", { s: Math.ceil(((retryUntil ?? 0) - now) / 1000) })}
+          </span>
         ) : error ? (
           <span className="text-red-400">{error}</span>
         ) : null}
@@ -276,6 +282,7 @@ type View =
   | { kind: "file"; file: FileItem; from: "root" | "personal" | "tools" };
 
 export function FilesApp({ ctx }: { ctx: GameCtx }) {
+  const t = useT();
   const { state } = ctx;
   const unlocked = state.progress.solved.includes("bonus-pin");
   const toolsUnlocked = state.progress.solved.includes("tools-folder");
@@ -293,19 +300,19 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
       .then((res) => {
         if (cancelled) return;
         if (res.ok && res.data && !res.data.locked) setPersonal(res.data.files);
-        else ctx.toast("Couldn't open the folder", "error");
+        else ctx.toast(t("apps.files.openFolderFailed"), "error");
       })
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
     };
-  }, [unlocked, view.kind, personal, ctx]);
+  }, [unlocked, view.kind, personal, ctx, t]);
 
   const header = (title: string, back?: () => void) => (
     <div className="flex shrink-0 items-center gap-2 border-b border-zinc-800 px-2 py-2">
       {back ? (
         <button onClick={back} className="min-h-11 min-w-11 rounded-lg px-3 text-sm font-semibold text-amber-300 active:bg-zinc-900">
-          ‹ Back
+          {t("apps.files.back")}
         </button>
       ) : (
         <span className="px-2 text-zinc-500" aria-hidden>
@@ -313,7 +320,7 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
         </span>
       )}
       <h2 className="min-w-0 flex-1 truncate font-mono text-sm text-zinc-300">{title}</h2>
-      {hasCompass && <CompassBadge label="Compass" />}
+      {hasCompass && <CompassBadge label={t("apps.files.compass")} />}
     </div>
   );
 
@@ -357,8 +364,8 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
             <SecurityQuestion ctx={ctx} />
           ) : (
             <ul className="divide-y divide-zinc-900">
-              {row("🧭", "Decoder", "app · Caesar shift, A1Z26 and binary", () => ctx.openApp("decoder"))}
-              {row("📄", SYLLABUS.name, "text file", () => setView({ kind: "file", file: SYLLABUS, from: "tools" }))}
+              {row("🧭", t("apps.files.decoderName"), t("apps.files.decoderSub"), () => ctx.openApp("decoder"))}
+              {row("📄", SYLLABUS.name, t("apps.files.textFile"), () => setView({ kind: "file", file: SYLLABUS, from: "tools" }))}
             </ul>
           )}
         </div>
@@ -374,23 +381,23 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
           {!unlocked ? (
             <PinPad ctx={ctx} />
           ) : loading || !personal ? (
-            <p className="p-10 text-center text-sm text-zinc-500">Opening…</p>
+            <p className="p-10 text-center text-sm text-zinc-500">{t("apps.files.opening")}</p>
           ) : (
             <>
               {hasCompass && (
                 <div className="m-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-amber-200">
-                  <CompassBadge /> <span className="ml-1">You found Ada&apos;s personal folder.</span>
+                  <CompassBadge /> <span className="ml-1">{t("apps.files.foundPersonal")}</span>
                 </div>
               )}
               <ul className="divide-y divide-zinc-900">
                 {row(
                   toolsUnlocked ? "📂" : "🔒",
                   "Ada's Tools",
-                  toolsUnlocked ? "folder · unlocked" : "folder · security question",
+                  toolsUnlocked ? t("apps.files.folderUnlockedSub") : t("apps.files.folderSecuritySub"),
                   () => setView({ kind: "tools" }),
                 )}
                 {personal.map((f) =>
-                  row("📄", f.name, "text file", () => setView({ kind: "file", file: f, from: "personal" })),
+                  row("📄", f.name, t("apps.files.textFile"), () => setView({ kind: "file", file: f, from: "personal" })),
                 )}
               </ul>
             </>
@@ -404,14 +411,17 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
     <div className="flex h-full min-h-0 flex-col bg-zinc-950 text-zinc-100">
       {header("~/")}
       <ul className="min-h-0 flex-1 divide-y divide-zinc-900 overflow-y-auto overscroll-contain">
-        {row(unlocked ? "📂" : "🔒", "Ada's Personal", unlocked ? "folder · unlocked" : "folder · PIN required", () =>
-          setView({ kind: "personal" }),
+        {row(
+          unlocked ? "📂" : "🔒",
+          "Ada's Personal",
+          unlocked ? t("apps.files.folderUnlockedSub") : t("apps.files.folderPinSub"),
+          () => setView({ kind: "personal" }),
         )}
-        {LOCAL_FILES.map((f) => row("📄", f.name, "text file", () => setView({ kind: "file", file: f, from: "root" })))}
+        {LOCAL_FILES.map((f) => row("📄", f.name, t("apps.files.textFile"), () => setView({ kind: "file", file: f, from: "root" })))}
       </ul>
       <div className="shrink-0 border-t border-zinc-900 p-2 text-center">
         <button className={`${btnGhost} w-full`} onClick={() => ctx.openApp("notes")}>
-          Open Notes
+          {t("apps.files.openNotes")}
         </button>
       </div>
     </div>

@@ -58,7 +58,16 @@ export async function generateCodes(admin: User, gameId: string, count: number, 
 
 export type RedeemResult =
   | { ok: true; gameId: string; alreadyOwned: boolean }
-  | { ok: false; status: number; error: string };
+  /** `messageId` is an `api.redeem.*` message id; the route translates it for the caller. */
+  | { ok: false; status: number; messageId: RedeemErrorId };
+
+export type RedeemErrorId =
+  | "api.redeem.badFormat"
+  | "api.redeem.invalid"
+  | "api.redeem.revoked"
+  | "api.redeem.expired"
+  | "api.redeem.used"
+  | "api.redeem.noUsesLeft";
 
 class CodeFull extends Error {}
 
@@ -69,16 +78,16 @@ class CodeFull extends Error {}
  */
 export async function redeemCode(user: User, raw: unknown): Promise<RedeemResult> {
   const body = normalizeCodeInput(raw);
-  if (!body) return { ok: false, status: 400, error: "That doesn't look like a purchase code (KEY-XXXX-XXXX-XXXX)." };
+  if (!body) return { ok: false, status: 400, messageId: "api.redeem.badFormat" };
   const code = await db.purchaseCode.findUnique({ where: { code: body } });
-  if (!code || !getGame(code.gameId)) return { ok: false, status: 404, error: "That code isn't valid." };
+  if (!code || !getGame(code.gameId)) return { ok: false, status: 404, messageId: "api.redeem.invalid" };
 
   const mine = await db.codeRedemption.findUnique({ where: { codeId_userId: { codeId: code.id, userId: user.id } } });
   if (mine) return { ok: true, gameId: code.gameId, alreadyOwned: true };
-  if (code.revokedAt) return { ok: false, status: 410, error: "That code has been turned off." };
-  if (code.expiresAt && code.expiresAt.getTime() <= Date.now()) return { ok: false, status: 410, error: "That code has expired." };
+  if (code.revokedAt) return { ok: false, status: 410, messageId: "api.redeem.revoked" };
+  if (code.expiresAt && code.expiresAt.getTime() <= Date.now()) return { ok: false, status: 410, messageId: "api.redeem.expired" };
   if (code.maxUses !== null && code.useCount >= code.maxUses) {
-    return { ok: false, status: 409, error: code.maxUses === 1 ? "That code has already been used." : "That code has no uses left." };
+    return { ok: false, status: 409, messageId: code.maxUses === 1 ? "api.redeem.used" : "api.redeem.noUsesLeft" };
   }
   if (await ownsGame(user, code.gameId)) return { ok: true, gameId: code.gameId, alreadyOwned: true };
 
@@ -100,7 +109,7 @@ export async function redeemCode(user: User, raw: unknown): Promise<RedeemResult
       });
     });
   } catch (err) {
-    if (err instanceof CodeFull) return { ok: false, status: 409, error: "That code has no uses left." };
+    if (err instanceof CodeFull) return { ok: false, status: 409, messageId: "api.redeem.noUsesLeft" };
     if ((err as { code?: string }).code === "P2002") return { ok: true, gameId: code.gameId, alreadyOwned: true };
     throw err;
   }

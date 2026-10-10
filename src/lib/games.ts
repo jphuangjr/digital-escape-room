@@ -43,8 +43,28 @@ export function getGame(gameId: string): GameInfo | undefined {
   return GAMES.find((g) => g.id === gameId);
 }
 
+/** English title; for server-only code (OG images, case records). UI should use `localGameTitle`. */
 export function gameTitle(gameId: string): string {
   return getGame(gameId)?.title ?? gameId;
+}
+
+/** A message formatter: `useT()` on the client, `await getT()` on the server. */
+export type Translate = (id: string, values?: Record<string, string | number>) => string;
+
+/** The directory-card strings a viewer sees, translated via message ids `site.game.<id>.<field>`. */
+export type GameTextField = "title" | "tagline" | "blurb" | "players" | "duration" | "difficulty" | "tone";
+
+/** `game[field]` in the viewer's language, falling back to the English value above if no message exists. */
+export function gameText(t: Translate, game: GameInfo, field: GameTextField): string {
+  const id = `site.game.${game.id}.${field}`;
+  const s = t(id);
+  return s && s !== id ? s : game[field];
+}
+
+/** Translated title for a game id (the id itself if the game is unknown). */
+export function localGameTitle(t: Translate, gameId: string): string {
+  const game = getGame(gameId);
+  return game ? gameText(t, game, "title") : gameId;
 }
 
 /** 1:04:09 or 47:12 */

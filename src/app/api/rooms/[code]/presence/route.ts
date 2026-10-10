@@ -3,13 +3,14 @@ import { error, isResponse, json, readBody, requirePlayer } from "@/server/http"
 import { publish } from "@/server/realtime";
 import { touchRoom } from "@/server/session";
 import { isOnline } from "@/server/state";
+import { getT } from "@/i18n/server";
 
 export async function POST(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   const ctx = await requirePlayer(code);
   if (isResponse(ctx)) return ctx;
   const body = await readBody(req);
-  if (!body) return error(400, "Invalid JSON body.");
+  if (!body) return error(400, (await getT())("api.common.invalidJson"));
   const view =
     typeof body.view === "string" ? body.view.replace(/[\u0000-\u001F\u007F]/g, "").slice(0, 80) || null : null;
 

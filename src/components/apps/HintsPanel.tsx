@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useT } from "@/i18n/client";
 import type { GameCtx } from "@/lib/client/game";
 import type { HintPuzzleId } from "@/lib/types";
 import { btnGhost, formatCountdown, useNow } from "./shared";
 
+/** Puzzle order in the panel. `label` is English reference data; the UI shows `room.hintTopic.<id>`. */
 export const HINT_LABELS: { id: HintPuzzleId; label: string }[] = [
   { id: "bonus-pin", label: "Ada's Personal" },
   { id: "tools-folder", label: "Ada's Tools" },
@@ -23,6 +25,7 @@ const MAX_TIER = 3;
 export function HintsPanel({ ctx }: { ctx: GameCtx }) {
   const { state } = ctx;
   const now = useNow(1000);
+  const t = useT();
   const [busy, setBusy] = useState<HintPuzzleId | null>(null);
   const [localCooldown, setLocalCooldown] = useState<Partial<Record<HintPuzzleId, string>>>({});
   const [open, setOpen] = useState<HintPuzzleId | null>(null);
@@ -30,7 +33,7 @@ export function HintsPanel({ ctx }: { ctx: GameCtx }) {
   async function request(id: HintPuzzleId, label: string, tier: number) {
     if (
       !window.confirm(
-        `Request hint ${tier}/${MAX_TIER} for "${label}"?\n\nIt unlocks for the whole room and arrives as a voicemail from Ada.`,
+        t("room.hints.confirm", { tier, max: MAX_TIER, label }),
       )
     )
       return;
@@ -43,11 +46,11 @@ export function HintsPanel({ ctx }: { ctx: GameCtx }) {
     if (res.status === 429) {
       const until = res.data?.cooldownUntil;
       if (until) setLocalCooldown((c) => ({ ...c, [id]: until }));
-      ctx.toast("Ada needs a moment before the next hint.", "info");
+      ctx.toast(t("room.hints.cooldown"), "info");
     } else if (!res.ok) {
-      ctx.toast(res.data?.error ?? "Couldn't get a hint", "error");
+      ctx.toast(res.data?.error ?? t("room.hints.failed"), "error");
     } else {
-      ctx.toast("New voicemail from Ada", "success");
+      ctx.toast(t("room.hints.arrived"), "success");
       setOpen(id);
     }
     await ctx.refresh();
@@ -56,13 +59,14 @@ export function HintsPanel({ ctx }: { ctx: GameCtx }) {
   return (
     <div className="flex h-full min-h-0 flex-col bg-zinc-950 text-zinc-100">
       <div className="shrink-0 border-b border-zinc-800 px-3 py-2">
-        <div className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Hints</div>
+        <div className="text-xs font-semibold uppercase tracking-widest text-zinc-400">{t("room.hints.title")}</div>
         <p className="text-xs text-zinc-500">
-          Hints unlock for everyone in the room and arrive as voicemails in Email. 2 min cooldown per puzzle.
+          {t("room.hints.intro")}
         </p>
       </div>
       <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain p-3">
-        {HINT_LABELS.map(({ id, label }) => {
+        {HINT_LABELS.map(({ id }) => {
+          const label = t(`room.hintTopic.${id}`);
           const hints = state.hints.filter((h) => h.puzzleId === id).sort((a, b) => a.tier - b.tier);
           const nextTier = hints.length + 1;
           const cdIso = [state.hintCooldowns[id], localCooldown[id]]
@@ -81,7 +85,7 @@ export function HintsPanel({ ctx }: { ctx: GameCtx }) {
                 className="flex min-h-12 w-full items-center gap-3 px-3 text-left"
               >
                 <span className="min-w-0 flex-1 truncate text-sm font-semibold">{label}</span>
-                <span className="flex gap-1" aria-label={`${hints.length} of ${MAX_TIER} hints unlocked`}>
+                <span className="flex gap-1" aria-label={t("room.hints.progressAria", { count: hints.length, max: MAX_TIER })}>
                   {Array.from({ length: MAX_TIER }).map((_, i) => (
                     <span key={i} className={`h-2 w-2 rounded-full ${i < hints.length ? "bg-amber-400" : "bg-zinc-700"}`} />
                   ))}
@@ -92,17 +96,17 @@ export function HintsPanel({ ctx }: { ctx: GameCtx }) {
               </button>
               {expanded && (
                 <div className="space-y-3 border-t border-zinc-800 p-3">
-                  {hints.length === 0 && <p className="text-sm text-zinc-500">No hints unlocked yet.</p>}
+                  {hints.length === 0 && <p className="text-sm text-zinc-500">{t("room.hints.none")}</p>}
                   {hints.map((h) => (
                     <div key={h.tier} className="rounded-lg border-l-2 border-amber-500/50 bg-zinc-950/60 p-2.5">
                       <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-amber-400">
-                        Tier {h.tier}
+                        {t("room.hints.tier", { tier: h.tier })}
                       </div>
                       <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-200">{h.text}</p>
                     </div>
                   ))}
                   {done ? (
-                    <p className="text-xs text-zinc-500">All hints unlocked.</p>
+                    <p className="text-xs text-zinc-500">{t("room.hints.allUnlocked")}</p>
                   ) : (
                     <button
                       className={`${btnGhost} w-full`}
@@ -110,10 +114,10 @@ export function HintsPanel({ ctx }: { ctx: GameCtx }) {
                       onClick={() => request(id, label, nextTier)}
                     >
                       {busy === id
-                        ? "Calling Ada…"
+                        ? t("room.hints.calling")
                         : cooling
-                          ? `Next hint in ${formatCountdown(cdLeft)}`
-                          : `Request next hint (tier ${nextTier}/${MAX_TIER})`}
+                          ? t("room.hints.nextIn", { time: formatCountdown(cdLeft) })
+                          : t("room.hints.request", { tier: nextTier, max: MAX_TIER })}
                     </button>
                   )}
                 </div>
@@ -124,7 +128,7 @@ export function HintsPanel({ ctx }: { ctx: GameCtx }) {
       </ul>
       <div className="shrink-0 border-t border-zinc-900 p-2">
         <button className={`${btnGhost} w-full`} onClick={() => ctx.openApp("email")}>
-          Open voicemails
+          {t("room.hints.openVoicemails")}
         </button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useT } from "@/i18n/client";
 import type { ChatMessageDTO } from "@/lib/types";
 import { apiFetch } from "./game";
 
@@ -28,6 +29,7 @@ export interface Chat {
 
 /** Room chat: history on load, live appends from realtime, catch-up on poll ticks, unread tracking. */
 export function useChat(code: string, meId: string): Chat {
+  const t = useT();
   const [messages, setMessages] = useState<ChatMessageDTO[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [readAt, setReadAt] = useState<string>("");
@@ -67,11 +69,11 @@ export function useChat(code: string, meId: string): Chat {
   const send = useCallback<Chat["send"]>(
     async (body) => {
       const res = await apiFetch<ChatMessageDTO & { error?: string }>(code, "/chat", { method: "POST", body: { body } });
-      if (!res.ok || !res.data?.id) return { ok: false, error: res.data?.error ?? "Couldn't send. Try again." };
+      if (!res.ok || !res.data?.id) return { ok: false, error: res.data?.error ?? t("room.chat.sendFailed") };
       setMessages((cur) => merge(cur, [res.data]));
       return { ok: true };
     },
-    [code],
+    [code, t],
   );
 
   const markRead = useCallback(() => {

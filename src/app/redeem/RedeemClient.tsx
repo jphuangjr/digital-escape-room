@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { getGame } from "@/lib/games";
+import { getGame, gameText } from "@/lib/games";
+import { useT } from "@/i18n/client";
 import { GoogleButton, useMe } from "@/components/site/Account";
 import { Compass } from "@/components/site/Compass";
 
@@ -16,6 +17,7 @@ type Result = { ok: true; gameId: string; title: string; alreadyOwned: boolean }
 export function RedeemClient() {
   const code = (useSearchParams().get("code") ?? "").trim().toUpperCase();
   const me = useMe();
+  const t = useT();
   const [result, setResult] = useState<Result | null>(null);
   const started = useRef(false);
 
@@ -28,46 +30,44 @@ export function RedeemClient() {
         setResult(
           res.ok && data.gameId
             ? { ok: true, gameId: data.gameId, title: data.title ?? data.gameId, alreadyOwned: Boolean(data.alreadyOwned) }
-            : { ok: false, error: data.error ?? "Couldn't redeem that code." },
+            : { ok: false, error: data.error ?? t("site.redeemBox.failed") },
         );
       })
-      .catch(() => setResult({ ok: false, error: "Network trouble. Reload to try again." }));
-  }, [code, me]);
+      .catch(() => setResult({ ok: false, error: t("site.redeem.networkReload") }));
+  }, [code, me, t]);
 
   let body: React.ReactNode;
   if (!code) {
-    body = <p className="text-noir-ink-dim">This link is missing its code. Ask whoever gave it to you for a new one.</p>;
+    body = <p className="text-noir-ink-dim">{t("site.redeem.missingCode")}</p>;
   } else if (!me) {
-    body = <p className="text-noir-ink-faint">Checking your account…</p>;
+    body = <p className="text-noir-ink-faint">{t("site.redeem.checking")}</p>;
   } else if (!me.user) {
     body = (
       <>
-        <p className="text-noir-ink-dim">
-          You&apos;ve been given a free escape room. Sign in with Google and it&apos;s added to your account for good, so you
-          can host it for your friends.
-        </p>
+        <p className="text-noir-ink-dim">{t("site.redeem.invite")}</p>
         <p className="font-mono tracking-wider text-noir-brass">{code}</p>
-        <GoogleButton label="Sign in with Google to claim" callbackUrl={`/redeem?code=${encodeURIComponent(code)}`} />
+        <GoogleButton label={t("site.redeem.signIn")} callbackUrl={`/redeem?code=${encodeURIComponent(code)}`} />
       </>
     );
   } else if (!result) {
-    body = <p className="text-noir-ink-faint">Claiming {code}…</p>;
+    body = <p className="text-noir-ink-faint">{t("site.redeem.claiming", { code })}</p>;
   } else if (result.ok) {
     const game = getGame(result.gameId);
+    const title = game ? gameText(t, game, "title") : result.title;
     body = (
       <>
-        <p className="font-serif text-2xl text-noir-ink">{result.alreadyOwned ? "You already own it" : "It's yours"}</p>
+        <p className="font-serif text-2xl text-noir-ink">{result.alreadyOwned ? t("site.redeem.alreadyOwnedTitle") : t("site.redeem.okTitle")}</p>
         <p className="text-noir-ink-dim">
           {result.alreadyOwned
-            ? `${result.title} is already on your account, so this code wasn't used. Pass it on to a friend.`
-            : `${result.title} is now on your account (${me.user.email ?? me.user.name}). Host it whenever you like.`}
+            ? t("site.redeem.alreadyOwnedBody", { title })
+            : t("site.redeem.okBody", { title, account: me.user.email ?? me.user.name ?? "" })}
         </p>
         {game && (
           <Link
             href={game.href}
             className="flex min-h-12 items-center justify-center rounded-lg bg-noir-brass font-semibold text-noir-bg active:bg-noir-brass-hi"
           >
-            Host {game.title} →
+            {t("site.redeem.host", { title })}
           </Link>
         )}
       </>
@@ -75,9 +75,9 @@ export function RedeemClient() {
   } else {
     body = (
       <>
-        <p className="font-serif text-2xl text-noir-ink">Couldn&apos;t claim it</p>
+        <p className="font-serif text-2xl text-noir-ink">{t("site.redeem.failedTitle")}</p>
         <p className="text-noir-ink-dim">{result.error}</p>
-        <p className="text-xs text-noir-ink-faint">Signed in as {me.user.email ?? me.user.name}.</p>
+        <p className="text-xs text-noir-ink-faint">{t("site.redeem.signedInAs", { account: me.user.email ?? me.user.name ?? "" })}</p>
       </>
     );
   }
@@ -89,7 +89,7 @@ export function RedeemClient() {
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-noir-ink-faint">Escape Escape</p>
         <div className="flex w-full flex-col gap-4">{body}</div>
         <Link href="/" className="min-h-11 content-center text-sm text-noir-ink-faint underline">
-          All escape rooms
+          {t("site.allRooms")}
         </Link>
       </div>
     </main>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/i18n/client";
 import type { AttemptResponse, Block, PuzzleId, SiteFormId } from "@/lib/types";
 import { BlockList, type RenderEnv } from "./SiteRenderer";
 
@@ -8,6 +9,7 @@ type Feedback = { tone: "success" | "error" | "info"; text: string } | null;
 
 function useAttempt(env: RenderEnv, puzzleId: PuzzleId) {
   const { ctx } = env;
+  const tr = useT();
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [retryUntil, setRetryUntil] = useState<number | null>(null);
@@ -38,20 +40,20 @@ function useAttempt(env: RenderEnv, puzzleId: PuzzleId) {
       const sec = res.data?.retryAfterSec ?? 30;
       setNow(Date.now());
       setRetryUntil(Date.now() + sec * 1000);
-      setFeedback({ tone: "info", text: res.data?.message ?? "Too many attempts. The system is cooling down." });
+      setFeedback({ tone: "info", text: res.data?.message ?? tr("browser.form.cooling") });
       return;
     }
     if (!res.ok || !res.data) {
-      setFeedback({ tone: "error", text: "Connection error. Try again." });
+      setFeedback({ tone: "error", text: tr("browser.form.connectionError") });
       return;
     }
     if (res.data.correct) {
-      setFeedback({ tone: "success", text: res.data.message ?? "Accepted." });
-      ctx.toast(res.data.message ?? "Correct!", "success");
+      setFeedback({ tone: "success", text: res.data.message ?? tr("browser.form.accepted") });
+      ctx.toast(res.data.message ?? tr("browser.form.correct"), "success");
       await ctx.refresh();
       env.onSolved();
     } else {
-      setFeedback({ tone: "error", text: res.data.message ?? "Rejected. That's not it." });
+      setFeedback({ tone: "error", text: res.data.message ?? tr("browser.form.rejected") });
     }
   }
 
@@ -59,13 +61,14 @@ function useAttempt(env: RenderEnv, puzzleId: PuzzleId) {
 }
 
 function FeedbackLine({ feedback, retryLeft }: { feedback: Feedback; retryLeft: number }) {
+  const tr = useT();
   if (!feedback && !retryLeft) return null;
   const color =
     feedback?.tone === "success" ? "text-emerald-500" : feedback?.tone === "error" ? "text-red-500" : "opacity-80";
   return (
     <p role="status" className={`text-sm font-semibold ${color}`}>
       {feedback?.text}
-      {retryLeft > 0 && ` Retry in ${retryLeft}s.`}
+      {retryLeft > 0 && ` ${tr("browser.form.retryIn", { s: retryLeft })}`}
     </p>
   );
 }
@@ -95,6 +98,7 @@ export function SiteForm({
 
 function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
   const { t, ctx } = env;
+  const tr = useT();
   const a = useAttempt(env, "shift-key");
   const [n, setN] = useState(1);
   const [preview, setPreview] = useState<Block[] | null>(null);
@@ -106,18 +110,18 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
     const res = await ctx.api<{ blocks: Block[] }>("/decode", { method: "POST", body: { shift: n } });
     setPreviewing(false);
     if (res.ok && res.data?.blocks) setPreview(res.data.blocks);
-    else ctx.toast("Preview failed", "error");
+    else ctx.toast(tr("browser.form.previewFailed"), "error");
   }
 
   return (
     <section className={`${t.card} space-y-3`}>
       <p className="font-semibold">{prompt}</p>
-      {a.solved && <p className="text-sm font-semibold text-emerald-600">✓ Listings decoded for the whole room.</p>}
+      {a.solved && <p className="text-sm font-semibold text-emerald-600">{tr("browser.form.shiftSolved")}</p>}
       <div className="flex items-center justify-center gap-3">
         <button
           type="button"
           onClick={() => setN((v) => wrap(v - 1))}
-          aria-label="Decrease shift"
+          aria-label={tr("browser.form.decreaseShift")}
           className={`h-14 w-14 text-3xl font-bold ${t.buttonGhost}`}
         >
           −
@@ -128,7 +132,7 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         <button
           type="button"
           onClick={() => setN((v) => wrap(v + 1))}
-          aria-label="Increase shift"
+          aria-label={tr("browser.form.increaseShift")}
           className={`h-14 w-14 text-3xl font-bold ${t.buttonGhost}`}
         >
           +
@@ -151,7 +155,7 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
       {preview && (
         <div className="space-y-3 border-t border-current/20 pt-3">
           <div className="flex items-center justify-between">
-            <p className={`text-xs uppercase tracking-wider ${t.muted}`}>Preview · shift {n} (only you can see this)</p>
+            <p className={`text-xs uppercase tracking-wider ${t.muted}`}>{tr("browser.form.previewLabel", { n })}</p>
             <button type="button" onClick={() => setPreview(null)} className={`min-h-11 px-2 text-sm ${t.link}`}>
               Hide
             </button>
@@ -265,6 +269,7 @@ function FinalPhraseForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
 /** harbourcc.edu practice quiz. `code` is the binary word to decode. */
 function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
   const { t } = env;
+  const tr = useT();
   const a = useAttempt(env, "binary-lesson");
   const [v, setV] = useState("");
   return (
@@ -282,7 +287,7 @@ function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
         ))}
       </p>
       {a.solved ? (
-        <p className="text-sm font-semibold text-emerald-600">✓ Passed. Open the Decoder and look for the Binary tab.</p>
+        <p className="text-sm font-semibold text-emerald-600">{tr("browser.form.binaryPassed")}</p>
       ) : (
         <>
           <label className="block text-sm">
