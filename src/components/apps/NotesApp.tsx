@@ -1,19 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useT } from "@/i18n/client";
 import type { GameCtx } from "@/lib/client/game";
 import type { FragmentTag, NoteDTO } from "@/lib/types";
-import { ColorDot, btnDanger, btnGhost, btnPrimary, relativeTime, useNow } from "./shared";
+import { ColorDot, btnDanger, btnGhost, btnPrimary, useNow, useRelativeTime } from "./shared";
 
-export const FRAGMENT_TAGS: { value: FragmentTag; label: string }[] = [
-  { value: "name", label: "name" },
-  { value: "year", label: "year" },
-  { value: "id", label: "ID" },
-  { value: "cipher", label: "cipher key" },
-  { value: "address", label: "address" },
-];
-
-const tagLabel = (t: FragmentTag | null) => FRAGMENT_TAGS.find((x) => x.value === t)?.label ?? null;
+/** Tag values; display labels are `apps.notes.tag.<value>`. */
+export const FRAGMENT_TAGS: FragmentTag[] = ["name", "year", "id", "cipher", "address"];
 
 function TagChips({
   value,
@@ -22,23 +16,24 @@ function TagChips({
   value: FragmentTag | null;
   onChange: (t: FragmentTag | null) => void;
 }) {
+  const t = useT();
   return (
-    <div className="flex flex-wrap gap-2" role="group" aria-label="Fragment tag">
-      {FRAGMENT_TAGS.map((t) => {
-        const active = value === t.value;
+    <div className="flex flex-wrap gap-2" role="group" aria-label={t("apps.notes.tagGroup")}>
+      {FRAGMENT_TAGS.map((tag) => {
+        const active = value === tag;
         return (
           <button
-            key={t.value}
+            key={tag}
             type="button"
             aria-pressed={active}
-            onClick={() => onChange(active ? null : t.value)}
+            onClick={() => onChange(active ? null : tag)}
             className={`min-h-11 rounded-full border px-3 text-xs font-semibold uppercase tracking-wide ${
               active
                 ? "border-amber-400 bg-amber-500/20 text-amber-200"
                 : "border-zinc-700 bg-zinc-900 text-zinc-400 active:bg-zinc-800"
             }`}
           >
-            #{t.label}
+            #{t(`apps.notes.tag.${tag}`)}
           </button>
         );
       })}
@@ -47,8 +42,9 @@ function TagChips({
 }
 
 function TagBadge({ tag }: { tag: FragmentTag | null }) {
-  const l = tagLabel(tag);
-  if (!l) return null;
+  const t = useT();
+  if (!tag || !FRAGMENT_TAGS.includes(tag)) return null;
+  const l = t(`apps.notes.tag.${tag}`);
   return (
     <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-300">
       #{l}
@@ -57,6 +53,8 @@ function TagBadge({ tag }: { tag: FragmentTag | null }) {
 }
 
 export function NotesApp({ ctx }: { ctx: GameCtx }) {
+  const t = useT();
+  const rel = useRelativeTime();
   const { state } = ctx;
   const now = useNow(15000);
   const [tab, setTab] = useState<"mine" | "room">("mine");
@@ -75,14 +73,14 @@ export function NotesApp({ ctx }: { ctx: GameCtx }) {
       const res = await fn();
       if (!res.ok) {
         const msg = (res.data as { error?: string } | null)?.error;
-        ctx.toast(msg || `Something went wrong (${res.status})`, "error");
+        ctx.toast(msg || t("apps.notes.somethingWrong", { status: res.status }), "error");
         return false;
       }
       if (okMsg) ctx.toast(okMsg, "success");
       await ctx.refresh();
       return true;
     } catch {
-      ctx.toast("Network error", "error");
+      ctx.toast(t("apps.notes.networkError"), "error");
       return false;
     } finally {
       setBusy(null);
@@ -103,13 +101,13 @@ export function NotesApp({ ctx }: { ctx: GameCtx }) {
   }
 
   const share = (n: NoteDTO) =>
-    run(`share-${n.id}`, () => ctx.api(`/notes/${n.id}`, { method: "PATCH", body: { visibility: "PUBLIC" } }), "Shared to room");
+    run(`share-${n.id}`, () => ctx.api(`/notes/${n.id}`, { method: "PATCH", body: { visibility: "PUBLIC" } }), t("apps.notes.shared"));
 
   const makePrivate = (n: NoteDTO) =>
-    run(`share-${n.id}`, () => ctx.api(`/notes/${n.id}`, { method: "PATCH", body: { visibility: "PRIVATE" } }), "Moved back to your notes");
+    run(`share-${n.id}`, () => ctx.api(`/notes/${n.id}`, { method: "PATCH", body: { visibility: "PRIVATE" } }), t("apps.notes.madePrivate"));
 
   const remove = (n: NoteDTO) => {
-    if (!window.confirm("Delete this note?")) return;
+    if (!window.confirm(t("apps.notes.deleteConfirm"))) return;
     void run(`del-${n.id}`, () => ctx.api(`/notes/${n.id}`, { method: "DELETE" }));
   };
 
@@ -129,8 +127,8 @@ export function NotesApp({ ctx }: { ctx: GameCtx }) {
       <div className="flex shrink-0 gap-1 border-b border-zinc-800 p-2" role="tablist">
         {(
           [
-            ["mine", `Mine (${mine.length})`],
-            ["room", `Room (${room.length})`],
+            ["mine", t("apps.notes.tabMine", { count: mine.length })],
+            ["room", t("apps.notes.tabRoom", { count: room.length })],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -153,16 +151,16 @@ export function NotesApp({ ctx }: { ctx: GameCtx }) {
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder="Jot down a clue…"
+            placeholder={t("apps.notes.placeholder")}
             rows={3}
             maxLength={2000}
             className="w-full resize-y rounded-lg border border-zinc-700 bg-zinc-900 p-3 text-base text-zinc-100 placeholder:text-zinc-500 focus:border-amber-500 focus:outline-none"
           />
           <TagChips value={tag} onChange={setTag} />
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs text-zinc-500">New notes are private until you share them.</span>
+            <span className="text-xs text-zinc-500">{t("apps.notes.privateHint")}</span>
             <button className={btnPrimary} disabled={!body.trim() || busy === "create"} onClick={create}>
-              {busy === "create" ? "Saving…" : "Save note"}
+              {busy === "create" ? t("apps.notes.saving") : t("apps.notes.saveNote")}
             </button>
           </div>
         </div>
@@ -171,7 +169,7 @@ export function NotesApp({ ctx }: { ctx: GameCtx }) {
         <ul className="space-y-3 p-3">
           {list.length === 0 && (
             <li className="py-10 text-center text-sm text-zinc-500">
-              {tab === "mine" ? "No private notes yet." : "Nobody has shared a note yet."}
+              {tab === "mine" ? t("apps.notes.emptyMine") : t("apps.notes.emptyRoom")}
             </li>
           )}
           {list.map((n) => {
@@ -184,10 +182,10 @@ export function NotesApp({ ctx }: { ctx: GameCtx }) {
                   {n.visibility === "PUBLIC" && (
                     <>
                       <ColorDot color={n.authorColor} />
-                      <span className="font-semibold text-zinc-200">{isMine ? "You" : n.authorName}</span>
+                      <span className="font-semibold text-zinc-200">{isMine ? t("apps.notes.you") : n.authorName}</span>
                     </>
                   )}
-                  <span>{relativeTime(n.createdAt, now)}</span>
+                  <span>{rel(n.createdAt, now)}</span>
                   <TagBadge tag={n.fragmentTag} />
                 </div>
 
@@ -200,13 +198,13 @@ export function NotesApp({ ctx }: { ctx: GameCtx }) {
                       maxLength={2000}
                       className="w-full resize-y rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-base focus:border-amber-500 focus:outline-none"
                     />
-                    <TagChips value={editing.tag} onChange={(t) => setEditing({ ...editing, tag: t })} />
+                    <TagChips value={editing.tag} onChange={(tag) => setEditing({ ...editing, tag })} />
                     <div className="flex gap-2">
                       <button className={btnPrimary} onClick={saveEdit} disabled={busy === `edit-${n.id}`}>
-                        Save
+                        {t("apps.notes.save")}
                       </button>
                       <button className={btnGhost} onClick={() => setEditing(null)}>
-                        Cancel
+                        {t("common.cancel")}
                       </button>
                     </div>
                   </div>
@@ -218,12 +216,12 @@ export function NotesApp({ ctx }: { ctx: GameCtx }) {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {isMine && n.visibility === "PRIVATE" && (
                       <button className={btnPrimary} onClick={() => share(n)} disabled={busy === `share-${n.id}`}>
-                        Share to room
+                        {t("apps.notes.shareToRoom")}
                       </button>
                     )}
                     {isMine && n.visibility === "PUBLIC" && (
                       <button className={btnGhost} onClick={() => makePrivate(n)} disabled={busy === `share-${n.id}`}>
-                        Make private
+                        {t("apps.notes.makePrivate")}
                       </button>
                     )}
                     {isMine && (
@@ -231,12 +229,12 @@ export function NotesApp({ ctx }: { ctx: GameCtx }) {
                         className={btnGhost}
                         onClick={() => setEditing({ id: n.id, body: n.body, tag: n.fragmentTag })}
                       >
-                        Edit
+                        {t("apps.notes.edit")}
                       </button>
                     )}
                     {canDelete && (
                       <button className={btnDanger} onClick={() => remove(n)} disabled={busy === `del-${n.id}`}>
-                        Delete
+                        {t("apps.notes.delete")}
                       </button>
                     )}
                   </div>

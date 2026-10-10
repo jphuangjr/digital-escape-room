@@ -1,22 +1,24 @@
 import { db } from "@/server/db";
-import { error, json, readBody } from "@/server/http";
+import { error, json, readBody, translateLogicError } from "@/server/http";
 import { validateColor, validateDisplayName } from "@/server/logic";
 import { getPlayerInRoom, getRoom, newPlayerToken, setPlayerCookie, touchRoom } from "@/server/session";
 import { publish } from "@/server/realtime";
 import { getSessionUser } from "@/server/auth";
+import { getT } from "@/i18n/server";
 
 const MAX_PLAYERS = 16;
 
 export async function POST(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code: rawCode } = await params;
+  const t = await getT();
   const room = await getRoom(rawCode);
-  if (!room) return error(404, "Room not found or expired.");
+  if (!room) return error(404, t("api.room.notFound"));
   const body = await readBody(req);
-  if (!body) return error(400, "Invalid JSON body.");
+  if (!body) return error(400, t("api.common.invalidJson"));
   const name = validateDisplayName(body.displayName);
-  if (!name.ok) return error(400, name.error);
+  if (!name.ok) return error(400, translateLogicError(t, name.error));
   const color = validateColor(body.color);
-  if (!color) return error(400, "Color must be a hex value like #c9a227.");
+  if (!color) return error(400, t("api.player.badColor"));
 
   const user = await getSessionUser();
 
@@ -44,7 +46,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   }
 
   const count = await db.player.count({ where: { roomId: room.id } });
-  if (count >= MAX_PLAYERS) return error(409, "This room is full.");
+  if (count >= MAX_PLAYERS) return error(409, t("api.room.full"));
 
   const token = newPlayerToken();
   const player = await db.player.create({

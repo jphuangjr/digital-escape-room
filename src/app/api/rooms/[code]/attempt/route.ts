@@ -7,6 +7,7 @@ import { publish } from "@/server/realtime";
 import { track } from "@/server/analytics";
 import { checkAnswer } from "@/server/content";
 import { recordFinishedCase } from "@/server/cases";
+import { getT } from "@/i18n/server";
 
 const PREREQS: Partial<Record<PuzzleId, PuzzleId>> = {
   "final-phrase": "admin-console",
@@ -14,9 +15,10 @@ const PREREQS: Partial<Record<PuzzleId, PuzzleId>> = {
   "tools-folder": "bonus-pin",
 };
 
+/** Message ids for puzzles whose solve shows a confirmation. */
 const SOLVED_MESSAGES: Partial<Record<PuzzleId, string>> = {
-  "binary-lesson": "Quiz passed. The Binary translator is now in your Decoder.",
-  "admin-console": "Admin console unlocked.",
+  "binary-lesson": "api.attempt.solved.binaryLesson",
+  "admin-console": "api.attempt.solved.adminConsole",
 };
 
 export async function POST(req: Request, { params }: { params: Promise<{ code: string }> }) {
@@ -24,21 +26,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   const ctx = await requirePlayer(code);
   if (isResponse(ctx)) return ctx;
   const { room, player } = ctx;
+  const t = await getT();
   const body = await readBody(req);
-  if (!body) return error(400, "Invalid JSON body.");
+  if (!body) return error(400, t("api.common.invalidJson"));
   const { puzzleId } = body;
-  if (!isPuzzleId(puzzleId)) return error(400, "Unknown puzzle.");
-  if (typeof body.input !== "string") return error(400, "Missing input.");
+  if (!isPuzzleId(puzzleId)) return error(400, t("api.attempt.unknownPuzzle"));
+  if (typeof body.input !== "string") return error(400, t("api.attempt.missingInput"));
   const input = body.input.replace(/[\u0000-\u001F\u007F]/g, " ").trim().slice(0, 120);
-  if (!input) return error(400, "Missing input.");
+  if (!input) return error(400, t("api.attempt.missingInput"));
 
   const progress = parseProgress(room.progress);
   if (progress.solved.includes(puzzleId)) {
-    return json<AttemptResponse>({ correct: true, message: "Already solved.", progress });
+    return json<AttemptResponse>({ correct: true, message: t("api.attempt.alreadySolved"), progress });
   }
   const prereq = PREREQS[puzzleId];
   if (prereq && !progress.solved.includes(prereq)) {
-    return json<AttemptResponse>({ correct: false, message: "Nothing happens. This isn't ready yet.", progress }, 403);
+    return json<AttemptResponse>({ correct: false, message: t("api.attempt.notReady"), progress }, 403);
   }
 
   const now = new Date();
@@ -56,7 +59,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
         correct: false,
         rateLimited: true,
         retryAfterSec: rl.retryAfterSec,
-        message: `Too many attempts. Try again in ${rl.retryAfterSec}s.`,
+        message: t("api.attempt.rateLimited", { s: rl.retryAfterSec }),
         progress,
       },
       429,
@@ -108,7 +111,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
 
   return json<AttemptResponse>({
     correct,
-    message: correct ? SOLVED_MESSAGES[puzzleId] : "That's not it.",
+    message: correct ? (SOLVED_MESSAGES[puzzleId] ? t(SOLVED_MESSAGES[puzzleId]) : undefined) : t("api.attempt.wrong"),
     progress: nextProgress,
   });
 }

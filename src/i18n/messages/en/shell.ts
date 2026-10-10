@@ -1,0 +1,26 @@
+const messages = {
+  "shell.app.browser": "Browser",
+  "shell.app.notes": "Notes",
+  "shell.app.email": "Email",
+  "shell.app.files": "Files",
+  "shell.app.decoder": "Decoder",
+  "shell.dock.label": "Dock",
+  "shell.dock.appAria": "{app}{locked, select, true { (locked)} other {}}{unread, plural, =0 {} one {, # unread} other {, # unread}}",
+  "shell.dock.room": "Room",
+  "shell.dock.roomAria": "Room: {online} online{unread, plural, =0 {} one {, # unread message} other {, # unread messages}}",
+  "shell.desktop.label": "Desktop",
+  "shell.window.close": "Close window",
+  "shell.home.title": "Home",
+  "shell.status.homeAria": "Home screen",
+  "shell.status.laptop": "Ada's Laptop",
+  "shell.status.phase": "{status, select, voting {Vote in progress} finished {Case closed} other {Investigation open}}",
+  "shell.status.roomAria": "Room details, {online} online",
+  "shell.status.unreadAria": "{count, plural, one {# unread message} other {# unread messages}}",
+  "shell.toast.decoderLocked": "Decoder is locked. Keep digging through the sites.",
+  "shell.toast.decoderUnlocked": "Decoder unlocked! Find it in your dock.",
+  "shell.toast.open": "Open",
+  "shell.toast.reply": "Reply",
+  "shell.toast.newEmail": "{kind, select, voicemail {New voicemail: {subject}} other {New email: {subject}}}",
+} as const;
+
+export default messages;

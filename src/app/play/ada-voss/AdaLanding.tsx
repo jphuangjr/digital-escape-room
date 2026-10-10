@@ -8,6 +8,9 @@ import { AccountBar, GoogleButton, MyCases } from "@/components/site/Account";
 import { Compass } from "@/components/site/Compass";
 import { ReplaceRoomDialog } from "@/components/site/ReplaceRoomDialog";
 import { RedeemBox } from "@/components/site/RedeemBox";
+import { LanguageSwitcher, useLocale, useT } from "@/i18n/client";
+import { getGame, gameText } from "@/lib/games";
+import { FormattedMessage } from "react-intl";
 
 const COLORS = ["#c9a227", "#a3302a", "#3d8c88", "#6b7fd7", "#b56cc4", "#d9824b", "#7fae4e", "#d8d2c4"];
 const PREF_KEY = "ada.profile";
@@ -22,6 +25,9 @@ function normalizeCode(raw: string): string {
 
 export function AdaLanding() {
   const router = useRouter();
+  const t = useT();
+  const locale = useLocale();
+  const game = getGame(GAME_ID)!;
   const [name, setName] = useState("");
   const [color, setColor] = useState(COLORS[0]);
   const [joinCode, setJoinCode] = useState("");
@@ -74,9 +80,9 @@ export function AdaLanding() {
   async function send(replaceExisting: boolean) {
     setErr(null);
     const displayName = name.trim();
-    if (!displayName) return setErr("Give yourself a name, investigator.");
+    if (!displayName) return setErr(t("site.ada.errName"));
     const code = normalizeCode(joinCode);
-    if (mode === "join" && !/^ADA-[A-Z0-9]{4}$/.test(code)) return setErr("Room codes look like ADA-7K2Q.");
+    if (mode === "join" && !/^ADA-[A-Z0-9]{4}$/.test(code)) return setErr(t("site.join.invalidCode"));
     setBusy(true);
     try {
       try {
@@ -104,7 +110,7 @@ export function AdaLanding() {
       };
       if (data.purchaseRequired) {
         setMe((m) => (m ? { ...m, ownedGames: m.ownedGames.filter((g) => g !== GAME_ID) } : m));
-        setErr("Enter a purchase code to host this case.");
+        setErr(t("site.ada.errPurchase"));
         setBusy(false);
         return;
       }
@@ -114,20 +120,20 @@ export function AdaLanding() {
         return;
       }
       if (data.signInRequired) {
-        setErr("Sign in with Google to host a room.");
+        setErr(t("site.ada.errSignIn"));
         setMe((m) => (m ? { ...m, googleEnabled: true, user: null } : m));
         setBusy(false);
         return;
       }
       if (!res.ok || !data.code) {
-        setErr(res.status === 404 ? "No such room. It may have gone cold (rooms expire after 48h)." : data.error || "Something went wrong.");
+        setErr(res.status === 404 ? t("site.ada.errNoRoom") : data.error || t("site.ada.errGeneric"));
         setBusy(false);
         return;
       }
       setReplaceRooms(null);
       router.push(`/r/${data.code}`);
     } catch {
-      setErr("Network trouble. Try again.");
+      setErr(t("site.error.network"));
       setBusy(false);
     }
   }
@@ -143,28 +149,38 @@ export function AdaLanding() {
         />
       )}
       <div className="mx-auto flex max-w-md flex-col gap-8 px-4 pb-10 pt-10">
-        <Link href="/" className="-mb-4 inline-flex min-h-11 items-center self-start text-sm text-noir-ink-faint">
-          ← All escape rooms
-        </Link>
+        <div className="-mb-4 flex flex-wrap items-center justify-between gap-x-4">
+          <Link href="/" className="inline-flex min-h-11 items-center text-sm text-noir-ink-faint">
+            {t("site.ada.back")}
+          </Link>
+          <LanguageSwitcher tone="noir" />
+        </div>
         <header className="flex flex-col items-center gap-4 text-center">
           <Compass className="h-20 w-20 text-noir-brass" />
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-noir-ink-faint">Case file 0412</p>
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-noir-ink-faint">{t("site.ada.caseFile")}</p>
           <h1 className="font-serif text-4xl leading-tight text-noir-ink">
-            The Vanishing of
-            <br />
-            <span className="text-noir-brass">Dr. Ada Voss</span>
+            <FormattedMessage
+              id="site.ada.heading"
+              values={{
+                line: (c) => (
+                  <>
+                    {c}
+                    <br />
+                  </>
+                ),
+                accent: (c) => <span className="text-noir-brass">{c}</span>,
+              }}
+            />
           </h1>
         </header>
 
         <section className="space-y-3 font-serif text-base leading-relaxed text-noir-ink-dim">
-          <p>
-            Ada Voss, archivist at the Meridian Institute, vanished forty-eight hours ago. Her sister hired you. All you have is
-            Ada&apos;s laptop, still warm, and one last message:
-          </p>
+          <p>{t("site.ada.intro")}</p>
           <blockquote className="border-l-2 border-noir-brass pl-4 italic text-noir-ink">
-            &ldquo;If you&apos;re reading this, I got too close. Start at the beginning.&rdquo;
+            &ldquo;{t("site.ada.quote")}&rdquo;
           </blockquote>
-          <p className="text-sm text-noir-ink-faint">Play solo or bring a crew. Best on a phone, with friends on theirs.</p>
+          <p className="text-sm text-noir-ink-faint">{t("site.ada.solo")}</p>
+          {locale !== "en" && <p className="text-sm text-noir-ink-faint">{t("site.game.storyEnglishOnly")}</p>}
         </section>
 
         <AccountBar me={me} callbackUrl="/play/ada-voss" fallbackColor={color} />
@@ -185,14 +201,14 @@ export function AdaLanding() {
                   mode === m ? "bg-noir-brass text-noir-bg" : "text-noir-ink-dim"
                 }`}
               >
-                {m === "create" ? "Create room" : "Join with code"}
+                {m === "create" ? t("site.ada.tabCreate") : t("site.ada.tabJoin")}
               </button>
             ))}
           </div>
 
           {mode === "join" && (
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs uppercase tracking-widest text-noir-ink-faint">Room code</span>
+              <span className="text-xs uppercase tracking-widest text-noir-ink-faint">{t("site.ada.roomCode")}</span>
               <input
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
@@ -209,11 +225,11 @@ export function AdaLanding() {
           )}
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs uppercase tracking-widest text-noir-ink-faint">Your name</span>
+            <span className="text-xs uppercase tracking-widest text-noir-ink-faint">{t("site.form.yourName")}</span>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Investigator"
+              placeholder={t("site.ada.namePlaceholder")}
               maxLength={24}
               autoComplete="nickname"
               className="min-h-12 rounded-lg border border-noir-line bg-noir-bg-3 px-3 text-noir-ink placeholder:text-noir-ink-faint"
@@ -221,13 +237,13 @@ export function AdaLanding() {
           </label>
 
           <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1.5 text-xs uppercase tracking-widest text-noir-ink-faint">Avatar color</legend>
+            <legend className="mb-1.5 text-xs uppercase tracking-widest text-noir-ink-faint">{t("site.form.avatarColor")}</legend>
             <div className="grid grid-cols-8 gap-1">
               {COLORS.map((c) => (
                 <button
                   key={c}
                   type="button"
-                  aria-label={`Color ${c}`}
+                  aria-label={t("site.form.colorAria", { color: c })}
                   aria-pressed={color === c}
                   onClick={() => setColor(c)}
                   className="flex min-h-11 items-center justify-center rounded-full"
@@ -249,12 +265,12 @@ export function AdaLanding() {
 
           {mustSignInToHost ? (
             <div className="flex flex-col gap-2">
-              <GoogleButton label="Sign in with Google to host" callbackUrl="/play/ada-voss" />
-              <p className="text-center text-xs text-noir-ink-faint">Hosts sign in. Friends can join with just a name.</p>
+              <GoogleButton label={t("site.ada.signInToHost")} callbackUrl="/play/ada-voss" />
+              <p className="text-center text-xs text-noir-ink-faint">{t("site.ada.hostsSignIn")}</p>
             </div>
           ) : mustUnlockToHost ? (
             <RedeemBox
-              gameTitle="The Vanishing of Dr. Ada Voss"
+              gameTitle={gameText(t, game, "title")}
               onRedeemed={(gameId) =>
                 setMe((m) => (m && !m.ownedGames.includes(gameId) ? { ...m, ownedGames: [...m.ownedGames, gameId] } : m))
               }
@@ -265,7 +281,7 @@ export function AdaLanding() {
               disabled={busy}
               className="min-h-12 rounded-lg bg-noir-brass font-semibold text-noir-bg transition-colors active:bg-noir-brass-hi disabled:opacity-60"
             >
-              {busy ? "Opening the laptop…" : mode === "create" ? "Open the case" : "Join the investigation"}
+              {busy ? t("site.ada.opening") : mode === "create" ? t("site.ada.openCase") : t("site.form.joinInvestigation")}
             </button>
           )}
         </form>
@@ -273,7 +289,7 @@ export function AdaLanding() {
         {me && <MyCases me={me} gameId="ada-voss" />}
 
         <footer className="text-center font-mono text-[11px] text-noir-ink-faint">
-          A work of fiction. Rooms go cold after 48 hours.
+          {t("site.ada.footer")}
         </footer>
       </div>
     </main>

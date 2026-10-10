@@ -1,23 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/i18n/client";
 import type { GameCtx } from "@/lib/client/game";
 import type { Ending } from "@/lib/types";
 import { ColorDot, CompassBadge, btnGhost, formatCountdown, useNow } from "./shared";
 
-const CHOICES: { id: Ending; label: string; blurb: string; tone: string }[] = [
-  {
-    id: "EXPOSE",
-    label: "EXPOSE",
-    blurb: "Leak the evidence. The Institute falls. Ada stays hidden a little longer, but the truth is out.",
-    tone: "border-red-500/60 bg-red-950/40 text-red-100",
-  },
-  {
-    id: "PROTECT",
-    label: "PROTECT",
-    blurb: "Keep the records sealed. Ada stays safe and disappears for good. Her sister gets one last message.",
-    tone: "border-sky-500/60 bg-sky-950/40 text-sky-100",
-  },
+/** Labels and blurbs are the `room.vote.choice.<id>` / `room.vote.blurb.<id>` messages. */
+const CHOICES: { id: Ending; tone: string }[] = [
+  { id: "EXPOSE", tone: "border-red-500/60 bg-red-950/40 text-red-100" },
+  { id: "PROTECT", tone: "border-sky-500/60 bg-sky-950/40 text-sky-100" },
 ];
 
 const shell =
@@ -39,6 +31,7 @@ function VotingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
   const { state } = ctx;
   const vote = state.vote;
   const now = useNow(500);
+  const t = useT();
   const [busy, setBusy] = useState<string | null>(null);
   const votes = vote?.votes ?? [];
   const myVote = votes.find((v) => v.playerId === state.me.id)?.choice ?? null;
@@ -53,16 +46,16 @@ function VotingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
     setBusy(choice);
     const res = await ctx.api("/vote", { method: "POST", body: { choice } });
     setBusy(null);
-    if (!res.ok) ctx.toast((res.data as { error?: string } | null)?.error ?? "Vote failed", "error");
+    if (!res.ok) ctx.toast((res.data as { error?: string } | null)?.error ?? t("room.vote.failed"), "error");
     await ctx.refresh();
   }
 
   async function tiebreak(choice: Ending) {
-    if (!window.confirm(`Break the tie for ${choice}? This decides the ending for everyone.`)) return;
+    if (!window.confirm(t("room.vote.tiebreakConfirm", { choice: t(`room.vote.choice.${choice}`) }))) return;
     setBusy(`tb-${choice}`);
     const res = await ctx.api("/tiebreak", { method: "POST", body: { choice } });
     setBusy(null);
-    if (!res.ok) ctx.toast((res.data as { error?: string } | null)?.error ?? "Tiebreak failed", "error");
+    if (!res.ok) ctx.toast((res.data as { error?: string } | null)?.error ?? t("room.vote.tiebreakFailed"), "error");
     await ctx.refresh();
   }
 
@@ -71,22 +64,20 @@ function VotingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
   return (
     <div className={shell} role="dialog" aria-modal="true" aria-labelledby="vote-title">
       <div className="flex shrink-0 items-center justify-between gap-2 px-3 py-2">
-        <span className="font-mono text-xs uppercase tracking-widest text-zinc-500">Room vote</span>
+        <span className="font-mono text-xs uppercase tracking-widest text-zinc-500">{t("room.vote.header")}</span>
         <button onClick={onMinimize} className="min-h-11 rounded-lg px-3 text-sm font-semibold text-zinc-400 active:bg-zinc-900">
-          Minimize
+          {t("room.vote.minimize")}
         </button>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6">
         <div className="mx-auto max-w-lg space-y-6">
           <header className="pt-2 text-center">
-            <p className="text-xs uppercase tracking-[0.3em] text-amber-500/80">Signal confirmed</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-amber-500/80">{t("room.vote.eyebrow")}</p>
             <h1 id="vote-title" className="mt-2 text-4xl font-black tracking-tight text-amber-300 drop-shadow sm:text-5xl">
-              ADA IS ALIVE
+              {t("room.vote.title")}
             </h1>
             <p className="mt-4 text-[15px] leading-relaxed text-zinc-300">
-              The switch didn&apos;t fire. Ada hid inside the Institute&apos;s own network after she caught them rewriting
-              history. Now she&apos;s asking you what happens next. The room decides together. Majority wins; a tie goes to
-              the host.
+              {t("room.vote.intro")}
             </p>
           </header>
 
@@ -97,7 +88,10 @@ function VotingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
               </span>
             )}
             <span className="text-zinc-400">
-              {votes.length}/{state.players.filter((p) => p.online).length || state.players.length} voted
+              {t("room.vote.voted", {
+                voted: votes.length,
+                total: state.players.filter((p) => p.online).length || state.players.length,
+              })}
             </span>
           </div>
 
@@ -116,11 +110,11 @@ function VotingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
                     } disabled:opacity-60`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-2xl font-black tracking-wider">{c.label}</span>
+                      <span className="text-2xl font-black tracking-wider">{t(`room.vote.choice.${c.id}`)}</span>
                       <span className="font-mono text-lg">{counts[c.id]}</span>
                     </div>
-                    <p className="mt-2 text-sm leading-snug opacity-90">{c.blurb}</p>
-                    {selected && <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-amber-300">Your vote · tap the other to change</p>}
+                    <p className="mt-2 text-sm leading-snug opacity-90">{t(`room.vote.blurb.${c.id}`)}</p>
+                    {selected && <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-amber-300">{t("room.vote.yourVote")}</p>}
                   </button>
                 );
               })}
@@ -130,11 +124,11 @@ function VotingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
           {tie && (
             <div className="rounded-2xl border border-amber-500/40 bg-amber-500/5 p-4 text-center">
               <p className="text-lg font-bold text-amber-300">
-                It&apos;s a tie: {counts.EXPOSE} – {counts.PROTECT}
+                {t("room.vote.tie", { expose: counts.EXPOSE, protect: counts.PROTECT })}
               </p>
               {state.me.isHost ? (
                 <>
-                  <p className="mt-1 text-sm text-zinc-300">You&apos;re the host. Your call breaks the tie.</p>
+                  <p className="mt-1 text-sm text-zinc-300">{t("room.vote.youBreakTie")}</p>
                   <div className="mt-4 grid grid-cols-2 gap-3">
                     {CHOICES.map((c) => (
                       <button
@@ -143,19 +137,19 @@ function VotingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
                         disabled={busy !== null}
                         className={`min-h-16 rounded-xl border-2 text-lg font-black tracking-wider ${c.tone}`}
                       >
-                        {c.label}
+                        {t(`room.vote.choice.${c.id}`)}
                       </button>
                     ))}
                   </div>
                 </>
               ) : (
-                <p className="mt-2 animate-pulse text-sm text-zinc-300">Waiting for host to break the tie…</p>
+                <p className="mt-2 animate-pulse text-sm text-zinc-300">{t("room.vote.waitingHost")}</p>
               )}
             </div>
           )}
 
           <section>
-            <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-500">Votes</h2>
+            <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-500">{t("room.vote.votes")}</h2>
             <ul className="divide-y divide-zinc-900 rounded-xl border border-zinc-800 bg-zinc-900/50">
               {players.map((p) => {
                 const v = votes.find((x) => x.playerId === p.id)?.choice;
@@ -164,15 +158,15 @@ function VotingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
                     <ColorDot color={p.color} />
                     <span className={`min-w-0 flex-1 truncate ${p.online ? "text-zinc-100" : "text-zinc-500"}`}>
                       {p.displayName}
-                      {p.id === state.me.id && " (you)"}
-                      {p.isHost && <span className="ml-1 text-xs text-amber-500">host</span>}
+                      {p.id === state.me.id && ` ${t("room.people.you")}`}
+                      {p.isHost && <span className="ml-1 text-xs text-amber-500">{t("room.people.host")}</span>}
                     </span>
                     <span
                       className={`font-mono text-xs font-bold ${
                         v === "EXPOSE" ? "text-red-300" : v === "PROTECT" ? "text-sky-300" : "text-zinc-600"
                       }`}
                     >
-                      {v ?? (p.online ? "deciding…" : "offline")}
+                      {v ? t(`room.vote.choice.${v}`) : t(p.online ? "room.vote.deciding" : "room.vote.offline")}
                     </span>
                   </li>
                 );
@@ -189,19 +183,23 @@ function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
   const ending = ctx.state.ending!;
   const hasCompass = ctx.state.progress.badges.includes("compass");
   const { summary } = ending;
+  const t = useT();
+  const endingLabel = t(`room.vote.choice.${ending.ending}`);
   return (
     <div className={shell} role="dialog" aria-modal="true" aria-labelledby="ending-title">
       <div className="flex shrink-0 items-center justify-between gap-2 px-3 py-2">
-        <span className="font-mono text-xs uppercase tracking-widest text-zinc-500">Case closed · {ending.ending}</span>
+        <span className="font-mono text-xs uppercase tracking-widest text-zinc-500">
+          {t("room.ending.caseClosed", { ending: endingLabel })}
+        </span>
         <button onClick={onMinimize} className="min-h-11 rounded-lg px-3 text-sm font-semibold text-zinc-400 active:bg-zinc-900">
-          Keep browsing
+          {t("room.ending.keepBrowsing")}
         </button>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
         <article className="mx-auto max-w-lg space-y-6">
           <header className="pt-2 text-center">
             <p className="text-xs uppercase tracking-[0.3em] text-amber-500/80">
-              {ending.ending === "EXPOSE" ? "The truth is out" : "The records stay sealed"}
+              {t("room.ending.eyebrow", { ending: ending.ending })}
             </p>
             <h1 id="ending-title" className="mt-2 text-3xl font-black tracking-tight text-amber-300 sm:text-4xl">
               {ending.title}
@@ -217,7 +215,7 @@ function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
           </div>
 
           <section className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">The vote</h2>
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">{t("room.ending.theVote")}</h2>
             <div className="flex gap-3">
               {(["EXPOSE", "PROTECT"] as const).map((c) => (
                 <div
@@ -226,19 +224,19 @@ function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
                     ending.ending === c ? "border-amber-500/60 bg-amber-500/10" : "border-zinc-800"
                   }`}
                 >
-                  <div className="text-xs font-bold tracking-wider text-zinc-400">{c}</div>
+                  <div className="text-xs font-bold tracking-wider text-zinc-400">{t(`room.vote.choice.${c}`)}</div>
                   <div className="font-mono text-2xl font-bold text-zinc-100">{summary[c]}</div>
                 </div>
               ))}
             </div>
             {summary.tieBrokenByHost && (
-              <p className="mt-3 text-center text-sm text-amber-300">Tie broken by the host.</p>
+              <p className="mt-3 text-center text-sm text-amber-300">{t("room.ending.tieBroken")}</p>
             )}
           </section>
 
           {ending.bonusEpilogue && (
             <section className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-              <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-amber-400">Epilogue</h2>
+              <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-amber-400">{t("room.ending.epilogue")}</h2>
               <div className="space-y-3 text-[15px] italic leading-relaxed text-zinc-200">
                 {ending.bonusEpilogue.split(/\n{2,}/).map((p, i) => (
                   <p key={i} className="whitespace-pre-wrap">
@@ -251,14 +249,14 @@ function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
 
           {hasCompass && (
             <div className="flex flex-col items-center gap-2 text-center">
-              <CompassBadge label="Compass badge earned" />
-              <p className="text-xs text-zinc-500">You opened Ada&apos;s Personal folder.</p>
+              <CompassBadge label={t("room.ending.compassEarned")} />
+              <p className="text-xs text-zinc-500">{t("room.ending.compassNote")}</p>
             </div>
           )}
 
           <div className="flex justify-center">
             <button className={btnGhost} onClick={onMinimize}>
-              Keep browsing Ada&apos;s laptop
+              {t("room.ending.keepBrowsingLaptop")}
             </button>
           </div>
         </article>
@@ -270,6 +268,7 @@ function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
 export function VoteOverlay({ ctx }: { ctx: GameCtx }) {
   const { state } = ctx;
   const [minimized, setMinimized] = useState(false);
+  const t = useT();
   const phase = state.status === "finished" && state.ending ? "ending" : state.status === "voting" ? "voting" : null;
 
   // Re-open automatically when the phase changes (e.g. voting -> ending).
@@ -281,7 +280,7 @@ export function VoteOverlay({ ctx }: { ctx: GameCtx }) {
   if (minimized) {
     return (
       <MinimizedPill
-        label={phase === "voting" ? "● Vote in progress · open" : "Case closed · view ending"}
+        label={t(phase === "voting" ? "room.vote.pill" : "room.ending.pill")}
         onOpen={() => setMinimized(false)}
       />
     );

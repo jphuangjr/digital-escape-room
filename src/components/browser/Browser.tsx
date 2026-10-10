@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FormattedMessage } from "react-intl";
+import { useT } from "@/i18n/client";
 import { PUZZLE_AFFECTS_HOSTS } from "@/lib/client/discoveries";
 import type { PuzzleId, ResolveResponse, SitePage } from "@/lib/types";
 import { normalizeAddress, type GameCtx } from "@/lib/client/game";
@@ -49,6 +51,7 @@ export function Browser({
   navRequest: { address: string; n: number } | null;
   onAddressChange?: (address: string | null) => void;
 }) {
+  const t = useT();
   const { code } = ctx;
   const [history, setHistory] = useState<{ entries: string[]; idx: number }>({ entries: [], idx: -1 });
   const [view, setViewState] = useState<View>({ kind: "newtab" });
@@ -169,7 +172,7 @@ export function Browser({
     const p = view.page;
     if (isBookmarked) saveBookmarks(bookmarks.filter((b) => b.address !== p.address));
     else saveBookmarks([...bookmarks, { address: p.address, title: p.title }]);
-    ctx.toast(isBookmarked ? "Bookmark removed" : "Bookmarked", "info");
+    ctx.toast(isBookmarked ? t("browser.toolbar.bookmarkRemoved") : t("browser.toolbar.bookmarked"), "info");
   };
 
   const btn =
@@ -180,14 +183,14 @@ export function Browser({
       {/* Toolbar */}
       <div className="relative z-10 shrink-0 border-b border-stone-800 bg-stone-900">
         <div className="flex items-center gap-0.5 px-1 py-1">
-          <button className={btn} onClick={() => go(-1)} disabled={history.idx <= 0} aria-label="Back">
+          <button className={btn} onClick={() => go(-1)} disabled={history.idx <= 0} aria-label={t("browser.toolbar.back")}>
             <BackIcon className="h-5 w-5" />
           </button>
           <button
             className={`${btn} hidden sm:flex`}
             onClick={() => go(1)}
             disabled={history.idx >= history.entries.length - 1}
-            aria-label="Forward"
+            aria-label={t("browser.toolbar.forward")}
           >
             <ForwardIcon className="h-5 w-5" />
           </button>
@@ -202,7 +205,7 @@ export function Browser({
             role="search"
           >
             <label htmlFor="address-bar" className="sr-only">
-              Address
+              {t("browser.toolbar.address")}
             </label>
             <input
               id="address-bar"
@@ -217,17 +220,17 @@ export function Browser({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onFocus={(e) => e.currentTarget.select()}
-              placeholder="Enter address"
+              placeholder={t("browser.toolbar.addressPlaceholder")}
               className="h-10 w-full min-w-0 rounded-full border border-stone-700 bg-black px-4 font-mono text-base text-stone-100 outline-none placeholder:text-stone-600 focus:border-amber-500 md:text-sm"
             />
           </form>
-          <button className={btn} onClick={reload} disabled={!current} aria-label="Reload">
+          <button className={btn} onClick={reload} disabled={!current} aria-label={t("browser.toolbar.reload")}>
             <ReloadIcon className="h-5 w-5" />
           </button>
           <button
             className={btn}
             onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Bookmarks and tools"
+            aria-label={t("browser.toolbar.menu")}
             aria-expanded={menuOpen}
           >
             <BookmarksIcon className="h-5 w-5" />
@@ -239,12 +242,12 @@ export function Browser({
             className={`${btn} sm:hidden`}
             onClick={() => go(1)}
             disabled={history.idx >= history.entries.length - 1}
-            aria-label="Forward"
+            aria-label={t("browser.toolbar.forward")}
           >
             <ForwardIcon className="h-5 w-5" />
           </button>
           <span className="min-w-0 flex-1 truncate px-1 text-xs text-stone-500">
-            {view.kind === "page" ? view.page.title : view.kind === "loading" ? "Loading…" : ""}
+            {view.kind === "page" ? view.page.title : view.kind === "loading" ? t("browser.toolbar.loading") : ""}
           </span>
           <button
             className="flex h-11 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs text-stone-300 active:bg-stone-800 disabled:text-stone-700"
@@ -253,7 +256,7 @@ export function Browser({
             aria-pressed={isBookmarked}
           >
             <StarIcon filled={isBookmarked} className={`h-4 w-4 ${isBookmarked ? "text-amber-400" : ""}`} />
-            {isBookmarked ? "Bookmarked" : "Bookmark"}
+            {isBookmarked ? t("browser.toolbar.bookmarked") : t("browser.toolbar.bookmark")}
           </button>
           <button
             className="flex h-11 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs text-stone-300 active:bg-stone-800 disabled:text-stone-700"
@@ -261,13 +264,13 @@ export function Browser({
             disabled={view.kind !== "page"}
           >
             <CodeIcon className="h-4 w-4" />
-            View Source
+            {t("browser.toolbar.viewSource")}
           </button>
         </div>
 
         {menuOpen && (
           <div className="absolute right-1 top-full z-20 mt-1 w-72 max-w-[calc(100vw-1rem)] rounded-lg border border-stone-700 bg-stone-900 p-1 shadow-2xl shadow-black">
-            <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-stone-500">Bookmarks</p>
+            <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-stone-500">{t("browser.menu.bookmarks")}</p>
             <ul>
               {bookmarks.map((b) => (
                 <li key={b.address} className="flex items-center">
@@ -283,14 +286,14 @@ export function Browser({
                   </button>
                   <button
                     className="flex h-11 w-11 items-center justify-center text-stone-500 active:bg-stone-800"
-                    aria-label={`Remove bookmark ${b.title}`}
+                    aria-label={t("browser.menu.removeBookmark", { title: b.title })}
                     onClick={() => saveBookmarks(bookmarks.filter((x) => x.address !== b.address))}
                   >
                     ✕
                   </button>
                 </li>
               ))}
-              {bookmarks.length === 0 && <li className="px-3 py-2 text-sm text-stone-500">No bookmarks yet.</li>}
+              {bookmarks.length === 0 && <li className="px-3 py-2 text-sm text-stone-500">{t("browser.menu.empty")}</li>}
             </ul>
             {view.kind === "page" && !isBookmarked && (
               <button
@@ -300,7 +303,7 @@ export function Browser({
                   setMenuOpen(false);
                 }}
               >
-                <StarIcon className="h-4 w-4" /> Bookmark this page
+                <StarIcon className="h-4 w-4" /> {t("browser.menu.bookmarkThisPage")}
               </button>
             )}
           </div>
@@ -322,7 +325,7 @@ export function Browser({
         {view.kind === "loading" && (
           <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-stone-500">
             <CompassMark className="h-10 w-10 animate-spin text-amber-500/70 [animation-duration:2.5s]" />
-            <p className="font-mono text-xs">Connecting to {view.address}…</p>
+            <p className="font-mono text-xs">{t("browser.loading.connecting", { address: view.address })}</p>
           </div>
         )}
         {view.kind === "page" && (
@@ -339,10 +342,15 @@ export function Browser({
               <path d="M8 34l16-24 16 24z" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
               <path d="M24 20v7M24 31v1" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
             </svg>
-            <h2 className="text-xl text-stone-100">This site can&apos;t be reached</h2>
+            <h2 className="text-xl text-stone-100">{t("browser.error.title")}</h2>
             <p className="break-all text-sm text-stone-400">
-              <span className="font-mono text-stone-200">{view.address}</span>
-              {view.kind === "unreachable" ? "’s server IP address could not be found." : " took too long to respond."}
+              <FormattedMessage
+                id={view.kind === "unreachable" ? "browser.error.unreachable" : "browser.error.timeout"}
+                values={{
+                  address: view.address,
+                  addr: (c) => <span className="font-mono text-stone-200">{c}</span>,
+                }}
+              />
             </p>
             <p className="font-mono text-xs text-stone-600">
               {view.kind === "unreachable" ? "ERR_NAME_NOT_RESOLVED" : "ERR_CONNECTION_TIMED_OUT"}
@@ -351,7 +359,7 @@ export function Browser({
               onClick={() => void load(view.address, "stay")}
               className="mt-2 min-h-11 rounded-md bg-stone-800 px-4 text-sm text-stone-100 active:bg-stone-700"
             >
-              Try again
+              {t("common.retry")}
             </button>
           </div>
         )}
@@ -365,10 +373,11 @@ export function Browser({
 }
 
 function NewTab({ bookmarks, onOpen }: { bookmarks: Bookmark[]; onOpen: (address: string) => void }) {
+  const t = useT();
   return (
     <div className="mx-auto flex max-w-md flex-col items-center px-6 py-12 text-center">
       <CompassMark className="h-16 w-16 text-amber-500/60" />
-      <p className="mt-4 font-serif text-lg text-stone-200">New Tab</p>
+      <p className="mt-4 font-serif text-lg text-stone-200">{t("browser.newTab.title")}</p>
       <p className="mt-1 text-sm italic text-stone-500">&ldquo;Start at the beginning.&rdquo;</p>
       <div className="mt-8 grid w-full grid-cols-2 gap-3">
         {bookmarks.map((b) => (

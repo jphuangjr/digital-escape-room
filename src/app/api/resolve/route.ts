@@ -5,12 +5,14 @@ import { mutateProgress } from "@/server/progress";
 import { publish } from "@/server/realtime";
 import { track } from "@/server/analytics";
 import { resolveSite } from "@/server/content";
+import { getT } from "@/i18n/server";
 
 export async function POST(req: Request) {
+  const t = await getT();
   const body = await readBody(req);
-  if (!body) return error(400, "Invalid JSON body.");
-  if (typeof body.code !== "string") return error(400, "Missing room code.");
-  if (typeof body.address !== "string" || body.address.length > 300) return error(400, "Missing address.");
+  if (!body) return error(400, t("api.common.invalidJson"));
+  if (typeof body.code !== "string") return error(400, t("api.room.missingCode"));
+  if (typeof body.address !== "string" || body.address.length > 300) return error(400, t("api.resolve.missingAddress"));
   const ctx = await requirePlayer(body.code);
   if (isResponse(ctx)) return ctx;
   const { room, player } = ctx;

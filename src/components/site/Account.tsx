@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { signIn, signOut } from "next-auth/react";
+import { FormattedMessage, useIntl } from "react-intl";
 import type { MeResponse } from "@/lib/types";
-import { formatDuration, gameTitle } from "@/lib/games";
+import { formatDuration, localGameTitle } from "@/lib/games";
+import { useT } from "@/i18n/client";
 
 let mePromise: Promise<MeResponse | null> | null = null;
 
@@ -45,6 +47,7 @@ export function GoogleButton({ label, callbackUrl = "/" }: { label: string; call
 
 /** Signed-in identity with sign out, or a nudge to sign in. Hidden when Google sign-in is off. */
 export function AccountBar({ me, callbackUrl = "/", fallbackColor = "#c9a227" }: { me: MeResponse | null; callbackUrl?: string; fallbackColor?: string }) {
+  const t = useT();
   const signedIn = Boolean(me?.user);
   const color = fallbackColor;
   return (
@@ -60,11 +63,17 @@ export function AccountBar({ me, callbackUrl = "/", fallbackColor = "#c9a227" }:
                   <span className="h-8 w-8 rounded-full" style={{ backgroundColor: color }} aria-hidden />
                 )}
                 <span className="min-w-0 flex-1 truncate text-sm text-noir-ink-dim">
-                  Signed in as <span className="text-noir-ink">{me.user!.name || me.user!.email}</span>
+                  <FormattedMessage
+                    id="site.account.signedInAs"
+                    values={{
+                      name: me.user!.name || me.user!.email || "",
+                      b: (c) => <span className="text-noir-ink">{c}</span>,
+                    }}
+                  />
                 </span>
                 {me!.isAdmin && (
                   <a href="/admin" className="min-h-11 shrink-0 content-center px-2 text-sm font-semibold text-noir-brass underline">
-                    Admin
+                    {t("site.account.admin")}
                   </a>
                 )}
                 <button
@@ -72,20 +81,20 @@ export function AccountBar({ me, callbackUrl = "/", fallbackColor = "#c9a227" }:
                   onClick={() => signOut({ callbackUrl })}
                   className="min-h-11 shrink-0 px-2 text-sm text-noir-ink-faint underline"
                 >
-                  Sign out
+                  {t("site.account.signOut")}
                 </button>
               </>
             ) : (
               <>
                 <span className="min-w-0 flex-1 text-sm text-noir-ink-dim">
-                  Sign in to keep your cases and times, and pick up on any device.
+                  {t("site.account.nudge")}
                 </span>
                 <button
                   type="button"
                   onClick={() => signIn("google", { callbackUrl })}
                   className="min-h-11 shrink-0 px-2 text-sm font-semibold text-noir-brass underline"
                 >
-                  Sign in
+                  {t("site.account.signIn")}
                 </button>
               </>
             )}
@@ -97,12 +106,14 @@ export function AccountBar({ me, callbackUrl = "/", fallbackColor = "#c9a227" }:
 }
 
 export function MyCases({ me, gameId }: { me: MeResponse; gameId?: string }) {
+  const t = useT();
+  const intl = useIntl();
   const activeRooms = gameId ? me.activeRooms.filter((r) => r.gameId === gameId) : me.activeRooms;
   const cases = gameId ? me.cases.filter((c) => c.gameId === gameId) : me.cases;
   if (!me.user || (activeRooms.length === 0 && cases.length === 0)) return null;
   return (
     <section className="flex flex-col gap-4 rounded-xl border border-noir-line bg-noir-bg-2/90 p-4">
-      <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-noir-ink-faint">My cases</h2>
+      <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-noir-ink-faint">{t("site.cases.heading")}</h2>
       {activeRooms.length > 0 && (
         <ul className="flex flex-col gap-2">
           {activeRooms.map((r) => (
@@ -114,11 +125,15 @@ export function MyCases({ me, gameId }: { me: MeResponse; gameId?: string }) {
                 <span className="min-w-0">
                   <span className="block font-mono tracking-widest text-noir-ink">{r.code}</span>
                   <span className="block truncate text-xs text-noir-ink-faint">
-                    {gameTitle(r.gameId)} · {r.playerCount} {r.playerCount === 1 ? "player" : "players"}
-                    {r.isHost ? " · host" : ""} · {r.status === "playing" ? "in progress" : r.status}
+                    {t("site.cases.roomMeta", {
+                      title: localGameTitle(t, r.gameId),
+                      count: r.playerCount,
+                      host: r.isHost,
+                      status: r.status,
+                    })}
                   </span>
                 </span>
-                <span className="shrink-0 text-sm font-semibold text-noir-brass">Rejoin →</span>
+                <span className="shrink-0 text-sm font-semibold text-noir-brass">{t("site.cases.rejoin")}</span>
               </a>
             </li>
           ))}
@@ -129,22 +144,22 @@ export function MyCases({ me, gameId }: { me: MeResponse; gameId?: string }) {
           <table className="w-full text-left text-sm">
             <thead className="text-xs uppercase tracking-wider text-noir-ink-faint">
               <tr>
-                <th className="py-1 pr-3 font-normal">Case</th>
-                <th className="py-1 pr-3 font-normal">Time</th>
-                <th className="py-1 font-normal">Ending</th>
+                <th className="py-1 pr-3 font-normal">{t("site.cases.colCase")}</th>
+                <th className="py-1 pr-3 font-normal">{t("site.cases.colTime")}</th>
+                <th className="py-1 font-normal">{t("site.cases.colEnding")}</th>
               </tr>
             </thead>
             <tbody>
               {cases.map((c) => (
                 <tr key={`${c.roomCode}-${c.finishedAt}`} className="border-t border-noir-line align-top">
                   <td className="py-2 pr-3">
-                    <span className="block text-noir-ink">{gameTitle(c.gameId)}</span>
+                    <span className="block text-noir-ink">{localGameTitle(t, c.gameId)}</span>
                     <span className="block text-xs text-noir-ink-faint">
-                      {new Date(c.finishedAt).toLocaleDateString()} · {c.playerCount} {c.playerCount === 1 ? "player" : "players"}
+                      {t("site.cases.caseMeta", { date: intl.formatDate(c.finishedAt), count: c.playerCount })}
                     </span>
                   </td>
                   <td className="py-2 pr-3 font-mono text-noir-brass">{formatDuration(c.durationMs)}</td>
-                  <td className="py-2 text-noir-ink-dim">{c.ending ? c.ending.toLowerCase() : "—"}</td>
+                  <td className="py-2 text-noir-ink-dim">{t("site.cases.ending", { ending: c.ending ?? "none" })}</td>
                 </tr>
               ))}
             </tbody>

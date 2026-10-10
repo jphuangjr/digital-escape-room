@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useT } from "@/i18n/client";
 import { useChat } from "@/lib/client/chat";
 import type { RoomTab } from "./RoomSheet";
-import { describeDiscovery } from "@/lib/client/discoveries";
+import { describeDiscovery, discoveryWho } from "@/lib/client/discoveries";
 import type { AppId, RoomState } from "@/lib/types";
 import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
 import { Browser } from "@/components/browser/Browser";
@@ -39,6 +40,7 @@ export function GameShell({
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [unreadEmails, setUnreadEmails] = useState(0);
   const toastId = useRef(0);
+  const t = useT();
 
   const unlocked = state.progress.unlockedApps;
   const isUnlocked = useCallback(
@@ -93,14 +95,14 @@ export function GameShell({
   const openApp = useCallback(
     (app: AppId) => {
       if (!isUnlocked(app)) {
-        toast("Decoder is locked. Keep digging through the sites.", "info");
+        toast(t("shell.toast.decoderLocked"), "info");
         return;
       }
       setMounted((m) => (m.includes(app) ? m : [...m, app]));
       setActive(app);
       setRoomOpen(false);
     },
-    [isUnlocked, toast],
+    [isUnlocked, toast, t],
   );
   const openAddress = useCallback((address: string) => {
     setMounted((m) => (m.includes("browser") ? m : [...m, "browser"]));
@@ -113,9 +115,9 @@ export function GameShell({
   const decoderWasUnlocked = useRef<boolean>(unlocked.includes("decoder"));
   useEffect(() => {
     const now = unlocked.includes("decoder");
-    if (now && !decoderWasUnlocked.current) toast("Decoder unlocked! Find it in your dock.", "success");
+    if (now && !decoderWasUnlocked.current) toast(t("shell.toast.decoderUnlocked"), "success");
     decoderWasUnlocked.current = now;
-  }, [unlocked, toast]);
+  }, [unlocked, toast, t]);
 
   // ---------- teammates' discoveries ----------
   // Toast what other players find (the finder already knows). Seed with what's already in the log so
@@ -126,13 +128,13 @@ export function GameShell({
     if (knownDiscoveries.current) {
       for (const d of list) {
         if (knownDiscoveries.current.has(d.id) || d.playerId === state.me.id) continue;
-        const msg = `${d.playerName} ${describeDiscovery(d)}`;
-        if (d.kind === "site") toast(msg, "info", { label: "Open", onClick: () => openAddress(d.host) });
+        const msg = `${discoveryWho(d, t)} ${describeDiscovery(d, t)}`;
+        if (d.kind === "site") toast(msg, "info", { label: t("shell.toast.open"), onClick: () => openAddress(d.host) });
         else toast(msg, "success");
       }
     }
     knownDiscoveries.current = new Set(list.map((d) => d.id));
-  }, [state.progress.discoveries, state.me.id, toast, openAddress]);
+  }, [state.progress.discoveries, state.me.id, toast, openAddress, t]);
 
   // ---------- chat toasts (when the chat isn't on screen) ----------
   const chatVisible = roomOpen && roomTab === "chat";
@@ -144,7 +146,7 @@ export function GameShell({
         if (knownChat.current.has(m.id) || m.playerId === state.me.id) continue;
         const preview = m.body.length > 70 ? `${m.body.slice(0, 70)}…` : m.body;
         toast(`${m.playerName}: ${preview}`, "info", {
-          label: "Reply",
+          label: t("shell.toast.reply"),
           onClick: () => {
             setRoomTab("chat");
             setRoomOpen(true);
@@ -153,7 +155,7 @@ export function GameShell({
       }
     }
     knownChat.current = new Set(chat.messages.map((m) => m.id));
-  }, [chat.messages, chat.loaded, chatVisible, state.me.id, toast]);
+  }, [chat.messages, chat.loaded, chatVisible, state.me.id, toast, t]);
 
   // ---------- email unread ----------
   useEffect(() => {
@@ -169,11 +171,14 @@ export function GameShell({
       const fresh = state.emails.filter((e) => !knownEmails.current!.has(e.id));
       if (fresh.length) {
         const vm = fresh.find((e) => e.kind === "voicemail");
-        toast(vm ? `New voicemail: ${vm.subject}` : `New email: ${fresh[0].subject}`, "info");
+        toast(
+          t("shell.toast.newEmail", { kind: vm ? "voicemail" : "email", subject: (vm ?? fresh[0]).subject }),
+          "info",
+        );
       }
     }
     knownEmails.current = new Set(ids);
-  }, [state.emails, toast]);
+  }, [state.emails, toast, t]);
   // ---------- context ----------
   const api = useCallback<GameCtx["api"]>((path, init) => apiFetch(code, path, init), [code]);
   const ctx = useMemo<GameCtx>(
@@ -198,7 +203,7 @@ export function GameShell({
         <div className="relative flex min-h-0 flex-1">
           {/* Desktop icons (≥768px) */}
           <nav
-            aria-label="Desktop"
+            aria-label={t("shell.desktop.label")}
             className="hidden w-28 shrink-0 flex-col items-center gap-3 overflow-y-auto py-6 md:flex"
           >
             {APP_ORDER.map((app) => (
@@ -225,19 +230,19 @@ export function GameShell({
               <div className="hidden h-10 shrink-0 items-center gap-2 border-b border-stone-800 bg-stone-900/80 px-3 md:flex">
                 <button
                   onClick={() => setActive(null)}
-                  aria-label="Close window"
+                  aria-label={t("shell.window.close")}
                   className="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 active:bg-stone-800"
                 >
                   <CloseIcon className="h-4 w-4" />
                 </button>
                 <span className="font-mono text-xs uppercase tracking-[0.2em] text-stone-400">
-                  {active ? APP_META[active].label : ""}
+                  {active ? t(`shell.app.${active}`) : ""}
                 </span>
               </div>
               {mounted.map((app) => (
                 <section
                   key={app}
-                  aria-label={APP_META[app].label}
+                  aria-label={t(`shell.app.${app}`)}
                   className={`min-h-0 flex-1 flex-col ${active === app ? "flex" : "hidden"} ${
                     app === "browser" ? "overflow-hidden" : "overflow-y-auto overflow-x-hidden"
                   }`}
@@ -299,11 +304,13 @@ export function AppTile({
   onClick: () => void;
   size?: "sm" | "lg";
 }) {
-  const { label, Icon } = APP_META[app];
+  const { Icon } = APP_META[app];
+  const t = useT();
+  const label = t(`shell.app.${app}`);
   return (
     <button
       onClick={onClick}
-      aria-label={`${label}${locked ? " (locked)" : ""}${badge ? `, ${badge} unread` : ""}`}
+      aria-label={t("shell.dock.appAria", { app: label, locked, unread: badge ?? 0 })}
       aria-current={active ? "true" : undefined}
       className={`group relative flex flex-col items-center gap-1.5 rounded-xl p-2 ${size === "lg" ? "w-24" : "w-20"} ${
         active ? "bg-amber-500/10" : ""

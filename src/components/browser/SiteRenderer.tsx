@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/i18n/client";
 import type { Block, ImageFileInfo, SitePage } from "@/lib/types";
 import type { GameCtx } from "@/lib/client/game";
 import { THEMES, type ThemeStyle } from "./themes";
@@ -278,12 +279,13 @@ function SiteLink({ href, env, children }: { href: string; env: RenderEnv; child
 }
 
 export function Redacted({ text, dark }: { text: string; dark?: boolean }) {
+  const tr = useT();
   const [on, setOn] = useState(false);
   return (
     <button
       type="button"
       aria-pressed={on}
-      aria-label={on ? `Revealed: ${text}` : "Redacted text. Tap to reveal."}
+      aria-label={on ? tr("browser.redacted.revealed", { text }) : tr("browser.redacted.hidden")}
       onClick={() => setOn((v) => !v)}
       className={`mx-0.5 inline min-h-6 rounded-[2px] px-1 py-0.5 text-left align-baseline [box-decoration-break:clone] transition-colors ${
         on
@@ -331,6 +333,7 @@ function ImageBlock({
   info: ImageFileInfo;
   t: ThemeStyle;
 }) {
+  const tr = useT();
   const [open, setOpen] = useState(false);
   const isGlyph = [...art].length <= 6;
   return (
@@ -355,7 +358,7 @@ function ImageBlock({
           className="absolute bottom-2 right-2 min-h-11 rounded bg-black/75 px-3 text-xs font-semibold text-white"
           style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
         >
-          ⓘ File Info
+          {tr("browser.fileInfo.button")}
         </button>
       </div>
       {caption && <figcaption className={`text-sm italic ${t.muted}`}>{caption}</figcaption>}
@@ -365,20 +368,20 @@ function ImageBlock({
           style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
         >
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-wider text-amber-400">File Info</p>
-            <button onClick={() => setOpen(false)} className="min-h-11 min-w-11 text-sm text-stone-400" aria-label="Close file info">
+            <p className="text-xs font-bold uppercase tracking-wider text-amber-400">{tr("browser.fileInfo.title")}</p>
+            <button onClick={() => setOpen(false)} className="min-h-11 min-w-11 text-sm text-stone-400" aria-label={tr("browser.fileInfo.close")}>
               ✕
             </button>
           </div>
           <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 font-mono text-xs">
             {(
               [
-                ["Filename", info.filename],
-                ["Author", info.author],
-                ["Camera", info.camera],
-                ["Date", info.date],
-                ["Dimensions", info.dimensions],
-                ["Comment", info.comment],
+                [tr("browser.fileInfo.filename"), info.filename],
+                [tr("browser.fileInfo.author"), info.author],
+                [tr("browser.fileInfo.camera"), info.camera],
+                [tr("browser.fileInfo.date"), info.date],
+                [tr("browser.fileInfo.dimensions"), info.dimensions],
+                [tr("browser.fileInfo.comment"), info.comment],
               ] as [string, string | undefined][]
             )
               .filter(([, v]) => v)

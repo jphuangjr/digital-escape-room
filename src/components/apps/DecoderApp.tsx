@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useT } from "@/i18n/client";
 import type { GameCtx } from "@/lib/client/game";
 import {
   ALPHABET,
@@ -18,33 +19,37 @@ import {
 } from "./decoderLogic";
 import { btnGhost } from "./shared";
 
-async function copyText(text: string, ctx: GameCtx) {
+type T = ReturnType<typeof useT>;
+
+async function copyText(text: string, ctx: GameCtx, t: T) {
   try {
     await navigator.clipboard.writeText(text);
-    ctx.toast("Copied", "success");
+    ctx.toast(t("common.copied"), "success");
   } catch {
-    ctx.toast("Couldn't copy", "error");
+    ctx.toast(t("apps.decoder.copyFailed"), "error");
   }
 }
 
-async function pasteInto(set: (v: string) => void, ctx: GameCtx) {
+async function pasteInto(set: (v: string) => void, ctx: GameCtx, t: T) {
   try {
-    const t = await navigator.clipboard.readText();
-    set(t);
+    const v = await navigator.clipboard.readText();
+    set(v);
   } catch {
-    ctx.toast("Paste blocked. Long-press the box to paste.", "info");
+    ctx.toast(t("apps.decoder.pasteBlocked"), "info");
   }
 }
 
-function OutputBox({ text, ctx, placeholder }: { text: string; ctx: GameCtx; placeholder: string }) {
+function OutputBox({ text, ctx }: { text: string; ctx: GameCtx }) {
+  const t = useT();
+  const placeholder = t("apps.decoder.resultPlaceholder");
   return (
     <div className="space-y-2">
       <div className="min-h-20 whitespace-pre-wrap break-words rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 font-mono text-base tracking-wide text-amber-100">
         {text || <span className="text-zinc-500">{placeholder}</span>}
       </div>
       <div className="flex gap-2">
-        <button className={btnGhost} disabled={!text} onClick={() => copyText(text, ctx)}>
-          Copy result
+        <button className={btnGhost} disabled={!text} onClick={() => copyText(text, ctx, t)}>
+          {t("apps.decoder.copyResult")}
         </button>
       </div>
     </div>
@@ -52,6 +57,7 @@ function OutputBox({ text, ctx, placeholder }: { text: string; ctx: GameCtx; pla
 }
 
 function CaesarTool({ ctx }: { ctx: GameCtx }) {
+  const t = useT();
   const [input, setInput] = useState("");
   const [shift, setShift] = useState(0);
   const [mode, setMode] = useState<"decode" | "encode">("decode");
@@ -61,12 +67,12 @@ function CaesarTool({ ctx }: { ctx: GameCtx }) {
   return (
     <div className="space-y-4 p-3">
       <label className="block">
-        <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-zinc-400">Ciphertext</span>
+        <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-zinc-400">{t("apps.decoder.ciphertext")}</span>
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           rows={4}
-          placeholder="Paste or type text…"
+          placeholder={t("apps.decoder.inputPlaceholder")}
           autoCapitalize="characters"
           autoCorrect="off"
           spellCheck={false}
@@ -74,13 +80,13 @@ function CaesarTool({ ctx }: { ctx: GameCtx }) {
         />
       </label>
       <div className="flex flex-wrap gap-2">
-        <button className={btnGhost} onClick={() => pasteInto(setInput, ctx)}>
-          Paste
+        <button className={btnGhost} onClick={() => pasteInto(setInput, ctx, t)}>
+          {t("common.paste")}
         </button>
         <button className={btnGhost} disabled={!input} onClick={() => setInput("")}>
-          Clear
+          {t("common.clear")}
         </button>
-        <div className="ml-auto flex rounded-lg border border-zinc-700 p-0.5" role="group" aria-label="Direction">
+        <div className="ml-auto flex rounded-lg border border-zinc-700 p-0.5" role="group" aria-label={t("apps.decoder.direction")}>
           {(["decode", "encode"] as const).map((m) => (
             <button
               key={m}
@@ -90,7 +96,7 @@ function CaesarTool({ ctx }: { ctx: GameCtx }) {
                 mode === m ? "bg-amber-500 text-zinc-950" : "text-zinc-400"
               }`}
             >
-              {m}
+              {t("apps.decoder.mode", { mode: m })}
             </button>
           ))}
         </div>
@@ -99,18 +105,18 @@ function CaesarTool({ ctx }: { ctx: GameCtx }) {
       {/* Stepper */}
       <div className="flex items-center justify-between gap-3 rounded-xl border border-zinc-800 bg-zinc-900/60 p-2">
         <button
-          aria-label="Decrease shift"
+          aria-label={t("apps.decoder.decreaseShift")}
           onClick={() => setShift((s) => normalizeShift(s - 1))}
           className="flex h-16 w-16 items-center justify-center rounded-xl bg-zinc-800 text-3xl font-bold text-zinc-100 active:bg-zinc-700"
         >
           −
         </button>
         <div className="text-center" aria-live="polite">
-          <div className="text-xs uppercase tracking-widest text-zinc-500">Shift</div>
+          <div className="text-xs uppercase tracking-widest text-zinc-500">{t("apps.decoder.shift")}</div>
           <div className="font-mono text-4xl font-bold text-amber-300">{shift}</div>
         </div>
         <button
-          aria-label="Increase shift"
+          aria-label={t("apps.decoder.increaseShift")}
           onClick={() => setShift((s) => normalizeShift(s + 1))}
           className="flex h-16 w-16 items-center justify-center rounded-xl bg-zinc-800 text-3xl font-bold text-zinc-100 active:bg-zinc-700"
         >
@@ -121,7 +127,8 @@ function CaesarTool({ ctx }: { ctx: GameCtx }) {
       {/* Wheel */}
       <div>
         <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">
-          A–Z wheel <span className="font-normal normal-case tracking-normal text-zinc-500">(top: in · bottom: out)</span>
+          {t("apps.decoder.wheel")}{" "}
+          <span className="font-normal normal-case tracking-normal text-zinc-500">{t("apps.decoder.wheelHint")}</span>
         </div>
         <div className="overflow-x-auto overscroll-x-contain rounded-lg border border-zinc-800 bg-zinc-900/60">
           <div className="flex w-max font-mono text-sm">
@@ -136,14 +143,15 @@ function CaesarTool({ ctx }: { ctx: GameCtx }) {
       </div>
 
       <div>
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">Output</div>
-        <OutputBox text={output} ctx={ctx} placeholder="Result appears here" />
+        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">{t("apps.decoder.output")}</div>
+        <OutputBox text={output} ctx={ctx} />
       </div>
     </div>
   );
 }
 
 function A1Z26Tool({ ctx }: { ctx: GameCtx }) {
+  const t = useT();
   const [input, setInput] = useState("");
   const numeric = looksNumeric(input);
   const output = !input.trim() ? "" : numeric ? a1z26ToLetters(input) : lettersToA1z26(input);
@@ -162,12 +170,12 @@ function A1Z26Tool({ ctx }: { ctx: GameCtx }) {
     <div className="space-y-4 p-3">
       <label className="block">
         <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-zinc-400">
-          Numbers or letters
+          {t("apps.decoder.numbersOrLetters")}
         </span>
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder='e.g. "8 9" or "8:9" or "HI"'
+          placeholder={t("apps.decoder.a1z26Placeholder")}
           autoCapitalize="characters"
           autoCorrect="off"
           spellCheck={false}
@@ -176,28 +184,34 @@ function A1Z26Tool({ ctx }: { ctx: GameCtx }) {
         />
       </label>
       <div className="flex flex-wrap gap-2">
-        <button className={btnGhost} onClick={() => pasteInto(setInput, ctx)}>
-          Paste
+        <button className={btnGhost} onClick={() => pasteInto(setInput, ctx, t)}>
+          {t("common.paste")}
         </button>
-        <button className={btnGhost} disabled={!input} onClick={() => setInput((v) => (looksNumeric(v) ? v.replace(/\d+\D*$/, "") : v.slice(0, -1)))}>
+        <button
+          className={btnGhost}
+          disabled={!input}
+          aria-label={t("apps.decoder.backspace")}
+          onClick={() => setInput((v) => (looksNumeric(v) ? v.replace(/\d+\D*$/, "") : v.slice(0, -1)))}
+        >
           ⌫
         </button>
         <button className={btnGhost} disabled={!input} onClick={() => setInput("")}>
-          Clear
+          {t("common.clear")}
         </button>
         <span className="ml-auto self-center text-xs text-zinc-500">
-          {input.trim() ? (numeric ? "numbers → letters" : "letters → numbers") : ""}
+          {input.trim() ? (numeric ? t("apps.decoder.numbersToLetters") : t("apps.decoder.lettersToNumbers")) : ""}
         </span>
       </div>
 
       <div>
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">Result</div>
-        <OutputBox text={output} ctx={ctx} placeholder="Result appears here" />
+        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">{t("apps.decoder.result")}</div>
+        <OutputBox text={output} ctx={ctx} />
       </div>
 
       <div>
         <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">
-          Tap letters <span className="font-normal normal-case tracking-normal text-zinc-500">(letter · number)</span>
+          {t("apps.decoder.tapLetters")}{" "}
+          <span className="font-normal normal-case tracking-normal text-zinc-500">{t("apps.decoder.tapLettersHint")}</span>
         </div>
         <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-9">
           {ALPHABET.split("").map((l, i) => (
@@ -214,13 +228,13 @@ function A1Z26Tool({ ctx }: { ctx: GameCtx }) {
             onClick={() => setInput((v) => (looksNumeric(v) ? v : v + " "))}
             className="col-span-2 min-h-12 rounded-lg border border-zinc-800 bg-zinc-900 text-xs uppercase text-zinc-400 active:bg-zinc-800"
           >
-            space
+            {t("apps.decoder.space")}
           </button>
         </div>
       </div>
 
       <div>
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">Tap numbers</div>
+        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">{t("apps.decoder.tapNumbers")}</div>
         <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-9">
           {Array.from({ length: 26 }, (_, i) => i + 1).map((n) => (
             <button
@@ -239,6 +253,7 @@ function A1Z26Tool({ ctx }: { ctx: GameCtx }) {
 }
 
 function BinaryTool({ ctx }: { ctx: GameCtx }) {
+  const t = useT();
   const [input, setInput] = useState("");
   const [bits, setBits] = useState([0, 0, 0, 0, 0]);
   const binary = looksBinary(input);
@@ -256,14 +271,14 @@ function BinaryTool({ ctx }: { ctx: GameCtx }) {
 
   return (
     <div className="space-y-4 p-3">
-      <p className="text-xs text-zinc-500">Wren&apos;s class code: five bits per letter, worth 16 · 8 · 4 · 2 · 1. A = 1, Z = 26.</p>
+      <p className="text-xs text-zinc-500">{t("apps.decoder.binaryIntro")}</p>
       <label className="block">
-        <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-zinc-400">Binary or letters</span>
+        <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-zinc-400">{t("apps.decoder.binaryOrLetters")}</span>
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           rows={3}
-          placeholder="e.g. 01000 00101 01100 01100 01111"
+          placeholder={t("apps.decoder.binaryPlaceholder")}
           inputMode={binary || !input ? "numeric" : "text"}
           autoCapitalize="characters"
           autoCorrect="off"
@@ -272,30 +287,31 @@ function BinaryTool({ ctx }: { ctx: GameCtx }) {
         />
       </label>
       <div className="flex flex-wrap gap-2">
-        <button className={btnGhost} onClick={() => pasteInto(setInput, ctx)}>
-          Paste
+        <button className={btnGhost} onClick={() => pasteInto(setInput, ctx, t)}>
+          {t("common.paste")}
         </button>
         <button className={btnGhost} disabled={!input} onClick={() => setInput("")}>
-          Clear
+          {t("common.clear")}
         </button>
         <span className="ml-auto self-center text-xs text-zinc-500">
-          {input.trim() ? (binary ? "binary → letters" : "letters → binary") : ""}
+          {input.trim() ? (binary ? t("apps.decoder.binaryToLetters") : t("apps.decoder.lettersToBinary")) : ""}
         </span>
       </div>
       <div>
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">Result</div>
-        <OutputBox text={output} ctx={ctx} placeholder="Result appears here" />
+        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">{t("apps.decoder.result")}</div>
+        <OutputBox text={output} ctx={ctx} />
       </div>
       <div>
         <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">
-          Tap switches <span className="font-normal normal-case tracking-normal text-zinc-500">(build one letter)</span>
+          {t("apps.decoder.tapSwitches")}{" "}
+          <span className="font-normal normal-case tracking-normal text-zinc-500">{t("apps.decoder.tapSwitchesHint")}</span>
         </div>
         <div className="grid grid-cols-5 gap-1.5">
           {bits.map((b, i) => (
             <button
               key={i}
               aria-pressed={b === 1}
-              aria-label={`Bit worth ${BIT_VALUES[i]}, ${b ? "on" : "off"}`}
+              aria-label={t("apps.decoder.bitAria", { value: BIT_VALUES[i], on: b === 1 })}
               onClick={() => setBits((cur) => cur.map((x, j) => (j === i ? 1 - x : x)))}
               className={`flex min-h-14 flex-col items-center justify-center rounded-lg border font-mono ${
                 b ? "border-amber-500 bg-amber-500/20 text-amber-200" : "border-zinc-800 bg-zinc-900 text-zinc-400"
@@ -311,7 +327,7 @@ function BinaryTool({ ctx }: { ctx: GameCtx }) {
             {bits.join("")} = {value} = <span className="text-lg font-bold text-amber-300">{letter}</span>
           </p>
           <button className={btnGhost} disabled={value === 0} onClick={addGroup}>
-            Add to input
+            {t("apps.decoder.addToInput")}
           </button>
         </div>
       </div>
@@ -320,18 +336,20 @@ function BinaryTool({ ctx }: { ctx: GameCtx }) {
 }
 
 function BinaryLocked() {
+  const t = useT();
   return (
     <div className="space-y-2 p-8 text-center">
       <div className="text-3xl" aria-hidden>
         🔒
       </div>
-      <p className="text-sm font-semibold text-zinc-200">Binary translator not installed</p>
-      <p className="text-xs text-zinc-500">It comes with a class Ada took. Her course notes might say where.</p>
+      <p className="text-sm font-semibold text-zinc-200">{t("apps.decoder.binaryLockedTitle")}</p>
+      <p className="text-xs text-zinc-500">{t("apps.decoder.binaryLockedBody")}</p>
     </div>
   );
 }
 
 export function DecoderApp({ ctx }: { ctx: GameCtx }) {
+  const t = useT();
   const [tab, setTab] = useState<"caesar" | "a1z26" | "binary">("caesar");
   const hasBinary = ctx.state.progress.badges.includes("binary");
   return (
@@ -339,9 +357,9 @@ export function DecoderApp({ ctx }: { ctx: GameCtx }) {
       <div className="flex shrink-0 gap-1 border-b border-zinc-800 p-2" role="tablist">
         {(
           [
-            ["caesar", "Caesar shift"],
-            ["a1z26", "A1Z26"],
-            ["binary", hasBinary ? "Binary" : "Binary 🔒"],
+            ["caesar", t("apps.decoder.tabCaesar")],
+            ["a1z26", t("apps.decoder.tabA1z26")],
+            ["binary", hasBinary ? t("apps.decoder.tabBinary") : t("apps.decoder.tabBinaryLocked")],
           ] as const
         ).map(([id, label]) => (
           <button

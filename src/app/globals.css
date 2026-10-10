@@ -118,3 +118,9 @@ button {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Korean: wrap between words, not inside them (CSS breaks Hangul anywhere by default). */
+:lang(ko) {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}

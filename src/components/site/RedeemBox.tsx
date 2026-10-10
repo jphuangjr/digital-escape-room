@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { FormattedMessage } from "react-intl";
+import { useT } from "@/i18n/client";
+import { localGameTitle } from "@/lib/games";
 
 /**
  * Enter a purchase code to unlock hosting a game. Not a <form>, so it can sit inside another form.
  * Until Stripe is wired up, codes are the only way to buy a game.
  */
 export function RedeemBox({ gameTitle, onRedeemed }: { gameTitle: string; onRedeemed: (gameId: string) => void }) {
+  const t = useT();
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ tone: "error" | "ok"; text: string } | null>(null);
@@ -23,14 +27,15 @@ export function RedeemBox({ gameTitle, onRedeemed }: { gameTitle: string; onRede
       });
       const data = (await res.json().catch(() => ({}))) as { ok?: boolean; gameId?: string; title?: string; alreadyOwned?: boolean; error?: string };
       if (!res.ok || !data.ok || !data.gameId) {
-        setMsg({ tone: "error", text: data.error ?? "Couldn't redeem that code." });
+        setMsg({ tone: "error", text: data.error ?? t("site.redeemBox.failed") });
         return;
       }
-      setMsg({ tone: "ok", text: data.alreadyOwned ? `You already own ${data.title}.` : `Unlocked ${data.title}. It's yours for good.` });
+      const title = localGameTitle(t, data.gameId);
+      setMsg({ tone: "ok", text: t(data.alreadyOwned ? "site.redeemBox.alreadyOwned" : "site.redeemBox.unlocked", { title }) });
       setCode("");
       onRedeemed(data.gameId);
     } catch {
-      setMsg({ tone: "error", text: "Network trouble. Try again." });
+      setMsg({ tone: "error", text: t("site.error.network") });
     } finally {
       setBusy(false);
     }
@@ -39,7 +44,10 @@ export function RedeemBox({ gameTitle, onRedeemed }: { gameTitle: string; onRede
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-noir-brass/40 bg-noir-bg-3 p-3">
       <p className="text-sm text-noir-ink">
-        Hosting <span className="font-semibold">{gameTitle}</span> needs a purchase code.
+        <FormattedMessage
+          id="site.redeemBox.needsCode"
+          values={{ title: gameTitle, b: (c) => <span className="font-semibold">{c}</span> }}
+        />
       </p>
       <div className="flex gap-2">
         <input
@@ -52,7 +60,7 @@ export function RedeemBox({ gameTitle, onRedeemed }: { gameTitle: string; onRede
             }
           }}
           placeholder="KEY-XXXX-XXXX-XXXX"
-          aria-label="Purchase code"
+          aria-label={t("site.redeemBox.codeAria")}
           autoCapitalize="characters"
           autoCorrect="off"
           spellCheck={false}
@@ -66,7 +74,7 @@ export function RedeemBox({ gameTitle, onRedeemed }: { gameTitle: string; onRede
           disabled={busy || !code.trim()}
           className="min-h-12 shrink-0 rounded-lg bg-noir-brass px-4 font-semibold text-noir-bg active:bg-noir-brass-hi disabled:opacity-50"
         >
-          {busy ? "…" : "Unlock"}
+          {busy ? "…" : t("site.redeemBox.unlock")}
         </button>
       </div>
       {msg && (
@@ -74,7 +82,7 @@ export function RedeemBox({ gameTitle, onRedeemed }: { gameTitle: string; onRede
           {msg.text}
         </p>
       )}
-      <p className="text-xs text-noir-ink-faint">A code unlocks hosting on your account permanently. Joining a friend&apos;s room is always free.</p>
+      <p className="text-xs text-noir-ink-faint">{t("site.redeemBox.note")}</p>
     </div>
   );
 }

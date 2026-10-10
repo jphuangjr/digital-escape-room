@@ -1,17 +1,20 @@
 "use client";
 
+import { useT } from "@/i18n/client";
 import type { GameCtx } from "@/lib/client/game";
-import { describeDiscovery } from "@/lib/client/discoveries";
-import { ColorDot, relativeTime, useNow } from "./shared";
+import { describeDiscovery, discoveryWho } from "@/lib/client/discoveries";
+import { ColorDot, useNow, useRelativeTime } from "./shared";
 
 /** Everything the room has found, newest first: new sites (tap to open) and solved puzzles. */
 export function CaseLog({ ctx }: { ctx: GameCtx }) {
   const now = useNow(30_000);
+  const t = useT();
+  const relativeTime = useRelativeTime();
   const { discoveries } = ctx.state.progress;
   const colors = new Map(ctx.state.players.map((p) => [p.id, p.color]));
 
   if (discoveries.length === 0) {
-    return <p className="py-6 text-center text-sm text-stone-500">Nothing found yet. Start at the beginning.</p>;
+    return <p className="py-6 text-center text-sm text-stone-500">{t("room.caseLog.empty")}</p>;
   }
 
   return (
@@ -24,8 +27,8 @@ export function CaseLog({ ctx }: { ctx: GameCtx }) {
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-sm text-stone-200">
-                <span className="font-semibold">{d.playerId === ctx.state.me.id ? "You" : d.playerName}</span>{" "}
-                {describeDiscovery(d)}
+                <span className="font-semibold">{discoveryWho(d, t, d.playerId === ctx.state.me.id)}</span>{" "}
+                {describeDiscovery(d, t)}
               </span>
               <span className="block text-xs text-stone-500">{relativeTime(d.at, now)}</span>
             </span>
@@ -41,7 +44,7 @@ export function CaseLog({ ctx }: { ctx: GameCtx }) {
                 type="button"
                 onClick={() => ctx.openAddress(d.host)}
                 className="flex min-h-12 w-full items-start gap-3 rounded-md px-1 py-1.5 text-left active:bg-stone-900"
-                aria-label={`Open ${d.host}`}
+                aria-label={t("room.caseLog.openAria", { host: d.host })}
               >
                 {body}
               </button>
