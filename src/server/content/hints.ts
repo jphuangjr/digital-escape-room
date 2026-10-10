@@ -9,6 +9,8 @@ export const HINT_PUZZLES: HintPuzzleId[] = [
   "find-pets",
   "pet-id",
   "intranet-login",
+  "binary-lesson",
+  "admin-console",
   "final-phrase",
 ];
 
@@ -21,6 +23,8 @@ export const HINT_TITLES: Record<HintPuzzleId, string> = {
   "final-phrase": "Proof of life",
   "bonus-pin": "My folder",
   "tools-folder": "My tools",
+  "binary-lesson": "Night school",
+  "admin-console": "Ones and zeros",
 };
 
 /** Ada's voicemails. Tier 1 = nudge, 2 = bigger nudge, 3 = near-answer. */
@@ -54,6 +58,16 @@ const HINTS: Record<HintPuzzleId, [string, string, string]> = {
     "The switch wants proof I'm alive. Only someone who walked my whole road could know it. Three pieces. You already have all of them.",
     "Name, year, number. The name who has the key. The year they lied. The number on the collar. Joined by dashes.",
     "Her first name, the true founding year, Biscuit's ID — lowercase, dashes between. Name-year-number. That's me, still breathing.",
+  ],
+  "binary-lesson": [
+    "Wren teaches a night class at the community college. I took it. My syllabus is still in my tools folder.",
+    "The syllabus points to the class website. Week three is the one about binary. Read the lesson, then take the practice quiz.",
+    "Go to harbourcc.edu/cs110/binary. Use the decoding sheet on the quiz word. It's the first word every programmer types: hello. Pass it and Wren's translator installs into my decoder.",
+  ],
+  "admin-console": [
+    "The memo you need is locked in the admin console. Wren pinned the new password on the dashboard. She writes things down the way she teaches them.",
+    "Those ones and zeros come in fives. Each group of five is one letter: add up the place values with a one in them, sixteen, eight, four, two, one, and A is one. Or let the decoder do it once you've passed her quiz.",
+    "01100 is eight plus four: twelve, L. 00001 is A. Keep going and it spells LANTERN, like the watchman's lamps. Type it into the admin console.",
   ],
   "bonus-pin": [
     "My personal folder is locked with something only family would think of. My sister talks about me more than I'd like.",

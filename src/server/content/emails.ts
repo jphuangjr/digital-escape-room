@@ -93,7 +93,13 @@ const AMBIENT: Ambient[] = [
     id: "vm-ambient-inside",
     when: (p) => p.solved.includes("intranet-login"),
     subject: "Voicemail — 1:02",
-    body: "[server hum] You're inside. I'm sorry about what you're seeing in that log. Founding years, warehouse fires, my father's name. It's all real, and it's all been sanded off. There's a memo. Tap through the black bars. [click]",
+    body: "[server hum] You're inside. I'm sorry about what you're seeing in that log. Founding years, warehouse fires, my father's name. It's all real, and it's all been sanded off. The memo about me is in the admin console. Wren left the password on the dashboard, in ones and zeros. She taught me to read them. [click]",
+  },
+  {
+    id: "vm-ambient-admin",
+    when: (p) => p.solved.includes("admin-console"),
+    subject: "Voicemail — 0:31",
+    body: "[a laugh, barely] Five bits a letter. Wren would give you a gold star. Lamps in the Trust office, the night of the fire. She never forgot that line either. There's a memo in there with my name on it. Tap through the black bars. [click]",
   },
   {
     id: "vm-ambient-alive",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { AttemptResponse, Block, PuzzleId } from "@/lib/types";
+import type { AttemptResponse, Block, PuzzleId, SiteFormId } from "@/lib/types";
 import { BlockList, type RenderEnv } from "./SiteRenderer";
 
 type Feedback = { tone: "success" | "error" | "info"; text: string } | null;
@@ -82,11 +82,13 @@ export function SiteForm({
   prompt,
   env,
 }: {
-  form: "shift-key" | "intranet-login" | "final-phrase";
+  form: SiteFormId;
   prompt: string;
   env: RenderEnv;
 }) {
   if (form === "shift-key") return <ShiftKeyForm prompt={prompt} env={env} />;
+  if (form === "binary-quiz") return <BinaryQuizForm code={prompt} env={env} />;
+  if (form === "admin-login") return <AdminLoginForm prompt={prompt} env={env} />;
   if (form === "intranet-login") return <LoginForm prompt={prompt} env={env} />;
   return <FinalPhraseForm prompt={prompt} env={env} />;
 }
@@ -254,6 +256,95 @@ function FinalPhraseForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         className={`min-h-12 w-full font-bold uppercase tracking-widest ${t.button} disabled:opacity-60`}
       >
         {a.busy ? "Transmitting…" : "Transmit"}
+      </button>
+      <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
+    </form>
+  );
+}
+
+/** harbourcc.edu practice quiz. `code` is the binary word to decode. */
+function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
+  const { t } = env;
+  const a = useAttempt(env, "binary-lesson");
+  const [v, setV] = useState("");
+  return (
+    <form
+      className={`${t.card} space-y-3`}
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (v.trim()) void a.submit(v);
+      }}
+    >
+      <p className={`text-xs font-semibold uppercase tracking-wider ${t.muted}`}>Decode this word</p>
+      <p className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-lg font-bold tracking-wider">
+        {code.split(" ").map((g, i) => (
+          <span key={i}>{g}</span>
+        ))}
+      </p>
+      {a.solved ? (
+        <p className="text-sm font-semibold text-emerald-600">✓ Passed. Open the Decoder and look for the Binary tab.</p>
+      ) : (
+        <>
+          <label className="block text-sm">
+            Your answer
+            <input
+              {...inputProps}
+              value={v}
+              onChange={(e) => setV(e.target.value)}
+              enterKeyHint="send"
+              className={`mt-1 h-11 w-full px-3 text-base ${t.input}`}
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={a.busy || a.retryLeft > 0 || !v.trim()}
+            className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
+          >
+            {a.busy ? "Checking…" : "Check answer"}
+          </button>
+        </>
+      )}
+      {!a.solved && <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />}
+    </form>
+  );
+}
+
+function AdminLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
+  const { t } = env;
+  const a = useAttempt(env, "admin-console");
+  const [pass, setPass] = useState("");
+  const [show, setShow] = useState(false);
+  return (
+    <form
+      className={`${t.card} mx-auto max-w-sm space-y-3`}
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (pass.trim()) void a.submit(pass);
+      }}
+    >
+      <label className="block text-sm font-semibold" htmlFor="admin-password">
+        {prompt}
+      </label>
+      <div className="flex gap-2">
+        <input
+          id="admin-password"
+          {...inputProps}
+          type={show ? "text" : "password"}
+          value={pass}
+          onChange={(e) => setPass(e.target.value)}
+          enterKeyHint="go"
+          className={`h-11 min-w-0 flex-1 px-3 text-base ${t.input}`}
+        />
+        <button type="button" onClick={() => setShow((v) => !v)} aria-pressed={show} className={`min-h-11 px-3 text-sm ${t.buttonGhost}`}>
+          {show ? "Hide" : "Show"}
+        </button>
+      </div>
+      <button
+        type="submit"
+        disabled={a.busy || a.retryLeft > 0 || !pass.trim()}
+        className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
+      >
+        {a.busy ? "Checking…" : "Unlock console"}
       </button>
       <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
     </form>

@@ -13,6 +13,8 @@ export const HINT_LABELS: { id: HintPuzzleId; label: string }[] = [
   { id: "find-pets", label: "The forum trail" },
   { id: "pet-id", label: "Biscuit" },
   { id: "intranet-login", label: "The intranet" },
+  { id: "binary-lesson", label: "Wren's class" },
+  { id: "admin-console", label: "The admin console" },
   { id: "final-phrase", label: "The switch" },
 ];
 

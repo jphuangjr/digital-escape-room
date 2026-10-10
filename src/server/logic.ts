@@ -62,7 +62,15 @@ export function validateColor(raw: unknown): string | null {
 // ---------- Progress ----------
 
 export const INITIAL_APPS: AppId[] = ["browser", "notes", "email", "files"];
-export const PUZZLE_IDS: PuzzleId[] = ["tools-folder", "shift-key", "intranet-login", "final-phrase", "bonus-pin"];
+export const PUZZLE_IDS: PuzzleId[] = [
+  "tools-folder",
+  "shift-key",
+  "intranet-login",
+  "binary-lesson",
+  "admin-console",
+  "final-phrase",
+  "bonus-pin",
+];
 export const FRAGMENT_TAGS: FragmentTag[] = ["name", "year", "id", "cipher", "address"];
 
 export function initialProgress(): RoomProgress {

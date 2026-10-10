@@ -52,6 +52,32 @@ Fee: paid in advance. Questions: none, apparently.`,
   },
 ];
 
+// In Ada's Tools. Points to the binary lesson; contains no answers.
+const SYLLABUS: FileItem = {
+  name: "cs110_syllabus.txt",
+  body: `HARBOUR COMMUNITY COLLEGE — EVENING STUDIES
+CS 110: How Computers Count
+Tuesdays 6:30–8:30pm, Room 12
+Instructor: W. Okafor
+
+Week 1  What is a computer, really?       (handout)
+Week 2  Switches: on and off              (handout)
+Week 3  Binary: counting with two fingers
+        Lesson + practice quiz online:
+        harbourcc.edu/cs110/binary
+        Pass the quiz to install the class
+        Binary translator on your machine.
+Week 4  Passwords, and why yours is bad
+
+Bring a pencil. Laptops welcome. Phones face down.
+
+---
+(Ada, in the margin:)
+W. writes EVERYTHING in her class code now.
+Shopping lists. Door codes. Probably passwords.
+Learn it.`,
+};
+
 const PIN_LEN = 4;
 
 function PinPad({ ctx }: { ctx: GameCtx }) {
@@ -247,7 +273,7 @@ type View =
   | { kind: "root" }
   | { kind: "personal" }
   | { kind: "tools" }
-  | { kind: "file"; file: FileItem; from: "root" | "personal" };
+  | { kind: "file"; file: FileItem; from: "root" | "personal" | "tools" };
 
 export function FilesApp({ ctx }: { ctx: GameCtx }) {
   const { state } = ctx;
@@ -309,7 +335,7 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
   );
 
   if (view.kind === "file") {
-    const back = () => setView(view.from === "root" ? { kind: "root" } : { kind: "personal" });
+    const back = () => setView({ kind: view.from });
     return (
       <div className="flex h-full min-h-0 flex-col bg-zinc-950 text-zinc-100">
         {header(view.file.name, back)}
@@ -331,7 +357,8 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
             <SecurityQuestion ctx={ctx} />
           ) : (
             <ul className="divide-y divide-zinc-900">
-              {row("🧭", "Decoder", "app · Caesar shift and A1Z26", () => ctx.openApp("decoder"))}
+              {row("🧭", "Decoder", "app · Caesar shift, A1Z26 and binary", () => ctx.openApp("decoder"))}
+              {row("📄", SYLLABUS.name, "text file", () => setView({ kind: "file", file: SYLLABUS, from: "tools" }))}
             </ul>
           )}
         </div>

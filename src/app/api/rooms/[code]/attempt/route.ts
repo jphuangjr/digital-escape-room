@@ -8,7 +8,16 @@ import { track } from "@/server/analytics";
 import { checkAnswer } from "@/server/content";
 import { recordFinishedCase } from "@/server/cases";
 
-const PREREQS: Partial<Record<PuzzleId, PuzzleId>> = { "final-phrase": "intranet-login", "tools-folder": "bonus-pin" };
+const PREREQS: Partial<Record<PuzzleId, PuzzleId>> = {
+  "final-phrase": "admin-console",
+  "admin-console": "intranet-login",
+  "tools-folder": "bonus-pin",
+};
+
+const SOLVED_MESSAGES: Partial<Record<PuzzleId, string>> = {
+  "binary-lesson": "Quiz passed. The Binary translator is now in your Decoder.",
+  "admin-console": "Admin console unlocked.",
+};
 
 export async function POST(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
@@ -71,6 +80,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
       };
       if (puzzleId === "bonus-pin" && !p.badges.includes("compass")) p.badges = [...p.badges, "compass"];
       if (puzzleId === "tools-folder" && !p.unlockedApps.includes("decoder")) p.unlockedApps = [...p.unlockedApps, "decoder"];
+      if (puzzleId === "binary-lesson" && !p.badges.includes("binary")) p.badges = [...p.badges, "binary"];
       const data =
         puzzleId === "final-phrase" && status === "playing"
           ? { status: "voting", voteDeadline: new Date(Date.now() + VOTE_DURATION_MS), finishedAt: new Date() }
@@ -98,7 +108,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
 
   return json<AttemptResponse>({
     correct,
-    message: correct ? undefined : "That's not it.",
+    message: correct ? SOLVED_MESSAGES[puzzleId] : "That's not it.",
     progress: nextProgress,
   });
 }

@@ -39,12 +39,12 @@ Tone: noir. Motif: a compass with a broken needle (7 notches) appears on every s
 | Notes | Private + public notes | Start |
 | Email | Sister's engagement email, Ada's voicemail hints | Start |
 | Files | "Ada's Personal" bonus folder (PIN-locked) | Start |
-| Decoder | Caesar shift and A1Z26 tools | Solving the "Ada's Tools" folder in Files (see §9) |
+| Decoder | Caesar shift and A1Z26 tools; Binary tab after the CS 110 quiz (see §9a) | Solving the "Ada's Tools" folder in Files (see §9) |
 Mobile: each app full-screen with bottom dock. Desktop: draggable windows optional.
 
 ## 7. Puzzle graph
 Site 1 (Meridian) → Branch A: Site 2 (blog) → cipher shift key; Branch B: Site 3 (forum) → pets address + pet name.
-Site 4 (lost pets) needs both → pet ID → Site 5 (intranet) → Site 6 (dead man's switch) → room vote → ending.
+Site 4 (lost pets) needs both → pet ID → Site 5 (intranet) → admin console (binary password; §9a) → Site 6 (dead man's switch) → room vote → ending.
 
 ## 8. Answer key (SERVER ONLY)
 Fragments: A = `wren`, B = `1987`, C = `0412`. Final phrase `wren-1987-0412`.
@@ -57,7 +57,7 @@ Site 3 RunnerBoard (`runnerboard.net`) [Branch B]: Real user `compass_needle`: 4
 
 Site 4 Lost Paws (`lostpaws.net`): Listing descriptions are Caesar shift 7. Decoded message: "WREN HAS THE KEY. VAULT CODE IS THE YEAR THEY LIED." Generate ciphertext from plaintext with a utility; don't hand-encode. Biscuit (tabby) listing shows pet ID 0412 (fragment C).
 
-Site 5 Intranet (`intranet.meridian-inst.net`): login username `wren.okafor`, password `19870412`. Contains record-diff evidence (before/after historical entries) and a redacted memo; tap-to-reveal discloses address of Site 6.
+Site 5 Intranet (`intranet.meridian-inst.net`): login username `wren.okafor`, password `19870412`. Contains record-diff evidence (before/after historical entries). The dashboard pins a Systems notice from W. Okafor with the admin password in 5-bit binary. `/admin` (Systems Admin console) asks for that password (`lantern`, shown as `01100 00001 01110 10100 00101 10010 01110`) and holds the badge log and the redacted memo; tap-to-reveal discloses address of Site 6. Site 6 and the final phrase require the admin console.
 
 Site 6 Dead man's switch (`switch.ada-voss.net`): cosmetic countdown, input `wren-1987-0412`. Success proves Ada is alive and opens room vote.
 
@@ -66,6 +66,9 @@ Normalization: trim, lowercase, collapse whitespace, treat `_`/`-`/space as equi
 ## 9. Opening puzzle: Ada's Personal → Ada's Tools → Decoder
 Files → "Ada's Personal" PIN = 0314, found in Email: sister's engagement email mentions Ada's birthday March 14. Contents: voicemail transcripts, lore about sister, Wren, Institute; reward: epilogue + compass badge.
 Files → "Ada's Tools" asks "Who was Dad's weather?" Answer `mara` (notes_on_mara.txt in Ada's Personal: "Dad called her his weather"). Requires Ada's Personal solved first. Solving it unlocks the Decoder for the room, so players have the A1Z26 tool before RunnerBoard.
+
+## 9a. Binary: Wren's night class
+Ada's Tools also holds `cs110_syllabus.txt` (Harbour Community College, CS 110, instructor W. Okafor). Week 3 points to `harbourcc.edu/cs110/binary`: a lesson on 5-bit place values (16 8 4 2 1, A = 1), a tap-the-switches demo, a 26-row decoding sheet and a practice quiz (`01000 00101 01100 01100 01111` = `hello`). Passing the quiz (puzzle `binary-lesson`) adds the `binary` badge, which installs a Binary tab in the Decoder for the whole room. The dashboard's View Source also links the class site, so players who skipped the syllabus can still find it.
 
 ## 10. Hints
 Ada's voicemails arrive in shared Email app. 3 tiers per puzzle (nudge, bigger nudge, near-answer). Any player requests next tier; unlocks for whole room. Cooldown 2 min per puzzle between tiers.

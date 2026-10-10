@@ -32,6 +32,6 @@ function home(progress: RoomProgress): SitePage {
 }
 
 export function resolveSwitch(path: string, progress: RoomProgress): SitePage | null {
-  if (!progress.solved.includes("intranet-login")) return null;
+  if (!progress.solved.includes("admin-console")) return null;
   return path === "" ? home(progress) : null;
 }

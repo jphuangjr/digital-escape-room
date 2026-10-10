@@ -199,6 +199,38 @@ function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
       return <Countdown seconds={b.seconds} label={b.label} t={t} />;
     case "form":
       return <SiteForm form={b.form} prompt={b.prompt} env={env} />;
+    case "table":
+      return (
+        <figure className={t.p}>
+          {b.caption && <figcaption className={`mb-2 text-sm ${t.muted}`}>{b.caption}</figcaption>}
+          <div className={`max-h-96 overflow-auto overscroll-contain ${t.card} p-0`}>
+            <table className="w-full border-collapse text-left text-sm">
+              <thead className="sticky top-0">
+                <tr>
+                  {b.columns.map((c) => (
+                    <th key={c} className={`px-3 py-2 font-semibold ${t.frame}`}>
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {b.rows.map((r, i) => (
+                  <tr key={i} className="border-t border-current/10">
+                    {r.map((c, j) => (
+                      <td key={j} className="whitespace-nowrap px-3 py-1.5 font-mono tabular-nums">
+                        {c}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </figure>
+      );
+    case "bits":
+      return <BitsWidget t={t} />;
     case "notice": {
       const tone = {
         info: "border-sky-500/60 bg-sky-500/10",
@@ -401,6 +433,39 @@ function fmt(s: number) {
   const m = Math.floor((s % 3600) / 60);
   const sec = s % 60;
   return [h, m, sec].map((n) => String(n).padStart(2, "0")).join(":");
+}
+
+const PLACE_VALUES = [16, 8, 4, 2, 1];
+
+/** Tap-to-flip place-value demo for the binary lesson. Generic: 5 bits, A = 1. */
+function BitsWidget({ t }: { t: ThemeStyle }) {
+  const [bits, setBits] = useState([0, 1, 0, 0, 0]);
+  const value = bits.reduce((sum, b, i) => sum + b * PLACE_VALUES[i], 0);
+  const letter = value >= 1 && value <= 26 ? String.fromCharCode(64 + value) : "?";
+  return (
+    <div className={`${t.card} space-y-3`}>
+      <div className="grid grid-cols-5 gap-2">
+        {bits.map((b, i) => (
+          <button
+            key={i}
+            type="button"
+            aria-pressed={b === 1}
+            aria-label={`Switch worth ${PLACE_VALUES[i]}, ${b ? "on" : "off"}`}
+            onClick={() => setBits((cur) => cur.map((x, j) => (j === i ? 1 - x : x)))}
+            className={`flex min-h-16 flex-col items-center justify-center gap-0.5 font-mono ${b ? t.button : t.buttonGhost}`}
+          >
+            <span className="text-2xl font-bold">{b}</span>
+            <span className="text-[11px] opacity-80">{PLACE_VALUES[i]}</span>
+          </button>
+        ))}
+      </div>
+      <p aria-live="polite" className="text-center font-mono text-lg">
+        {bits.join("")} = {bits.map((b, i) => (b ? PLACE_VALUES[i] : null)).filter(Boolean).join(" + ") || "0"} = {value} ={" "}
+        <span className={`text-2xl font-bold ${t.accent}`}>{letter}</span>
+      </p>
+      {letter === "?" && <p className={`text-center text-xs ${t.muted}`}>{value === 0 ? "All off is zero, not a letter." : "Past 26: no letter for that one."}</p>}
+    </div>
+  );
 }
 
 function Countdown({ seconds, label, t }: { seconds: number; label: string; t: ThemeStyle }) {

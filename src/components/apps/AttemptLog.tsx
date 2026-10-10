@@ -8,6 +8,8 @@ export const PUZZLE_LABELS: Record<PuzzleId, string> = {
   "tools-folder": "Ada's Tools",
   "shift-key": "Lost Paws cipher",
   "intranet-login": "Intranet login",
+  "binary-lesson": "Binary quiz",
+  "admin-console": "Admin console",
   "final-phrase": "Dead man's switch",
   "bonus-pin": "Ada's Personal PIN",
 };

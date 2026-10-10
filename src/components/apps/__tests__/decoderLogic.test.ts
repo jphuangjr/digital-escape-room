@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   a1z26ToLetters,
+  binaryToLetters,
+  lettersToBinary,
+  looksBinary,
   caesarDecode,
   caesarShift,
   caesarWheel,
@@ -65,5 +68,23 @@ describe("a1z26", () => {
     expect(looksNumeric("12:15")).toBe(true);
     expect(looksNumeric("abc")).toBe(false);
     expect(looksNumeric("")).toBe(false);
+  });
+});
+
+describe("binary", () => {
+  it("decodes 5-bit groups with any separators", () => {
+    expect(binaryToLetters("01000 00101 01100 01100 01111")).toBe("HELLO");
+    expect(binaryToLetters("01000,00101-01100")).toBe("HEL");
+    expect(binaryToLetters("0100000101")).toBe("HE");
+    expect(binaryToLetters("00000 11111")).toBe("??");
+    expect(binaryToLetters("")).toBe("");
+  });
+  it("encodes letters", () => {
+    expect(lettersToBinary("Hi there")).toBe("01000 01001 / 10100 01000 00101 10010 00101");
+  });
+  it("detects binary input", () => {
+    expect(looksBinary("01110 00101")).toBe(true);
+    expect(looksBinary("abc")).toBe(false);
+    expect(looksBinary("12 15")).toBe(false);
   });
 });

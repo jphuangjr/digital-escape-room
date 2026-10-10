@@ -8,7 +8,9 @@ export type PuzzleId =
   | "intranet-login" // intranet login form (username + password joined as "user:pass")
   | "final-phrase" // switch.ada-voss.net input
   | "bonus-pin" // Files app "Ada's Personal" PIN
-  | "tools-folder"; // Files app "Ada's Tools" security question; unlocks the Decoder
+  | "tools-folder" // Files app "Ada's Tools" security question; unlocks the Decoder
+  | "binary-lesson" // harbourcc.edu practice quiz; installs the Binary tab in the Decoder
+  | "admin-console"; // the Vault's Systems Admin console (password shown in binary on the dashboard)
 
 /** Puzzles that have hints. Includes navigation milestones that aren't attempt-validated. */
 export type HintPuzzleId =
@@ -19,7 +21,9 @@ export type HintPuzzleId =
   | "intranet-login"
   | "final-phrase"
   | "bonus-pin"
-  | "tools-folder";
+  | "tools-folder"
+  | "binary-lesson"
+  | "admin-console";
 
 export type FragmentTag = "name" | "year" | "id" | "cipher" | "address";
 export type Ending = "EXPOSE" | "PROTECT";
@@ -147,12 +151,16 @@ export type Block =
   | { type: "diff"; label: string; before: string; after: string }
   | { type: "memo"; heading: string; parts: ({ text: string } | { redacted: string })[] }
   | { type: "countdown"; seconds: number; label: string }
-  | { type: "form"; form: "shift-key" | "intranet-login" | "final-phrase"; prompt: string }
+  | { type: "form"; form: SiteFormId; prompt: string }
+  | { type: "table"; caption?: string; columns: string[]; rows: string[][] } // wide tables scroll in their own box
+  | { type: "bits" } // interactive 5-bit place-value widget (generic teaching tool, no answers)
   | { type: "notice"; tone: "info" | "warning" | "danger" | "success"; text: string }
   | { type: "footer"; text: string }
   | { type: "compass" }; // the broken-needle compass motif (7 notches)
 
-export type SiteTheme = "meridian" | "drift" | "runnerboard" | "lostpaws" | "intranet" | "switch" | "honeypot";
+export type SiteFormId = "shift-key" | "intranet-login" | "final-phrase" | "binary-quiz" | "admin-login";
+
+export type SiteTheme = "meridian" | "drift" | "runnerboard" | "lostpaws" | "intranet" | "switch" | "honeypot" | "harbourcc";
 
 export interface SitePage {
   address: string; // canonical, e.g. "meridian-inst.net/about"
