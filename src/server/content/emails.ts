@@ -12,8 +12,8 @@ export function baseEmails(loc: Locale): EmailDTO[] {
     {
       id: "email-ada-last",
       from: "Ada Voss <ada@ada-voss.net>",
-      subject: x({ en: "(no subject)", ko: "(제목 없음)", "zh-TW": "（無主旨）" }),
-      date: x({ en: "2 days ago, 23:57", ko: "2일 전 23:57", "zh-TW": "2 天前 23:57" }),
+      subject: x({ en: "(no subject)", ko: "(제목 없음)", "zh-TW": "（無主旨）", es: "(sin asunto)" }),
+      date: x({ en: "2 days ago, 23:57", ko: "2일 전 23:57", "zh-TW": "2 天前 23:57", es: "hace 2 días, 23:57" }),
       kind: "email",
       body: x({
         en: [
@@ -43,6 +43,15 @@ export function baseEmails(loc: Locale): EmailDTO[] {
           "",
           "附註：去任何地方之前，先把我的工具帶上。它們在這台筆電的檔案（Files）裡，用家人才懂的方式鎖著。瑪拉（Mara）會告訴你的，比她自己打算說的還多。",
         ].join("\n"),
+        es: [
+          "Si estás leyendo esto, me acerqué demasiado. Empieza por el principio.",
+          "",
+          "meridian-inst.net",
+          "",
+          "— A.",
+          "",
+          "P. D.: Antes de ir a cualquier parte, llévate mis herramientas. Están en Archivos (Files), en esta laptop, cerradas como la familia cierra las cosas. Mara te contará más de lo que pretende.",
+        ].join("\n"),
       }),
     },
     {
@@ -52,8 +61,9 @@ export function baseEmails(loc: Locale): EmailDTO[] {
         en: "The job — and some news I didn't want to share like this",
         ko: "의뢰 건, 그리고 이런 식으로 전하고 싶지 않았던 소식",
         "zh-TW": "委託的事，還有一個我不想用這種方式告訴您的消息",
+        es: "El encargo — y una noticia que no quería darle así",
       }),
-      date: x({ en: "Yesterday, 08:14", ko: "어제 08:14", "zh-TW": "昨天 08:14" }),
+      date: x({ en: "Yesterday, 08:14", ko: "어제 08:14", "zh-TW": "昨天 08:14", es: "Ayer, 08:14" }),
       kind: "email",
       body: x({
         en: [
@@ -95,13 +105,26 @@ export function baseEmails(loc: Locale): EmailDTO[] {
           "",
           "瑪拉",
         ].join("\n"),
+        es: [
+          "Hola:",
+          "",
+          "Gracias por aceptar este encargo. Sé que la policía cree que no es nada. Siguen diciendo 'mujer adulta, licencia prolongada, ya aparecerá'. El Instituto dijo lo mismo, con exactamente las mismas palabras, y esa es la mitad de la razón por la que no les creo.",
+          "",
+          "Ada y yo no hablamos de verdad desde hace dos años. Fue una pelea estúpida por los papeles de nuestro padre. Ella creía que él había estado metido en algo en el puerto; yo le dije que veía fantasmas en los libros de cuentas. Daría cualquier cosa por poder volver atrás y tener esa conversación de nuevo.",
+          "",
+          "La otra razón por la que le escribo: me voy a casar. Tom me lo propuso el mes pasado y reservamos la fiesta para el 14 de marzo. Es el cumpleaños de Ada. Lo elegí a propósito. Pensé que si la invitaba el día de su propio cumpleaños no podría decir que no. Ella debería estar en mi fiesta de compromiso el día de su cumpleaños, el 14 de marzo, riéndose del terrible discurso de Tom. Tiene que estar ahí.",
+          "",
+          "Le reenvié su último correo. Le di los datos para entrar en su laptop. Encuentre lo que encuentre, por favor, dígame la verdad. Aunque sea mala.",
+          "",
+          "Mara",
+        ].join("\n"),
       }),
     },
     {
       id: "email-institute-pr",
       from: "Office of the Director, Meridian Institute <press@meridian-inst.net>",
-      subject: x({ en: "Statement regarding Dr. A. Voss", ko: "A. 보스 박사 관련 입장문", "zh-TW": "關於 A. 佛斯博士之聲明" }),
-      date: x({ en: "Yesterday, 16:02", ko: "어제 16:02", "zh-TW": "昨天 16:02" }),
+      subject: x({ en: "Statement regarding Dr. A. Voss", ko: "A. 보스 박사 관련 입장문", "zh-TW": "關於 A. 佛斯博士之聲明", es: "Declaración sobre la Dra. A. Voss" }),
+      date: x({ en: "Yesterday, 16:02", ko: "어제 16:02", "zh-TW": "昨天 16:02", es: "Ayer, 16:02" }),
       kind: "email",
       body: x({
         en: [
@@ -134,6 +157,16 @@ export function baseEmails(loc: Locale): EmailDTO[] {
           "秉持連續性，",
           "院長辦公室 敬啟",
         ].join("\n"),
+        es: [
+          "A quien corresponda:",
+          "",
+          "El Instituto Meridian está al tanto de las especulaciones sobre nuestra colega, la Dra. Ada Voss. Podemos confirmar que la Dra. Voss se encuentra de licencia prolongada por motivos personales. Solicitamos que se respete su privacidad y la de su familia.",
+          "",
+          "Los registros del Instituto están completos, verificados y son definitivos. No comentamos rumores.",
+          "",
+          "Con continuidad,",
+          "La Oficina del Director",
+        ].join("\n"),
       }),
     },
   ];
@@ -150,68 +183,74 @@ const AMBIENT: Ambient[] = [
   {
     id: "vm-ambient-drift",
     when: (p) => p.visitedSites.some((s) => s.startsWith("thedrift.blog")),
-    subject: { en: "Voicemail — 0:31", ko: "음성 메시지 — 0:31", "zh-TW": "語音留言 — 0:31" },
+    subject: { en: "Voicemail — 0:31", ko: "음성 메시지 — 0:31", "zh-TW": "語音留言 — 0:31", es: "Mensaje de voz — 0:31" },
     body: {
       en: "[static] ...you found the notebook. Good. I wrote it in order so someone could follow me. Don't let the recipes distract you — those were for Mara. [click]",
       ko: "[잡음] ...노트를 찾았구나. 잘했어. 누군가 날 따라올 수 있게 순서대로 적어 뒀어. 레시피에 한눈팔지 마. 그건 마라 주려고 쓴 거야. [딸깍]",
       "zh-TW": "[雜訊] ……你找到那本筆記了。很好。我照順序寫，就是為了讓人能跟上我。別被食譜分心——那些是寫給瑪拉的。[喀]",
+      es: "[estática] ...encontraste el cuaderno. Bien. Lo escribí en orden para que alguien pudiera seguirme. No dejes que las recetas te distraigan: eran para Mara. [clic]",
     },
   },
   {
     id: "vm-ambient-trapdoor",
     when: (p) => p.visitedSites.some((s) => s.startsWith("trapdoor.net")),
-    subject: { en: "Voicemail — 0:18", ko: "음성 메시지 — 0:18", "zh-TW": "語音留言 — 0:18" },
+    subject: { en: "Voicemail — 0:18", ko: "음성 메시지 — 0:18", "zh-TW": "語音留言 — 0:18", es: "Mensaje de voz — 0:18" },
     body: {
       en: "[wind] They built that door for people like you. Don't take it personally. Go back to the forum. My needle points true; theirs only points back at them. [click]",
       ko: "[바람 소리] 그 문은 너 같은 사람 잡으려고 만든 거야. 기분 나빠하지 마. 포럼으로 돌아가. 내 바늘은 진실을 가리켜. 그들 바늘은 자기들만 가리키고. [딸깍]",
       "zh-TW": "[風聲] 那扇門就是為你這種人蓋的。別往心裡去。回論壇去。我的指針指向真實；他們的只會指回他們自己。[喀]",
+      es: "[viento] Construyeron esa puerta para gente como tú. No te lo tomes personal. Vuelve al foro. Mi aguja apunta a la verdad; la suya solo apunta de vuelta hacia ellos. [clic]",
     },
   },
   {
     id: "vm-ambient-decoded",
     when: (p) => p.solved.includes("shift-key"),
-    subject: { en: "Voicemail — 0:44", ko: "음성 메시지 — 0:44", "zh-TW": "語音留言 — 0:44" },
+    subject: { en: "Voicemail — 0:44", ko: "음성 메시지 — 0:44", "zh-TW": "語音留言 — 0:44", es: "Mensaje de voz — 0:44" },
     body: {
       en: "[keyboard clatter] Seven notches. You turned the dial. Wren has the key — she gave it to me when she realised they'd erased her face. The vault code is the year they lied. Look at the bottom of their pages, where nobody reads. [click]",
       ko: "[키보드 소리] 눈금 일곱 개. 다이얼을 돌렸구나. 열쇠는 렌(Wren)이 갖고 있어. 그들이 자기 얼굴을 지웠다는 걸 알았을 때 나한테 넘겨줬지. 볼트 코드는 그들이 거짓말한 연도야. 아무도 안 읽는 곳, 그들 페이지 맨 아래를 봐. [딸깍]",
       "zh-TW": "[鍵盤敲擊聲] 七道刻痕。你轉動了轉盤。鑰匙在芮恩（Wren）手上——她發現他們抹掉了她的臉之後，就把它交給了我。金庫密碼是他們說謊的那個年份。去看他們頁面的最底下，沒有人會讀的地方。[喀]",
+      es: "[tecleo] Siete muescas. Giraste el dial. Wren tiene la llave: me la dio cuando se dio cuenta de que le habían borrado la cara. El código de la Bóveda es el año en que mintieron. Mira al pie de sus páginas, donde nadie lee. [clic]",
     },
   },
   {
     id: "vm-ambient-inside",
     when: (p) => p.solved.includes("intranet-login"),
-    subject: { en: "Voicemail — 1:02", ko: "음성 메시지 — 1:02", "zh-TW": "語音留言 — 1:02" },
+    subject: { en: "Voicemail — 1:02", ko: "음성 메시지 — 1:02", "zh-TW": "語音留言 — 1:02", es: "Mensaje de voz — 1:02" },
     body: {
       en: "[server hum] You're inside. I'm sorry about what you're seeing in that log. Founding years, warehouse fires, my father's name. It's all real, and it's all been sanded off. The memo about me is in the admin console. Wren left the password on the dashboard, in ones and zeros. She taught me to read them. [click]",
       ko: "[서버 웅웅거리는 소리] 들어왔구나. 그 로그에서 보고 있는 것들, 미안해. 설립 연도, 창고 화재, 우리 아버지 이름. 전부 진짜고, 전부 깎여 나갔어. 나에 관한 메모는 관리자 콘솔에 있어. 렌이 대시보드에 비밀번호를 남겨 뒀어. 0과 1로. 그걸 읽는 법은 렌이 나한테 가르쳐 줬어. [딸깍]",
       "zh-TW": "[伺服器嗡嗡聲] 你進來了。抱歉讓你看到那份紀錄裡的東西。創立年份、倉庫火災、我父親的名字。全都是真的，也全都被磨掉了。關於我的那份備忘錄在管理主控台裡。芮恩把密碼留在儀表板上，用一和零寫的。是她教我怎麼讀的。[喀]",
+      es: "[zumbido de servidores] Estás dentro. Siento lo que estás viendo en ese registro. Años de fundación, incendios de almacenes, el nombre de mi padre. Todo es real, y todo lo han ido lijando. El memorándum sobre mí está en la consola de administración. Wren dejó la contraseña en el panel, en unos y ceros. Ella me enseñó a leerlos. [clic]",
     },
   },
   {
     id: "vm-ambient-admin",
     when: (p) => p.solved.includes("admin-console"),
-    subject: { en: "Voicemail — 0:31", ko: "음성 메시지 — 0:31", "zh-TW": "語音留言 — 0:31" },
+    subject: { en: "Voicemail — 0:31", ko: "음성 메시지 — 0:31", "zh-TW": "語音留言 — 0:31", es: "Mensaje de voz — 0:31" },
     body: {
       en: "[a laugh, barely] Five bits a letter. Wren would give you a gold star. Lamps in the Trust office, the night of the fire. She never forgot that line either. There's a memo in there with my name on it. Tap through the black bars. [click]",
       ko: "[아주 작게 웃는 소리] 글자 하나에 5비트. 렌이었으면 너한테 금별 스티커 붙여 줬을 거야. 화재 당일 밤, 트러스트 사무실의 등불. 렌도 그 구절은 절대 못 잊었어. 거기 내 이름이 적힌 메모가 있어. 검은 줄을 눌러서 열어 봐. [딸깍]",
       "zh-TW": "[一聲幾乎聽不見的笑] 一個字母五個位元。芮恩會給你一顆金星。火災那晚，港灣信託辦公室裡的燈。她也從來沒忘記那一句。裡面有一份寫著我名字的備忘錄。點開那些黑條。[喀]",
+      es: "[una risa, apenas] Cinco bits por letra. Wren te daría una estrellita dorada. Faroles en la oficina del Fideicomiso, la noche del incendio. Ella tampoco olvidó nunca esa frase. Ahí dentro hay un memorándum con mi nombre. Toca las barras negras. [clic]",
     },
   },
   {
     id: "vm-ambient-alive",
     when: (p) => p.solved.includes("final-phrase"),
-    subject: { en: "Voicemail — 0:52", ko: "음성 메시지 — 0:52", "zh-TW": "語音留言 — 0:52" },
+    subject: { en: "Voicemail — 0:52", ko: "음성 메시지 — 0:52", "zh-TW": "語音留言 — 0:52", es: "Mensaje de voz — 0:52" },
     body: {
       en: "[a breath, close to the phone] Hi. It's really me. Not a recording this time. Thank you. Now — you and the people with you get to decide what happens next. I'll live with it either way. [click]",
       ko: "[수화기 가까이서 숨소리] 안녕. 정말 나야. 이번엔 녹음 아니야. 고마워. 이제 너랑 같이 있는 사람들이 다음에 무슨 일이 일어날지 정해. 어느 쪽이든 받아들일게. [딸깍]",
       "zh-TW": "[貼著話筒的一聲呼吸] 嗨。真的是我。這次不是錄音。謝謝你。現在——你和你身邊的人可以決定接下來會發生什麼。不管是哪一種，我都會承受。[喀]",
+      es: "[una respiración, cerca del teléfono] Hola. Soy yo, de verdad. Esta vez no es una grabación. Gracias. Ahora, tú y quienes están contigo deciden lo que pasa después. Lo aceptaré, sea lo que sea. [clic]",
     },
   },
 ];
 
 export function voicemailsFor(progress: RoomProgress, hints: HintDTO[], loc: Locale): EmailDTO[] {
   const x = pick(loc);
-  const unknown = x({ en: "Unknown number", ko: "알 수 없는 번호", "zh-TW": "未知號碼" });
+  const unknown = x({ en: "Unknown number", ko: "알 수 없는 번호", "zh-TW": "未知號碼", es: "Número desconocido" });
   const out: EmailDTO[] = [];
   for (const a of AMBIENT) {
     if (a.when(progress)) out.push({ id: a.id, from: ADA, subject: x(a.subject), date: unknown, body: x(a.body), kind: "voicemail" });
@@ -227,9 +266,9 @@ export function voicemailsFor(progress: RoomProgress, hints: HintDTO[], loc: Loc
     out.push({
       id: `vm-hint-${h.puzzleId}-${h.tier}`,
       from: ADA,
-      subject: x({ en: `Voicemail: ${title} (${h.tier}/3)`, ko: `음성 메시지: ${title} (${h.tier}/3)`, "zh-TW": `語音留言：${title}（${h.tier}/3）` }),
+      subject: x({ en: `Voicemail: ${title} (${h.tier}/3)`, ko: `음성 메시지: ${title} (${h.tier}/3)`, "zh-TW": `語音留言：${title}（${h.tier}/3）`, es: `Mensaje de voz: ${title} (${h.tier}/3)` }),
       date: formatWhen(h.unlockedAt, unknown),
-      body: x({ en: `[recording] ${h.text} [click]`, ko: `[녹음] ${h.text} [딸깍]`, "zh-TW": `[錄音] ${h.text} [喀]` }),
+      body: x({ en: `[recording] ${h.text} [click]`, ko: `[녹음] ${h.text} [딸깍]`, "zh-TW": `[錄音] ${h.text} [喀]`, es: `[grabación] ${h.text} [clic]` }),
       kind: "voicemail",
     });
   }
