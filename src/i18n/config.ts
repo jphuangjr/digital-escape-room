@@ -1,13 +1,13 @@
 // Locale settings shared by server and client. Language is per player (cookie), never in the URL,
 // so invite links and QR codes work for everyone.
 
-export const LOCALES = ["en", "ko", "zh-TW", "es"] as const;
+export const LOCALES = ["en", "ko", "zh-TW", "es", "ja"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "en";
 export const LOCALE_COOKIE = "lang";
 
 /** Each language's name, written in that language (for the switcher). */
-export const LOCALE_NAMES: Record<Locale, string> = { en: "English", ko: "한국어", "zh-TW": "繁體中文", es: "Español" };
+export const LOCALE_NAMES: Record<Locale, string> = { en: "English", ko: "한국어", "zh-TW": "繁體中文", es: "Español", ja: "日本語" };
 
 export function isLocale(x: unknown): x is Locale {
   return typeof x === "string" && (LOCALES as readonly string[]).includes(x);

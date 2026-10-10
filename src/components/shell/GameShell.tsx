@@ -364,6 +364,7 @@ function HomeScreen({
           ko: "이걸 읽고 있다면, 내가 너무 가까이 갔다는 뜻이야. 처음부터 시작해.",
           "zh-TW": "如果你正在讀這段話，代表我靠得太近了。從頭開始。",
           es: "Si estás leyendo esto, me acerqué demasiado. Empieza por el principio.",
+          ja: "これを読んでいるなら、私は近づきすぎた。最初から始めて。",
         })}
         &rdquo;
       </p>

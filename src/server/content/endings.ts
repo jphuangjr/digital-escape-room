@@ -7,7 +7,7 @@ type Paras = Record<Locale, string[]>;
 
 const ENDINGS: Record<Ending, { title: Tr; body: Paras }> = {
   EXPOSE: {
-    title: { en: "The Needle Points True", ko: "바늘은 진실을 가리킨다", "zh-TW": "指針指向真相", es: "La aguja señala la verdad" },
+    title: { en: "The Needle Points True", ko: "바늘은 진실을 가리킨다", "zh-TW": "指針指向真相", es: "La aguja señala la verdad", ja: "針は真実を指す" },
     body: {
       en: [
         "At 06:00 the switch fires on purpose. Ada lets it.",
@@ -41,10 +41,18 @@ const ENDINGS: Record<Ending, { title: Tr; body: Paras }> = {
         "Ada no sale. Todavía no. Hay gente que va a estar furiosa por mucho tiempo, y algunos saben dónde es más profundo el puerto. Desde una dirección que dejará de funcionar una hora después, envía una sola línea a la bandeja de entrada del investigador: «Todavía no. Pero pronto. Dile a Mara que me guarde un lugar».",
         "El registro está abierto. Es desordenado, contradictorio y está vivo, como suele estarlo la verdad. En algún rincón del vestíbulo vacío del Instituto, alguien por fin descuelga la brújula para que le arreglen la aguja.",
       ],
+      ja: [
+        "06:00、スイッチが意図どおりに作動する。エイダはそれを止めない。",
+        "「整合」された記録4,112件が、市内のすべての報道機関の受信トレイに届く。その一件一件に原本が添えられている。1978年にハーバー信託が署名した設立認可状。倉庫が燃えた夜、信託の事務所に灯りがともっていたという夜警の証言。そして、研究所の誰もが忘れるよう命じられていた名前が載った創設者名簿。ヴォス（Voss）。彼女の父の名だ。",
+        "正午には、メリディアン研究所のトップページは「技術メンテナンス中」という一行に差し替えられている。夕方には、針の折れたコンパスの下の階段にテレビ局の中継車が並ぶ。ケル副所長は書面で辞任する。キャロウェイ所長は辞任しない。連行されるのだ。",
+        "レン・オカフォー（Wren Okafor）は、初めて顔を出してインタビューに応じる。彼らが消したあの写真が朝刊の一面を飾る。少し粗いが、紛れもなく彼女だ。",
+        "エイダは姿を現さない。まだ。長く怒り続ける人々がいて、その中には港のどこがいちばん深いかを知っている者もいる。彼女は一時間後には使えなくなるアドレスから、調査員の受信トレイに一行だけ送る。「まだだよ。でも、もうすぐ。マーラに、私の席を取っておいてって伝えて」",
+        "記録は開かれた。真実がたいていそうであるように、乱雑で、矛盾だらけで、生きている。研究所のがらんとしたロビーのどこかで、誰かがようやくコンパスを壁から下ろし、針を直しに出す。",
+      ],
     },
   },
   PROTECT: {
-    title: { en: "A Record Kept Sealed", ko: "봉인된 채 남은 기록", "zh-TW": "封存的紀錄", es: "Un registro que sigue sellado" },
+    title: { en: "A Record Kept Sealed", ko: "봉인된 채 남은 기록", "zh-TW": "封存的紀錄", es: "Un registro que sigue sellado", ja: "封印されたままの記録" },
     body: {
       en: [
         "You let the timer run past its own deadline, and then you stop it. The unaltered records stay where Ada hid them: in the dark, unindexed, safe.",
@@ -82,6 +90,15 @@ const ENDINGS: Record<Ending, { title: Tr; body: Paras }> = {
         "«Mara: perdóname lo de los papeles de papá. Tenías razón en que hay fantasmas que es mejor dejar en los libros de cuentas, y yo tenía razón en que estaban ahí. Estoy a salvo. No puedo ir a la fiesta, pero el 14 de marzo pensaré en ti, como siempre. Cásate con el hombre de los discursos terribles. Sé feliz tan fuerte que pueda oírte desde dondequiera que esté. Con todo mi amor, la hermana que lee las notas al pie. — A.»",
         "Mara la lee en la mesa de la cocina hasta que cambia la luz. Luego, de todos modos, pone un lugar de más en la fiesta de compromiso, lo deja vacío y no le dice a nadie por qué.",
       ],
+      ja: [
+        "あなたはタイマーが自らの期限を過ぎるまで走らせ、それから止める。改ざんされていない記録は、エイダが隠した場所にそのまま残る。闇の中に、索引もなく、安全に。",
+        "研究所は、自分たちがどれほど危うかったかを知ることはない。継続性管理室は「整合」を続ける。設立年はウェブサイトでは1987年、小さな文字では1978年のまま残り、その小さな文字を読む者はいない。それが代償であり、この部屋の誰もがそれを知っている。",
+        "その代わりに、エイダは真実が与えられなかった唯一のものを手にする。逃げ道だ。継続性管理室が彼女のスイッチの沈黙に気づく頃には、サーバーは消去され、アカウントは閉じられ、あらゆる脚注を読んだあの女性は、自らひとつの脚注になっている。",
+        "レンは仕事も、ハイスコアも守る。彼女はRunnerBoardにもう一度だけ投稿する。compass_needle宛てのメッセージがひとつ、タイムスタンプは07:15。ほかの誰にも意味はわからない。最初から彼らに向けたものではなかったのだ。",
+        "3週間後、差出人の住所のない手紙がマーラ・ヴォス（Mara Voss）宛てに届く。中には港の防波堤で摘んだラベンダーの押し花がひと枝と、姉の筆跡で書かれた便箋が一枚。",
+        "「マーラへ。父さんの書類のこと、ごめん。幽霊の中には帳簿の中に眠らせておいたほうがいいものもあるっていうあなたの言葉は正しかったし、幽霊がそこにいるっていう私の言葉も正しかった。私は無事。パーティーには行けないけど、3月14日には、いつものようにあなたのことを想ってる。スピーチがひどく下手なあの人と結婚して。私がどこにいても聞こえるくらい、大きな声で幸せになって。愛をこめて、脚注を読む姉より。— A.」",
+        "マーラは台所のテーブルで、光の色が変わるまでそれを読む。それから、婚約パーティーにはやはり席をひとつ余分に用意し、空けたままにして、その理由を誰にも話さない。",
+      ],
     },
   },
 };
@@ -111,6 +128,11 @@ const EPILOGUE: Paras = {
     "Dentro de la carpeta personal de Ada, debajo de las transcripciones de los mensajes de voz y las fotografías de los libros de cuentas de su padre, hay un archivo más. Es el escaneo de un dibujo infantil: dos niñas sobre el malecón del puerto, sosteniendo una brújula entre las dos. La aguja está dibujada entera.",
     "Al reverso, con la letra cuidadosa de un adulto: «Para cuando las dos encuentren el camino de vuelta. — Papá, 1987».",
     "Ada nunca le contó a nadie que lo había guardado. Te has ganado el derecho a saberlo. La insignia de la brújula es tuya.",
+  ],
+  ja: [
+    "エイダの個人フォルダーの中、留守電メッセージの文字起こしと父の帳簿を撮った写真の下に、もうひとつファイルがある。子どもが描いた絵をスキャンしたものだ。港の防波堤の上で、二人の少女がひとつのコンパスを間に挟んで持っている。針は折れずに描かれている。",
+    "裏には、大人の丁寧な筆跡でこう書かれている。「ふたりが帰り道を見つけるときのために。— 父より、1987」",
+    "エイダは、これを持っていることを誰にも話さなかった。あなたはそれを知る資格を得た。コンパスのバッジはあなたのものだ。",
   ],
 };
 
@@ -150,6 +172,13 @@ const FILES: { name: string; body: Paras }[] = [
         "",
         "Tenías razón en que estaba obsesionada. Y yo también tenía razón. No sé cómo decir las dos cosas por teléfono. Feliz casi compromiso. Tom me cae bien. No se lo digas.",
       ],
+      ja: [
+        "[文字起こし — 録音済み・未送信]",
+        "",
+        "マーラ。私。何度も話し始めては消してる。創設者たちの手紙の中に父さんの名前を見つけた。悪役としてじゃない。証人として。父さんは倉庫で何が起きたかを見ていて、あの人たちはお金を払って忘れさせようとした。父さんが拒むと、今度は記録のほうに父さんを忘れさせた。",
+        "",
+        "私が取り憑かれてるって、あなたの言うとおりだった。でも、私の言うことも正しかった。その両方を電話でどう言えばいいのかわからない。ほぼ婚約おめでとう。トムのこと、好きだよ。本人には言わないで。",
+      ],
     },
   },
   {
@@ -174,6 +203,11 @@ const FILES: { name: string; body: Paras }[] = [
         "[Transcripción — 23:49]",
         "",
         "Wren, soy Ada. Estoy en la Sala de Servidores B. Estoy usando tu usuario, como dijiste: si alguien pregunta, estabas en el salón de videojuegos y tienes una coartada de dos millones de puntos. Gracias por la llave. Voy a poner el interruptor donde no puedan alcanzarlo. Si me quedo callada, no es porque me hayan encontrado. Es porque yo lo elegí.",
+      ],
+      ja: [
+        "[文字起こし — 23:49]",
+        "",
+        "レン、エイダだよ。今、サーバールームBにいる。言われたとおり、あなたのログインを使ってる。誰かに聞かれたら、あなたはゲームセンターにいて、200万点のアリバイがある。鍵をありがとう。スイッチはあいつらの手が届かない場所に置く。私が連絡を絶っても、それは見つかったからじゃない。自分でそう決めたから。",
       ],
     },
   },
@@ -200,6 +234,11 @@ const FILES: { name: string; body: Paras }[] = [
         "",
         "Nació la noche de la tormenta, así que papá la llamaba su clima. Yo nací el 14 de marzo; papá me llamaba su brújula. Dejamos de hablarnos por sus papeles. Quiero arreglar eso más que arreglar el registro. Las dos cosas, idealmente.",
       ],
+      ja: [
+        "マーラ・ヴォス（Mara）。私より四つ下。港の公営プールで水泳を教えている。時間どおりに来たことは一度もないし、大事なことを見逃したことも一度もない。",
+        "",
+        "嵐の夜に生まれたから、父さんはマーラを自分の「天気」と呼んだ。私は3月14日生まれ。父さんは私を自分の「コンパス」と呼んだ。私たちは父さんの書類のことで口をきかなくなった。記録を正すことより、そっちを直したい。できれば両方。",
+      ],
     },
   },
   {
@@ -224,6 +263,11 @@ const FILES: { name: string; body: Paras }[] = [
         "Wren Okafor. Archivista de sistemas. Declaró ante la Comisión de Investigación de Continuidad de 2019 que la digitalización estaba perdiendo registros «de forma selectiva». Dos semanas después, su fotografía desapareció de la página del personal, luego del padrón y luego del sistema de identificación del edificio.",
         "",
         "Todavía va a trabajar. Todavía tiene el récord de Circuit Runner '94. Dice que el truco es el mismo que con el archivo: aprenderte el nivel tan bien que notes cuando alguien mueve una pared.",
+      ],
+      ja: [
+        "レン・オカフォー（Wren Okafor）。システム・アーキビスト。2019年の継続性調査委員会で、デジタル化の過程で記録が「選択的に」抜け落ちていると証言した。2週間後、彼女の写真は職員ページから消え、次に名簿から、そして建物のIDシステムから消えた。",
+        "",
+        "それでも彼女は出勤している。Circuit Runner '94 のハイスコアも、今も彼女のものだ。コツはアーカイブと同じだという。ステージを隅々まで覚えておけば、誰かが壁を一枚動かしたときに気づける。",
       ],
     },
   },
@@ -250,6 +294,11 @@ const FILES: { name: string; body: Paras }[] = [
         "",
         "En 1987 el Fideicomiso se disolvió y el Instituto fue «refundado» por ordenanza municipal, con una nueva carta, una nueva junta y una nueva fecha de fundación. Todo lo anterior a 1987 se volvió prehistoria. El pie de página nunca se actualizó. Alguien en la vieja imprenta intercambió los dígitos, y desde entonces la mentira y la verdad comparten página.",
       ],
+      ja: [
+        "メリディアン研究所は1978年6月14日、ハーバー信託によって設立認可を受けた。街に忘れてほしい倉庫火災を抱えた民間企業である。",
+        "",
+        "1987年、信託は解散し、研究所は市条例によって「再設立」された。新しい認可状、新しい理事会、新しい設立日。1987年以前のすべては先史時代になった。フッターは一度も更新されなかった。古い印刷所の誰かが数字を入れ替え、以来、嘘と真実は同じページを分け合っている。",
+      ],
     },
   },
   {
@@ -274,6 +323,11 @@ const FILES: { name: string; body: Paras }[] = [
         "Siete muescas, una por cada colección fundacional. La séptima colección, los propios papeles del Fideicomiso, se retiró en 2019. La aguja no se rompió en la mudanza. Kell la partió a la altura del eje para que nunca volviera a señalar el número siete.",
         "",
         "Me llevé la punta rota a casa. Está en el bolsillo de mi abrigo. Cuando esto termine, la devolveré.",
+      ],
+      ja: [
+        "刻み目は七つ。創設時のコレクションひとつにつきひとつ。七つ目のコレクション、つまり信託自身の文書は、2019年に撤去された。針は移転の際に折れたのではない。二度と七番を指さないよう、ケルが軸のところでへし折ったのだ。",
+        "",
+        "折れた針先は私が家に持ち帰った。コートのポケットに入っている。これが終わったら、返すつもりだ。",
       ],
     },
   },

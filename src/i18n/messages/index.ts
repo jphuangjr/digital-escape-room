@@ -35,6 +35,14 @@ import esApps from "./es/apps";
 import esBrowser from "./es/browser";
 import esAdmin from "./es/admin";
 import esApi from "./es/api";
+import jaCommon from "./ja/common";
+import jaSite from "./ja/site";
+import jaShell from "./ja/shell";
+import jaRoom from "./ja/room";
+import jaApps from "./ja/apps";
+import jaBrowser from "./ja/browser";
+import jaAdmin from "./ja/admin";
+import jaApi from "./ja/api";
 
 export type Messages = Record<string, string>;
 
@@ -45,4 +53,6 @@ const zhTW: Messages = { ...zhCommon, ...zhSite, ...zhShell, ...zhRoom, ...zhApp
 
 const es: Messages = { ...esCommon, ...esSite, ...esShell, ...esRoom, ...esApps, ...esBrowser, ...esAdmin, ...esApi };
 
-export const MESSAGES: Record<Locale, Messages> = { en, ko, "zh-TW": zhTW, es };
+const ja: Messages = { ...jaCommon, ...jaSite, ...jaShell, ...jaRoom, ...jaApps, ...jaBrowser, ...jaAdmin, ...jaApi };
+
+export const MESSAGES: Record<Locale, Messages> = { en, ko, "zh-TW": zhTW, es, ja };
