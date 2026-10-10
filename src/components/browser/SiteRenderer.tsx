@@ -7,6 +7,8 @@ import type { Block, ImageFileInfo, SitePage } from "@/lib/types";
 import type { GameCtx } from "@/lib/client/game";
 import { THEMES, type ThemeStyle } from "./themes";
 import { SiteForm } from "./SiteForms";
+import { PETS } from "./art/Pets";
+import { PHOTOS } from "./art/Photos";
 import { PORTRAITS } from "./art/Portraits";
 
 /** In-site (story) strings: `const x = useStory(); x({ en, ko })`. */
@@ -162,9 +164,15 @@ function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
           <p className={`mt-3 whitespace-pre-line ${t.p}`}>{b.body}</p>
         </article>
       );
-    case "listing":
+    case "listing": {
+      const Pet = b.petId ? PETS[b.petId] : undefined;
       return (
         <article className={t.card}>
+          {Pet && (
+            <div className="-mx-4 -mt-4 mb-3 aspect-[16/10] overflow-hidden rounded-t-2xl" role="img" aria-label={b.title}>
+              <Pet />
+            </div>
+          )}
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h3 className="text-lg font-bold">{b.title}</h3>
             {b.petId && (
@@ -177,6 +185,7 @@ function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
           <p className="mt-2 whitespace-pre-line font-mono text-sm leading-relaxed tracking-wide">{b.body}</p>
         </article>
       );
+    }
     case "diff":
       return (
         <figure className={t.card}>
@@ -356,11 +365,16 @@ function ImageBlock({
 }) {
   const tr = useT();
   const [open, setOpen] = useState(false);
+  const Photo = PHOTOS[art];
   const isGlyph = [...art].length <= 6;
   return (
     <figure className="space-y-2">
       <div className={`relative flex aspect-[4/3] w-full max-w-md items-center justify-center overflow-hidden ${t.frame}`} role="img" aria-label={alt}>
-        {isGlyph ? (
+        {Photo ? (
+          <div className="absolute inset-0">
+            <Photo />
+          </div>
+        ) : isGlyph ? (
           <span className="text-7xl leading-none drop-shadow">{art}</span>
         ) : (
           <div className="flex flex-col items-center gap-2 opacity-70">
