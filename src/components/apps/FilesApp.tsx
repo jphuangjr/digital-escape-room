@@ -39,8 +39,8 @@ Fee: paid in advance. Questions: none, apparently.`,
 - Notes: private by default. Tap "Share to room" when it matters.
   Tag fragments (name / year / ID / cipher key / address).
 - Email: keep an eye on it. Ada leaves voicemails.
-- Decoder: Ada keeps it in "Ada's Tools". She never could resist
-  a security question.
+- Decoder: Ada keeps it in "Ada's Tools", inside her personal
+  folder. She never could resist a security question.
 - Stuck? The hints panel can ask Ada for a nudge.`,
   },
   {
@@ -351,7 +351,7 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
   if (view.kind === "tools") {
     return (
       <div className="flex h-full min-h-0 flex-col bg-zinc-950 text-zinc-100">
-        {header("~/Ada's Tools", () => setView({ kind: "root" }))}
+        {header("~/Ada's Personal/Ada's Tools", () => setView({ kind: "personal" }))}
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {!toolsUnlocked ? (
             <SecurityQuestion ctx={ctx} />
@@ -383,7 +383,12 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
                 </div>
               )}
               <ul className="divide-y divide-zinc-900">
-                {personal.length === 0 && <li className="p-10 text-center text-sm text-zinc-500">Empty.</li>}
+                {row(
+                  toolsUnlocked ? "📂" : "🔒",
+                  "Ada's Tools",
+                  toolsUnlocked ? "folder · unlocked" : "folder · security question",
+                  () => setView({ kind: "tools" }),
+                )}
                 {personal.map((f) =>
                   row("📄", f.name, "text file", () => setView({ kind: "file", file: f, from: "personal" })),
                 )}
@@ -401,12 +406,6 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
       <ul className="min-h-0 flex-1 divide-y divide-zinc-900 overflow-y-auto overscroll-contain">
         {row(unlocked ? "📂" : "🔒", "Ada's Personal", unlocked ? "folder · unlocked" : "folder · PIN required", () =>
           setView({ kind: "personal" }),
-        )}
-        {row(
-          toolsUnlocked ? "📂" : "🔒",
-          "Ada's Tools",
-          toolsUnlocked ? "folder · unlocked" : "folder · security question",
-          () => setView({ kind: "tools" }),
         )}
         {LOCAL_FILES.map((f) => row("📄", f.name, "text file", () => setView({ kind: "file", file: f, from: "root" })))}
       </ul>
