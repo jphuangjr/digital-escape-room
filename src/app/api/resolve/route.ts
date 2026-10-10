@@ -5,7 +5,7 @@ import { mutateProgress } from "@/server/progress";
 import { publish } from "@/server/realtime";
 import { track } from "@/server/analytics";
 import { resolveSite } from "@/server/content";
-import { getT } from "@/i18n/server";
+import { getT, getLocale } from "@/i18n/server";
 
 export async function POST(req: Request) {
   const t = await getT();
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   const { room, player } = ctx;
 
   const address = canonicalAddress(body.address);
-  const page = address ? resolveSite(address, parseProgress(room.progress)) : null;
+  const page = address ? resolveSite(address, parseProgress(room.progress), await getLocale()) : null;
   if (!page) return json<ResolveResponse>({ ok: false, error: "unreachable" });
 
   const host = hostOf(page.address);

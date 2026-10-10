@@ -1,7 +1,7 @@
 import { error, isResponse, json, readBody, requirePlayer } from "@/server/http";
 import { parseProgress } from "@/server/logic";
 import { decodeListings } from "@/server/content";
-import { getT } from "@/i18n/server";
+import { getT, getLocale } from "@/i18n/server";
 
 export async function POST(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
@@ -16,5 +16,5 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   if (!progress.visitedSites.some((s) => s === "lostpaws.net" || s.startsWith("lostpaws.net/"))) {
     return error(403, t("api.decode.nothingYet"));
   }
-  return json({ blocks: decodeListings(((shift % 26) + 26) % 26) });
+  return json({ blocks: decodeListings(((shift % 26) + 26) % 26, await getLocale()) });
 }

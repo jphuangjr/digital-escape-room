@@ -1,4 +1,5 @@
 import "server-only";
+import type { Locale } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
 
@@ -152,7 +153,7 @@ function collections(): SitePage {
   });
 }
 
-export function resolveMeridian(path: string, _progress: RoomProgress): SitePage | null {
+export function resolveMeridian(path: string, _progress: RoomProgress, _loc: Locale): SitePage | null {
   switch (path) {
     case "":
     case "/index.html":

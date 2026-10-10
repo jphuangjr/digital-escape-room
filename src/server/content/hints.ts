@@ -1,4 +1,5 @@
 import "server-only";
+import type { Locale } from "@/i18n/config";
 import type { HintPuzzleId } from "@/lib/types";
 
 export const HINT_PUZZLES: HintPuzzleId[] = [
@@ -81,7 +82,7 @@ const HINTS: Record<HintPuzzleId, [string, string, string]> = {
   ],
 };
 
-export function getHint(puzzleId: HintPuzzleId, tier: 1 | 2 | 3): string {
+export function getHint(puzzleId: HintPuzzleId, tier: 1 | 2 | 3, _loc: Locale): string {
   const set = HINTS[puzzleId];
   if (!set) return "";
   const t = Math.min(3, Math.max(1, Math.trunc(tier))) as 1 | 2 | 3;

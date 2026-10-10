@@ -1,4 +1,5 @@
 import "server-only";
+import type { Locale } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { BINARY_PRACTICE_WORD, toBinary5 } from "../answers";
 import { page } from "./source";
@@ -95,7 +96,7 @@ function lesson(progress: RoomProgress): SitePage {
   });
 }
 
-export function resolveHarbourcc(path: string, progress: RoomProgress): SitePage | null {
+export function resolveHarbourcc(path: string, progress: RoomProgress, _loc: Locale): SitePage | null {
   if (path === "") return home();
   if (path === "/cs110") return course();
   if (path === "/cs110/binary") return lesson(progress);

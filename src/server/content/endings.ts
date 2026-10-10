@@ -1,4 +1,5 @@
 import "server-only";
+import type { Locale } from "@/i18n/config";
 import type { Ending } from "@/lib/types";
 
 const ENDINGS: Record<Ending, { title: string; body: string }> = {
@@ -27,11 +28,11 @@ const ENDINGS: Record<Ending, { title: string; body: string }> = {
   },
 };
 
-export function endingText(ending: Ending): { title: string; body: string } {
+export function endingText(ending: Ending, _loc: Locale): { title: string; body: string } {
   return ENDINGS[ending];
 }
 
-export function bonusEpilogue(): string {
+export function bonusEpilogue(_loc: Locale): string {
   return [
     "Inside Ada's personal folder, beneath the voicemail transcripts and the photographs of her father's ledgers, there is one more file. It is a scan of a child's drawing: two girls on a harbour wall, holding a compass between them. The needle is drawn whole.",
     "On the back, in an adult's careful hand: 'For when you both find your way back. — Dad, 1987.'",
@@ -39,7 +40,7 @@ export function bonusEpilogue(): string {
   ].join("\n\n");
 }
 
-export function bonusFiles(): { name: string; body: string }[] {
+export function bonusFiles(_loc: Locale): { name: string; body: string }[] {
   return [
     {
       name: "voicemail_to_mara_unsent.txt",

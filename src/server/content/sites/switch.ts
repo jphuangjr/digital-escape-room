@@ -1,4 +1,5 @@
 import "server-only";
+import type { Locale } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
 
@@ -31,7 +32,7 @@ function home(progress: RoomProgress): SitePage {
   });
 }
 
-export function resolveSwitch(path: string, progress: RoomProgress): SitePage | null {
+export function resolveSwitch(path: string, progress: RoomProgress, _loc: Locale): SitePage | null {
   if (!progress.solved.includes("admin-console")) return null;
   return path === "" ? home(progress) : null;
 }

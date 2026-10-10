@@ -1,4 +1,5 @@
 import "server-only";
+import type { Locale } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
 
@@ -26,6 +27,6 @@ function home(): SitePage {
   });
 }
 
-export function resolveTrapdoor(path: string, _progress: RoomProgress): SitePage | null {
+export function resolveTrapdoor(path: string, _progress: RoomProgress, _loc: Locale): SitePage | null {
   return path === "" ? home() : null;
 }

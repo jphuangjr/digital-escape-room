@@ -1,4 +1,5 @@
 import "server-only";
+import type { Locale } from "@/i18n/config";
 import type { RoomProgress, SitePage } from "@/lib/types";
 import { DRIFT_HOST, resolveDrift } from "./drift";
 import { HARBOURCC_HOST, resolveHarbourcc } from "./harbourcc";
@@ -9,7 +10,7 @@ import { RUNNERBOARD_HOST, resolveRunnerboard } from "./runnerboard";
 import { SWITCH_HOST, resolveSwitch } from "./switch";
 import { TRAPDOOR_HOST, resolveTrapdoor } from "./trapdoor";
 
-type Resolver = (path: string, progress: RoomProgress) => SitePage | null;
+type Resolver = (path: string, progress: RoomProgress, loc: Locale) => SitePage | null;
 
 const SITES: Record<string, Resolver> = {
   [MERIDIAN_HOST]: resolveMeridian,
@@ -37,7 +38,7 @@ export function normalizeAddress(address: string): string {
   return a;
 }
 
-export function resolveSite(address: string, progress: RoomProgress): SitePage | null {
+export function resolveSite(address: string, progress: RoomProgress, loc: Locale): SitePage | null {
   const a = normalizeAddress(address);
   if (!a) return null;
   const slash = a.indexOf("/");
@@ -45,7 +46,7 @@ export function resolveSite(address: string, progress: RoomProgress): SitePage |
   const path = slash < 0 ? "" : a.slice(slash);
   const resolver = SITES[host];
   if (!resolver) return null;
-  return resolver(path, progress);
+  return resolver(path, progress, loc);
 }
 
 export { decodeListings } from "./lostpaws";

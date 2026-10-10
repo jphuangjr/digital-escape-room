@@ -28,3 +28,15 @@ export function pickLocale(acceptLanguage: string | null | undefined): Locale {
   for (const { base } of ranked) if (isLocale(base)) return base;
   return DEFAULT_LOCALE;
 }
+
+/**
+ * Story text in every language, used where the text lives in code instead of a catalog
+ * (server content, client-side story files). Adding a locale makes every `Tr` fail typecheck
+ * until it's translated.
+ */
+export type Tr = Record<Locale, string>;
+
+/** `const x = pick(loc); x({ en: "…", ko: "…" })` */
+export function pick(loc: Locale) {
+  return (t: Tr): string => t[loc] ?? t.en;
+}

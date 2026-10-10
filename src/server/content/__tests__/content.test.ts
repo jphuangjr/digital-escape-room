@@ -9,18 +9,19 @@ import {
 } from "../cipher";
 import { DRIFT_POSTS } from "../sites/drift";
 import { FORUM_THREADS } from "../sites/runnerboard";
-import {
-  baseEmails,
-  bonusFiles,
-  checkAnswer,
-  decodeListings,
-  endingText,
-  getHint,
-  HINT_PUZZLES,
-  normalize,
-  resolveSite,
-  voicemailsFor,
-} from "../index";
+import type { Locale } from "@/i18n/config";
+import * as content from "../index";
+import { checkAnswer, HINT_PUZZLES, normalize } from "../index";
+
+// English unless a test passes a locale; story text in other languages is checked in i18n tests.
+const resolveSite = (a: string, p: RoomProgress, loc: Locale = "en") => content.resolveSite(a, p, loc);
+const decodeListings = (shift: number, loc: Locale = "en") => content.decodeListings(shift, loc);
+const baseEmails = (loc: Locale = "en") => content.baseEmails(loc);
+const voicemailsFor = (p: RoomProgress, h: Parameters<typeof content.voicemailsFor>[1], loc: Locale = "en") =>
+  content.voicemailsFor(p, h, loc);
+const getHint = (id: Parameters<typeof content.getHint>[0], tier: 1 | 2 | 3, loc: Locale = "en") => content.getHint(id, tier, loc);
+const endingText = (e: Parameters<typeof content.endingText>[0], loc: Locale = "en") => content.endingText(e, loc);
+const bonusFiles = (loc: Locale = "en") => content.bonusFiles(loc);
 
 const fresh = (solved: RoomProgress["solved"] = []): RoomProgress => ({
   unlockedApps: ["browser", "notes", "email", "files"],
@@ -111,6 +112,15 @@ describe("answers", () => {
       expect(checkAnswer("final-phrase", v)).toBe(true);
     }
     expect(checkAnswer("final-phrase", "wren-1978-0412")).toBe(false);
+  });
+  it("accepts Korean spellings of story names", () => {
+    expect(checkAnswer("tools-folder", "마라")).toBe(true);
+    expect(checkAnswer("tools-folder", " 마라 ")).toBe(true);
+    expect(checkAnswer("tools-folder", "렌")).toBe(false);
+    expect(checkAnswer("final-phrase", "렌-1987-0412")).toBe(true);
+    expect(checkAnswer("final-phrase", "렌 1987 0412")).toBe(true);
+    expect(checkAnswer("final-phrase", "마라-1987-0412")).toBe(false);
+    expect(checkAnswer("shift-key", "칠")).toBe(true);
   });
   it("binary-lesson and admin-console", () => {
     expect(checkAnswer("binary-lesson", " Hello ")).toBe(true);

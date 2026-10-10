@@ -1,11 +1,12 @@
 import "server-only";
+import type { Locale } from "@/i18n/config";
 import type { EmailDTO, HintDTO, RoomProgress } from "@/lib/types";
 import { HINT_PUZZLES, HINT_TITLES } from "./hints";
 
 const SISTER = "Mara Voss <mara.voss@harbourmail.net>";
 const ADA = "Ada Voss";
 
-export function baseEmails(): EmailDTO[] {
+export function baseEmails(_loc: Locale): EmailDTO[] {
   return [
     {
       id: "email-ada-last",
@@ -109,7 +110,7 @@ const AMBIENT: Ambient[] = [
   },
 ];
 
-export function voicemailsFor(progress: RoomProgress, hints: HintDTO[]): EmailDTO[] {
+export function voicemailsFor(progress: RoomProgress, hints: HintDTO[], _loc: Locale): EmailDTO[] {
   const out: EmailDTO[] = [];
   for (const a of AMBIENT) {
     if (a.when(progress)) out.push({ id: a.id, from: ADA, subject: a.subject, date: "Unknown number", body: a.body, kind: "voicemail" });

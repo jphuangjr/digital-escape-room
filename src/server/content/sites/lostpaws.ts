@@ -1,4 +1,5 @@
 import "server-only";
+import type { Locale } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { caesar, LOSTPAWS_CIPHERTEXT_CHUNKS, LOSTPAWS_PLAINTEXT_CHUNKS } from "../cipher";
 import { page } from "./source";
@@ -29,7 +30,7 @@ function listingBlocks(bodies: readonly string[]): Block[] {
 }
 
 /** Listings with each body shifted back by `shift` from the ciphertext (server-side decoder preview). */
-export function decodeListings(shift: number): Block[] {
+export function decodeListings(shift: number, _loc: Locale): Block[] {
   const s = Number.isFinite(shift) ? Math.trunc(shift) : 0;
   return listingBlocks(LOSTPAWS_CIPHERTEXT_CHUNKS.map((c) => caesar(c, -s)));
 }
@@ -55,6 +56,6 @@ function home(progress: RoomProgress): SitePage {
   });
 }
 
-export function resolveLostpaws(path: string, progress: RoomProgress): SitePage | null {
+export function resolveLostpaws(path: string, progress: RoomProgress, _loc: Locale): SitePage | null {
   return path === "" ? home(progress) : null;
 }

@@ -1,4 +1,5 @@
 import "server-only";
+import type { Locale } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
 
@@ -106,7 +107,7 @@ function scores(): SitePage {
   return page(`${RUNNERBOARD_HOST}/scores`, "High Scores — RunnerBoard", "runnerboard", blocks);
 }
 
-export function resolveRunnerboard(path: string, _progress: RoomProgress): SitePage | null {
+export function resolveRunnerboard(path: string, _progress: RoomProgress, _loc: Locale): SitePage | null {
   if (path === "") return home();
   if (path === "/scores") return scores();
   return null;

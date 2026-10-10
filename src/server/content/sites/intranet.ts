@@ -1,4 +1,5 @@
 import "server-only";
+import type { Locale } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
 import { ADMIN_PASSWORD, toBinary5 } from "../answers";
@@ -156,7 +157,7 @@ function memos(): SitePage {
   return page(`${INTRANET_HOST}/memos`, "Memos", "intranet", blocks);
 }
 
-export function resolveIntranet(path: string, progress: RoomProgress): SitePage | null {
+export function resolveIntranet(path: string, progress: RoomProgress, _loc: Locale): SitePage | null {
   const authed = progress.solved.includes("intranet-login");
   if (path === "" || path === "/login") return authed ? dashboard() : login();
   const known = ["/dashboard", "/records", "/memos", "/admin"];

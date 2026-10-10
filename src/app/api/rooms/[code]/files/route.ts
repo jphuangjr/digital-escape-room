@@ -1,4 +1,5 @@
 import { isResponse, json, requirePlayer } from "@/server/http";
+import { getLocale } from "@/i18n/server";
 import { parseProgress } from "@/server/logic";
 import { bonusFiles } from "@/server/content";
 
@@ -8,5 +9,5 @@ export async function GET(_req: Request, { params }: { params: Promise<{ code: s
   if (isResponse(ctx)) return ctx;
   const progress = parseProgress(ctx.room.progress);
   if (!progress.solved.includes("bonus-pin")) return json({ locked: true as const });
-  return json({ locked: false as const, files: bonusFiles() });
+  return json({ locked: false as const, files: bonusFiles(await getLocale()) });
 }

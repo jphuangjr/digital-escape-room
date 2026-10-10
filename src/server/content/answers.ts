@@ -7,13 +7,26 @@ import type { PuzzleId } from "@/lib/types";
  */
 export const FRAGMENTS = { name: "wren", year: "1987", id: "0412" } as const;
 
-const SHIFT_ANSWERS = new Set(["7", "seven", "rot7", "shift7", "+7"]);
+const SHIFT_ANSWERS = new Set(["7", "seven", "rot7", "shift7", "+7", "칠", "일곱"]);
 const INTRANET_USER = "wren.okafor";
 const INTRANET_PASS = `${FRAGMENTS.year}${FRAGMENTS.id}`;
 const FINAL_PHRASE = `${FRAGMENTS.name}-${FRAGMENTS.year}-${FRAGMENTS.id}`;
 const BONUS_PIN = "0314";
 /** "What's the weather?" (notes_on_mara.txt inside Ada's Personal). */
 const TOOLS_ANSWER = "mara";
+
+/**
+ * Names as they're written in translated story text, accepted alongside the English answer.
+ * Usernames, passwords and decoded words (wren.okafor, lantern, hello) stay Latin-only: the story
+ * always shows those in English.
+ */
+const NAME_ALIASES: Record<string, string[]> = {
+  wren: ["렌"],
+  mara: ["마라"],
+};
+const nameMatches = (input: string, name: string) =>
+  normalize(input).replace(/[^a-z]/g, "") === name ||
+  (NAME_ALIASES[name] ?? []).includes(normalize(input).replace(/[^\p{L}]/gu, ""));
 /** harbourcc.edu/cs110/binary practice quiz word, shown there in 5-bit binary. */
 export const BINARY_PRACTICE_WORD = "hello";
 /** Vault admin console password, shown in binary on Wren's dashboard notice. */
@@ -58,12 +71,16 @@ export function checkAnswer(puzzleId: PuzzleId, input: string): boolean {
       const pass = input.slice(idx + 1).replace(/\s+/g, "");
       return user === INTRANET_USER && pass === INTRANET_PASS;
     }
-    case "final-phrase":
-      return normalizePhrase(input) === FINAL_PHRASE;
+    case "final-phrase": {
+      const p = normalizePhrase(input);
+      if (p === FINAL_PHRASE) return true;
+      const rest = `-${FRAGMENTS.year}-${FRAGMENTS.id}`;
+      return p.endsWith(rest) && (NAME_ALIASES[FRAGMENTS.name] ?? []).includes(p.slice(0, -rest.length));
+    }
     case "bonus-pin":
       return input.replace(/\D/g, "") === BONUS_PIN;
     case "tools-folder":
-      return normalize(input).replace(/[^a-z]/g, "") === TOOLS_ANSWER;
+      return nameMatches(input, TOOLS_ANSWER);
     case "binary-lesson":
       return normalize(input).replace(/[^a-z]/g, "") === BINARY_PRACTICE_WORD;
     case "admin-console":

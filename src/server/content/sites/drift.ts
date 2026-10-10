@@ -1,4 +1,5 @@
 import "server-only";
+import type { Locale } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
 
@@ -158,7 +159,7 @@ function post(slug: string): SitePage | null {
   });
 }
 
-export function resolveDrift(path: string, _progress: RoomProgress): SitePage | null {
+export function resolveDrift(path: string, _progress: RoomProgress, _loc: Locale): SitePage | null {
   if (path === "") return home();
   if (path === "/about") return about();
   const m = path.match(/^\/post\/([a-z0-9-]+)$/);
