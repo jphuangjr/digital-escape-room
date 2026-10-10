@@ -29,6 +29,10 @@ OAuth redirect URI is `<origin>/api/auth/callback/google`.
 Hosting requires owning the game. Until Stripe is wired up, admins (emails in `ACCOUNT_ADMIN`, comma-separated)
 generate single-use purchase codes at `/admin`; players redeem them on the game page.
 
+Database migrations run during the build (`scripts/migrate.mjs`) on production and local builds only.
+Vercel preview builds skip them because previews share the production database, so a schema change reaches the
+database only when its PR is merged. Until then, a preview of a schema-changing PR may error.
+
 Admin analytics (which puzzles stall players): `GET /api/admin/analytics?token=$ADMIN_TOKEN`.
 
 The answer key lives only in `src/server/**` (guarded with `server-only`); client code must never import it.
