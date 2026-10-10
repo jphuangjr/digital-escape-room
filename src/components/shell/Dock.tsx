@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/i18n/client";
 import type { AppId } from "@/lib/types";
 import { APP_META, APP_ORDER, LockIcon, PeopleIcon } from "./icons";
 
@@ -20,9 +21,10 @@ export function Dock({
   onlineCount: number;
   chatUnread?: number;
 }) {
+  const t = useT();
   return (
     <nav
-      aria-label="Dock"
+      aria-label={t("shell.dock.label")}
       className="relative z-10 shrink-0 border-t border-stone-800 bg-stone-950/95 backdrop-blur md:hidden"
       style={{
         paddingBottom: "env(safe-area-inset-bottom)",
@@ -32,7 +34,8 @@ export function Dock({
     >
       <ul className="flex items-stretch justify-around">
         {APP_ORDER.map((app) => {
-          const { label, Icon } = APP_META[app];
+          const { Icon } = APP_META[app];
+          const label = t(`shell.app.${app}`);
           const locked = !isUnlocked(app);
           const badge = badges[app] ?? 0;
           const on = active === app;
@@ -40,7 +43,7 @@ export function Dock({
             <li key={app} className="flex-1">
               <button
                 onClick={() => onOpen(app)}
-                aria-label={`${label}${locked ? " (locked)" : ""}${badge ? `, ${badge} unread` : ""}`}
+                aria-label={t("shell.dock.appAria", { app: label, locked, unread: badge })}
                 aria-current={on ? "page" : undefined}
                 className={`flex min-h-14 w-full flex-col items-center justify-center gap-0.5 py-1.5 ${
                   on ? "text-amber-400" : locked ? "text-stone-600" : "text-stone-400"
@@ -64,7 +67,7 @@ export function Dock({
         <li className="flex-1">
           <button
             onClick={onRoom}
-            aria-label={`Room: ${onlineCount} online${chatUnread ? `, ${chatUnread} unread messages` : ""}`}
+            aria-label={t("shell.dock.roomAria", { online: onlineCount, unread: chatUnread })}
             className="flex min-h-14 w-full flex-col items-center justify-center gap-0.5 py-1.5 text-stone-400 active:bg-stone-900"
           >
             <span className="relative">
@@ -77,7 +80,7 @@ export function Dock({
                 {chatUnread ? (chatUnread > 9 ? "9+" : chatUnread) : onlineCount}
               </span>
             </span>
-            <span className="text-[10px] tracking-wide">Room</span>
+            <span className="text-[10px] tracking-wide">{t("shell.dock.room")}</span>
           </button>
         </li>
       </ul>

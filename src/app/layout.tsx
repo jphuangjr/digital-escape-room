@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { IntlClientProvider } from "@/i18n/client";
+import { MESSAGES } from "@/i18n/messages";
+import { getLocale } from "@/i18n/server";
 
 export const metadata: Metadata = {
   // Absolute base for link-preview image URLs. Set NEXT_PUBLIC_SITE_URL to override (e.g. for local testing).
@@ -22,10 +25,15 @@ export const viewport: Viewport = {
   interactiveWidget: "resizes-content",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale();
   return (
-    <html lang="en">
-      <body className="antialiased bg-noir-bg text-noir-ink">{children}</body>
+    <html lang={locale}>
+      <body className="antialiased bg-noir-bg text-noir-ink">
+        <IntlClientProvider locale={locale} messages={MESSAGES[locale]}>
+          {children}
+        </IntlClientProvider>
+      </body>
     </html>
   );
 }
