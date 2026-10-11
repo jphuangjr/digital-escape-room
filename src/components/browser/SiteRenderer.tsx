@@ -10,6 +10,7 @@ import { SiteForm } from "./SiteForms";
 import { PETS } from "./art/Pets";
 import { PHOTOS } from "./art/Photos";
 import { PORTRAITS } from "./art/Portraits";
+import { MeridianSite } from "./sites/MeridianSite";
 
 /** In-site (story) strings: `const x = useStory(); x({ en, ko })`. */
 function useStory() {
@@ -44,6 +45,9 @@ export function SiteRenderer({
     onSolved,
     navigate: (href) => onNavigate(resolveHref(href, host)),
   };
+  if (page.theme === "meridian") {
+    return <MeridianSite page={page} navigate={env.navigate} renderBlocks={(blocks) => <BlockList blocks={blocks} env={env} />} />;
+  }
   return (
     <div className={`min-h-full w-full ${t.root}`} style={t.font}>
       <div className={`mx-auto w-full ${t.container} space-y-5 px-4 py-6 pb-16 break-words`}>
