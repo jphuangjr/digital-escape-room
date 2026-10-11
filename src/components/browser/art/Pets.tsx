@@ -273,33 +273,33 @@ function Juno() {
         <path d="M58 172 C70 168 98 168 116 170 L116 181 C98 183 74 183 60 182 C53 180 53 174 58 172 Z" fill={white} />
         <S d="M60 172 v-0 M62 177 v4 M57 176 v4 M66 168 v4 M70 167 v4" c="#cfc1aa" w={1} />
         <S d="M66 177 C84 178 104 178 120 176" c="#d8cbb5" w={1} />
-        {/* head resting on paws */}
-        <path d="M70 154 C62 142 66 122 82 114 C98 106 118 110 126 122 C132 132 128 148 118 154 C106 160 82 162 70 154 Z" fill={sable} />
-        {/* long muzzle */}
-        <path d="M74 146 C62 148 48 150 43 156 C40 163 50 166 62 165 L92 160 C96 152 86 146 74 146 Z" fill={white} />
-        <path d="M80 140 C66 142 52 146 44 152 C46 155 52 156 60 155 C70 153 80 150 90 148 Z" fill={sable} />
-        <S d="M44 157 C54 158 64 156 74 152" c="#d8cbb5" w={1} />
-        {/* blaze */}
-        <path d="M100 113 C96 124 90 136 80 147 L90 150 C96 138 102 126 105 114 Z" fill={white} />
-        {/* ears folded back (shy) */}
-        <path d="M108 112 C116 102 128 100 138 104 C132 110 124 116 114 120 Z" fill={sableD} />
-        <path d="M96 110 C102 100 112 96 122 98 C116 104 108 110 100 116 Z" fill={sable} />
-        <path d="M118 100 C124 98 130 99 135 102 C131 104 126 105 121 105 Z" fill="#e7b39b" opacity="0.7" />
-        {/* cheek fur */}
-        <S d="M118 150 l4 4 M110 154 l3 5 M124 140 l5 2" c={sableD} w={1.3} />
-        {/* nose */}
-        <path d="M40 154 C42 150 49 150 50 154 C49 158 42 159 40 154 Z" fill="#231915" />
-        <S d="M46 161 C56 162 66 161 76 158" c="#8f7f69" w={1} />
+        {/* head facing the viewer, chin resting on her front paws (shy) */}
+        {/* ears folded back flat */}
+        <path d="M70 108 C60 104 48 108 42 120 C40 126 46 128 52 124 C58 120 64 118 72 120 Z" fill={sableD} />
+        <path d="M126 108 C136 104 148 108 154 120 C156 126 150 128 144 124 C138 120 132 118 124 120 Z" fill={sableD} />
+        <S d="M50 118 C56 114 62 112 68 112 M146 118 C140 114 134 112 128 112" c="#5e3618" w={1.1} o={0.7} />
+        {/* skull and cheeks */}
+        <path d="M98 100 C122 100 138 116 138 136 C138 152 128 162 114 166 L82 166 C68 162 58 152 58 136 C58 116 74 100 98 100 Z" fill={sable} />
+        {/* white blaze widening down into the muzzle */}
+        <path d="M95 101 C93 112 92 122 88 134 L108 134 C104 122 103 112 101 101 Z" fill={white} />
+        {/* muzzle resting on the paws */}
+        <path d="M98 126 C110 126 118 138 118 151 C118 163 110 169 98 169 C86 169 78 163 78 151 C78 138 86 126 98 126 Z" fill={white} />
+        <S d="M83 158 C87 163 92 166 98 167 C104 166 109 163 113 158" c="#d8cbb5" w={1} />
+        {/* cheek fur tufts */}
+        <S d="M62 144 l-5 3 M64 152 l-5 4 M134 144 l5 3 M132 152 l5 4" c={sableD} w={1.3} />
+        {/* nose and mouth */}
+        <path d="M90 143 C90 138 106 138 106 143 C106 148 100 151 98 151 C96 151 90 148 90 143 Z" fill="#231915" />
+        <S d="M98 151 v5 M98 156 C95 159 91 159 88 157 M98 156 C101 159 105 159 108 157" c="#8f7f69" w={1.1} />
       </g>
-      {/* eyes: small, glancing up, worried brows */}
-      <path d="M79 132 C81 127 88 126 91 130 C89 134 82 135 79 132 Z" fill="#2e1c10" />
-      <path d="M80 133 C83 134.5 87 134.5 90 131.5" fill="none" stroke="#f3e6d2" strokeWidth="1" />
-      <circle cx="86.5" cy="129.2" r="0.9" fill="#fff" />
-      <S d="M78 125 C81 121 87 121 91 124" c={sableD} w={1.5} />
-      <path d="M100 128 C102 123 108 123 110 127 C108 131 102 131 100 128 Z" fill="#2e1c10" />
-      <path d="M101 129 C104 130.5 107 130.5 109.5 128" fill="none" stroke="#f3e6d2" strokeWidth="1" />
-      <circle cx="106.6" cy="125.6" r="0.9" fill="#fff" />
-      <S d="M99 121 C103 118 108 118 112 121" c={sableD} w={1.4} />
+      {/* eyes: glancing up under worried brows */}
+      <ellipse cx="83" cy="124" rx="5.2" ry="4.6" fill="#2e1c10" />
+      <ellipse cx="113" cy="124" rx="5.2" ry="4.6" fill="#2e1c10" />
+      <path d="M78.5 126.5 C81 128.6 85 128.6 87.5 126.5" fill="none" stroke="#f3e6d2" strokeWidth="1" />
+      <path d="M108.5 126.5 C111 128.6 115 128.6 117.5 126.5" fill="none" stroke="#f3e6d2" strokeWidth="1" />
+      <circle cx="84.4" cy="121.6" r="1.3" fill="#fff" />
+      <circle cx="114.4" cy="121.6" r="1.3" fill="#fff" />
+      <S d="M76 115 C79 113 84 112 89 115" c={sableD} w={1.6} />
+      <S d="M107 115 C112 112 117 113 120 115" c={sableD} w={1.6} />
       <rect x="104" y="112" width="156" height="40" fill={`url(#${id}-hatch)`} opacity="0.08" />
     </PetFrame>
   );
