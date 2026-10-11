@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLocale, useT } from "@/i18n/client";
 import { pick } from "@/i18n/config";
-import type { AttemptResponse, Block, PuzzleId, SiteFormId } from "@/lib/types";
+import type { AttemptResponse, PuzzleId, SiteFormId } from "@/lib/types";
 import { lockoutRemainingSec, WRONG_ANSWER_LOCKOUT_MS } from "@/lib/rules";
 import { useNow } from "@/components/apps/shared";
 import type { RenderEnv } from "./SiteRenderer";
