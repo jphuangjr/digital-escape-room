@@ -192,7 +192,12 @@ export function Browser({
       {/* Toolbar */}
       <div className="relative z-10 shrink-0 border-b border-stone-800 bg-stone-900">
         <div className="flex items-center gap-0.5 px-1 py-1">
-          <button className={btn} onClick={() => go(-1)} disabled={history.idx <= 0} aria-label={t("browser.toolbar.back")}>
+          <button
+            className={`${btn} hidden sm:flex`}
+            onClick={() => go(-1)}
+            disabled={history.idx <= 0}
+            aria-label={t("browser.toolbar.back")}
+          >
             <BackIcon className="h-5 w-5" />
           </button>
           <button
@@ -245,35 +250,49 @@ export function Browser({
             <BookmarksIcon className="h-5 w-5" />
           </button>
         </div>
-        {/* Secondary row: forward (mobile), bookmark star, view source */}
+        {/* Secondary row: back/forward pair (mobile), page title, bookmark star, view source */}
         <div className="flex items-center gap-1 overflow-x-auto px-1 pb-1">
-          <button
-            className={`${btn} sm:hidden`}
-            onClick={() => go(1)}
-            disabled={history.idx >= history.entries.length - 1}
-            aria-label={t("browser.toolbar.forward")}
-          >
-            <ForwardIcon className="h-5 w-5" />
-          </button>
-          <span className="min-w-0 flex-1 truncate px-1 text-xs text-stone-500">
+          <div className="flex shrink-0 items-center overflow-hidden rounded-full border border-stone-800 sm:hidden">
+            <button
+              className={btn}
+              onClick={() => go(-1)}
+              disabled={history.idx <= 0}
+              aria-label={t("browser.toolbar.back")}
+            >
+              <BackIcon className="h-5 w-5" />
+            </button>
+            <span aria-hidden className="h-5 w-px bg-stone-800" />
+            <button
+              className={btn}
+              onClick={() => go(1)}
+              disabled={history.idx >= history.entries.length - 1}
+              aria-label={t("browser.toolbar.forward")}
+            >
+              <ForwardIcon className="h-5 w-5" />
+            </button>
+          </div>
+          <span className="min-w-0 flex-1 truncate px-2 text-xs text-stone-400">
             {view.kind === "page" ? view.page.title : view.kind === "loading" ? t("browser.toolbar.loading") : ""}
           </span>
           <button
-            className="flex h-11 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs text-stone-300 active:bg-stone-800 disabled:text-stone-700"
+            className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-stone-300 active:bg-stone-800 disabled:text-stone-700"
             onClick={toggleBookmark}
             disabled={view.kind !== "page"}
             aria-pressed={isBookmarked}
+            aria-label={isBookmarked ? t("browser.toolbar.bookmarked") : t("browser.toolbar.bookmark")}
           >
-            <StarIcon filled={isBookmarked} className={`h-4 w-4 ${isBookmarked ? "text-amber-400" : ""}`} />
-            {isBookmarked ? t("browser.toolbar.bookmarked") : t("browser.toolbar.bookmark")}
+            <StarIcon filled={isBookmarked} className={`h-5 w-5 sm:h-4 sm:w-4 ${isBookmarked ? "text-amber-400" : ""}`} />
+            {/* Icon-only on phones so long translations don't crowd out the page title. */}
+            <span className="hidden sm:inline">{isBookmarked ? t("browser.toolbar.bookmarked") : t("browser.toolbar.bookmark")}</span>
           </button>
           <button
-            className="flex h-11 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs text-stone-300 active:bg-stone-800 disabled:text-stone-700"
+            className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-stone-300 active:bg-stone-800 disabled:text-stone-700"
             onClick={() => setSourceOpen(true)}
             disabled={view.kind !== "page"}
+            aria-label={t("browser.toolbar.viewSource")}
           >
-            <CodeIcon className="h-4 w-4" />
-            {t("browser.toolbar.viewSource")}
+            <CodeIcon className="h-5 w-5 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">{t("browser.toolbar.viewSource")}</span>
           </button>
         </div>
 
