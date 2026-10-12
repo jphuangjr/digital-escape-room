@@ -253,6 +253,28 @@ function BlockView({ block: b, env }: { block: Block; env: RenderEnv }) {
       );
     case "bits":
       return <BitsWidget t={t} />;
+    case "mail":
+      return (
+        <details className={`group ${t.card} !p-0`}>
+          <summary className="flex min-h-14 cursor-pointer list-none flex-col gap-0.5 px-4 py-3 [&::-webkit-details-marker]:hidden">
+            <span className="flex items-baseline justify-between gap-3">
+              <span className="min-w-0 truncate text-sm font-semibold">{b.party.replace(/\s*<[^>]*>\s*$/, "")}</span>
+              <span className={`shrink-0 text-xs ${t.muted}`}>{b.date}</span>
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="min-w-0 flex-1 truncate">{b.subject}</span>
+              <span aria-hidden className={`shrink-0 text-xs transition-transform group-open:rotate-90 ${t.muted}`}>
+                ▸
+              </span>
+            </span>
+          </summary>
+          <div className={`border-t px-4 py-3 ${t.dark ? "border-white/10" : "border-black/10"}`}>
+            <p className={`mb-2 break-all text-xs ${t.muted}`}>{b.party}</p>
+            {b.tag && <p className={`mb-2 text-xs font-semibold uppercase tracking-wider ${t.accent}`}>{b.tag}</p>}
+            <p className={`whitespace-pre-line ${t.p}`}>{b.body}</p>
+          </div>
+        </details>
+      );
     case "notice": {
       const tone = {
         info: "border-sky-500/60 bg-sky-500/10",

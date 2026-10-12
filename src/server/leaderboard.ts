@@ -2,7 +2,7 @@ import "server-only";
 import type { Ending, LeaderboardResponse, LeaderboardRow } from "@/lib/types";
 import type { LeaderboardEntry } from "@prisma/client";
 import { db } from "./db";
-import { normalizeRoomCode } from "./logic";
+import { BONUS_PUZZLE_IDS, normalizeRoomCode } from "./logic";
 
 export const LEADERBOARD_SIZE = 10;
 const MAX_INT = 2_147_483_647;
@@ -19,9 +19,10 @@ export async function recordLeaderboardEntry(roomId: string): Promise<void> {
   });
   if (!room?.finishedAt) return;
   const until = { lte: room.finishedAt };
+  const mainPuzzles = { notIn: BONUS_PUZZLE_IDS }; // the HarbourMail Easter egg doesn't count against a team
   const [attempts, wrongAttempts, hintsUsed] = await Promise.all([
-    db.attempt.count({ where: { roomId, createdAt: until } }),
-    db.attempt.count({ where: { roomId, correct: false, createdAt: until } }),
+    db.attempt.count({ where: { roomId, puzzleId: mainPuzzles, createdAt: until } }),
+    db.attempt.count({ where: { roomId, puzzleId: mainPuzzles, correct: false, createdAt: until } }),
     db.hintRequest.count({ where: { roomId, createdAt: until } }),
   ]);
   await db.leaderboardEntry.upsert({

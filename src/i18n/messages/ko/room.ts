@@ -125,6 +125,13 @@ const messages: Record<keyof typeof en, string> = {
   "room.leave.note": "방은 계속 열려 있어요. 코드 {code}로 언제든 돌아올 수 있어요.",
   "room.leave.confirm": "게임에서 나가 로비로 돌아갈까요?\n\n방은 계속 열려 있어요. 코드 {code}로 언제든 다시 참가할 수 있어요.",
   "room.ending.pill": "사건 종결 · 엔딩 보기",
+  "room.puzzle.mara-reset": "HarbourMail 비밀번호 재설정",
+  "room.puzzle.mara-login": "마라의 HarbourMail",
+  "room.discovery.mara-reset": "마라의 HarbourMail 비밀번호를 재설정했어요",
+  "room.discovery.mara-login": "마라의 HarbourMail에 들어갔어요",
+  "room.ending.envelopeEarned": "편지 봉투 배지 획득",
+  "room.ending.envelopeNote": "마라의 받은편지함을 읽었어요.",
+  "room.ending.maraHeading": "마라",
 };
 
 export default messages;

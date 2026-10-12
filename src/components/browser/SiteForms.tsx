@@ -105,6 +105,8 @@ export function SiteForm({
   if (form === "binary-quiz") return <BinaryQuizForm code={prompt} env={env} />;
   if (form === "admin-login") return <AdminLoginForm prompt={prompt} env={env} />;
   if (form === "intranet-login") return <LoginForm prompt={prompt} env={env} />;
+  if (form === "mara-login") return <MailLoginForm prompt={prompt} env={env} />;
+  if (form === "mara-reset") return <MailResetForm prompt={prompt} env={env} />;
   return <FinalPhraseForm prompt={prompt} env={env} />;
 }
 
@@ -357,6 +359,103 @@ function AdminLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
       >
         {a.busy ? x({ en: "Checking…", ko: "확인 중…", "zh-TW": "確認中…", es: "Comprobando…", ja: "確認中…", "pt-BR": "Verificando…" }) : x({ en: "Unlock console", ko: "콘솔 잠금 해제", "zh-TW": "解鎖主控台", es: "Desbloquear consola", ja: "コンソールのロックを解除", "pt-BR": "Desbloquear console" })}
+      </button>
+      <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
+    </form>
+  );
+}
+
+/** harbourmail.net sign-in (Easter egg). Submitted as "address:password". */
+function MailLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
+  const x = useStory();
+  const { t } = env;
+  const a = useAttempt(env, "mara-login");
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
+  const [show, setShow] = useState(false);
+  return (
+    <form
+      className={`${t.card} mx-auto max-w-sm space-y-3`}
+      onSubmit={(e) => {
+        e.preventDefault();
+        void a.submit(`${user.trim()}:${pass}`);
+      }}
+    >
+      <p className="font-semibold">{prompt}</p>
+      <label className="block text-sm">
+        {x({ en: "Email address", ko: "이메일 주소", "zh-TW": "電子郵件地址", es: "Correo electrónico", ja: "メールアドレス", "pt-BR": "Endereço de e-mail" })}
+        <input
+          {...inputProps}
+          type="email"
+          inputMode="email"
+          value={user}
+          onChange={(e) => setUser(e.target.value)}
+          enterKeyHint="next"
+          className={`mt-1 h-11 w-full px-3 text-base ${t.input}`}
+        />
+      </label>
+      <label className="block text-sm">
+        {x({ en: "Password", ko: "비밀번호", "zh-TW": "密碼", es: "Contraseña", ja: "パスワード", "pt-BR": "Senha" })}
+        <div className="mt-1 flex gap-2">
+          <input
+            {...inputProps}
+            type={show ? "text" : "password"}
+            value={pass}
+            onChange={(e) => setPass(e.target.value)}
+            enterKeyHint="go"
+            className={`h-11 min-w-0 flex-1 px-3 text-base ${t.input}`}
+          />
+          <button type="button" onClick={() => setShow((v) => !v)} aria-pressed={show} className={`min-h-11 px-3 text-sm ${t.buttonGhost}`}>
+            {show ? x({ en: "Hide", ko: "숨기기", "zh-TW": "隱藏", es: "Ocultar", ja: "隠す", "pt-BR": "Ocultar" }) : x({ en: "Show", ko: "보기", "zh-TW": "顯示", es: "Mostrar", ja: "表示", "pt-BR": "Mostrar" })}
+          </button>
+        </div>
+      </label>
+      <button
+        type="submit"
+        disabled={a.busy || a.retryLeft > 0 || !user.trim() || !pass}
+        className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
+      >
+        {a.busy ? x({ en: "Signing in…", ko: "로그인 중…", "zh-TW": "登入中…", es: "Iniciando sesión…", ja: "ログイン中…", "pt-BR": "Entrando…" }) : x({ en: "Sign in", ko: "로그인", "zh-TW": "登入", es: "Iniciar sesión", ja: "ログイン", "pt-BR": "Entrar" })}
+      </button>
+      <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
+    </form>
+  );
+}
+
+/** harbourmail.net "forgot password": sends a temporary password to the account's recovery contact. */
+function MailResetForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
+  const x = useStory();
+  const { t } = env;
+  const a = useAttempt(env, "mara-reset");
+  const [v, setV] = useState("");
+  return (
+    <form
+      className={`${t.card} mx-auto max-w-sm space-y-3`}
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (v.trim()) void a.submit(v);
+      }}
+    >
+      <label className="block text-sm font-semibold" htmlFor="mail-reset">
+        {prompt}
+      </label>
+      <input
+        id="mail-reset"
+        {...inputProps}
+        type="email"
+        inputMode="email"
+        value={v}
+        onChange={(e) => setV(e.target.value)}
+        enterKeyHint="send"
+        placeholder="name@harbourmail.net"
+        className={`h-11 w-full px-3 text-base ${t.input}`}
+      />
+      <button
+        type="submit"
+        disabled={a.busy || a.retryLeft > 0 || !v.trim()}
+        className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
+      >
+        {a.busy ? x({ en: "Sending…", ko: "보내는 중…", "zh-TW": "傳送中…", es: "Enviando…", ja: "送信中…", "pt-BR": "Enviando…" }) : x({ en: "Send temporary password", ko: "임시 비밀번호 보내기", "zh-TW": "寄送臨時密碼", es: "Enviar contraseña temporal", ja: "仮パスワードを送信", "pt-BR": "Enviar senha temporária" })}
       </button>
       <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
     </form>

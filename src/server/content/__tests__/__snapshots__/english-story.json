@@ -345,6 +345,78 @@
    ],
    "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Week 3: Binary</title>\n    <link rel=\"stylesheet\" href=\"/static/harbourcc.css\" />\n  </head>\n  <body class=\"theme-harbourcc\">\n    <!-- yes, real computers use 8 bits and a different table. this is a class, not a job. — W.O. -->\n    <main>\n      <nav>\n        <ul>\n          <li><a href=\"https://harbourcc.edu\">Home</a></li>\n          <li><a href=\"https://harbourcc.edu/cs110\">CS 110</a></li>\n          <li><a href=\"https://harbourcc.edu/cs110/binary\">Week 3: Binary</a></li>\n        </ul>\n      </nav>\n      <h1>Week 3: Binary</h1>\n      <p>Computers only have two fingers: a switch is either off (0) or on (1). So instead of counting in tens, they count in twos.</p>\n      <h2>Place values</h2>\n      <p>In our class code every letter is five switches. From left to right the switches are worth 16, 8, 4, 2 and 1. Add up the values of the switches that are on. That number is the letter: A is 1, B is 2, all the way to Z at 26.</p>\n      <p>Worked example: 01000. Only the 8 switch is on, so it's 8, and the 8th letter is H. Another: 10011 is 16 + 2 + 1 = 19, which is S.</p>\n      <h2>Try it</h2>\n      <p>Tap the switches to turn them on and off.</p>\n      <div class=\"bit-widget\" data-bits=\"5\"><!-- interactive: tap a switch to flip it --></div>\n      <h2>Decoding sheet</h2>\n      <table>\n        <caption>Class code: one letter, five bits</caption>\n        <tr><th>Letter</th><th>Number</th><th>Binary</th></tr>\n        <tr><td>A</td><td>1</td><td>00001</td></tr>\n        <tr><td>B</td><td>2</td><td>00010</td></tr>\n        <tr><td>C</td><td>3</td><td>00011</td></tr>\n        <tr><td>D</td><td>4</td><td>00100</td></tr>\n        <tr><td>E</td><td>5</td><td>00101</td></tr>\n        <tr><td>F</td><td>6</td><td>00110</td></tr>\n        <tr><td>G</td><td>7</td><td>00111</td></tr>\n        <tr><td>H</td><td>8</td><td>01000</td></tr>\n        <tr><td>I</td><td>9</td><td>01001</td></tr>\n        <tr><td>J</td><td>10</td><td>01010</td></tr>\n        <tr><td>K</td><td>11</td><td>01011</td></tr>\n        <tr><td>L</td><td>12</td><td>01100</td></tr>\n        <tr><td>M</td><td>13</td><td>01101</td></tr>\n        <tr><td>N</td><td>14</td><td>01110</td></tr>\n        <tr><td>O</td><td>15</td><td>01111</td></tr>\n        <tr><td>P</td><td>16</td><td>10000</td></tr>\n        <tr><td>Q</td><td>17</td><td>10001</td></tr>\n        <tr><td>R</td><td>18</td><td>10010</td></tr>\n        <tr><td>S</td><td>19</td><td>10011</td></tr>\n        <tr><td>T</td><td>20</td><td>10100</td></tr>\n        <tr><td>U</td><td>21</td><td>10101</td></tr>\n        <tr><td>V</td><td>22</td><td>10110</td></tr>\n        <tr><td>W</td><td>23</td><td>10111</td></tr>\n        <tr><td>X</td><td>24</td><td>11000</td></tr>\n        <tr><td>Y</td><td>25</td><td>11001</td></tr>\n        <tr><td>Z</td><td>26</td><td>11010</td></tr>\n      </table>\n      <h2>Practice quiz</h2>\n      <p>Decode this word with the sheet, then type it in. Pass and the class Binary translator installs on your machine.</p>\n      <form method=\"post\" action=\"/submit\" data-form=\"binary-quiz\">\n        <label>01000 00101 01100 01100 01111</label>\n        <input name=\"answer\" autocomplete=\"off\" />\n        <button type=\"submit\">Submit</button>\n      </form>\n      <footer>Harbour Community College · Evening Studies · Doors open 6pm, coffee is not guaranteed.</footer>\n    </main>\n  </body>\n</html>"
   },
+  "harbourmail.net": {
+   "address": "harbourmail.net",
+   "title": "HarbourMail",
+   "theme": "harbourmail",
+   "blocks": [
+    {
+     "type": "heading",
+     "level": 1,
+     "text": "HarbourMail"
+    },
+    {
+     "type": "paragraph",
+     "text": "Free email for the harbour city since 2004."
+    },
+    {
+     "type": "heading",
+     "level": 2,
+     "text": "Sign in"
+    },
+    {
+     "type": "form",
+     "form": "mara-login",
+     "prompt": "Sign in to your HarbourMail account."
+    },
+    {
+     "type": "link",
+     "text": "Forgot your password?",
+     "href": "harbourmail.net/forgot"
+    },
+    {
+     "type": "footer",
+     "text": "HarbourMail · Privacy · Terms · Help"
+    }
+   ],
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <!-- HarbourMail webmail 4.2 -->\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>HarbourMail</title>\n    <link rel=\"stylesheet\" href=\"/static/harbourmail.css\" />\n  </head>\n  <body class=\"theme-harbourmail\">\n    <!-- password resets go to the recovery contact on the account. most people pick family. -->\n    <main>\n      <h1>HarbourMail</h1>\n      <p>Free email for the harbour city since 2004.</p>\n      <h2>Sign in</h2>\n      <form method=\"post\" action=\"/submit\" data-form=\"mara-login\">\n        <label>Sign in to your HarbourMail account.</label>\n        <input name=\"answer\" autocomplete=\"off\" />\n        <button type=\"submit\">Submit</button>\n      </form>\n      <a href=\"https://harbourmail.net/forgot\">Forgot your password?</a>\n      <footer>HarbourMail · Privacy · Terms · Help</footer>\n    </main>\n  </body>\n</html>"
+  },
+  "harbourmail.net/forgot": {
+   "address": "harbourmail.net/forgot",
+   "title": "Reset your password",
+   "theme": "harbourmail",
+   "blocks": [
+    {
+     "type": "heading",
+     "level": 1,
+     "text": "HarbourMail"
+    },
+    {
+     "type": "heading",
+     "level": 2,
+     "text": "Reset your password"
+    },
+    {
+     "type": "paragraph",
+     "text": "Enter your HarbourMail address. We'll send a temporary password to the recovery contact on file for that account."
+    },
+    {
+     "type": "form",
+     "form": "mara-reset",
+     "prompt": "Your HarbourMail address"
+    },
+    {
+     "type": "link",
+     "text": "Back to sign in",
+     "href": "harbourmail.net"
+    },
+    {
+     "type": "footer",
+     "text": "HarbourMail · Privacy · Terms · Help"
+    }
+   ],
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Reset your password</title>\n    <link rel=\"stylesheet\" href=\"/static/harbourmail.css\" />\n  </head>\n  <body class=\"theme-harbourmail\">\n    <!-- password resets go to the recovery contact on the account. most people pick family. -->\n    <main>\n      <h1>HarbourMail</h1>\n      <h2>Reset your password</h2>\n      <p>Enter your HarbourMail address. We'll send a temporary password to the recovery contact on file for that account.</p>\n      <form method=\"post\" action=\"/submit\" data-form=\"mara-reset\">\n        <label>Your HarbourMail address</label>\n        <input name=\"answer\" autocomplete=\"off\" />\n        <button type=\"submit\">Submit</button>\n      </form>\n      <a href=\"https://harbourmail.net\">Back to sign in</a>\n      <footer>HarbourMail · Privacy · Terms · Help</footer>\n    </main>\n  </body>\n</html>"
+  },
   "intranet.meridian-inst.net": {
    "address": "intranet.meridian-inst.net",
    "title": "The Vault — Meridian Staff Access",
@@ -1735,6 +1807,292 @@
     }
    ],
    "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Week 3: Binary</title>\n    <link rel=\"stylesheet\" href=\"/static/harbourcc.css\" />\n  </head>\n  <body class=\"theme-harbourcc\">\n    <!-- yes, real computers use 8 bits and a different table. this is a class, not a job. — W.O. -->\n    <main>\n      <nav>\n        <ul>\n          <li><a href=\"https://harbourcc.edu\">Home</a></li>\n          <li><a href=\"https://harbourcc.edu/cs110\">CS 110</a></li>\n          <li><a href=\"https://harbourcc.edu/cs110/binary\">Week 3: Binary</a></li>\n        </ul>\n      </nav>\n      <h1>Week 3: Binary</h1>\n      <p>Computers only have two fingers: a switch is either off (0) or on (1). So instead of counting in tens, they count in twos.</p>\n      <h2>Place values</h2>\n      <p>In our class code every letter is five switches. From left to right the switches are worth 16, 8, 4, 2 and 1. Add up the values of the switches that are on. That number is the letter: A is 1, B is 2, all the way to Z at 26.</p>\n      <p>Worked example: 01000. Only the 8 switch is on, so it's 8, and the 8th letter is H. Another: 10011 is 16 + 2 + 1 = 19, which is S.</p>\n      <h2>Try it</h2>\n      <p>Tap the switches to turn them on and off.</p>\n      <div class=\"bit-widget\" data-bits=\"5\"><!-- interactive: tap a switch to flip it --></div>\n      <h2>Decoding sheet</h2>\n      <table>\n        <caption>Class code: one letter, five bits</caption>\n        <tr><th>Letter</th><th>Number</th><th>Binary</th></tr>\n        <tr><td>A</td><td>1</td><td>00001</td></tr>\n        <tr><td>B</td><td>2</td><td>00010</td></tr>\n        <tr><td>C</td><td>3</td><td>00011</td></tr>\n        <tr><td>D</td><td>4</td><td>00100</td></tr>\n        <tr><td>E</td><td>5</td><td>00101</td></tr>\n        <tr><td>F</td><td>6</td><td>00110</td></tr>\n        <tr><td>G</td><td>7</td><td>00111</td></tr>\n        <tr><td>H</td><td>8</td><td>01000</td></tr>\n        <tr><td>I</td><td>9</td><td>01001</td></tr>\n        <tr><td>J</td><td>10</td><td>01010</td></tr>\n        <tr><td>K</td><td>11</td><td>01011</td></tr>\n        <tr><td>L</td><td>12</td><td>01100</td></tr>\n        <tr><td>M</td><td>13</td><td>01101</td></tr>\n        <tr><td>N</td><td>14</td><td>01110</td></tr>\n        <tr><td>O</td><td>15</td><td>01111</td></tr>\n        <tr><td>P</td><td>16</td><td>10000</td></tr>\n        <tr><td>Q</td><td>17</td><td>10001</td></tr>\n        <tr><td>R</td><td>18</td><td>10010</td></tr>\n        <tr><td>S</td><td>19</td><td>10011</td></tr>\n        <tr><td>T</td><td>20</td><td>10100</td></tr>\n        <tr><td>U</td><td>21</td><td>10101</td></tr>\n        <tr><td>V</td><td>22</td><td>10110</td></tr>\n        <tr><td>W</td><td>23</td><td>10111</td></tr>\n        <tr><td>X</td><td>24</td><td>11000</td></tr>\n        <tr><td>Y</td><td>25</td><td>11001</td></tr>\n        <tr><td>Z</td><td>26</td><td>11010</td></tr>\n      </table>\n      <h2>Practice quiz</h2>\n      <div class=\"notice notice-success\">Quiz passed. The class Binary translator is installed in your Decoder.</div>\n      <form method=\"post\" action=\"/submit\" data-form=\"binary-quiz\">\n        <label>01000 00101 01100 01100 01111</label>\n        <input name=\"answer\" autocomplete=\"off\" />\n        <button type=\"submit\">Submit</button>\n      </form>\n      <footer>Harbour Community College · Evening Studies · Doors open 6pm, coffee is not guaranteed.</footer>\n    </main>\n  </body>\n</html>"
+  },
+  "harbourmail.net": {
+   "address": "harbourmail.net",
+   "title": "Inbox — HarbourMail",
+   "theme": "harbourmail",
+   "blocks": [
+    {
+     "type": "heading",
+     "level": 1,
+     "text": "HarbourMail"
+    },
+    {
+     "type": "paragraph",
+     "text": "Signed in as mara.voss@harbourmail.net"
+    },
+    {
+     "type": "nav",
+     "links": [
+      {
+       "text": "Inbox",
+       "href": "harbourmail.net"
+      },
+      {
+       "text": "Sent",
+       "href": "harbourmail.net/sent"
+      },
+      {
+       "text": "Drafts",
+       "href": "harbourmail.net/drafts"
+      },
+      {
+       "text": "Spam",
+       "href": "harbourmail.net/spam"
+      }
+     ]
+    },
+    {
+     "type": "heading",
+     "level": 2,
+     "text": "Inbox"
+    },
+    {
+     "type": "mail",
+     "subject": "Seating chart (sorry)",
+     "party": "From: Tom Achebe <tom.achebe@harbourmail.net>",
+     "date": "Today, 07:02",
+     "body": "Mar,\n\nThe venue wants the final seating chart by Friday. I've put your aunt nowhere near my uncle. You're welcome.\n\nOne question, and you can tell me to mind my own business: do I save Ada a seat?\n\nI'll do whatever you want. I just think you'd never forgive yourself if she walked in and there was nowhere for her to sit.\n\nT x"
+    },
+    {
+     "type": "mail",
+     "subject": "Your report: reference HC-2210",
+     "party": "From: Harbour City Police <noreply@harbourcity-police.gov>",
+     "date": "Yesterday, 17:25",
+     "body": "Ms Voss,\n\nThank you for your report concerning Dr Ada Voss.\n\nWe have since received a written statement from her employer, the Meridian Institute, confirming that Dr Voss is on voluntary leave and has been in contact with them. On that basis we are treating her absence as voluntary.\n\nThe report will be closed in five working days unless you can provide new information.\n\nSgt D. Marsh\nHarbour City Police"
+    },
+    {
+     "type": "mail",
+     "subject": "Supporting you at this difficult time",
+     "party": "From: Family Liaison Office, Meridian Institute <liaison@meridian-inst.net>",
+     "date": "Yesterday, 11:40",
+     "body": "Dear Ms Voss,\n\nAs part of our duty of care, the Institute would like to help you bring this unsettling period to a close.\n\nWe have prepared a short statement confirming that your sister's leave is voluntary. If you sign and return it, the police will be able to close their file and you will no longer be troubled by enquiries.\n\nWe also understand that Dr Voss's personal laptop may contain Institute property. A courier can collect it from you at a time of your choosing.\n\nWe would ask that you do not discuss this matter with third parties, including private investigators. Outside involvement tends to cause unnecessary distress to everyone concerned.\n\nWith continuity,\nFamily Liaison Office\nMeridian Institute"
+    },
+    {
+     "type": "mail",
+     "subject": "Cover for your Thursday lessons",
+     "party": "From: Harbour Baths <office@harbourbaths.org>",
+     "date": "Yesterday, 09:03",
+     "body": "Hi Mara,\n\nDon't worry about Thursday. Priya will take the Minnows and I'll do the adult beginners.\n\nThe Minnows made you a card. It's mostly glitter and a drawing of you as a dolphin. It's on your locker.\n\nTake as long as you need.\n\nJoan"
+    },
+    {
+     "type": "mail",
+     "subject": "Your father's papers",
+     "party": "From: Harriet Pell, Pell & Daughters <h.pell@pellanddaughters.law>",
+     "date": "2 years ago",
+     "body": "Dear Mara,\n\nAs you asked, we have not forwarded your late father's box to your sister. It is in our strongroom under your name, and I will respect your wishes.\n\nI will say this once, as a friend of your father's for forty years and not as his solicitor. He kept that notebook for a reason. I think he wanted someone to read it. I think he hoped it would be one of you.\n\nWhen you are ready, the box is here.\n\nHarriet Pell"
+    },
+    {
+     "type": "mail",
+     "subject": "Welcome to HarbourMail, Mara!",
+     "party": "From: HarbourMail <welcome@harbourmail.net>",
+     "date": "Sep 2006",
+     "body": "Welcome to HarbourMail!\n\nYour new address is mara.voss@harbourmail.net.\n\nThis account was set up for you by Ada Voss (ada@ada-voss.net), who is listed as your recovery contact. If you ever forget your password, we'll send a temporary one to Ada.\n\nMessage from Ada: \"You WILL forget it. That's why I'm the backup. Welcome to the internet, little fish. — A.\""
+    },
+    {
+     "type": "footer",
+     "text": "HarbourMail · Privacy · Terms · Help"
+    }
+   ],
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <!-- HarbourMail webmail 4.2 -->\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Inbox — HarbourMail</title>\n    <link rel=\"stylesheet\" href=\"/static/harbourmail.css\" />\n  </head>\n  <body class=\"theme-harbourmail\">\n    <main>\n      <h1>HarbourMail</h1>\n      <p>Signed in as mara.voss@harbourmail.net</p>\n      <nav>\n        <ul>\n          <li><a href=\"https://harbourmail.net\">Inbox</a></li>\n          <li><a href=\"https://harbourmail.net/sent\">Sent</a></li>\n          <li><a href=\"https://harbourmail.net/drafts\">Drafts</a></li>\n          <li><a href=\"https://harbourmail.net/spam\">Spam</a></li>\n        </ul>\n      </nav>\n      <h2>Inbox</h2>\n      <details class=\"message\">\n        <summary>From: Tom Achebe &lt;tom.achebe@harbourmail.net&gt; — Seating chart (sorry) <time>Today, 07:02</time></summary>\n        <p>Mar,</p>\n        <p></p>\n        <p>The venue wants the final seating chart by Friday. I've put your aunt nowhere near my uncle. You're welcome.</p>\n        <p></p>\n        <p>One question, and you can tell me to mind my own business: do I save Ada a seat?</p>\n        <p></p>\n        <p>I'll do whatever you want. I just think you'd never forgive yourself if she walked in and there was nowhere for her to sit.</p>\n        <p></p>\n        <p>T x</p>\n      </details>\n      <details class=\"message\">\n        <summary>From: Harbour City Police &lt;noreply@harbourcity-police.gov&gt; — Your report: reference HC-2210 <time>Yesterday, 17:25</time></summary>\n        <p>Ms Voss,</p>\n        <p></p>\n        <p>Thank you for your report concerning Dr Ada Voss.</p>\n        <p></p>\n        <p>We have since received a written statement from her employer, the Meridian Institute, confirming that Dr Voss is on voluntary leave and has been in contact with them. On that basis we are treating her absence as voluntary.</p>\n        <p></p>\n        <p>The report will be closed in five working days unless you can provide new information.</p>\n        <p></p>\n        <p>Sgt D. Marsh</p>\n        <p>Harbour City Police</p>\n      </details>\n      <details class=\"message\">\n        <summary>From: Family Liaison Office, Meridian Institute &lt;liaison@meridian-inst.net&gt; — Supporting you at this difficult time <time>Yesterday, 11:40</time></summary>\n        <p>Dear Ms Voss,</p>\n        <p></p>\n        <p>As part of our duty of care, the Institute would like to help you bring this unsettling period to a close.</p>\n        <p></p>\n        <p>We have prepared a short statement confirming that your sister's leave is voluntary. If you sign and return it, the police will be able to close their file and you will no longer be troubled by enquiries.</p>\n        <p></p>\n        <p>We also understand that Dr Voss's personal laptop may contain Institute property. A courier can collect it from you at a time of your choosing.</p>\n        <p></p>\n        <p>We would ask that you do not discuss this matter with third parties, including private investigators. Outside involvement tends to cause unnecessary distress to everyone concerned.</p>\n        <p></p>\n        <p>With continuity,</p>\n        <p>Family Liaison Office</p>\n        <p>Meridian Institute</p>\n      </details>\n      <details class=\"message\">\n        <summary>From: Harbour Baths &lt;office@harbourbaths.org&gt; — Cover for your Thursday lessons <time>Yesterday, 09:03</time></summary>\n        <p>Hi Mara,</p>\n        <p></p>\n        <p>Don't worry about Thursday. Priya will take the Minnows and I'll do the adult beginners.</p>\n        <p></p>\n        <p>The Minnows made you a card. It's mostly glitter and a drawing of you as a dolphin. It's on your locker.</p>\n        <p></p>\n        <p>Take as long as you need.</p>\n        <p></p>\n        <p>Joan</p>\n      </details>\n      <details class=\"message\">\n        <summary>From: Harriet Pell, Pell &amp; Daughters &lt;h.pell@pellanddaughters.law&gt; — Your father's papers <time>2 years ago</time></summary>\n        <p>Dear Mara,</p>\n        <p></p>\n        <p>As you asked, we have not forwarded your late father's box to your sister. It is in our strongroom under your name, and I will respect your wishes.</p>\n        <p></p>\n        <p>I will say this once, as a friend of your father's for forty years and not as his solicitor. He kept that notebook for a reason. I think he wanted someone to read it. I think he hoped it would be one of you.</p>\n        <p></p>\n        <p>When you are ready, the box is here.</p>\n        <p></p>\n        <p>Harriet Pell</p>\n      </details>\n      <details class=\"message\">\n        <summary>From: HarbourMail &lt;welcome@harbourmail.net&gt; — Welcome to HarbourMail, Mara! <time>Sep 2006</time></summary>\n        <p>Welcome to HarbourMail!</p>\n        <p></p>\n        <p>Your new address is mara.voss@harbourmail.net.</p>\n        <p></p>\n        <p>This account was set up for you by Ada Voss (ada@ada-voss.net), who is listed as your recovery contact. If you ever forget your password, we'll send a temporary one to Ada.</p>\n        <p></p>\n        <p>Message from Ada: &quot;You WILL forget it. That's why I'm the backup. Welcome to the internet, little fish. — A.&quot;</p>\n      </details>\n      <footer>HarbourMail · Privacy · Terms · Help</footer>\n    </main>\n  </body>\n</html>"
+  },
+  "harbourmail.net/drafts": {
+   "address": "harbourmail.net/drafts",
+   "title": "Drafts — HarbourMail",
+   "theme": "harbourmail",
+   "blocks": [
+    {
+     "type": "heading",
+     "level": 1,
+     "text": "HarbourMail"
+    },
+    {
+     "type": "paragraph",
+     "text": "Signed in as mara.voss@harbourmail.net"
+    },
+    {
+     "type": "nav",
+     "links": [
+      {
+       "text": "Inbox",
+       "href": "harbourmail.net"
+      },
+      {
+       "text": "Sent",
+       "href": "harbourmail.net/sent"
+      },
+      {
+       "text": "Drafts",
+       "href": "harbourmail.net/drafts"
+      },
+      {
+       "text": "Spam",
+       "href": "harbourmail.net/spam"
+      }
+     ]
+    },
+    {
+     "type": "heading",
+     "level": 2,
+     "text": "Drafts"
+    },
+    {
+     "type": "mail",
+     "subject": "(no subject)",
+     "party": "To: Ada Voss <ada@ada-voss.net>",
+     "date": "Last edited 2 years ago",
+     "body": "Ada,\n\nI read Dad's notebook. The night of the fire he wrote one line: \"Lamps on in the Trust office. I told them what I saw. They told me I didn't.\"\n\nYou were right about him. I couldn't stand you being right, so I asked Pell to keep the box from you. That was cowardly and I knew it while I was doing it.\n\nI'll bring it to you. I'll",
+     "tag": "Draft — not sent"
+    },
+    {
+     "type": "mail",
+     "subject": "The 14th",
+     "party": "To: Ada Voss <ada@ada-voss.net>",
+     "date": "Last edited yesterday, 23:58",
+     "body": "Ada,\n\nIf you're reading this somehow: Tom's saving you a seat. Next to me.\n\nYou don't have to say anything. You don't have to forgive me. Just come.",
+     "tag": "Draft — not sent"
+    },
+    {
+     "type": "footer",
+     "text": "HarbourMail · Privacy · Terms · Help"
+    }
+   ],
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <!-- HarbourMail webmail 4.2 -->\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Drafts — HarbourMail</title>\n    <link rel=\"stylesheet\" href=\"/static/harbourmail.css\" />\n  </head>\n  <body class=\"theme-harbourmail\">\n    <main>\n      <h1>HarbourMail</h1>\n      <p>Signed in as mara.voss@harbourmail.net</p>\n      <nav>\n        <ul>\n          <li><a href=\"https://harbourmail.net\">Inbox</a></li>\n          <li><a href=\"https://harbourmail.net/sent\">Sent</a></li>\n          <li><a href=\"https://harbourmail.net/drafts\">Drafts</a></li>\n          <li><a href=\"https://harbourmail.net/spam\">Spam</a></li>\n        </ul>\n      </nav>\n      <h2>Drafts</h2>\n      <details class=\"message\">\n        <summary>To: Ada Voss &lt;ada@ada-voss.net&gt; — (no subject) <time>Last edited 2 years ago</time></summary>\n        <p class=\"tag\">Draft — not sent</p>\n        <p>Ada,</p>\n        <p></p>\n        <p>I read Dad's notebook. The night of the fire he wrote one line: &quot;Lamps on in the Trust office. I told them what I saw. They told me I didn't.&quot;</p>\n        <p></p>\n        <p>You were right about him. I couldn't stand you being right, so I asked Pell to keep the box from you. That was cowardly and I knew it while I was doing it.</p>\n        <p></p>\n        <p>I'll bring it to you. I'll</p>\n      </details>\n      <details class=\"message\">\n        <summary>To: Ada Voss &lt;ada@ada-voss.net&gt; — The 14th <time>Last edited yesterday, 23:58</time></summary>\n        <p class=\"tag\">Draft — not sent</p>\n        <p>Ada,</p>\n        <p></p>\n        <p>If you're reading this somehow: Tom's saving you a seat. Next to me.</p>\n        <p></p>\n        <p>You don't have to say anything. You don't have to forgive me. Just come.</p>\n      </details>\n      <footer>HarbourMail · Privacy · Terms · Help</footer>\n    </main>\n  </body>\n</html>"
+  },
+  "harbourmail.net/sent": {
+   "address": "harbourmail.net/sent",
+   "title": "Sent — HarbourMail",
+   "theme": "harbourmail",
+   "blocks": [
+    {
+     "type": "heading",
+     "level": 1,
+     "text": "HarbourMail"
+    },
+    {
+     "type": "paragraph",
+     "text": "Signed in as mara.voss@harbourmail.net"
+    },
+    {
+     "type": "nav",
+     "links": [
+      {
+       "text": "Inbox",
+       "href": "harbourmail.net"
+      },
+      {
+       "text": "Sent",
+       "href": "harbourmail.net/sent"
+      },
+      {
+       "text": "Drafts",
+       "href": "harbourmail.net/drafts"
+      },
+      {
+       "text": "Spam",
+       "href": "harbourmail.net/spam"
+      }
+     ]
+    },
+    {
+     "type": "heading",
+     "level": 2,
+     "text": "Sent"
+    },
+    {
+     "type": "mail",
+     "subject": "Re: Seating chart (sorry)",
+     "party": "To: Tom Achebe <tom.achebe@harbourmail.net>",
+     "date": "Today, 07:20",
+     "body": "Save her a seat. Next to me.\n\nx"
+    },
+    {
+     "type": "mail",
+     "subject": "Dad's box",
+     "party": "To: Harriet Pell, Pell & Daughters <h.pell@pellanddaughters.law>",
+     "date": "Yesterday, 23:10",
+     "body": "Harriet,\n\nPlease courier Dad's box to the investigator I've hired. Address below.\n\nIt's time somebody read his notebook. It should have been me, two years ago.\n\nMara"
+    },
+    {
+     "type": "mail",
+     "subject": "Re: Supporting you at this difficult time",
+     "party": "To: Family Liaison Office, Meridian Institute <liaison@meridian-inst.net>",
+     "date": "Yesterday, 12:15",
+     "body": "No.\n\nDon't contact me again.\n\nMara Voss"
+    },
+    {
+     "type": "footer",
+     "text": "HarbourMail · Privacy · Terms · Help"
+    }
+   ],
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <!-- HarbourMail webmail 4.2 -->\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Sent — HarbourMail</title>\n    <link rel=\"stylesheet\" href=\"/static/harbourmail.css\" />\n  </head>\n  <body class=\"theme-harbourmail\">\n    <main>\n      <h1>HarbourMail</h1>\n      <p>Signed in as mara.voss@harbourmail.net</p>\n      <nav>\n        <ul>\n          <li><a href=\"https://harbourmail.net\">Inbox</a></li>\n          <li><a href=\"https://harbourmail.net/sent\">Sent</a></li>\n          <li><a href=\"https://harbourmail.net/drafts\">Drafts</a></li>\n          <li><a href=\"https://harbourmail.net/spam\">Spam</a></li>\n        </ul>\n      </nav>\n      <h2>Sent</h2>\n      <details class=\"message\">\n        <summary>To: Tom Achebe &lt;tom.achebe@harbourmail.net&gt; — Re: Seating chart (sorry) <time>Today, 07:20</time></summary>\n        <p>Save her a seat. Next to me.</p>\n        <p></p>\n        <p>x</p>\n      </details>\n      <details class=\"message\">\n        <summary>To: Harriet Pell, Pell &amp; Daughters &lt;h.pell@pellanddaughters.law&gt; — Dad's box <time>Yesterday, 23:10</time></summary>\n        <p>Harriet,</p>\n        <p></p>\n        <p>Please courier Dad's box to the investigator I've hired. Address below.</p>\n        <p></p>\n        <p>It's time somebody read his notebook. It should have been me, two years ago.</p>\n        <p></p>\n        <p>Mara</p>\n      </details>\n      <details class=\"message\">\n        <summary>To: Family Liaison Office, Meridian Institute &lt;liaison@meridian-inst.net&gt; — Re: Supporting you at this difficult time <time>Yesterday, 12:15</time></summary>\n        <p>No.</p>\n        <p></p>\n        <p>Don't contact me again.</p>\n        <p></p>\n        <p>Mara Voss</p>\n      </details>\n      <footer>HarbourMail · Privacy · Terms · Help</footer>\n    </main>\n  </body>\n</html>"
+  },
+  "harbourmail.net/spam": {
+   "address": "harbourmail.net/spam",
+   "title": "Spam — HarbourMail",
+   "theme": "harbourmail",
+   "blocks": [
+    {
+     "type": "heading",
+     "level": 1,
+     "text": "HarbourMail"
+    },
+    {
+     "type": "paragraph",
+     "text": "Signed in as mara.voss@harbourmail.net"
+    },
+    {
+     "type": "nav",
+     "links": [
+      {
+       "text": "Inbox",
+       "href": "harbourmail.net"
+      },
+      {
+       "text": "Sent",
+       "href": "harbourmail.net/sent"
+      },
+      {
+       "text": "Drafts",
+       "href": "harbourmail.net/drafts"
+      },
+      {
+       "text": "Spam",
+       "href": "harbourmail.net/spam"
+      }
+     ]
+    },
+    {
+     "type": "heading",
+     "level": 2,
+     "text": "Spam"
+    },
+    {
+     "type": "notice",
+     "tone": "warning",
+     "text": "Messages in Spam were moved here automatically because the sender isn't in your contacts. Be careful with links."
+    },
+    {
+     "type": "mail",
+     "subject": "don't reply to this",
+     "party": "From: harbourwall@quietpost.org",
+     "date": "3 days ago, 02:16",
+     "body": "M.\n\nDon't reply to this. Don't call.\n\nIf anyone from the Institute asks for my laptop, say no and keep saying no. Give it to someone who reads footnotes. You'll know them when you meet them.\n\nYou always said I was seeing ghosts in the ledgers. You were half right.\n\nI'm going somewhere they can't reconcile me. If this works, I'll see you on the 14th.\n\n— the one who taught you to swim"
+    },
+    {
+     "type": "mail",
+     "subject": "CONGRATULATIONS!! You have been selected for a FREE harbour cruise",
+     "party": "From: Prize Desk <winner@harbour-cruise-deals.biz>",
+     "date": "4 days ago",
+     "body": "Claim your FREE sunset cruise for two!! Just confirm your bank details and a small port fee.\n\nOffer ends TONIGHT."
+    },
+    {
+     "type": "footer",
+     "text": "HarbourMail · Privacy · Terms · Help"
+    }
+   ],
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <!-- HarbourMail webmail 4.2 -->\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Spam — HarbourMail</title>\n    <link rel=\"stylesheet\" href=\"/static/harbourmail.css\" />\n  </head>\n  <body class=\"theme-harbourmail\">\n    <main>\n      <h1>HarbourMail</h1>\n      <p>Signed in as mara.voss@harbourmail.net</p>\n      <nav>\n        <ul>\n          <li><a href=\"https://harbourmail.net\">Inbox</a></li>\n          <li><a href=\"https://harbourmail.net/sent\">Sent</a></li>\n          <li><a href=\"https://harbourmail.net/drafts\">Drafts</a></li>\n          <li><a href=\"https://harbourmail.net/spam\">Spam</a></li>\n        </ul>\n      </nav>\n      <h2>Spam</h2>\n      <div class=\"notice notice-warning\">Messages in Spam were moved here automatically because the sender isn't in your contacts. Be careful with links.</div>\n      <details class=\"message\">\n        <summary>From: harbourwall@quietpost.org — don't reply to this <time>3 days ago, 02:16</time></summary>\n        <p>M.</p>\n        <p></p>\n        <p>Don't reply to this. Don't call.</p>\n        <p></p>\n        <p>If anyone from the Institute asks for my laptop, say no and keep saying no. Give it to someone who reads footnotes. You'll know them when you meet them.</p>\n        <p></p>\n        <p>You always said I was seeing ghosts in the ledgers. You were half right.</p>\n        <p></p>\n        <p>I'm going somewhere they can't reconcile me. If this works, I'll see you on the 14th.</p>\n        <p></p>\n        <p>— the one who taught you to swim</p>\n      </details>\n      <details class=\"message\">\n        <summary>From: Prize Desk &lt;winner@harbour-cruise-deals.biz&gt; — CONGRATULATIONS!! You have been selected for a FREE harbour cruise <time>4 days ago</time></summary>\n        <p>Claim your FREE sunset cruise for two!! Just confirm your bank details and a small port fee.</p>\n        <p></p>\n        <p>Offer ends TONIGHT.</p>\n      </details>\n      <footer>HarbourMail · Privacy · Terms · Help</footer>\n    </main>\n  </body>\n</html>"
   },
   "intranet.meridian-inst.net": {
    "address": "intranet.meridian-inst.net",

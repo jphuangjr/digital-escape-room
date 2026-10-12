@@ -125,6 +125,13 @@ const messages: Record<keyof typeof en, string> = {
   "room.leave.note": "房間會繼續開著，隨時可以用代碼 {code} 回來。",
   "room.leave.confirm": "要離開遊戲並返回大廳嗎？\n\n房間會繼續開著，隨時可以用代碼 {code} 重新加入。",
   "room.ending.pill": "案件已結案 · 查看結局",
+  "room.puzzle.mara-reset": "HarbourMail 密碼重設",
+  "room.puzzle.mara-login": "瑪拉的 HarbourMail",
+  "room.discovery.mara-reset": "重設了瑪拉的 HarbourMail 密碼",
+  "room.discovery.mara-login": "登入了瑪拉的 HarbourMail",
+  "room.ending.envelopeEarned": "獲得信封徽章",
+  "room.ending.envelopeNote": "你讀了瑪拉的收件匣。",
+  "room.ending.maraHeading": "瑪拉",
 };
 
 export default messages;

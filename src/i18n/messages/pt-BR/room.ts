@@ -125,6 +125,13 @@ const messages: Record<keyof typeof en, string> = {
   "room.leave.note": "A sala continua aberta. Volte quando quiser com o código {code}.",
   "room.leave.confirm": "Sair do jogo e voltar ao saguão?\n\nA sala continua aberta: volte quando quiser com o código {code}.",
   "room.ending.pill": "Caso encerrado · ver o final",
+  "room.puzzle.mara-reset": "Redefinição de senha do HarbourMail",
+  "room.puzzle.mara-login": "HarbourMail da Mara",
+  "room.discovery.mara-reset": "redefiniu a senha do HarbourMail da Mara",
+  "room.discovery.mara-login": "entrou no HarbourMail da Mara",
+  "room.ending.envelopeEarned": "Insígnia do envelope conquistada",
+  "room.ending.envelopeNote": "Você leu a caixa de entrada da Mara.",
+  "room.ending.maraHeading": "Mara",
 };
 
 export default messages;

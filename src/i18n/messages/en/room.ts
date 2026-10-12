@@ -123,6 +123,13 @@ const messages = {
   "room.leave.note": "The room stays open. Come back anytime with code {code}.",
   "room.leave.confirm": "Leave the game and go back to the lobby?\n\nThe room stays open: rejoin anytime with code {code}.",
   "room.ending.pill": "Case closed · view ending",
+  "room.puzzle.mara-reset": "HarbourMail password reset",
+  "room.puzzle.mara-login": "Mara's HarbourMail",
+  "room.discovery.mara-reset": "reset Mara's HarbourMail password",
+  "room.discovery.mara-login": "got into Mara's HarbourMail",
+  "room.ending.envelopeEarned": "Envelope badge earned",
+  "room.ending.envelopeNote": "You read Mara's inbox.",
+  "room.ending.maraHeading": "Mara",
 } as const;
 
 export default messages;
