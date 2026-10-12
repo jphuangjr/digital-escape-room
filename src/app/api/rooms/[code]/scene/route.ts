@@ -6,6 +6,11 @@ import { ATTEMPT_WINDOW_MS, ONLINE_WINDOW_MS, rateLimitDecision } from "@/server
 import { publish } from "@/server/realtime";
 import { applyAction, parseScene, sceneDTO } from "@/server/train/scene";
 import { mutateScene } from "@/server/train/store";
+import { THIEF } from "@/server/train/content";
+import { recordLeaderboardEntry } from "@/server/leaderboard";
+import { recordCaseEnding, recordFinishedCase } from "@/server/cases";
+import { trainT } from "@/server/train/text";
+import { getLocale } from "@/i18n/server";
 
 const TYPES = new Set(["take", "operate", "use", "combine", "unlock", "item", "hint", "vote", "close-vote", "tiebreak"]);
 
@@ -19,6 +24,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   const body = await readBody(req);
   if (!body || typeof body.type !== "string" || !TYPES.has(body.type)) return error(400, "Unknown action.");
   const action = body as unknown as SceneAction;
+  const loc = await getLocale();
 
   if (action.type === "unlock") {
     const puzzleId = `nx-${String(action.lock)}`;
@@ -30,7 +36,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     const rl = rateLimitDecision(recent.map((r) => r.createdAt), now);
     if (rl.limited) {
       return json<SceneActionResponse>(
-        { ok: false, message: `Too many tries. Wait ${rl.retryAfterSec}s.`, retryAfterSec: rl.retryAfterSec, scene: sceneDTO(parseScene(room.scene), { startedAt: room.createdAt }) },
+        { ok: false, message: trainT(loc)("msg.tooMany", { s: rl.retryAfterSec }), retryAfterSec: rl.retryAfterSec, scene: sceneDTO(parseScene(room.scene), { startedAt: room.createdAt, loc }) },
         429,
       );
     }
@@ -42,10 +48,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     .filter((p) => p.id === player.id || Date.now() - p.lastSeenAt.getTime() <= ONLINE_WINDOW_MS)
     .map((p) => p.id);
   const res = await mutateScene(room.id, (cur) =>
-    applyAction(cur, action, { id: player.id, name: player.displayName }, { hostId: room.hostId, onlineIds }),
+    applyAction(cur, action, { id: player.id, name: player.displayName }, { hostId: room.hostId, onlineIds }, new Date(), loc),
   );
-  if (res.finished) {
-    await db.room.update({ where: { id: room.id }, data: { status: "finished", finishedAt: new Date() } });
+  if (res.finished && res.scene.ending) {
+    await db.room.update({ where: { id: room.id }, data: { status: "finished", finishedAt: new Date(), ending: res.scene.ending.accused } });
+    // Public results (skipped while the game is in staging).
+    const solved = res.scene.ending.accused === THIEF;
+    await Promise.all([
+      recordLeaderboardEntry(room.id, { solved, hintsUsed: res.scene.hints.length, ending: res.scene.ending.accused }).catch(() => {}),
+      recordFinishedCase(room.id).then(() => recordCaseEnding(room.id, res.scene.ending!.accused)).catch(() => {}),
+    ]);
   }
   if (res.attempt) {
     await db.attempt.create({
@@ -54,5 +66,5 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     await publish(room.code, "attempt.logged", { puzzleId: `nx-${res.attempt.lock}`, correct: res.attempt.correct });
   }
   if (res.changed) await publish(room.code, "progress.updated", { reason: "scene" });
-  return json<SceneActionResponse>({ ok: res.ok, message: res.message, scene: sceneDTO(res.scene, { startedAt: room.createdAt }) });
+  return json<SceneActionResponse>({ ok: res.ok, message: res.message, scene: sceneDTO(res.scene, { startedAt: room.createdAt, loc }) });
 }

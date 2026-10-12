@@ -15,6 +15,7 @@ const messages: Record<keyof typeof en, string> = {
   "board.stat.hints": "Pistas",
   "board.morePlayers": "+{n}",
   "board.timeNote": "El tiempo corre desde que se abre el caso hasta la respuesta final.",
+  "board.unsolved": "Acusación errónea",
 };
 
 export default messages;

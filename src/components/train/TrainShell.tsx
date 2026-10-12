@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RoomState } from "@/lib/types";
 import type { HotspotId, ItemDTO, ItemId, SceneAction, SceneActionResponse, SceneDTO, Suspect, TrainRoomId, WallId } from "@/lib/train/types";
-import { SUIT_SYMBOLS, SUSPECTS, WALLS_12B, WALLS_DINING } from "@/lib/train/types";
+import { SUIT_SYMBOLS, SUSPECTS, TRAIN_GAME_ID, WALLS_12B, WALLS_DINING } from "@/lib/train/types";
 import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
 import { useChat } from "@/lib/client/chat";
 import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
-import { CorridorArt, HOTSPOTS, WALL_NAMES, WallArt } from "./walls";
+import { useT } from "@/i18n/client";
+import { Leaderboard } from "@/components/site/Leaderboard";
+import { CorridorArt, HOTSPOTS, WallArt } from "./walls";
 import { CloseupDocView, ItemIcon, ItemReading, LockDial } from "./parts";
 import { setSoundPreferred, soundPreferred, TrainAmbience } from "./sound";
 
@@ -21,7 +23,7 @@ import { setSoundPreferred, soundPreferred, TrainAmbience } from "./sound";
  */
 
 const PRESENCE_MS = 15_000;
-const TABS: RoomTab[] = ["people", "chat"];
+const TABS: RoomTab[] = ["people", "chat", "attempts"];
 
 export function TrainShell({ code, state, refresh }: { code: string; state: RoomState; refresh: () => Promise<void> }) {
   const scene = state.scene as SceneDTO;
@@ -29,6 +31,12 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   const [wallIdxBy, setWallIdxBy] = useState<Record<"12b" | "dining", number>>({ "12b": 0, dining: 0 });
   const [notesOpen, setNotesOpen] = useState(false);
   const [intro, setIntro] = useState(false);
+  const [showSpots, setShowSpots] = useState(false);
+  useEffect(() => {
+    if (!showSpots) return;
+    const id = setTimeout(() => setShowSpots(false), 1800);
+    return () => clearTimeout(id);
+  }, [showSpots]);
   const [closeup, setCloseup] = useState<HotspotId | null>(null);
   const [itemOpen, setItemOpen] = useState<ItemId | null>(null);
   const [busy, setBusy] = useState(false);
@@ -38,6 +46,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const toastId = useRef(0);
   const chat = useChat(code, state.me.id);
+  const t = useT();
   const walls = place === "dining" ? WALLS_DINING : WALLS_12B;
   const wallIdx = place === "dining" ? wallIdxBy.dining : wallIdxBy["12b"];
   const wall: WallId = walls[wallIdx];
@@ -80,7 +89,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
 
   // ---------- presence ----------
   const view = place === "corridor" ? "train:corridor" : `train:${wall}`;
-  const roomName = place === "dining" ? "Dining car" : "Compartment 12B";
+  const roomName = t(place === "dining" ? "train.room.dining" : "train.room.12b");
   const viewRef = useRef(view);
   useEffect(() => {
     viewRef.current = view;
@@ -112,7 +121,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
       for (const m of chat.messages) {
         if (knownChat.current.has(m.id) || m.playerId === state.me.id) continue;
         toast(`${m.playerName}: ${m.body.length > 70 ? `${m.body.slice(0, 70)}…` : m.body}`, "info", {
-          label: "Reply",
+          label: t("train.reply"),
           onClick: () => {
             setRoomTab("chat");
             setRoomOpen(true);
@@ -121,7 +130,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
       }
     }
     knownChat.current = new Set(chat.messages.map((m) => m.id));
-  }, [chat.messages, chat.loaded, roomOpen, roomTab, state.me.id, toast]);
+  }, [chat.messages, chat.loaded, roomOpen, roomTab, state.me.id, toast, t]);
 
   // ---------- actions ----------
   const act = useCallback(
@@ -132,7 +141,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
       setBusy(false);
       const data = res.data;
       if (!data || typeof data !== "object" || !("scene" in data)) {
-        toast("Couldn't reach the train. Try again.", "error");
+        toast(t("train.offline"), "error");
         return null;
       }
       if (data.message) toast(data.message, data.ok ? "success" : "info");
@@ -143,7 +152,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
       if (data.ok) void refresh();
       return data;
     },
-    [busy, code, refresh, toast],
+    [busy, code, refresh, toast, t],
   );
 
   const ctx: GameCtx = useMemo(
@@ -177,13 +186,13 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
         <header className="flex h-12 shrink-0 items-center gap-2 border-b border-[#3d2615] px-3">
           <div className="min-w-0 flex-1">
             <p className="truncate font-serif text-base text-[#ecd27a]">
-              {place === "corridor" ? "The corridor" : `${roomName} · ${WALL_NAMES[wall]}`}
+              {place === "corridor" ? t("train.room.corridor") : t("train.title", { room: roomName, wall: t(`train.wall.${wall}`) })}
             </p>
           </div>
           <button
             type="button"
             onClick={() => setNotesOpen(true)}
-            aria-label="Ring for Teodor (hints)"
+            aria-label={t("train.hintsAria")}
             className="relative flex h-10 w-10 items-center justify-center rounded-md text-[#ecd27a] active:bg-[#3d2615]"
           >
             🛎
@@ -195,7 +204,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             type="button"
             onClick={toggleSound}
             aria-pressed={soundOn}
-            aria-label={soundOn ? "Mute train sounds" : "Play train sounds"}
+            aria-label={soundOn ? t("train.mute") : t("train.unmute")}
             className="flex h-10 w-10 items-center justify-center rounded-md text-[#ecd27a] active:bg-[#3d2615]"
           >
             {soundOn ? "🔊" : "🔇"}
@@ -205,7 +214,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             onClick={() => setRoomOpen(true)}
             className="relative flex h-10 items-center gap-1.5 rounded-md border border-[#c9a227]/50 px-3 text-sm text-[#ecd27a] active:bg-[#3d2615]"
           >
-            {state.players.filter((p) => p.online).length} · Room
+            {t("train.roomButton", { count: state.players.filter((p) => p.online).length })}
             {chat.unread > 0 && (
               <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-bold text-white">
                 {chat.unread}
@@ -236,16 +245,18 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
                   <button
                     key={h.id}
                     type="button"
-                    aria-label={h.label}
+                    aria-label={t(`train.spot.${h.id}`)}
                     onClick={() => setCloseup(h.id)}
-                    className="absolute rounded-lg outline-none ring-[#ecd27a]/70 transition hover:ring-2 focus-visible:ring-2 active:bg-[#ecd27a]/15"
+                    className={`absolute rounded-lg outline-none ring-[#ecd27a]/70 transition hover:ring-2 focus-visible:ring-2 active:bg-[#ecd27a]/15 ${
+                      showSpots ? "animate-pulse bg-[#ecd27a]/15 ring-2" : ""
+                    }`}
                     style={{ left: `${(h.x / 300) * 100}%`, top: `${(h.y / 400) * 100}%`, width: `${(h.w / 300) * 100}%`, height: `${(h.h / 400) * 100}%` }}
                   />
                 ))}
               </>
             )}
             {here.length > 0 && (
-              <div className="absolute right-2 top-2 flex -space-x-1.5" aria-label={`${here.map((p) => p.displayName).join(", ")} looking here too`}>
+              <div className="absolute right-2 top-2 flex -space-x-1.5" aria-label={t("train.lookingHere", { names: here.map((p) => p.displayName).join(", ") })}>
                 {here.map((p) => (
                   <span
                     key={p.id}
@@ -268,12 +279,12 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
                   onClick={() => setPlace("corridor")}
                   className="absolute left-2 top-2 min-h-9 rounded-md bg-black/50 px-3 text-xs text-[#ecd27a] active:bg-black/70"
                 >
-                  ← Corridor
+                  {t("train.toCorridor")}
                 </button>
               )}
               <button
                 type="button"
-                aria-label="Turn left"
+                aria-label={t("train.turnLeft")}
                 onClick={() => turn(-1)}
                 className="absolute left-1 top-1/2 flex h-14 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-black/40 text-2xl text-[#ecd27a] active:bg-black/60"
               >
@@ -281,11 +292,19 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               </button>
               <button
                 type="button"
-                aria-label="Turn right"
+                aria-label={t("train.turnRight")}
                 onClick={() => turn(1)}
                 className="absolute right-1 top-1/2 flex h-14 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-black/40 text-2xl text-[#ecd27a] active:bg-black/60"
               >
                 ›
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowSpots(true)}
+                aria-label={t("train.showSpots")}
+                className="absolute bottom-1 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-base active:bg-black/70"
+              >
+                👁
               </button>
               <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5" aria-hidden>
                 {walls.map((w, i) => (
@@ -295,21 +314,21 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             </>
           ) : (
             <div className="absolute inset-x-0 bottom-4 mx-auto flex w-[min(92%,22rem)] flex-col gap-2 rounded-xl border border-[#c9a227]/40 bg-[#1b120b]/95 p-4 text-center">
-              <p className="font-serif text-[#ecd27a]">The corridor is dark and empty.</p>
-              <p className="text-sm text-stone-300">At the far end, warm light shows through the dining car door.</p>
+              <p className="font-serif text-[#ecd27a]">{t("train.corridor.title")}</p>
+              <p className="text-sm text-stone-300">{t("train.corridor.text")}</p>
               <button
                 type="button"
                 onClick={() => setPlace("dining")}
                 className="mt-1 min-h-11 rounded-md bg-[#c9a227] text-sm font-semibold text-[#1b120b] active:bg-[#ecd27a]"
               >
-                Into the dining car →
+                {t("train.corridor.dining")}
               </button>
               <button
                 type="button"
                 onClick={() => setPlace("12b")}
                 className="min-h-11 rounded-md border border-[#c9a227]/50 text-sm text-[#ecd27a] active:bg-[#3d2615]"
               >
-                ← Back to Compartment 12B
+                {t("train.corridor.back")}
               </button>
             </div>
           )}
@@ -317,9 +336,9 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
 
         {/* inventory */}
         <footer className="shrink-0 border-t border-[#3d2615] bg-[#1b120b] px-2 pt-1.5" style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}>
-          <p className="px-1 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">Your things</p>
+          <p className="px-1 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("train.things")}</p>
           <div className="flex min-h-16 gap-1.5 overflow-x-auto py-1">
-            {scene.inventory.length === 0 && <p className="self-center px-1 text-sm text-stone-500">Nothing yet. Tap around the room.</p>}
+            {scene.inventory.length === 0 && <p className="self-center px-1 text-sm text-stone-500">{t("train.thingsEmpty")}</p>}
             {scene.inventory.map((it) => (
               <button
                 key={it.id}
@@ -329,7 +348,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               >
                 <ItemIcon id={it.id} className="h-9 w-9" />
                 <span className="mt-0.5 line-clamp-1 text-[10px] text-stone-300">{it.name}</span>
-                {it.evidence && <span className="absolute right-0.5 top-0.5 text-[10px]" aria-label="Evidence">🔍</span>}
+                {it.evidence && <span className="absolute right-0.5 top-0.5 text-[10px]" aria-label={t("train.evidence")}>🔍</span>}
               </button>
             ))}
           </div>
@@ -364,7 +383,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
         )}
         {notesOpen && <NotesSheet scene={scene} busy={busy} onClose={() => setNotesOpen(false)} onRing={() => void act({ type: "hint" })} />}
         {scene.vote && !scene.ending && <VotePanel state={state} scene={scene} busy={busy} act={act} />}
-        {scene.ending && <EndingPanel scene={scene} />}
+        {scene.ending && <EndingPanel scene={scene} code={code} />}
         {intro && (
           <IntroCard
             onClose={() => {
@@ -383,6 +402,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
 }
 
 function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  const t = useT();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -390,14 +410,14 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
   }, [onClose]);
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={title}>
-      <button aria-label="Close" className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <button aria-label={t("train.close")} className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div
         className="relative flex max-h-[86dvh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border-t border-[#c9a227]/40 bg-[#1b120b]"
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
         <div className="flex items-center gap-2 px-4 pt-3">
           <h2 className="min-w-0 flex-1 font-serif text-xl text-[#ecd27a]">{title}</h2>
-          <button onClick={onClose} aria-label="Close" className="flex h-10 w-10 items-center justify-center rounded-md text-stone-400 active:bg-[#3d2615]">
+          <button onClick={onClose} aria-label={t("train.close")} className="flex h-10 w-10 items-center justify-center rounded-md text-stone-400 active:bg-[#3d2615]">
             <CloseIcon className="h-5 w-5" />
           </button>
         </div>
@@ -424,6 +444,7 @@ function CloseupSheet({
   act: (a: SceneAction) => Promise<SceneActionResponse | null>;
   goCorridor: () => void;
 }) {
+  const t = useT();
   const c = scene.closeups[id];
   if (!c) return null;
   return (
@@ -446,7 +467,7 @@ function CloseupSheet({
             >
               <ItemIcon id={it.id} className="h-10 w-10 shrink-0" />
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-[#ecd27a]">Take: {it.name}</span>
+                <span className="block text-sm font-semibold text-[#ecd27a]">{t("train.take", { item: it.name })}</span>
                 <span className="block text-xs text-stone-400">{it.description}</span>
               </span>
             </button>
@@ -477,7 +498,7 @@ function CloseupSheet({
       ))}
       {scene.inventory.length > 0 && (
         <div className="border-t border-[#3d2615] pt-3">
-          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">Use something here</p>
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("train.useHere")}</p>
           <div className="flex gap-1.5 overflow-x-auto pb-1">
             {scene.inventory.map((it) => (
               <button
@@ -513,6 +534,7 @@ function ItemSheet({
   onCombine: (other: ItemId) => void;
   onItemAction: (op: string) => void;
 }) {
+  const t = useT();
   if (!item) return null;
   return (
     <Sheet title={item.name} onClose={onClose}>
@@ -520,7 +542,7 @@ function ItemSheet({
         <ItemIcon id={item.id} className="h-16 w-16 shrink-0" />
         <p className="text-[15px] leading-relaxed text-stone-200">{item.description}</p>
       </div>
-      {item.evidence && <p className="text-xs text-[#ecd27a]">🔍 Evidence. Keep it for when you name the thief.</p>}
+      {item.evidence && <p className="text-xs text-[#ecd27a]">{t("train.evidenceNote")}</p>}
       <ItemReading item={item} />
       {item.actions?.map((a) => (
         <button
@@ -535,7 +557,7 @@ function ItemSheet({
       ))}
       {others.length > 0 && (
         <div className="border-t border-[#3d2615] pt-3">
-          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">Combine with</p>
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("train.combineWith")}</p>
           <div className="flex gap-1.5 overflow-x-auto pb-1">
             {others.map((o) => (
               <button
@@ -552,17 +574,13 @@ function ItemSheet({
           </div>
         </div>
       )}
-      <p className="text-xs text-stone-500">To use it on something, tap that thing in the room.</p>
+      <p className="text-xs text-stone-500">{t("train.useTip")}</p>
     </Sheet>
   );
 }
 
-const SUSPECT_INFO: Record<Suspect, { name: string; line: string }> = {
-  varga: { name: "Countess Ilona Varga", line: "Owner of the Star of Varga. Berth 10." },
-  carrow: { name: "Mr. Roland Carrow", line: "The insurance assessor. Berth 14." },
-  osei: { name: "Dr. Amara Osei", line: "The Countess's physician. Berth 11." },
-  lindqvist: { name: "Mrs. Hedda Lindqvist", line: "Retired schoolteacher. Berth 12A, next door." },
-};
+const suspectName = (t: ReturnType<typeof useT>, s: Suspect) => t(`train.suspect.${s}`);
+const suspectLine = (t: ReturnType<typeof useT>, s: Suspect) => t(`train.suspect.${s}.line`);
 
 function useNow(ms: number) {
   const [now, setNow] = useState(() => Date.now());
@@ -575,16 +593,17 @@ function useNow(ms: number) {
 
 /** Teodor the porter's notes: the hint system. */
 function NotesSheet({ scene, busy, onClose, onRing }: { scene: SceneDTO; busy: boolean; onClose: () => void; onRing: () => void }) {
+  const t = useT();
   const now = useNow(1000);
   const next = scene.nextHint;
   const wait = next?.readyAt ? Math.max(0, Math.ceil((new Date(next.readyAt).getTime() - now) / 1000)) : 0;
   return (
-    <Sheet title="Teodor's notes" onClose={onClose}>
-      <p className="text-sm text-stone-400">Stuck? Ring for the night porter. Each ring brings a clearer note, and everyone in your party sees it.</p>
+    <Sheet title={t("train.notes.title")} onClose={onClose}>
+      <p className="text-sm text-stone-400">{t("train.notes.intro")}</p>
       {[...scene.hints].reverse().map((h) => (
         <div key={h.id} className="rotate-[-0.5deg] rounded-sm bg-[#f7f2e4] px-4 py-3 text-stone-800 shadow">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-stone-500">
-            {h.title} · note {h.tier} of 3
+            {t("train.notes.tier", { title: h.title, tier: h.tier })}
           </p>
           <p className="mt-1 text-[15px] leading-relaxed" style={{ fontFamily: "Georgia, serif" }}>
             {h.text}
@@ -598,10 +617,10 @@ function NotesSheet({ scene, busy, onClose, onRing }: { scene: SceneDTO; busy: b
           onClick={onRing}
           className="min-h-12 w-full rounded-lg bg-[#c9a227] font-semibold text-[#1b120b] active:bg-[#ecd27a] disabled:opacity-60"
         >
-          {wait > 0 ? `Teodor is busy (${wait}s)` : `🛎 Ring for a note: ${next.title} (${next.tier}/3)`}
+          {wait > 0 ? t("train.notes.busy", { s: wait }) : t("train.notes.ring", { title: next.title, tier: next.tier })}
         </button>
       ) : (
-        <p className="text-sm text-stone-500">Teodor has nothing more to add.</p>
+        <p className="text-sm text-stone-500">{t("train.notes.none")}</p>
       )}
     </Sheet>
   );
@@ -622,17 +641,18 @@ function EvidenceStrip({ items }: { items: ItemDTO[] }) {
 
 /** The accusation: every player picks a suspect; a clear majority closes the case, the host breaks ties. */
 function VotePanel({ state, scene, busy, act }: { state: RoomState; scene: SceneDTO; busy: boolean; act: (a: SceneAction) => Promise<SceneActionResponse | null> }) {
+  const t = useT();
   const vote = scene.vote!;
   const mine = vote.votes[state.me.id];
   const isHost = state.me.isHost;
   const voters = state.players.filter((p) => p.online || vote.votes[p.id]);
   const count = (s: Suspect) => Object.values(vote.votes).filter((v) => v === s).length;
   return (
-    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#120c07] px-4 pb-8" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label="Name the thief">
+    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#120c07] px-4 pb-8" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label={t("train.vote.aria")}>
       <div className="mx-auto w-full max-w-md space-y-4">
-        <p className="pt-4 text-center font-mono text-[11px] uppercase tracking-[0.3em] text-[#c9a227]">The conductor is here</p>
-        <h1 className="text-center font-serif text-3xl text-[#ecd27a]">Who stole the Star of Varga?</h1>
-        <p className="text-center text-sm text-stone-300">The border is an hour away. Decide together: majority wins, and the host breaks a tie. You only get one accusation.</p>
+        <p className="pt-4 text-center font-mono text-[11px] uppercase tracking-[0.3em] text-[#c9a227]">{t("train.vote.eyebrow")}</p>
+        <h1 className="text-center font-serif text-3xl text-[#ecd27a]">{t("train.vote.title")}</h1>
+        <p className="text-center text-sm text-stone-300">{t("train.vote.intro")}</p>
         <EvidenceStrip items={scene.evidence} />
         <div className="space-y-2">
           {SUSPECTS.map((s) => (
@@ -646,20 +666,20 @@ function VotePanel({ state, scene, busy, act }: { state: RoomState; scene: Scene
               } disabled:opacity-80`}
             >
               <span className="min-w-0 flex-1">
-                <span className="block font-serif text-lg text-stone-100">{SUSPECT_INFO[s].name}</span>
-                <span className="block text-xs text-stone-400">{SUSPECT_INFO[s].line}</span>
+                <span className="block font-serif text-lg text-stone-100">{suspectName(t, s)}</span>
+                <span className="block text-xs text-stone-400">{suspectLine(t, s)}</span>
               </span>
               <span className="font-mono text-xl text-[#ecd27a]">{count(s) || ""}</span>
             </button>
           ))}
         </div>
         <p className="text-center text-xs text-stone-500">
-          {Object.keys(vote.votes).length}/{voters.length} voted{mine ? " · tap another name to change your vote" : ""}
+          {t(mine ? "train.vote.change" : "train.vote.count", { voted: Object.keys(vote.votes).length, total: voters.length })}
         </p>
         {vote.tie &&
           (isHost ? (
             <div className="space-y-2 rounded-xl border border-[#c9a227]/50 p-3">
-              <p className="text-center text-sm text-[#ecd27a]">It&apos;s a tie. You&apos;re the host: your call decides it.</p>
+              <p className="text-center text-sm text-[#ecd27a]">{t("train.vote.tieHost")}</p>
               {vote.tie.map((s) => (
                 <button
                   key={s}
@@ -668,12 +688,12 @@ function VotePanel({ state, scene, busy, act }: { state: RoomState; scene: Scene
                   onClick={() => void act({ type: "tiebreak", suspect: s })}
                   className="min-h-11 w-full rounded-lg bg-[#c9a227] font-semibold text-[#1b120b] disabled:opacity-60"
                 >
-                  Accuse {SUSPECT_INFO[s].name}
+                  {t("train.vote.accuse", { name: suspectName(t, s) })}
                 </button>
               ))}
             </div>
           ) : (
-            <p className="text-center text-sm text-[#ecd27a]">It&apos;s a tie. Waiting for the host to decide…</p>
+            <p className="text-center text-sm text-[#ecd27a]">{t("train.vote.tieWait")}</p>
           ))}
         {isHost && !vote.tie && Object.keys(vote.votes).length > 0 && (
           <button
@@ -682,7 +702,7 @@ function VotePanel({ state, scene, busy, act }: { state: RoomState; scene: Scene
             onClick={() => void act({ type: "close-vote" })}
             className="min-h-11 w-full rounded-lg border border-[#c9a227]/50 text-sm text-[#ecd27a] active:bg-[#3d2615] disabled:opacity-60"
           >
-            Close the vote now
+            {t("train.vote.close")}
           </button>
         )}
       </div>
@@ -690,13 +710,14 @@ function VotePanel({ state, scene, busy, act }: { state: RoomState; scene: Scene
   );
 }
 
-function EndingPanel({ scene }: { scene: SceneDTO }) {
+function EndingPanel({ scene, code }: { scene: SceneDTO; code: string }) {
+  const t = useT();
   const e = scene.ending!;
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[#120c07] px-4 pb-10" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label={e.title}>
       <article className="mx-auto max-w-md space-y-5 pt-6">
         <p className={`text-center font-mono text-[11px] uppercase tracking-[0.3em] ${e.correct ? "text-[#c9a227]" : "text-red-400"}`}>
-          {e.correct ? "Case solved" : "Case closed"} · {SUSPECT_INFO[e.accused].name} accused
+          {t(e.correct ? "train.end.solved" : "train.end.closed", { name: suspectName(t, e.accused) })}
         </p>
         <h1 className="text-center font-serif text-4xl text-[#ecd27a]">{e.title}</h1>
         <div className="space-y-4 font-serif text-[16px] leading-relaxed text-stone-200">
@@ -706,25 +727,26 @@ function EndingPanel({ scene }: { scene: SceneDTO }) {
         </div>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="rounded-lg border border-[#3d2615] p-2">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500">Time</p>
-            <p className="font-mono text-lg text-stone-100">{e.minutes} min</p>
+            <p className="text-[10px] uppercase tracking-wider text-stone-500">{t("train.end.time")}</p>
+            <p className="font-mono text-lg text-stone-100">{t("train.end.minutes", { n: e.minutes })}</p>
           </div>
           <div className="rounded-lg border border-[#3d2615] p-2">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500">Evidence</p>
+            <p className="text-[10px] uppercase tracking-wider text-stone-500">{t("train.end.evidence")}</p>
             <p className="font-mono text-lg text-stone-100">
               {e.evidenceFound}/{e.evidenceTotal}
             </p>
           </div>
           <div className="rounded-lg border border-[#3d2615] p-2">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500">Votes</p>
+            <p className="text-[10px] uppercase tracking-wider text-stone-500">{t("train.end.votes")}</p>
             <p className="font-mono text-lg text-stone-100">{e.counts[e.accused]}</p>
           </div>
         </div>
         {e.everyClue && (
-          <p className="mx-auto w-fit rounded-full border border-[#c9a227]/60 bg-[#c9a227]/10 px-3 py-1 text-xs font-semibold text-[#ecd27a]">🔍 Every clue: you found all six pieces of evidence</p>
+          <p className="mx-auto w-fit rounded-full border border-[#c9a227]/60 bg-[#c9a227]/10 px-3 py-1 text-xs font-semibold text-[#ecd27a]">{t("train.end.everyClue")}</p>
         )}
+        <Leaderboard gameId={TRAIN_GAME_ID} roomCode={code} tone="room" />
         <Link href="/" className="block min-h-12 rounded-lg bg-[#c9a227] py-3 text-center font-semibold text-[#1b120b]">
-          All escape rooms
+          {t("train.end.lobby")}
         </Link>
       </article>
     </div>
@@ -732,23 +754,23 @@ function EndingPanel({ scene }: { scene: SceneDTO }) {
 }
 
 function IntroCard({ onClose }: { onClose: () => void }) {
+  const t = useT();
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4" role="dialog" aria-modal="true" aria-label="The Nightingale Express">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4" role="dialog" aria-modal="true" aria-label={t("site.game.nightingale-express.title")}>
       <div className="w-full max-w-sm space-y-3 rounded-2xl border border-[#c9a227]/50 bg-[#1b120b] p-5">
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#c9a227]">00:40 · somewhere past Kessel</p>
-        <h2 className="font-serif text-2xl text-[#ecd27a]">You wake in Compartment 12B</h2>
+        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#c9a227]">{t("train.intro.when")}</p>
+        <h2 className="font-serif text-2xl text-[#ecd27a]">{t("train.intro.title")}</h2>
         <p className="font-serif text-[15px] leading-relaxed text-stone-200">
-          The door is locked from the outside. The Countess Varga&apos;s sapphire has been stolen tonight, and someone wants it to look like you
-          took it. The police board at the border at six. Get out, find the Star, and name the thief.
+          {t("train.intro.text")}
         </p>
         <ul className="space-y-1.5 text-sm text-stone-300">
-          <li>‹ › Swipe or tap the arrows to turn between the walls.</li>
-          <li>👆 Tap anything to look closer, open it or pick it up.</li>
-          <li>🎒 Your things are shared with your whole party. Tap one to read it or combine it.</li>
-          <li>🛎 Stuck? Ring for Teodor, the night porter.</li>
+          <li>{t("train.intro.tip1")}</li>
+          <li>{t("train.intro.tip2")}</li>
+          <li>{t("train.intro.tip3")}</li>
+          <li>{t("train.intro.tip4")}</li>
         </ul>
         <button type="button" onClick={onClose} className="min-h-12 w-full rounded-lg bg-[#c9a227] font-semibold text-[#1b120b] active:bg-[#ecd27a]">
-          Start searching
+          {t("train.intro.start")}
         </button>
       </div>
     </div>

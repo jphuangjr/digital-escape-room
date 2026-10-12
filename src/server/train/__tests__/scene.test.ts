@@ -34,7 +34,7 @@ describe("Compartment 12B", () => {
     expect(results.every((r) => r.ok)).toBe(true);
     expect(scene.flags).toContain("door.open");
     expect(scene.inventory.sort()).toEqual(["cufflink", "pouch", "screwdriver", "telegram"]);
-    expect(scene.log.map((l) => l.text)).toContain("opened the compartment door");
+    expect(sceneDTO(scene).log.map((l) => l.text)).toContain("Sam opened the compartment door");
   });
 
   it("hides items until they're uncovered and never offers them twice", () => {

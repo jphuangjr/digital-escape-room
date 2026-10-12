@@ -24,10 +24,10 @@ function describeView(view: string | null, t: ReturnType<typeof useT>): string {
     return t("room.view.app", { app: name });
   }
   if (view === "desktop") return t("room.view.desktop");
-  // The Nightingale Express (staging, English only): "train:door", "train:corridor".
+  // The Nightingale Express: "train:door", "train:corridor".
   if (view.startsWith("train:")) {
     const w = view.slice(6);
-    return w === "corridor" ? "the corridor" : `the ${w} wall`;
+    return w === "corridor" ? t("train.view.corridor") : t("train.view.wall", { wall: t(`train.wall.${w}`) });
   }
   return view;
 }

@@ -149,6 +149,7 @@ function Row({ row, tone }: { row: LeaderboardRow; tone: Tone }) {
           )}
         </span>
         <span className={`block truncate text-xs ${c.meta}`}>
+          {!row.solved && <span className="text-red-400">{t("board.unsolved")} · </span>}
           {t("board.rowMeta", { attempts: row.attempts, wrong: row.wrongAttempts, hints: row.hintsUsed })}
         </span>
       </span>

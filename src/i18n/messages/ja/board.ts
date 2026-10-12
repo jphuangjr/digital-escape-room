@@ -15,6 +15,7 @@ const messages: Record<keyof typeof en, string> = {
   "board.stat.hints": "ヒント",
   "board.morePlayers": "+{n}",
   "board.timeNote": "タイムは事件を開いた時から最後の回答までです。",
+  "board.unsolved": "誤った告発",
 };
 
 export default messages;

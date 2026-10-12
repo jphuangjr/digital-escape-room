@@ -15,6 +15,7 @@ const messages: Record<keyof typeof en, string> = {
   "board.stat.hints": "提示",
   "board.morePlayers": "+{n}",
   "board.timeNote": "時間從開啟案件起算，到最後一個答案為止。",
+  "board.unsolved": "指認錯誤",
 };
 
 export default messages;
