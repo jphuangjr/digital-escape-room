@@ -20,7 +20,7 @@ const messages: Record<keyof typeof en, string> = {
   "tour.email.title": "이메일: 여기서 시작하세요",
   "tour.email.body": "에이다의 마지막 메시지와 여동생이 보낸 이메일이 기다리고 있어요. 먼저 읽어 보세요. 에이다가 보내는 힌트 음성 메시지도 여기로 와요.",
   "tour.browser.title": "브라우저",
-  "tour.browser.body": "작은 인터넷이 통째로 들어 있어요. meridian-inst.net 같은 주소를 입력해 보세요. 모든 페이지에 소스 보기가 있고, 검은 막대를 누르면 가려진 텍스트가 보이며, 사진에는 파일 정보가 있어요.",
+  "tour.browser.body": "작은 인터넷이 통째로 들어 있어요. meridian-inst.com 같은 주소를 입력해 보세요. 모든 페이지에 소스 보기가 있고, 검은 막대를 누르면 가려진 텍스트가 보이며, 사진에는 파일 정보가 있어요.",
   "tour.notes.title": "메모",
   "tour.notes.body": "찾은 것을 적어 두세요. 메모는 방에 공유를 누르기 전까지 나만 볼 수 있어요. 중요한 단서(이름, 연도, ID)에 태그를 달면 팀원들이 쉽게 찾을 수 있어요.",
   "tour.files.title": "파일",

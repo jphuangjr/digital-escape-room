@@ -1,4 +1,5 @@
 import "server-only";
+import { modernizeAddress } from "@/lib/domains";
 // Pure helpers (no DB, no Next). Unit-tested in src/server/__tests__.
 import type { AppId, Ending, FragmentTag, HintPuzzleId, PuzzleId, RoomProgress, Discovery } from "@/lib/types";
 
@@ -86,10 +87,12 @@ export function parseProgress(raw: unknown): RoomProgress {
   const arr = <T,>(v: unknown, fallback: T[]): T[] => (Array.isArray(v) ? (v as T[]) : fallback);
   return {
     unlockedApps: arr<AppId>(p.unlockedApps, [...INITIAL_APPS]),
-    visitedSites: arr<string>(p.visitedSites, []),
+    visitedSites: arr<string>(p.visitedSites, []).map((s) => (typeof s === "string" ? modernizeAddress(s) : s)),
     solved: arr<PuzzleId>(p.solved, []),
     badges: arr<string>(p.badges, []),
-    discoveries: arr<Discovery>(p.discoveries, []),
+    discoveries: arr<Discovery>(p.discoveries, []).map((d) =>
+      d && d.kind === "site" && typeof d.host === "string" ? { ...d, host: modernizeAddress(d.host) } : d,
+    ),
   };
 }
 

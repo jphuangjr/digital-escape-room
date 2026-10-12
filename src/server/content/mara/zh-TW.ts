@@ -28,7 +28,7 @@ const text: MaraText = {
     {
       id: "tom-seating",
       folder: "inbox",
-      party: "Tom Achebe <tom.achebe@harbourmail.net>",
+      party: "Tom Achebe <tom.achebe@harbourmail.com>",
       subject: "座位表（抱歉）",
       date: "今天 07:02",
       body: [
@@ -65,7 +65,7 @@ const text: MaraText = {
     {
       id: "liaison",
       folder: "inbox",
-      party: "Family Liaison Office, Meridian Institute <liaison@meridian-inst.net>",
+      party: "Family Liaison Office, Meridian Institute <liaison@meridian-inst.com>",
       subject: "在這段艱難時期支持您",
       date: "昨天 11:40",
       body: [
@@ -123,15 +123,15 @@ const text: MaraText = {
     {
       id: "welcome",
       folder: "inbox",
-      party: "HarbourMail <welcome@harbourmail.net>",
+      party: "HarbourMail <welcome@harbourmail.com>",
       subject: "歡迎加入 HarbourMail，瑪拉！",
       date: "2006年9月",
       body: [
         "歡迎加入 HarbourMail！",
         "",
-        "您的新地址是 mara.voss@harbourmail.net。",
+        "您的新地址是 mara.voss@harbourmail.com。",
         "",
-        "此帳號由艾達・佛斯（ada@ada-voss.net）為您建立，她已登記為您的備援聯絡人。如果您忘記密碼，我們會把臨時密碼寄給艾達。",
+        "此帳號由艾達・佛斯（ada@ada-voss.com）為您建立，她已登記為您的備援聯絡人。如果您忘記密碼，我們會把臨時密碼寄給艾達。",
         "",
         "艾達的留言：「你一定會忘記的。所以我才當你的備援。歡迎來到網路世界，小魚。— A.」",
       ],
@@ -167,7 +167,7 @@ const text: MaraText = {
     {
       id: "draft-sorry",
       folder: "drafts",
-      party: "Ada Voss <ada@ada-voss.net>",
+      party: "Ada Voss <ada@ada-voss.com>",
       subject: "（無主旨）",
       date: "最後編輯：2 年前",
       body: [
@@ -183,7 +183,7 @@ const text: MaraText = {
     {
       id: "draft-14th",
       folder: "drafts",
-      party: "Ada Voss <ada@ada-voss.net>",
+      party: "Ada Voss <ada@ada-voss.com>",
       subject: "14號",
       date: "最後編輯：昨天 23:58",
       body: [
@@ -197,7 +197,7 @@ const text: MaraText = {
     {
       id: "sent-tom",
       folder: "sent",
-      party: "Tom Achebe <tom.achebe@harbourmail.net>",
+      party: "Tom Achebe <tom.achebe@harbourmail.com>",
       subject: "回覆：座位表（抱歉）",
       date: "今天 07:20",
       body: ["幫她留個位子。在我旁邊。", "", "x"],
@@ -221,7 +221,7 @@ const text: MaraText = {
     {
       id: "sent-liaison",
       folder: "sent",
-      party: "Family Liaison Office, Meridian Institute <liaison@meridian-inst.net>",
+      party: "Family Liaison Office, Meridian Institute <liaison@meridian-inst.com>",
       subject: "回覆：在這段艱難時期支持您",
       date: "昨天 12:15",
       body: ["不要。", "", "別再聯絡我。", "", "瑪拉・佛斯"],
@@ -237,7 +237,7 @@ const text: MaraText = {
       "",
       "臨時密碼：{password}",
       "",
-      "請至 harbourmail.net 登入。如果這不是您申請的，可以忽略這封信。",
+      "請至 harbourmail.com 登入。如果這不是您申請的，可以忽略這封信。",
       "",
       "— HarbourMail 帳號服務",
     ],

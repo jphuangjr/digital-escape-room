@@ -19,7 +19,7 @@ const messages = {
   "tour.email.title": "Email: start here",
   "tour.email.body": "Ada's last message and her sister's email are waiting. Read them first. Hint voicemails from Ada show up here too.",
   "tour.browser.title": "The browser",
-  "tour.browser.body": "A small internet of its own. Type addresses like meridian-inst.net. Every page has View Source, black bars can be tapped to reveal text, and pictures have File Info.",
+  "tour.browser.body": "A small internet of its own. Type addresses like meridian-inst.com. Every page has View Source, black bars can be tapped to reveal text, and pictures have File Info.",
   "tour.notes.title": "Notes",
   "tour.notes.body": "Write down what you find. Notes are private until you tap Share to room. Tag the important bits (a name, a year, an ID) so the team can spot them.",
   "tour.files.title": "Files",

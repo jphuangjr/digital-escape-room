@@ -3,7 +3,7 @@ import { pick, type Locale } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
 
-export const SWITCH_HOST = "switch.ada-voss.net";
+export const SWITCH_HOST = "switch.ada-voss.com";
 
 function home(progress: RoomProgress, loc: Locale): SitePage {
   const x = pick(loc);
@@ -34,7 +34,7 @@ function home(progress: RoomProgress, loc: Locale): SitePage {
             ko: "이제 네가 골라야 해. 이건 내가 대신 정해 줄 수 없어. 난 너무 가까이 있으니까.", "zh-TW": "現在你得做出選擇。這件事我沒辦法替你決定，我離它太近了。", es: "Ahora tienes que elegir. No puedo tomar esta decisión por ti. Estoy demasiado cerca.", ja: "今度はあなたが選ぶ番。これは私には決められない。近すぎるから。", "pt-BR": "Agora você precisa escolher. Não posso decidir isso por você. Estou perto demais.",
           }),
         },
-        { type: "footer", text: x({ en: "switch.ada-voss.net — the needle points true.", ko: "switch.ada-voss.net — 바늘은 진실을 가리킨다.", "zh-TW": "switch.ada-voss.net — 指針指向真相。", es: "switch.ada-voss.net — la aguja señala la verdad.", ja: "switch.ada-voss.net — 針は真実を指す。", "pt-BR": "switch.ada-voss.net — a agulha aponta a verdade." }) },
+        { type: "footer", text: x({ en: "switch.ada-voss.com — the needle points true.", ko: "switch.ada-voss.com — 바늘은 진실을 가리킨다.", "zh-TW": "switch.ada-voss.com — 指針指向真相。", es: "switch.ada-voss.com — la aguja señala la verdad.", ja: "switch.ada-voss.com — 針は真実を指す。", "pt-BR": "switch.ada-voss.com — a agulha aponta a verdade." }) },
       ]
     : [
         { type: "compass" },
@@ -61,7 +61,7 @@ function home(progress: RoomProgress, loc: Locale): SitePage {
         { type: "form", form: "final-phrase", prompt: x({ en: "Proof of life phrase", ko: "생존 증명 문구", "zh-TW": "生存證明密語", es: "Frase de prueba de vida", ja: "生存証明のフレーズ", "pt-BR": "Frase de prova de vida" }) },
         {
           type: "footer",
-          text: x({ en: "switch.ada-voss.net — hosted somewhere they can't reconcile.", ko: "switch.ada-voss.net — 그들이 손댈 수 없는 곳에서 호스팅 중.", "zh-TW": "switch.ada-voss.net — 架設在他們校正不到的地方。", es: "switch.ada-voss.net — alojado en algún lugar que no pueden conciliar.", ja: "switch.ada-voss.net — あいつらが整合できない場所でホスティング中。", "pt-BR": "switch.ada-voss.net — hospedado num lugar que eles não conseguem conciliar." }),
+          text: x({ en: "switch.ada-voss.com — hosted somewhere they can't reconcile.", ko: "switch.ada-voss.com — 그들이 손댈 수 없는 곳에서 호스팅 중.", "zh-TW": "switch.ada-voss.com — 架設在他們校正不到的地方。", es: "switch.ada-voss.com — alojado en algún lugar que no pueden conciliar.", ja: "switch.ada-voss.com — あいつらが整合できない場所でホスティング中。", "pt-BR": "switch.ada-voss.com — hospedado num lugar que eles não conseguem conciliar." }),
         },
       ];
   return page(SWITCH_HOST, solved ? x({ en: "You found me", ko: "날 찾았구나", "zh-TW": "你找到我了", es: "Me encontraste", ja: "見つけてくれたんだね", "pt-BR": "Você me encontrou" }) : x({ en: "Dead Man's Switch", ko: "데드맨 스위치", "zh-TW": "死手開關", es: "Interruptor de hombre muerto", ja: "デッドマン・スイッチ", "pt-BR": "Interruptor do homem morto" }), "switch", blocks, {

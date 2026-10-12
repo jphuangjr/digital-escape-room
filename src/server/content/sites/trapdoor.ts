@@ -3,7 +3,7 @@ import { pick, type Locale } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
 
-export const TRAPDOOR_HOST = "trapdoor.net";
+export const TRAPDOOR_HOST = "trapdoor.com";
 
 function home(x: ReturnType<typeof pick>): SitePage {
   const blocks: Block[] = [
@@ -38,7 +38,7 @@ function home(x: ReturnType<typeof pick>): SitePage {
       text: x({ en: "This page is monitored. Your visit has been reconciled.", ko: "이 페이지는 감시되고 있습니다. 당신의 방문은 정리되었습니다.", "zh-TW": "本頁面受到監控。您的造訪已被校正。", es: "Esta página está vigilada. Su visita ha sido conciliada.", ja: "このページは監視されています。あなたの訪問は整合されました。", "pt-BR": "Esta página é monitorada. Sua visita foi conciliada." }),
     },
   ];
-  return page(TRAPDOOR_HOST, "trapdoor.net", "honeypot", blocks, {
+  return page(TRAPDOOR_HOST, "trapdoor.com", "honeypot", blocks, {
     headComments: [x({ en: "honeypot v2 — log visitor, notify T.K.", ko: "허니팟 v2 — 방문자 기록, T.K.에게 통보", "zh-TW": "誘捕頁 v2 — 記錄訪客，通知 T.K.", es: "honeypot v2 — registrar al visitante, avisar a T.K.", ja: "ハニーポット v2 — 訪問者を記録し、T.K. に通知", "pt-BR": "honeypot v2 — registrar o visitante, avisar T.K." })],
     bodyComments: [
       x({

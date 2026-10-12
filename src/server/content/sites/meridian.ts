@@ -3,7 +3,7 @@ import { pick, type Locale } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
 
-export const MERIDIAN_HOST = "meridian-inst.net";
+export const MERIDIAN_HOST = "meridian-inst.com";
 
 type X = ReturnType<typeof pick>;
 
@@ -14,7 +14,7 @@ const nav = (x: X): Block => ({
     { text: x({ en: "About", ko: "연구소 소개", "zh-TW": "關於本院", es: "Acerca de", ja: "研究所について", "pt-BR": "Sobre" }), href: `${MERIDIAN_HOST}/about` },
     { text: x({ en: "Staff", ko: "직원", "zh-TW": "職員", es: "Personal", ja: "職員", "pt-BR": "Equipe" }), href: `${MERIDIAN_HOST}/staff` },
     { text: x({ en: "Collections", ko: "소장품", "zh-TW": "館藏", es: "Colecciones", ja: "収蔵品", "pt-BR": "Acervos" }), href: `${MERIDIAN_HOST}/collections` },
-    { text: x({ en: "Staff portal", ko: "직원 포털", "zh-TW": "職員入口", es: "Portal del personal", ja: "職員ポータル", "pt-BR": "Portal dos funcionários" }), href: "intranet.meridian-inst.net" },
+    { text: x({ en: "Staff portal", ko: "직원 포털", "zh-TW": "職員入口", es: "Portal del personal", ja: "職員ポータル", "pt-BR": "Portal dos funcionários" }), href: "intranet.meridian-inst.com" },
   ],
 });
 
@@ -163,15 +163,14 @@ const staffList = (x: X): Person[] => [
     name: x({ en: "Wren Okafor", ko: "렌 오카포 (Wren Okafor)", "zh-TW": "芮恩・奧卡佛（Wren Okafor）", es: "Wren Okafor", ja: "レン・オカフォー（Wren Okafor）", "pt-BR": "Wren Okafor" }),
     role: x({ en: "Systems Archivist", ko: "시스템 기록연구사", "zh-TW": "系統檔案研究員", es: "Archivista de sistemas", ja: "システム・アーキビスト", "pt-BR": "Arquivista de sistemas" }),
     bio: x({
-      en: "Maintains the Institute's digital catalogue and access systems. Off the clock, she still holds the high score on Circuit Runner '94 — and will tell you so on runnerboard.net if you ask.",
-      ko: "연구소의 디지털 목록과 접근 시스템을 관리합니다. 퇴근 후에는 지금도 Circuit Runner '94 최고 기록 보유자이며, 물어보면 runnerboard.net에서 직접 자랑할 겁니다.",
-      "zh-TW": "負責維護本院的數位目錄與存取系統。下班後，她至今仍保有 Circuit Runner '94 的最高分紀錄——只要你問，她就會在 runnerboard.net 上親口告訴你。",
-      es: "Mantiene el catálogo digital y los sistemas de acceso del Instituto. Fuera del horario laboral, todavía tiene el récord de Circuit Runner '94, y si usted se lo pregunta, ella misma se lo dirá en runnerboard.net.",
-      ja: "研究所のデジタル目録とアクセスシステムを管理。勤務時間外では今も Circuit Runner '94 のハイスコア保持者で、尋ねれば runnerboard.net で本人が教えてくれるはずだ。",
-      "pt-BR": "Mantém o catálogo digital e os sistemas de acesso do Instituto. Fora do expediente, ainda detém o recorde de Circuit Runner '94 — e, se você perguntar, ela mesma conta no runnerboard.net.",
+      en: "Maintains the Institute's digital catalogue and access systems. Off the clock, she still holds the high score on Circuit Runner '94 — and will tell you so on runnerboard.com if you ask.",
+      ko: "연구소의 디지털 목록과 접근 시스템을 관리합니다. 퇴근 후에는 지금도 Circuit Runner '94 최고 기록 보유자이며, 물어보면 runnerboard.com에서 직접 자랑할 겁니다.",
+      "zh-TW": "負責維護本院的數位目錄與存取系統。下班後，她至今仍保有 Circuit Runner '94 的最高分紀錄——只要你問，她就會在 runnerboard.com 上親口告訴你。",
+      es: "Mantiene el catálogo digital y los sistemas de acceso del Instituto. Fuera del horario laboral, todavía tiene el récord de Circuit Runner '94, y si usted se lo pregunta, ella misma se lo dirá en runnerboard.com.",
+      ja: "研究所のデジタル目録とアクセスシステムを管理。勤務時間外では今も Circuit Runner '94 のハイスコア保持者で、尋ねれば runnerboard.com で本人が教えてくれるはずだ。",
+      "pt-BR": "Mantém o catálogo digital e os sistemas de acesso do Instituto. Fora do expediente, ainda detém o recorde de Circuit Runner '94 — e, se você perguntar, ela mesma conta no runnerboard.com.",
     }),
     photo: null,
-    link: { text: "runnerboard.net →", href: "runnerboard.net" },
   },
   {
     name: x({ en: "Thomas Kell", ko: "토머스 켈 (Thomas Kell)", "zh-TW": "湯瑪斯・凱爾（Thomas Kell）", es: "Thomas Kell", ja: "トーマス・ケル（Thomas Kell）", "pt-BR": "Thomas Kell" }),

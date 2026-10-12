@@ -31,7 +31,7 @@ export function unreadCount(code: string, emails: EmailDTO[]): number {
   return emails.filter((e) => !read.has(e.id)).length;
 }
 
-// In-game addresses, e.g. meridian-inst.net, thedrift.blog, intranet.meridian-inst.net/login.
+// In-game addresses, e.g. meridian-inst.com, thedrift.blog, intranet.meridian-inst.com/login.
 // Not preceded by "@" or a word char (so e-mail addresses are not linkified).
 const ADDRESS_RE =
   /(?<![@\w.-])(?:https?:\/\/)?(?:www\.)?((?:[a-z0-9-]+\.)+(?:net|blog|com|org|io|info))(\/[\w\-/.]*[\w/])?(?![\w@])/gi;

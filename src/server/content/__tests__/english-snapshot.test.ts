@@ -27,7 +27,7 @@ function hrefs(blocks: Block[]): string[] {
 
 function crawl(p: RoomProgress) {
   const seen = new Map<string, unknown>();
-  const queue = [...SITE_HOSTS, "meridian-inst.net/vault-2019", "intranet.meridian-inst.net/admin"];
+  const queue = [...SITE_HOSTS, "meridian-inst.com/vault-2019", "intranet.meridian-inst.com/admin"];
   while (queue.length) {
     const a = content.normalizeAddress(queue.shift()!);
     if (seen.has(a)) continue;

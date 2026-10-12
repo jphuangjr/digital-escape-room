@@ -38,16 +38,16 @@ describe("Korean Drift, RunnerBoard and Lost Paws pages", () => {
       "thedrift.blog",
       "thedrift.blog/about",
       ...DRIFT_POSTS.map((p) => `thedrift.blog/post/${p.slug}`),
-      "runnerboard.net",
-      "runnerboard.net/scores",
-      "lostpaws.net",
+      "runnerboard.com",
+      "runnerboard.com/scores",
+      "lostpaws.com",
     ];
     for (const a of addrs) {
       const p = ko(a);
       expect(text(p.blocks), a).toMatch(HANGUL);
       expect(p.source, a).toMatch(HANGUL);
     }
-    expect(text(ko("lostpaws.net", ["shift-key"]).blocks)).toMatch(HANGUL);
+    expect(text(ko("lostpaws.com", ["shift-key"]).blocks)).toMatch(HANGUL);
   });
 
   it("Drift: Field Notes titles on the Korean page still spell DRIFT oldest-first, days 2,1,1,2,1 (sum 7)", () => {
@@ -83,23 +83,23 @@ describe("Korean Drift, RunnerBoard and Lost Paws pages", () => {
   });
 
   it("RunnerBoard: timestamps decode to LOSTPAWS / TRAPDOOR on the Korean page, Biscuit is mentioned", () => {
-    const shown = posts(ko("runnerboard.net").blocks);
+    const shown = posts(ko("runnerboard.com").blocks);
     const spell = (u: string) => shown.filter((p) => p.author === u).map((p) => decodeTimestamp(p.time!)).join("");
     expect(spell("compass_needle")).toBe("LOSTPAWS");
     expect(spell("needle_compass")).toBe("TRAPDOOR");
     expect(shown.some((p) => p.author === "compass_needle" && p.body.includes("Biscuit") && HANGUL.test(p.body))).toBe(true);
-    expect(text(ko("runnerboard.net").blocks)).toContain("Circuit Runner '94");
-    expect(text(ko("runnerboard.net/scores").blocks)).toContain("W.OKAFOR — 2,418,770");
+    expect(text(ko("runnerboard.com").blocks)).toContain("Circuit Runner '94");
+    expect(text(ko("runnerboard.com/scores").blocks)).toContain("W.OKAFOR — 2,418,770");
   });
 
   it("Lost Paws: Korean page keeps the ciphertext bodies, pet names and Biscuit's ID 0412", () => {
-    const before = listings(ko("lostpaws.net").blocks);
+    const before = listings(ko("lostpaws.com").blocks);
     expect(before.map((l) => l.body)).toEqual([...LOSTPAWS_CIPHERTEXT_CHUNKS]);
     const biscuit = before.find((l) => l.title.startsWith("Biscuit"));
     expect(biscuit?.petId).toBe("0412");
     expect(biscuit?.title).toMatch(HANGUL);
-    expect(ko("lostpaws.net").blocks.some((b) => b.type === "form" && b.form === "shift-key" && HANGUL.test(b.prompt))).toBe(true);
-    const after = listings(ko("lostpaws.net", ["shift-key"]).blocks);
+    expect(ko("lostpaws.com").blocks.some((b) => b.type === "form" && b.form === "shift-key" && HANGUL.test(b.prompt))).toBe(true);
+    const after = listings(ko("lostpaws.com", ["shift-key"]).blocks);
     expect(after.map((l) => l.body).join(" ")).toBe(LOSTPAWS_PLAINTEXT);
   });
 

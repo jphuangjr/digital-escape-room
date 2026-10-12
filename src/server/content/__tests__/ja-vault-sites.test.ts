@@ -19,7 +19,7 @@ const ja = (address: string, solved: RoomProgress["solved"] = []) => content.res
 
 describe("Japanese Vault (intranet)", () => {
   it("login page is ja and keeps the username/vault-code clues", () => {
-    const login = ja("intranet.meridian-inst.net");
+    const login = ja("intranet.meridian-inst.com");
     expect(JSON.stringify(login.blocks)).toMatch(KANA);
     expect(JSON.stringify(login.blocks)).toContain("金庫");
     expect(login.source).toContain("firstname.lastname");
@@ -29,23 +29,23 @@ describe("Japanese Vault (intranet)", () => {
   });
 
   it("dashboard keeps the binary password and class link", () => {
-    const dash = ja("intranet.meridian-inst.net", ["intranet-login"]);
+    const dash = ja("intranet.meridian-inst.com", ["intranet-login"]);
     const json = JSON.stringify(dash.blocks);
     expect(json).toMatch(KANA);
     expect(json).toContain("01100 00001 01110 10100 00101 10010 01110");
     expect(json).toContain("wren.okafor");
-    expect(json).not.toContain("switch.ada-voss.net");
+    expect(json).not.toContain("switch.ada-voss.com");
     expect(dash.source).toContain("harbourcc.edu/cs110");
     expect(JSON.stringify(dash)).not.toMatch(LANTERN);
   });
 
   it("admin console memo keeps the redacted switch address", () => {
-    const gate = ja("intranet.meridian-inst.net/admin", ["intranet-login"]);
-    expect(JSON.stringify(gate)).not.toContain("switch.ada-voss.net");
+    const gate = ja("intranet.meridian-inst.com/admin", ["intranet-login"]);
+    expect(JSON.stringify(gate)).not.toContain("switch.ada-voss.com");
     expect(JSON.stringify(gate)).not.toMatch(LANTERN);
-    const open = ja("intranet.meridian-inst.net/admin", ["intranet-login", "admin-console"]);
+    const open = ja("intranet.meridian-inst.com/admin", ["intranet-login", "admin-console"]);
     const memo = open.blocks.find((b) => b.type === "memo");
-    expect(memo && memo.type === "memo" && memo.parts.some((p) => "redacted" in p && p.redacted === "switch.ada-voss.net")).toBe(true);
+    expect(memo && memo.type === "memo" && memo.parts.some((p) => "redacted" in p && p.redacted === "switch.ada-voss.com")).toBe(true);
     expect(JSON.stringify(memo)).toMatch(KANA);
     expect(JSON.stringify(memo)).toContain("デッドマン・スイッチ");
     expect(JSON.stringify(open.blocks)).toContain("23:58");
@@ -53,10 +53,10 @@ describe("Japanese Vault (intranet)", () => {
 
   it("records and memos are ja", () => {
     for (const path of ["records", "memos"]) {
-      const p = ja(`intranet.meridian-inst.net/${path}`, ["intranet-login"]);
+      const p = ja(`intranet.meridian-inst.com/${path}`, ["intranet-login"]);
       expect(JSON.stringify(p.blocks)).toMatch(KANA);
-      expect(JSON.stringify(p.blocks)).not.toContain("switch.ada-voss.net");
+      expect(JSON.stringify(p.blocks)).not.toContain("switch.ada-voss.com");
     }
-    expect(JSON.stringify(ja("intranet.meridian-inst.net/records", ["intranet-login"]).blocks)).toContain("1978");
+    expect(JSON.stringify(ja("intranet.meridian-inst.com/records", ["intranet-login"]).blocks)).toContain("1978");
   });
 });

@@ -71,11 +71,11 @@ describe("Chinese switch", () => {
   });
 
   it("is hidden until the admin console is solved", () => {
-    expect(content.resolveSite("switch.ada-voss.net", progress(["intranet-login"]), "zh-TW")).toBeNull();
+    expect(content.resolveSite("switch.ada-voss.com", progress(["intranet-login"]), "zh-TW")).toBeNull();
   });
 
   it("countdown page explains the proof-of-life phrase", () => {
-    const p = content.resolveSite("switch.ada-voss.net", progress(["intranet-login", "admin-console"]), "zh-TW")!;
+    const p = content.resolveSite("switch.ada-voss.com", progress(["intranet-login", "admin-console"]), "zh-TW")!;
     const json = JSON.stringify(p.blocks);
     expect(json).toMatch(CJK);
     expect(json).toContain("Biscuit");
@@ -84,7 +84,7 @@ describe("Chinese switch", () => {
   });
 
   it("solved page is Chinese", () => {
-    const p = content.resolveSite("switch.ada-voss.net", progress(["intranet-login", "admin-console", "final-phrase"]), "zh-TW")!;
+    const p = content.resolveSite("switch.ada-voss.com", progress(["intranet-login", "admin-console", "final-phrase"]), "zh-TW")!;
     expect(JSON.stringify(p.blocks)).toMatch(CJK);
   });
 });

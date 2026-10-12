@@ -8,7 +8,7 @@ export type MaraFolder = "inbox" | "sent" | "drafts" | "spam";
 export interface MaraMessage {
   id: string;
   folder: MaraFolder;
-  /** "Tom Achebe <tom.achebe@harbourmail.net>" for received mail, "Ada Voss <ada@ada-voss.net>" (recipient) for sent/drafts */
+  /** "Tom Achebe <tom.achebe@harbourmail.com>" for received mail, "Ada Voss <ada@ada-voss.com>" (recipient) for sent/drafts */
   party: string;
   subject: string;
   date: string;

@@ -28,7 +28,7 @@ const text: MaraText = {
     {
       id: "tom-seating",
       folder: "inbox",
-      party: "Tom Achebe <tom.achebe@harbourmail.net>",
+      party: "Tom Achebe <tom.achebe@harbourmail.com>",
       subject: "좌석 배치표 (미안)",
       date: "오늘 07:02",
       body: [
@@ -65,7 +65,7 @@ const text: MaraText = {
     {
       id: "liaison",
       folder: "inbox",
-      party: "Family Liaison Office, Meridian Institute <liaison@meridian-inst.net>",
+      party: "Family Liaison Office, Meridian Institute <liaison@meridian-inst.com>",
       subject: "어려운 시기를 보내고 계신 귀하를 지원하고자 합니다",
       date: "어제 11:40",
       body: [
@@ -123,15 +123,15 @@ const text: MaraText = {
     {
       id: "welcome",
       folder: "inbox",
-      party: "HarbourMail <welcome@harbourmail.net>",
+      party: "HarbourMail <welcome@harbourmail.com>",
       subject: "HarbourMail에 오신 것을 환영합니다, 마라 님!",
       date: "2006년 9월",
       body: [
         "HarbourMail에 오신 것을 환영합니다!",
         "",
-        "새 주소는 mara.voss@harbourmail.net입니다.",
+        "새 주소는 mara.voss@harbourmail.com입니다.",
         "",
-        "이 계정은 에이다 보스(ada@ada-voss.net) 님이 만들어 드렸으며, 에이다 님이 복구 연락처로 등록되어 있습니다. 비밀번호를 잊으시면 임시 비밀번호를 에이다 님께 보내 드립니다.",
+        "이 계정은 에이다 보스(ada@ada-voss.com) 님이 만들어 드렸으며, 에이다 님이 복구 연락처로 등록되어 있습니다. 비밀번호를 잊으시면 임시 비밀번호를 에이다 님께 보내 드립니다.",
         "",
         "에이다 님의 메시지: \"넌 분명히 까먹을 거야. 그래서 내가 백업이지. 인터넷 세상에 온 걸 환영해, 꼬마 물고기. — A.\"",
       ],
@@ -167,7 +167,7 @@ const text: MaraText = {
     {
       id: "draft-sorry",
       folder: "drafts",
-      party: "Ada Voss <ada@ada-voss.net>",
+      party: "Ada Voss <ada@ada-voss.com>",
       subject: "(제목 없음)",
       date: "마지막 수정: 2년 전",
       body: [
@@ -183,7 +183,7 @@ const text: MaraText = {
     {
       id: "draft-14th",
       folder: "drafts",
-      party: "Ada Voss <ada@ada-voss.net>",
+      party: "Ada Voss <ada@ada-voss.com>",
       subject: "14일",
       date: "마지막 수정: 어제 23:58",
       body: [
@@ -197,7 +197,7 @@ const text: MaraText = {
     {
       id: "sent-tom",
       folder: "sent",
-      party: "Tom Achebe <tom.achebe@harbourmail.net>",
+      party: "Tom Achebe <tom.achebe@harbourmail.com>",
       subject: "Re: 좌석 배치표 (미안)",
       date: "오늘 07:20",
       body: ["언니 자리 남겨 줘. 내 옆에.", "", "x"],
@@ -221,7 +221,7 @@ const text: MaraText = {
     {
       id: "sent-liaison",
       folder: "sent",
-      party: "Family Liaison Office, Meridian Institute <liaison@meridian-inst.net>",
+      party: "Family Liaison Office, Meridian Institute <liaison@meridian-inst.com>",
       subject: "Re: 어려운 시기를 보내고 계신 귀하를 지원하고자 합니다",
       date: "어제 12:15",
       body: ["싫습니다.", "", "다시는 연락하지 마세요.", "", "마라 보스"],
@@ -237,7 +237,7 @@ const text: MaraText = {
       "",
       "임시 비밀번호: {password}",
       "",
-      "harbourmail.net에서 로그인하세요. 요청하신 적이 없다면 이 메일은 무시하셔도 됩니다.",
+      "harbourmail.com에서 로그인하세요. 요청하신 적이 없다면 이 메일은 무시하셔도 됩니다.",
       "",
       "— HarbourMail 계정팀",
     ],

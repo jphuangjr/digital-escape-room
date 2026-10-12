@@ -1,6 +1,7 @@
 import "server-only";
 import type { Locale } from "@/i18n/config";
 import type { RoomProgress, SitePage } from "@/lib/types";
+import { modernizeAddress } from "@/lib/domains";
 import { ADAVOSS_HOST, resolveAdaVoss } from "./adavoss";
 import { DRIFT_HOST, resolveDrift } from "./drift";
 import { HARBOURCC_HOST, resolveHarbourcc } from "./harbourcc";
@@ -39,7 +40,7 @@ export function normalizeAddress(address: string): string {
   a = a.replace(/\/{2,}/g, "/");
   a = a.replace(/\/+$/, "");
   a = a.replace(/\/index\.html?$/, "");
-  return a;
+  return modernizeAddress(a); // old .net addresses (bookmarks, links in saved rooms) still work
 }
 
 export function resolveSite(address: string, progress: RoomProgress, loc: Locale): SitePage | null {
