@@ -109,7 +109,7 @@ const messages: Record<keyof typeof en, string> = {
   "train.end.votes": "投票",
   "train.end.everyClue": "🔍 全証拠発見：六つの証拠品をすべて見つけました",
   "train.end.lobby": "すべての脱出ゲーム",
-  "train.intro.when": "00:40 · ケッセルを過ぎたあたり",
+  "train.intro.when": "00:40 · エルムズフォードを過ぎたあたり",
   "train.intro.title": "12B号室で目を覚ます",
   "train.intro.text": "扉は外から鍵が掛けられています。今夜、ヴァルガ伯爵夫人のサファイアが盗まれ、何者かがあなたの仕業に見せかけようとしています。六時には国境で警察が乗り込んできます。部屋を抜け出し、「星」を見つけ、犯人を名指ししてください。",
   "train.intro.tip1": "‹ › スワイプするか矢印をタップして、壁の向きを変えます。",

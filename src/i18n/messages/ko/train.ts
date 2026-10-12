@@ -109,7 +109,7 @@ const messages: Record<keyof typeof en, string> = {
   "train.end.votes": "투표",
   "train.end.everyClue": "🔍 모든 단서: 증거 여섯 개를 모두 찾았어요",
   "train.end.lobby": "모든 방탈출",
-  "train.intro.when": "00:40 · 케셀을 지난 어딘가",
+  "train.intro.when": "00:40 · 엘름스퍼드를 지난 어딘가",
   "train.intro.title": "12B 객실에서 눈을 떴어요",
   "train.intro.text": "문은 밖에서 잠겨 있어요. 오늘 밤 바르가 백작부인의 사파이어가 도난당했고, 누군가 그걸 당신 짓으로 꾸미려 하고 있어요. 여섯 시면 국경에서 경찰이 열차에 올라요. 객실을 빠져나가 별을 찾고, 도둑의 이름을 밝혀내세요.",
   "train.intro.tip1": "‹ › 화면을 밀거나 화살표를 눌러 벽 사이를 돌아볼 수 있어요.",

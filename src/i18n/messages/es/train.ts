@@ -109,7 +109,7 @@ const messages: Record<keyof typeof en, string> = {
   "train.end.votes": "Votos",
   "train.end.everyClue": "🔍 Todas las pistas: encontraste las seis pruebas",
   "train.end.lobby": "Todas las salas de escape",
-  "train.intro.when": "00:40 · en algún punto pasado Kessel",
+  "train.intro.when": "00:40 · en algún punto pasado Elmsford",
   "train.intro.title": "Despiertas en el Compartimento 12B",
   "train.intro.text": "La puerta está cerrada desde fuera. Esta noche han robado el zafiro de la condesa Varga, y alguien quiere que parezca que fuiste tú. La policía sube al tren en la frontera a las seis. Sal de aquí, encuentra la Estrella y nombra al ladrón.",
   "train.intro.tip1": "‹ › Desliza o toca las flechas para girar entre las paredes.",

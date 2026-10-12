@@ -109,7 +109,7 @@ const messages = {
   "train.end.votes": "Votes",
   "train.end.everyClue": "🔍 Every clue: you found all six pieces of evidence",
   "train.end.lobby": "All escape rooms",
-  "train.intro.when": "00:40 · somewhere past Kessel",
+  "train.intro.when": "00:40 · somewhere past Elmsford",
   "train.intro.title": "You wake in Compartment 12B",
   "train.intro.text": "The door is locked from the outside. The Countess Varga's sapphire has been stolen tonight, and someone wants it to look like you took it. The police board at the border at six. Get out, find the Star, and name the thief.",
   "train.intro.tip1": "‹ › Swipe or tap the arrows to turn between the walls.",

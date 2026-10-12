@@ -109,7 +109,7 @@ const messages: Record<keyof typeof en, string> = {
   "train.end.votes": "Votos",
   "train.end.everyClue": "🔍 Todas as pistas: vocês encontraram as seis provas",
   "train.end.lobby": "Todos os escape rooms",
-  "train.intro.when": "00:40 · em algum ponto depois de Kessel",
+  "train.intro.when": "00:40 · em algum ponto depois de Elmsford",
   "train.intro.title": "Você acorda na Cabine 12B",
   "train.intro.text": "A porta está trancada por fora. A safira da Condessa Varga foi roubada esta noite, e alguém quer que pareça que foi você. A polícia embarca na fronteira às seis. Saia daqui, encontre a Estrela e aponte o ladrão.",
   "train.intro.tip1": "‹ › Deslize ou toque nas setas para virar entre as paredes.",
