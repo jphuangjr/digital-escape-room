@@ -35,15 +35,20 @@ const STEPS: Step[] = [
 
 type Rect = { top: number; left: number; width: number; height: number };
 
+// The last visible copy wins: on phones that's the dock button (rendered after the status bar),
+// which is the one the step's text tells players to tap.
 function findTarget(name: string): HTMLElement | null {
   const els = Array.from(document.querySelectorAll<HTMLElement>(`[data-tour="${name}"]`));
-  return (
-    els.find((el) => {
-      const r = el.getBoundingClientRect();
-      return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight;
-    }) ?? null
-  );
+  const visible = els.filter((el) => {
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight;
+  });
+  return visible[visible.length - 1] ?? null;
 }
+
+const CARD_MAX_W = 352; // 22rem
+const EDGE = 12;
+const GAP = 14; // space between spotlight and card, room for the arrow
 
 export function Tour({
   onClose,
@@ -58,6 +63,7 @@ export function Tour({
   const [i, setI] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
   const [vh, setVh] = useState(0);
+  const [vw, setVw] = useState(0);
   const step = STEPS[i];
   const last = i === STEPS.length - 1;
 
@@ -69,6 +75,7 @@ export function Tour({
   // Track the target's position (the sheet animates in, the page can resize/scroll).
   const measure = useCallback(() => {
     setVh(window.innerHeight);
+    setVw(window.innerWidth);
     if (!step.target) return setRect(null);
     const el = findTarget(step.target);
     if (!el) return setRect(null);
@@ -103,13 +110,18 @@ export function Tour({
 
   const pad = 6;
   const spot = rect && { top: rect.top - pad, left: rect.left - pad, width: rect.width + pad * 2, height: rect.height + pad * 2 };
-  // Card goes on whichever side of the target has more room; centred when there's no target.
+  // Card goes on whichever side of the target has more room, lined up with it horizontally (kept on
+  // screen), with an arrow pointing at the target like a tooltip. Centred when there's no target.
+  const cardW = Math.min(vw * 0.92, CARD_MAX_W);
   const below = spot ? spot.top + spot.height / 2 < vh / 2 : false;
+  const targetX = spot ? spot.left + spot.width / 2 : vw / 2;
+  const cardLeft = spot ? Math.min(Math.max(targetX - cardW / 2, EDGE), vw - cardW - EDGE) : (vw - cardW) / 2;
+  const arrowX = Math.min(Math.max(targetX - cardLeft, 22), cardW - 22);
   const cardStyle: React.CSSProperties = spot
     ? below
-      ? { top: Math.min(spot.top + spot.height + 12, vh - 220) }
-      : { bottom: Math.max(vh - spot.top + 12, 12) }
-    : { top: "50%", transform: "translateY(-50%)" };
+      ? { top: Math.min(spot.top + spot.height + GAP, vh - 220), left: cardLeft, width: cardW }
+      : { bottom: Math.max(vh - spot.top + GAP, EDGE), left: cardLeft, width: cardW }
+    : { top: "50%", left: cardLeft, width: cardW, transform: "translateY(-50%)" };
 
   return (
     <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-labelledby="tour-title">
@@ -118,16 +130,27 @@ export function Tour({
         <div
           className="pointer-events-none absolute rounded-xl ring-2 ring-amber-400 transition-all duration-300 ease-out"
           style={{ ...spot, boxShadow: "0 0 0 9999px rgba(5,4,3,0.72)" }}
-        />
+        >
+          <span className="absolute inset-0 animate-ping rounded-xl ring-2 ring-amber-400/60 motion-reduce:hidden" />
+        </div>
       ) : (
         <div className="absolute inset-0 bg-[rgba(5,4,3,0.72)]" />
       )}
       <div className="absolute inset-0" onClick={(e) => e.stopPropagation()} />
 
       <div
-        className="absolute left-1/2 w-[min(92vw,22rem)] rounded-2xl border border-amber-500/30 bg-stone-950 p-4 shadow-2xl shadow-black"
-        style={{ ...cardStyle, transform: `${cardStyle.transform ?? ""} translateX(-50%)` }}
+        className="absolute rounded-2xl border border-amber-500/30 bg-stone-950 p-4 shadow-2xl shadow-black"
+        style={cardStyle}
       >
+        {spot && (
+          <span
+            aria-hidden
+            className={`absolute h-3.5 w-3.5 -translate-x-1/2 rotate-45 border-amber-500/30 bg-stone-950 ${
+              below ? "-top-[7.5px] border-l border-t" : "-bottom-[7.5px] border-b border-r"
+            }`}
+            style={{ left: arrowX }}
+          />
+        )}
         <div className="mb-2 flex items-center justify-between">
           <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-amber-400/80">
             {t("tour.progress", { n: i + 1, total: STEPS.length })}
