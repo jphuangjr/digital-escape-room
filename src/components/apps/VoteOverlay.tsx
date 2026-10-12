@@ -1,5 +1,6 @@
 "use client";
 
+import { Leaderboard } from "@/components/site/Leaderboard";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useT } from "@/i18n/client";
@@ -234,6 +235,8 @@ function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
               <p className="mt-3 text-center text-sm text-amber-300">{t("room.ending.tieBroken")}</p>
             )}
           </section>
+
+          <Leaderboard gameId={ctx.state.gameId} roomCode={ctx.code} tone="room" />
 
           {ending.bonusEpilogue && (
             <section className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">

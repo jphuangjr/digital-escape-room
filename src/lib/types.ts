@@ -110,6 +110,7 @@ export interface EndingDTO {
 
 export interface RoomState {
   code: string;
+  gameId: string;
   status: RoomStatus;
   hostId: string | null;
   me: { id: string; displayName: string; color: string; isHost: boolean; image: string | null; signedIn: boolean };
@@ -241,4 +242,26 @@ export interface ChatMessageDTO {
   playerColor: string;
   body: string;
   createdAt: string;
+}
+
+/** One team's result on a game's leaderboard. */
+export interface LeaderboardRow {
+  rank: number;
+  players: { name: string; color: string }[];
+  playerCount: number;
+  durationMs: number;
+  attempts: number;
+  wrongAttempts: number;
+  hintsUsed: number;
+  ending: Ending | null;
+  finishedAt: string;
+  /** this is the requesting room's entry */
+  mine: boolean;
+}
+
+export interface LeaderboardResponse {
+  total: number;
+  top: LeaderboardRow[];
+  /** the requested room's own entry, with its overall rank (may be outside the top) */
+  mine: LeaderboardRow | null;
 }

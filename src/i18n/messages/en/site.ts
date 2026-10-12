@@ -25,6 +25,7 @@ const messages = {
 
   // Shared form bits
   "site.form.yourName": "Your name",
+  "site.form.nameNotice": "Shown to your team, and on the public leaderboard if your team escapes. Use a nickname if you'd rather not share your real name.",
   "site.form.avatarColor": "Avatar color",
   "site.form.colorAria": "Color {color}",
   "site.form.joinInvestigation": "Join the investigation",

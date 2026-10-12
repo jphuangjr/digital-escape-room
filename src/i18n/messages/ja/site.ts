@@ -24,6 +24,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.join.invalidCode": "ルームコードは ADA-7K2Q のような形式です。",
 
   "site.form.yourName": "あなたの名前",
+  "site.form.nameNotice": "チームのメンバーに表示され、脱出すると公開ランキングにも載ります。本名を出したくない場合はニックネームを使ってください。",
   "site.form.avatarColor": "アバターの色",
   "site.form.colorAria": "色 {color}",
   "site.form.joinInvestigation": "捜査に参加する",

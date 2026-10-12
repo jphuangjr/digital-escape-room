@@ -198,3 +198,23 @@ model ChatMessage {
 
   @@index([roomId, createdAt])
 }
+
+/// One finished room on a game's public leaderboard. Written when the final puzzle is solved and kept
+/// after the room expires. No room code is stored publicly here beyond roomRef (an internal id).
+model LeaderboardEntry {
+  id            String   @id @default(cuid())
+  gameId        String
+  roomRef       String   @unique // Room.id at the time
+  players       Json // [{ name, color }] in join order
+  playerCount   Int
+  startedAt     DateTime
+  finishedAt    DateTime
+  durationMs    Int
+  attempts      Int // every answer submitted, right or wrong
+  wrongAttempts Int
+  hintsUsed     Int
+  ending        String? // filled in once the vote resolves
+  createdAt     DateTime @default(now())
+
+  @@index([gameId, durationMs])
+}

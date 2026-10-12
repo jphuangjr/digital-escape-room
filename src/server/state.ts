@@ -98,6 +98,7 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
 
   return {
     code: room.code,
+    gameId: room.gameId,
     status: room.status as RoomStatus,
     hostId: room.hostId,
     me: {

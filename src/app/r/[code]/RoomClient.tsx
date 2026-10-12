@@ -232,7 +232,11 @@ function JoinForm({
           enterKeyHint="go"
           className="mt-2 h-12 w-full rounded-md border border-stone-700 bg-black px-3 text-base text-stone-100 outline-none focus:border-amber-500"
           placeholder={t("site.room.namePlaceholder")}
+          aria-describedby="join-name-notice"
         />
+        <p id="join-name-notice" className="mt-1.5 text-xs leading-relaxed text-stone-500">
+          {t("site.form.nameNotice")}
+        </p>
 
         <fieldset className="mt-5">
           <legend className="text-xs font-semibold uppercase tracking-wider text-stone-400">{t("site.form.avatarColor")}</legend>

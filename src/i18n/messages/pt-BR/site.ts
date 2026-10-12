@@ -24,6 +24,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.join.invalidCode": "Os códigos da sala são assim: ADA-7K2Q.",
 
   "site.form.yourName": "Seu nome",
+  "site.form.nameNotice": "Aparece para sua equipe e, se vocês escaparem, no ranking público. Use um apelido se preferir não mostrar seu nome real.",
   "site.form.avatarColor": "Cor do avatar",
   "site.form.colorAria": "Cor {color}",
   "site.form.joinInvestigation": "Entrar na investigação",

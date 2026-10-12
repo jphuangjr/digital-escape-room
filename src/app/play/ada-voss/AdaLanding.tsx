@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MeResponse, OpenHostedRoom } from "@/lib/types";
 import { AccountBar, GoogleButton, MyCases } from "@/components/site/Account";
+import { Leaderboard } from "@/components/site/Leaderboard";
 import { Compass } from "@/components/site/Compass";
 import { ReplaceRoomDialog } from "@/components/site/ReplaceRoomDialog";
 import { RedeemBox } from "@/components/site/RedeemBox";
@@ -230,8 +231,12 @@ export function AdaLanding() {
               placeholder={t("site.ada.namePlaceholder")}
               maxLength={24}
               autoComplete="nickname"
+              aria-describedby="name-notice"
               className="min-h-12 rounded-lg border border-noir-line bg-noir-bg-3 px-3 text-noir-ink placeholder:text-noir-ink-faint"
             />
+            <span id="name-notice" className="text-xs leading-relaxed text-noir-ink-faint">
+              {t("site.form.nameNotice")}
+            </span>
           </label>
 
           <fieldset className="flex flex-col gap-2">
@@ -285,6 +290,8 @@ export function AdaLanding() {
         </form>
 
         {me && <MyCases me={me} gameId="ada-voss" />}
+
+        <Leaderboard gameId={GAME_ID} />
 
         <footer className="text-center font-mono text-[11px] text-noir-ink-faint">
           {t("site.ada.footer")}
