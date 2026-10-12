@@ -1,0 +1,31 @@
+// First-run guided tour of the game screen (src/components/shell/Tour.tsx).
+const messages = {
+  "tour.next": "Next",
+  "tour.back": "Back",
+  "tour.skip": "Skip tour",
+  "tour.done": "Open my email",
+  "tour.progress": "{n} of {total}",
+  "tour.replay": "How to play",
+  "tour.welcome.title": "Welcome to Ada's laptop",
+  "tour.welcome.body": "Dr. Ada Voss is missing and this is her laptop. Everyone in your room is looking at the same laptop on their own phone, and anything one of you unlocks, everyone gets. Here's a quick tour.",
+  "tour.room.title": "Your room",
+  "tour.room.body": "Tap Room to see who's here, who's online and what each person is looking at. Your room code is at the top.",
+  "tour.invite.title": "Invite your team",
+  "tour.invite.body": "Tap Invite to share a link, or have friends scan the QR code below the player list. They can join with Google or just a name.",
+  "tour.chat.title": "Chat",
+  "tour.chat.body": "Talk to your team here. When someone sends a message you'll see a red badge on Room.",
+  "tour.hints.title": "Hints and history",
+  "tour.hints.body": "Stuck? Ask Ada for a hint: it unlocks for the whole room and arrives as a voicemail. Log shows what the room has found, and Attempts shows every answer tried, so you don't repeat each other.",
+  "tour.email.title": "Email: start here",
+  "tour.email.body": "Ada's last message and her sister's email are waiting. Read them first. Hint voicemails from Ada show up here too.",
+  "tour.browser.title": "The browser",
+  "tour.browser.body": "A small internet of its own. Type addresses like meridian-inst.net. Every page has View Source, black bars can be tapped to reveal text, and pictures have File Info.",
+  "tour.notes.title": "Notes",
+  "tour.notes.body": "Write down what you find. Notes are private until you tap Share to room. Tag the important bits (a name, a year, an ID) so the team can spot them.",
+  "tour.files.title": "Files",
+  "tour.files.body": "Ada's files. Some folders are locked: the codes are hidden in the story. One of them unlocks the Decoder, a tool you'll need for ciphers.",
+  "tour.end.title": "Start at the beginning",
+  "tour.end.body": "That's everything. Ada's last words were \"Start at the beginning\". Good luck, detective. You can replay this tour from Room any time.",
+} as const;
+
+export default messages;

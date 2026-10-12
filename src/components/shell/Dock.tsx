@@ -43,6 +43,7 @@ export function Dock({
             <li key={app} className="flex-1">
               <button
                 onClick={() => onOpen(app)}
+                data-tour={`app-${app}`}
                 aria-label={t("shell.dock.appAria", { app: label, locked, unread: badge })}
                 aria-current={on ? "page" : undefined}
                 className={`flex min-h-14 w-full flex-col items-center justify-center gap-0.5 py-1.5 ${
@@ -67,6 +68,7 @@ export function Dock({
         <li className="flex-1">
           <button
             onClick={onRoom}
+            data-tour="room"
             aria-label={t("shell.dock.roomAria", { online: onlineCount, unread: chatUnread })}
             className="flex min-h-14 w-full flex-col items-center justify-center gap-0.5 py-1.5 text-stone-400 active:bg-stone-900"
           >
