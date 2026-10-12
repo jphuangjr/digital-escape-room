@@ -43,6 +43,14 @@ export function GameShell({
   const toastId = useRef(0);
   const t = useT();
   const locale = useLocale();
+  // Emails, voicemails, hints and endings come from the server in the player's language:
+  // refetch room state when the language changes so they switch right away.
+  const lastLocale = useRef(locale);
+  useEffect(() => {
+    if (lastLocale.current === locale) return;
+    lastLocale.current = locale;
+    void refresh();
+  }, [locale, refresh]);
 
   const unlocked = state.progress.unlockedApps;
   const isUnlocked = useCallback(
