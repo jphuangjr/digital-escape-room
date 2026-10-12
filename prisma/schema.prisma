@@ -215,6 +215,8 @@ model LeaderboardEntry {
   wrongAttempts Int
   hintsUsed     Int
   ending        String? // filled in once the vote resolves
+  /** False when the team finished but got it wrong (e.g. accused the wrong suspect): ranked below every solve. */
+  solved        Boolean  @default(true)
   createdAt     DateTime @default(now())
 
   @@index([gameId, durationMs])

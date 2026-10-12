@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useT } from "@/i18n/client";
 import type { CloseupDoc, ItemDTO, ItemId } from "@/lib/train/types";
 
 /** Small drawings of the things you can carry. */
@@ -101,6 +102,7 @@ export function ItemIcon({ id, className = "h-10 w-10" }: { id: ItemId; classNam
 }
 
 export function ItemReading({ item }: { item: ItemDTO }) {
+  const t = useT();
   if (!item.reading) return null;
   const telegram = item.id.startsWith("telegram");
   return (
@@ -108,7 +110,7 @@ export function ItemReading({ item }: { item: ItemDTO }) {
       className={`mt-3 rounded-sm p-4 shadow-inner ${telegram ? "bg-[#f3e9c6] text-[#3a3020]" : "bg-[#efe6d2] text-stone-900"}`}
       style={{ fontFamily: telegram ? "'Courier New', ui-monospace, monospace" : "Georgia, serif" }}
     >
-      {telegram && <p className="mb-2 text-center text-[11px] font-bold tracking-[0.3em] text-[#8a6b1a]">RAILWAY TELEGRAPH</p>}
+      {telegram && <p className="mb-2 text-center text-[11px] font-bold tracking-[0.3em] text-[#8a6b1a]">{t("train.telegraph")}</p>}
       {item.reading.lines.map((l, i) => (
         <p key={i} className="text-sm font-semibold uppercase leading-relaxed tracking-wide">
           {l}
@@ -120,6 +122,7 @@ export function ItemReading({ item }: { item: ItemDTO }) {
 
 /** A close-up's read-out, styled as the real object. */
 export function CloseupDocView({ doc }: { doc: CloseupDoc }) {
+  const t = useT();
   const [side, setSide] = useState<"front" | "back">("front");
   if (doc.kind === "newspaper") {
     return (
@@ -130,7 +133,7 @@ export function CloseupDocView({ doc }: { doc: CloseupDoc }) {
             onClick={() => setSide(side === "front" ? "back" : "front")}
             className="min-h-9 rounded border border-stone-500 px-3 text-xs font-semibold text-stone-700 active:bg-stone-300"
           >
-            {side === "front" ? "Turn to the back page →" : "← Front page"}
+            {side === "front" ? t("train.news.back") : t("train.news.front")}
           </button>
         </div>
         {side === "front" ? (
@@ -269,6 +272,7 @@ export function LockDial({
   /** Wheel faces; digits 0–9 by default. */
   faces?: string[];
 }) {
+  const t = useT();
   const wheel = faces ?? ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
   const [digits, setDigits] = useState<number[]>(() => Array.from({ length }, () => 0));
   const bump = (i: number, d: number) => setDigits((ds) => ds.map((v, j) => (j === i ? (v + d + wheel.length) % wheel.length : v)));
@@ -280,21 +284,21 @@ export function LockDial({
           <div key={i} className="flex flex-col items-center">
             <button
               type="button"
-              aria-label={`Wheel ${i + 1} up`}
+              aria-label={t("train.lock.up", { n: i + 1 })}
               onClick={() => bump(i, 1)}
               className="flex h-10 w-12 items-center justify-center rounded-t-md bg-[#3d2615] text-[#ecd27a] active:bg-[#5b3a22]"
             >
               ▲
             </button>
             <output
-              aria-label={`Wheel ${i + 1}`}
+              aria-label={t("train.lock.wheel", { n: i + 1 })}
               className="flex h-14 w-12 items-center justify-center border-y border-[#7a5f12] bg-gradient-to-b from-[#ecd27a] via-[#c9a227] to-[#8a6b1a] font-mono text-3xl font-bold text-[#1b120b]"
             >
               <span className={faces && (wheel[v] === "♥" || wheel[v] === "♦") ? "text-[#8a1f17]" : undefined}>{wheel[v]}</span>
             </output>
             <button
               type="button"
-              aria-label={`Wheel ${i + 1} down`}
+              aria-label={t("train.lock.down", { n: i + 1 })}
               onClick={() => bump(i, -1)}
               className="flex h-10 w-12 items-center justify-center rounded-b-md bg-[#3d2615] text-[#ecd27a] active:bg-[#5b3a22]"
             >
@@ -309,7 +313,7 @@ export function LockDial({
         onClick={() => onTry(digits.map((v) => wheel[v]).join(""))}
         className="mt-4 min-h-11 w-full rounded-md bg-[#c9a227] font-semibold text-[#1b120b] active:bg-[#ecd27a] disabled:opacity-60"
       >
-        {busy ? "Trying…" : "Try the lock"}
+        {busy ? t("train.lock.trying") : t("train.lock.try")}
       </button>
     </div>
   );

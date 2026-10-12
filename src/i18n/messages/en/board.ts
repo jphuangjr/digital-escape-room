@@ -13,6 +13,7 @@ const messages = {
   "board.stat.hints": "Hints",
   "board.morePlayers": "+{n}",
   "board.timeNote": "Time runs from opening the case to the final answer.",
+  "board.unsolved": "Wrong accusation",
 };
 
 export default messages;

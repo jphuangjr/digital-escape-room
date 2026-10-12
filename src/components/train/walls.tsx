@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/i18n/client";
+
 import type { HotspotId, WallId } from "@/lib/train/types";
 
 /**
@@ -16,17 +18,6 @@ export interface Hotspot {
   w: number;
   h: number;
 }
-
-export const WALL_NAMES: Record<WallId, string> = {
-  window: "Window",
-  door: "Door",
-  berths: "Berths",
-  washstand: "Washstand",
-  bar: "Bar",
-  tables: "Tables",
-  kitchen: "Kitchen end",
-  lounge: "Lounge end",
-};
 
 export const HOTSPOTS: Record<WallId, Hotspot[]> = {
   window: [
@@ -117,6 +108,23 @@ function Room({ children }: { children: React.ReactNode }) {
           <stop offset="0.5" stopColor="#8fa0aa" />
           <stop offset="1" stopColor="#b8c4ca" />
         </linearGradient>
+        {/* walnut grain: long wavy streaks */}
+        <pattern id="nx-grain" width="60" height="400" patternUnits="userSpaceOnUse">
+          <path d="M6 0 C10 80 2 160 8 240 S4 360 8 400" stroke="#2a180c" strokeWidth="1" fill="none" opacity="0.35" />
+          <path d="M22 0 C18 90 26 170 20 260 S24 350 21 400" stroke="#7a5333" strokeWidth="0.8" fill="none" opacity="0.25" />
+          <path d="M38 0 C42 70 34 150 40 230 S36 340 39 400" stroke="#2a180c" strokeWidth="0.7" fill="none" opacity="0.3" />
+          <path d="M52 0 C48 100 56 190 50 280 S54 370 51 400" stroke="#7a5333" strokeWidth="0.6" fill="none" opacity="0.2" />
+        </pattern>
+        {/* warm light from the ceiling lamp, dark corners */}
+        <radialGradient id="nx-light" cx="0.5" cy="0.08" r="0.95">
+          <stop offset="0" stopColor="#ffd98a" stopOpacity="0.16" />
+          <stop offset="0.45" stopColor="#ffd98a" stopOpacity="0.04" />
+          <stop offset="1" stopColor="#000" stopOpacity="0.45" />
+        </radialGradient>
+        <linearGradient id="nx-floorShade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#000" stopOpacity="0.45" />
+          <stop offset="1" stopColor="#000" stopOpacity="0" />
+        </linearGradient>
         <pattern id="nx-carpet" width="20" height="20" patternUnits="userSpaceOnUse">
           <rect width="20" height="20" fill={C.carpet} />
           <path d="M10 2 L18 10 L10 18 L2 10 Z" fill="none" stroke="#8e3a2c" strokeWidth="1" />
@@ -124,6 +132,7 @@ function Room({ children }: { children: React.ReactNode }) {
         </pattern>
       </defs>
       <rect width="300" height="400" fill="url(#nx-wall)" />
+      <rect width="300" height="400" fill="url(#nx-grain)" />
       {/* panelling */}
       <g stroke={C.walnutLine} strokeWidth="1" fill="none" opacity="0.7">
         <rect x="8" y="26" width="284" height="326" rx="4" />
@@ -134,7 +143,13 @@ function Room({ children }: { children: React.ReactNode }) {
       <path d="M0 20 H300" stroke="url(#nx-brass)" strokeWidth="2" />
       <rect y="356" width="300" height="44" fill="url(#nx-carpet)" />
       <path d="M0 356 H300" stroke="url(#nx-brass)" strokeWidth="2" />
+      {/* inlaid brass stringing along the dado rail */}
+      <path d="M8 250 H292" stroke="url(#nx-brass)" strokeWidth="1" opacity="0.6" />
+      {/* skirting shadow on the carpet */}
+      <rect y="356" width="300" height="14" fill="url(#nx-floorShade)" />
       {children}
+      {/* light and shadow over everything */}
+      <rect width="300" height="400" fill="url(#nx-light)" pointerEvents="none" />
     </>
   );
 }
@@ -529,6 +544,7 @@ function TablesWall({ taken }: { taken: boolean }) {
 }
 
 function KitchenWall({ flags }: { flags: string[] }) {
+  const t = useT();
   const open = flags.includes("dumbwaiter.open");
   const raised = flags.includes("dumbwaiter.raised");
   return (
@@ -536,7 +552,7 @@ function KitchenWall({ flags }: { flags: string[] }) {
       {/* chalk menu */}
       <rect x="30" y="50" width="120" height="142" rx="4" fill="#1d2420" stroke="url(#nx-brass)" strokeWidth="3" />
       <text x="90" y="72" textAnchor="middle" fontSize="11" fill="#e8e4d8" fontFamily="'Segoe Script', 'Brush Script MT', cursive">
-        Tonight
+        {t("train.sign.tonight")}
       </text>
       <g stroke="#cfcab9" strokeWidth="1" opacity="0.8">
         {[86, 100, 114, 128].map((y) => (
@@ -572,7 +588,7 @@ function KitchenWall({ flags }: { flags: string[] }) {
       <circle cx="225" cy="120" r="22" fill="#2a1f14" stroke="url(#nx-brass)" strokeWidth="3" />
       <rect x="186" y="186" width="78" height="20" rx="2" fill={C.cream} />
       <text x="225" y="199" textAnchor="middle" fontSize="6.5" fill={C.ink} fontFamily="Georgia, serif" letterSpacing="0.5">
-        KITCHEN CLOSED
+        {t("train.sign.kitchenClosed")}
       </text>
       <rect x="252" y="230" width="8" height="24" rx="3" fill="url(#nx-brass)" />
     </Room>
@@ -625,8 +641,9 @@ export function WallArt({
   pouchHere: boolean;
   scorecardHere: boolean;
 }) {
+  const t = useT();
   return (
-    <svg viewBox="0 0 300 400" className="h-full w-full" role="img" aria-label={`${WALL_NAMES[wall]} wall`}>
+    <svg viewBox="0 0 300 400" className="h-full w-full" role="img" aria-label={t("train.wallAria", { wall: t(`train.wall.${wall}`) })}>
       {wall === "window" && <WindowWall />}
       {wall === "door" && <DoorWall flags={flags} />}
       {wall === "berths" && <BerthWall flags={flags} pouchHere={pouchHere} />}
@@ -641,8 +658,9 @@ export function WallArt({
 
 /** The corridor outside 12B, reached once the door is open. */
 export function CorridorArt() {
+  const t = useT();
   return (
-    <svg viewBox="0 0 300 400" className="h-full w-full" role="img" aria-label="The corridor outside Compartment 12B">
+    <svg viewBox="0 0 300 400" className="h-full w-full" role="img" aria-label={t("train.corridorAria")}>
       <defs>
         <linearGradient id="nx-cor" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#4a2f1c" />
@@ -677,7 +695,7 @@ export function CorridorArt() {
       <rect x="138" y="168" width="24" height="30" rx="3" fill="url(#nx-end)" />
       <circle cx="150" cy="190" r="40" fill="url(#nx-end)" opacity="0.5" />
       <text x="150" y="156" textAnchor="middle" fontSize="6" fill="#c9a227" fontFamily="Georgia, serif" letterSpacing="1.5">
-        DINING CAR
+        {t("train.sign.diningCar")}
       </text>
     </svg>
   );

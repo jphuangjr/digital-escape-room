@@ -3,14 +3,17 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getGame } from "@/lib/games";
+import { gameText, getGame } from "@/lib/games";
+import { LanguageSwitcher, useT } from "@/i18n/client";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { AVATAR_COLORS } from "@/app/r/[code]/RoomClient";
+import { Leaderboard } from "@/components/site/Leaderboard";
 
 /** Staging landing page for The Nightingale Express: start a room (admins only). English only for now. */
 export function TrainLanding() {
   const router = useRouter();
   const game = getGame(TRAIN_GAME_ID)!;
+  const t = useT();
   const [name, setName] = useState("");
   const [color, setColor] = useState(AVATAR_COLORS[0]);
   const [busy, setBusy] = useState(false);
@@ -25,7 +28,7 @@ export function TrainLanding() {
 
   async function start(replaceExisting = false): Promise<void> {
     const displayName = name.trim();
-    if (!displayName) return setErr("Enter a name first.");
+    if (!displayName) return setErr(t("train.landing.errName"));
     setBusy(true);
     setErr(null);
     const res = await fetch("/api/rooms", {
@@ -36,13 +39,13 @@ export function TrainLanding() {
     const data = (await res.json().catch(() => ({}))) as { code?: string; error?: string; replaceRequired?: boolean; openRooms?: { code: string }[] };
     if (res.status === 409 && data.replaceRequired) {
       const codes = (data.openRooms ?? []).map((r) => r.code).join(", ");
-      if (window.confirm(`You already host ${codes}. Close it and start a new room?`)) return start(true);
+      if (window.confirm(t("train.landing.replace", { codes }))) return start(true);
       setBusy(false);
       return;
     }
     if (!res.ok || !data.code) {
       setBusy(false);
-      setErr(data.error ?? "Couldn't start a room.");
+      setErr(data.error ?? t("train.landing.errStart"));
       return;
     }
     try {
@@ -54,15 +57,20 @@ export function TrainLanding() {
   return (
     <main className="noir-vignette min-h-dvh px-4 pb-10 pt-8">
       <div className="mx-auto flex max-w-md flex-col gap-6">
-        <Link href="/" className="text-sm text-noir-ink-faint">
-          ← All escape rooms
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link href="/" className="text-sm text-noir-ink-faint">
+            {t("train.landing.back")}
+          </Link>
+          <LanguageSwitcher tone="noir" />
+        </div>
         <header className="text-center">
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-noir-blood">Staging · admins only</p>
-          <h1 className="mt-2 font-serif text-4xl text-noir-ink">{game.title}</h1>
-          <p className="mt-2 font-serif italic text-noir-ink-dim">{game.tagline}</p>
+          {game.status === "staging" && (
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-noir-blood">{t("train.landing.staging")}</p>
+          )}
+          <h1 className="mt-2 font-serif text-4xl text-noir-ink">{gameText(t, game, "title")}</h1>
+          <p className="mt-2 font-serif italic text-noir-ink-dim">{gameText(t, game, "tagline")}</p>
         </header>
-        <p className="font-serif leading-relaxed text-noir-ink-dim">{game.blurb}</p>
+        <p className="font-serif leading-relaxed text-noir-ink-dim">{gameText(t, game, "blurb")}</p>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -71,7 +79,7 @@ export function TrainLanding() {
           className="flex flex-col gap-4 rounded-xl border border-noir-line bg-noir-bg-2/90 p-4"
         >
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs uppercase tracking-widest text-noir-ink-faint">Your name</span>
+            <span className="text-xs uppercase tracking-widest text-noir-ink-faint">{t("train.landing.name")}</span>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -79,16 +87,17 @@ export function TrainLanding() {
               autoComplete="nickname"
               className="min-h-12 rounded-lg border border-noir-line bg-noir-bg-3 px-3 text-noir-ink"
             />
+            <span className="text-xs leading-relaxed text-noir-ink-faint">{t("site.form.nameNotice")}</span>
           </label>
           <fieldset className="flex flex-wrap gap-2">
-            <legend className="mb-1.5 text-xs uppercase tracking-widest text-noir-ink-faint">Avatar colour</legend>
+            <legend className="mb-1.5 text-xs uppercase tracking-widest text-noir-ink-faint">{t("train.landing.color")}</legend>
             {AVATAR_COLORS.map((c) => (
               <button
                 key={c}
                 type="button"
                 onClick={() => setColor(c)}
                 aria-pressed={color === c}
-                aria-label={`Colour ${c}`}
+                aria-label={t("train.landing.colorAria", { color: c })}
                 className={`h-10 w-10 rounded-full border-2 ${color === c ? "border-white" : "border-transparent"}`}
                 style={{ backgroundColor: c }}
               />
@@ -96,10 +105,11 @@ export function TrainLanding() {
           </fieldset>
           {err && <p className="text-sm text-noir-ink-dim">{err}</p>}
           <button type="submit" disabled={busy} className="min-h-12 rounded-lg bg-noir-brass font-semibold text-noir-bg disabled:opacity-60">
-            {busy ? "Boarding…" : "Board the train"}
+            {busy ? t("train.landing.boarding") : t("train.landing.board")}
           </button>
-          <p className="text-xs text-noir-ink-faint">Invite playtesters from the Room menu once you&apos;re aboard.</p>
+          <p className="text-xs text-noir-ink-faint">{t("train.landing.invite")}</p>
         </form>
+        <Leaderboard gameId={TRAIN_GAME_ID} />
       </div>
     </main>
   );

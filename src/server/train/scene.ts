@@ -13,19 +13,33 @@ import type {
   Suspect,
 } from "@/lib/train/types";
 import { SUSPECTS } from "@/lib/train/types";
+import type { Locale } from "@/i18n/config";
 import {
   closeupText,
-  ENDINGS,
+  endingText,
   EVIDENCE,
   HINT_COOLDOWN_SEC,
   HINT_PUZZLES,
+  hintText,
+  hintTitle,
   ITEM_PLACES,
-  ITEMS,
+  itemText,
   LOCK_CODES,
-  MIRROR_LETTERS,
-  POWDER_PEELED,
+  suspectName,
   THIEF,
 } from "./content";
+import { trainT, type TrainTextKey, type TT } from "./text";
+
+/** A case-log line as stored: no words, so each viewer reads it in their own language. */
+interface StoredLog {
+  id: string;
+  at: string;
+  playerId: string;
+  playerName: string;
+  key: TrainTextKey;
+  item?: ItemId;
+  suspect?: Suspect;
+}
 
 /** What a train room stores in Room.scene. Shared by everyone in the room. */
 export interface TrainScene {
@@ -35,7 +49,7 @@ export interface TrainScene {
   inventory: ItemId[];
   /** Every item ever picked up (taken items never reappear in the room). */
   found: ItemId[];
-  log: SceneLogEntry[];
+  log: StoredLog[];
   /** Teodor's notes, oldest first. */
   hints: { id: string; puzzle: string; tier: 1 | 2 | 3; at: string }[];
   /** The accusation, once the bell is rung. */
@@ -72,7 +86,21 @@ const HOTSPOTS: HotspotId[] = [
   "stole",
   "dining-window",
 ];
-const ITEM_IDS = Object.keys(ITEMS) as ItemId[];
+const ITEM_IDS: ItemId[] = [
+  "pouch",
+  "washstand-key",
+  "screwdriver",
+  "telegram-left",
+  "telegram-right",
+  "telegram",
+  "cufflink",
+  "scorecard",
+  "keyring",
+  "crank",
+  "powder",
+  "bank-notice",
+  "star",
+];
 const MAX_LOG = 100;
 
 export function initialScene(): TrainScene {
@@ -97,23 +125,23 @@ export function parseScene(raw: unknown): TrainScene {
     flags: strings(s.flags),
     inventory: items(s.inventory),
     found: items(s.found),
-    log: Array.isArray(s.log) ? (s.log as SceneLogEntry[]).slice(-MAX_LOG) : [],
+    log: Array.isArray(s.log) ? (s.log as StoredLog[]).filter((l) => l && typeof l.key === "string").slice(-MAX_LOG) : [],
     hints: Array.isArray(s.hints) ? s.hints : [],
     vote,
     ending: s.ending && isSuspect(s.ending.accused) ? s.ending : null,
   };
 }
 
-function itemDTO(id: ItemId, held: boolean, has: (f: string) => boolean): ItemDTO {
-  const { name, description, evidence, reading } = ITEMS[id];
-  const peeled = id === "powder" && has("powder.peeled");
+function itemDTO(id: ItemId, held: boolean, has: (f: string) => boolean, T: TT): ItemDTO {
+  const peeled = has("powder.peeled");
+  const { name, description, evidence, reading } = itemText(id, T, { held, peeled });
   return {
     id,
     name,
-    description: peeled ? "A little brown bottle, half empty. Its label is peeled back." : description,
+    description,
     ...(evidence ? { evidence } : {}),
-    ...(held && reading ? { reading: peeled ? POWDER_PEELED : reading } : {}),
-    ...(held && id === "powder" && !peeled ? { actions: [{ op: "peel", label: "Peel back the label" }] } : {}),
+    ...(reading ? { reading } : {}),
+    ...(held && id === "powder" && !peeled ? { actions: [{ op: "peel", label: T("item.powder.peel") }] } : {}),
   };
 }
 
@@ -125,10 +153,10 @@ function takeablesAt(scene: TrainScene, at: HotspotId): ItemId[] {
   });
 }
 
-function lockAt(h: HotspotId, has: (f: string) => boolean): CloseupDTO["lock"] {
-  if (h === "suitcase" && !has("suitcase.open")) return { id: "suitcase", kind: "digits", length: 3, label: "Suitcase lock" };
-  if (h === "door" && has("panel.open") && !has("door.open")) return { id: "door", kind: "digits", length: 4, label: "Crew override" };
-  if (h === "cashbox" && !has("cashbox.open")) return { id: "cashbox", kind: "symbols", length: 4, label: "Cash box" };
+function lockAt(h: HotspotId, has: (f: string) => boolean, T: TT): CloseupDTO["lock"] {
+  if (h === "suitcase" && !has("suitcase.open")) return { id: "suitcase", kind: "digits", length: 3, label: T("lock.suitcase") };
+  if (h === "door" && has("panel.open") && !has("door.open")) return { id: "door", kind: "digits", length: 4, label: T("lock.door") };
+  if (h === "cashbox" && !has("cashbox.open")) return { id: "cashbox", kind: "symbols", length: 4, label: T("lock.cashbox") };
   return undefined;
 }
 
@@ -139,7 +167,7 @@ function currentPuzzle(scene: TrainScene) {
   return HINT_PUZZLES.find((p) => !p.solved(has, found)) ?? null;
 }
 
-function nextHint(scene: TrainScene, now: Date): SceneDTO["nextHint"] {
+function nextHint(scene: TrainScene, now: Date, T: TT = trainT("en")): SceneDTO["nextHint"] {
   if (scene.ending) return null;
   const p = currentPuzzle(scene);
   if (!p) return null;
@@ -147,13 +175,13 @@ function nextHint(scene: TrainScene, now: Date): SceneDTO["nextHint"] {
   if (given.length >= 3) return null;
   const last = given.at(-1);
   const ready = last ? new Date(new Date(last.at).getTime() + HINT_COOLDOWN_SEC * 1000) : null;
-  return { title: p.title, tier: (given.length + 1) as 1 | 2 | 3, readyAt: ready && ready > now ? ready.toISOString() : null };
+  return { title: hintTitle(T, p.id), tier: (given.length + 1) as 1 | 2 | 3, readyAt: ready && ready > now ? ready.toISOString() : null };
 }
 
-function endingDTO(scene: TrainScene, startedAt: Date | null): EndingDTO | null {
+function endingDTO(scene: TrainScene, startedAt: Date | null, T: TT): EndingDTO | null {
   const e = scene.ending;
   if (!e) return null;
-  const text = ENDINGS[e.accused];
+  const text = endingText(T, e.accused);
   return {
     accused: e.accused,
     correct: e.accused === THIEF,
@@ -168,31 +196,47 @@ function endingDTO(scene: TrainScene, startedAt: Date | null): EndingDTO | null 
 }
 
 /** The client's view of the scene: only what the team has uncovered, never a lock code. */
-export function sceneDTO(scene: TrainScene, opts: { startedAt?: Date; now?: Date } = {}): SceneDTO {
+export function sceneDTO(scene: TrainScene, opts: { startedAt?: Date; now?: Date; loc?: Locale } = {}): SceneDTO {
+  const T = trainT(opts.loc ?? "en");
   const has = (f: string) => scene.flags.includes(f);
   const closeups: SceneDTO["closeups"] = {};
   for (const h of HOTSPOTS) {
-    const c = closeupText(h, has);
+    const c = closeupText(h, has, T);
     // Once taken, the scorecard is read from the inventory instead.
     const doc = h === "bridge" && scene.found.includes("scorecard") ? undefined : c.doc;
-    const lock = lockAt(h, has);
-    closeups[h] = { ...c, doc, takes: takeablesAt(scene, h).map((id) => itemDTO(id, false, has)), ...(lock ? { lock } : {}) };
+    const lock = lockAt(h, has, T);
+    closeups[h] = { ...c, doc, takes: takeablesAt(scene, h).map((id) => itemDTO(id, false, has, T)), ...(lock ? { lock } : {}) };
   }
-  const hints: HintNote[] = scene.hints.map((h) => {
-    const p = HINT_PUZZLES.find((x) => x.id === h.puzzle);
-    return { id: h.id, puzzle: h.puzzle, title: p?.title ?? h.puzzle, tier: h.tier, text: p?.tiers[h.tier - 1] ?? "", at: h.at };
-  });
+  const hints: HintNote[] = scene.hints.map((h) => ({
+    id: h.id,
+    puzzle: h.puzzle,
+    title: hintTitle(T, h.puzzle),
+    tier: h.tier,
+    text: hintText(T, h.puzzle, h.tier),
+    at: h.at,
+  }));
+  const log: SceneLogEntry[] = scene.log.slice(-30).map((l) => ({
+    id: l.id,
+    at: l.at,
+    playerId: l.playerId,
+    playerName: l.playerName,
+    text: T(l.key, {
+      name: l.playerName,
+      item: l.item ? itemText(l.item, T, { held: false, peeled: false }).logName : "",
+      suspect: l.suspect ? suspectName(T, l.suspect) : "",
+    }),
+  }));
   return {
     flags: scene.flags,
-    inventory: scene.inventory.map((id) => itemDTO(id, true, has)),
+    inventory: scene.inventory.map((id) => itemDTO(id, true, has, T)),
     closeups,
-    log: scene.log.slice(-30),
-    mirrorLetters: has("tap.hot") ? MIRROR_LETTERS : null,
+    log,
+    mirrorLetters: has("tap.hot") ? T("mirror.letters") : null,
     hints,
-    nextHint: nextHint(scene, opts.now ?? new Date()),
+    nextHint: nextHint(scene, opts.now ?? new Date(), T),
     vote: scene.vote && !scene.ending ? { open: true, votes: scene.vote.votes, tie: scene.vote.tie } : null,
-    ending: endingDTO(scene, opts.startedAt ?? null),
-    evidence: EVIDENCE.filter((i) => scene.found.includes(i)).map((id) => itemDTO(id, true, has)),
+    ending: endingDTO(scene, opts.startedAt ?? null, T),
+    evidence: EVIDENCE.filter((i) => scene.found.includes(i)).map((id) => itemDTO(id, true, has, T)),
   };
 }
 
@@ -218,7 +262,15 @@ function tally(votes: Record<string, Suspect>): Record<Suspect, number> {
 }
 
 /** Apply one player action to the scene. Pure: no I/O, so it's unit-testable. */
-export function applyAction(prev: TrainScene, action: SceneAction, who: Who, room: RoomCtx = { hostId: null, onlineIds: [] }, now = new Date()): ActionResult {
+export function applyAction(
+  prev: TrainScene,
+  action: SceneAction,
+  who: Who,
+  room: RoomCtx = { hostId: null, onlineIds: [] },
+  now = new Date(),
+  loc: Locale = "en",
+): ActionResult {
+  const T = trainT(loc);
   const scene: TrainScene = {
     ...prev,
     flags: [...prev.flags],
@@ -235,54 +287,59 @@ export function applyAction(prev: TrainScene, action: SceneAction, who: Who, roo
   const clear = (f: string) => {
     scene.flags = scene.flags.filter((x) => x !== f);
   };
-  const log = (text: string) => {
-    scene.log.push({ id: `${now.getTime().toString(36)}-${scene.log.length}`, at: now.toISOString(), playerId: who.id, playerName: who.name, text });
+  const log = (key: TrainTextKey, extra: { item?: ItemId; suspect?: Suspect } = {}) => {
+    scene.log.push({ id: `${now.getTime().toString(36)}-${scene.log.length}`, at: now.toISOString(), playerId: who.id, playerName: who.name, key, ...extra });
     scene.log = scene.log.slice(-MAX_LOG);
   };
-  const ok = (message?: string): ActionResult => ({ scene, changed: true, ok: true, message });
-  const no = (message: string): ActionResult => ({ scene: prev, changed: false, ok: false, message });
+  const ok = (key?: TrainTextKey, values?: Record<string, string | number>): ActionResult => ({
+    scene,
+    changed: true,
+    ok: true,
+    message: key ? T(key, values) : undefined,
+  });
+  const no = (key: TrainTextKey, values?: Record<string, string | number>): ActionResult => ({ scene: prev, changed: false, ok: false, message: T(key, values) });
   const holding = (id: ItemId) => scene.inventory.includes(id);
   const drop = (id: ItemId) => {
     scene.inventory = scene.inventory.filter((i) => i !== id);
   };
 
-  if (prev.ending) return no("The case is closed.");
-  if (prev.vote && !["vote", "close-vote", "tiebreak", "hint"].includes(action.type)) return no("Everyone's waiting for your accusation.");
+  if (prev.ending) return no("msg.closed");
+  if (prev.vote && !["vote", "close-vote", "tiebreak", "hint"].includes(action.type)) return no("msg.waiting");
 
   /** Close the vote: a clear winner ends the game; a tie goes to the host. */
   const closeVote = (): ActionResult => {
     const votes = scene.vote!.votes;
     const counts = tally(votes);
     const top = Math.max(...Object.values(counts));
-    if (top === 0) return no("Nobody has voted yet.");
+    if (top === 0) return no("msg.noVotes");
     const leaders = SUSPECTS.filter((s) => counts[s] === top);
     if (leaders.length > 1) {
       scene.vote!.tie = leaders;
-      return ok("It's a tie. The host has the deciding word.");
+      return ok("msg.tie");
     }
     return finish(leaders[0], counts);
   };
   const finish = (accused: Suspect, counts: Record<Suspect, number>): ActionResult => {
     scene.ending = { accused, at: now.toISOString(), counts, everyClue: has("everyclue") };
-    log(`accused ${accused === "varga" ? "Countess Varga" : accused === "carrow" ? "Mr. Carrow" : accused === "osei" ? "Dr. Osei" : "Mrs. Lindqvist"}`);
+    log("log.accused", { suspect: accused });
     return { scene, changed: true, ok: true, finished: true };
   };
 
   switch (action.type) {
     case "take": {
       const place = ITEM_PLACES[action.item];
-      if (!place || !takeablesAt(prev, place.at).includes(action.item)) return no("There's nothing like that here to take.");
+      if (!place || !takeablesAt(prev, place.at).includes(action.item)) return no("msg.nothingToTake");
       scene.inventory.push(action.item);
       scene.found.push(action.item);
-      log(`found ${ITEMS[action.item].logName}`);
-      return ok(`${ITEMS[action.item].name} added to your things.`);
+      log("log.found", { item: action.item });
+      return ok("msg.took", { item: itemText(action.item, T, { held: false, peeled: false }).name });
     }
 
     case "operate": {
       const { target, op } = action;
       if (target === "coat" && op === "search" && !has("coat.searched")) {
         set("coat.searched");
-        return ok("Something small and metal in the pocket.");
+        return ok("msg.coat");
       }
       if (target === "pillow" && op === "lift" && !has("pillow.lifted")) {
         set("pillow.lifted");
@@ -295,91 +352,91 @@ export function applyAction(prev: TrainScene, action: SceneAction, who: Who, roo
       }
       if (target === "washstand" && has("washstand.open") && op === "hot" && !has("tap.hot")) {
         set("tap.hot");
-        log("ran the hot tap");
-        return ok("Steam curls up over the mirror.");
+        log("log.ranHot");
+        return ok("msg.hot");
       }
       if (target === "washstand" && op === "cold" && has("tap.hot")) {
         clear("tap.hot");
-        return ok("The steam clears from the mirror.");
+        return ok("msg.cold");
       }
-      if (!has("door.open")) return no("Nothing happens.");
+      if (!has("door.open")) return no("msg.nothing");
       if (target === "stole" && op === "search" && !has("stole.searched")) {
         set("stole.searched");
-        return ok("A small glass bottle in the pocket.");
+        return ok("msg.stole");
       }
       if (target === "records" && op === "search" && !has("records.searched")) {
         set("records.searched");
-        return ok("A folded letter slides out of one sleeve.");
+        return ok("msg.records");
       }
       if (target === "bell" && op === "ring" && !has("bell.rung")) {
-        if (!scene.found.includes("star")) return no("Teodor puts his head round the door: \"Find the Star first, or no one will believe you.\"");
+        if (!scene.found.includes("star")) return no("msg.bellEarly");
         set("bell.rung");
         if (EVIDENCE.every((i) => scene.found.includes(i))) set("everyclue");
         scene.vote = { votes: {}, tie: null };
-        log("rang for the conductor");
-        return ok("The conductor and Teodor hurry in. \"Well? Who took it?\"");
+        log("log.bell");
+        return ok("msg.bell");
       }
-      return no("Nothing happens.");
+      return no("msg.nothing");
     }
 
     case "use": {
       const { item, target } = action;
-      if (!holding(item)) return no("You don't have that.");
+      if (!holding(item)) return no("msg.dontHave");
       if (item === "washstand-key" && target === "washstand" && !has("washstand.open")) {
         set("washstand.open");
         drop(item);
-        log("unlocked the washstand");
-        return ok("The key turns. The cabinet folds down into a little washbasin.");
+        log("log.washstand");
+        return ok("msg.washstand");
       }
       if (item === "screwdriver" && target === "vent" && !has("vent.open")) {
         set("vent.open");
-        log("opened the ceiling vent");
-        return ok("Standing on the washstand, you undo the screws. The grille swings down.");
+        log("log.vent");
+        return ok("msg.vent");
       }
       if (item === "screwdriver" && target === "door" && !has("panel.open")) {
         set("panel.open");
-        log("took the service plate off the door");
-        return ok("Four screws later, the plate comes away. There's a dial behind it.");
+        log("log.panel");
+        return ok("msg.panel");
       }
       if (item === "keyring" && target === "dumbwaiter" && !has("dumbwaiter.open")) {
         set("dumbwaiter.open");
         drop(item);
-        log("unlocked the dumbwaiter");
-        return ok("The DUMBWAITER key turns. The hatch swings open onto a dark shaft.");
+        log("log.dumbwaiter");
+        return ok("msg.dumbwaiter");
       }
       if (item === "crank" && target === "dumbwaiter") {
-        if (!has("dumbwaiter.open")) return no("The hatch is locked; winding it up wouldn't help yet.");
-        if (has("dumbwaiter.raised")) return no("It's already up.");
+        if (!has("dumbwaiter.open")) return no("msg.crankLocked");
+        if (has("dumbwaiter.raised")) return no("msg.crankDone");
         set("dumbwaiter.raised");
         drop(item);
-        log("wound up the dumbwaiter");
-        return ok("You wind and wind. The little lift creaks up into view.");
+        log("log.crank");
+        return ok("msg.crank");
       }
-      return no("That doesn't work there.");
+      return no("msg.doesntWork");
     }
 
     case "item": {
-      if (!holding(action.item)) return no("You don't have that.");
+      if (!holding(action.item)) return no("msg.dontHave");
       if (action.item === "powder" && action.op === "peel" && !has("powder.peeled")) {
         set("powder.peeled");
-        log("peeled back the label on the sleeping powder");
-        return ok("Under the label is an older one, with a different name on it.");
+        log("log.peel");
+        return ok("msg.peel");
       }
-      return no("Nothing happens.");
+      return no("msg.nothing");
     }
 
     case "combine": {
       const [a, b] = action.items;
       const pair = new Set([a, b]);
-      if (!holding(a) || !holding(b) || a === b) return no("You don't have both of those.");
+      if (!holding(a) || !holding(b) || a === b) return no("msg.dontHaveBoth");
       if (pair.has("telegram-left") && pair.has("telegram-right")) {
         scene.inventory = scene.inventory.filter((i) => !pair.has(i));
         scene.inventory.push("telegram");
         scene.found.push("telegram");
-        log("pieced the telegram together");
-        return ok("The torn edges match. You can read the whole telegram now.");
+        log("log.telegram");
+        return ok("msg.telegram");
       }
-      return no("Those don't go together.");
+      return no("msg.dontGo");
     }
 
     case "unlock": {
@@ -394,40 +451,40 @@ export function applyAction(prev: TrainScene, action: SceneAction, who: Who, roo
           : lock === "door"
             ? has("panel.open") && !has("door.open")
             : has("door.open") && !has("cashbox.open");
-      if (!reachable) return no("There's no lock like that to try.");
+      if (!reachable) return no("msg.noLock");
       const length = Array.from(LOCK_CODES[lock]).length;
-      if (Array.from(input).length !== length) return no(`The lock has ${length} wheels.`);
+      if (Array.from(input).length !== length) return no("msg.wheels", { n: length });
       const correct = input === LOCK_CODES[lock];
       const attempt = { lock, input, correct };
-      if (!correct) return { scene: prev, changed: false, ok: false, message: "The lock doesn't give.", attempt };
+      if (!correct) return { scene: prev, changed: false, ok: false, message: T("msg.wrong"), attempt };
       if (lock === "suitcase") {
         set("suitcase.open");
-        log("opened Mrs. Lindqvist's suitcase");
-        return { ...ok("Click. The suitcase springs open."), attempt };
+        log("log.suitcase");
+        return { ...ok("msg.suitcase"), attempt };
       }
       if (lock === "door") {
         set("door.open");
-        log("opened the compartment door");
-        return { ...ok("The dial clunks home and the door slides open."), attempt };
+        log("log.door");
+        return { ...ok("msg.door"), attempt };
       }
       set("cashbox.open");
-      log("opened the cash box");
-      return { ...ok("The wheels line up and the lid springs open."), attempt };
+      log("log.cashbox");
+      return { ...ok("msg.cashbox"), attempt };
     }
 
     case "hint": {
       const p = currentPuzzle(prev);
       const next = nextHint(prev, now);
-      if (!p || !next) return no("Teodor has nothing more to add.");
-      if (next.readyAt) return no("Teodor is busy down the corridor. Ring again in a minute.");
+      if (!p || !next) return no("msg.noHint");
+      if (next.readyAt) return no("msg.hintBusy");
       scene.hints.push({ id: `${now.getTime().toString(36)}-${scene.hints.length}`, puzzle: p.id, tier: next.tier, at: now.toISOString() });
-      log(`rang for a note from Teodor (${p.title.toLowerCase()})`);
-      return ok("A note slides under the door.");
+      log("log.hint");
+      return ok("msg.hint");
     }
 
     case "vote": {
-      if (!scene.vote) return no("There's nothing to vote on yet.");
-      if (!isSuspect(action.suspect)) return no("Who?");
+      if (!scene.vote) return no("msg.noVote");
+      if (!isSuspect(action.suspect)) return no("msg.who");
       scene.vote.votes[who.id] = action.suspect;
       scene.vote.tie = null;
       const everyone = room.onlineIds.length > 0 && room.onlineIds.every((id) => scene.vote!.votes[id]);
@@ -435,15 +492,15 @@ export function applyAction(prev: TrainScene, action: SceneAction, who: Who, roo
     }
 
     case "close-vote": {
-      if (!scene.vote) return no("There's nothing to vote on yet.");
-      if (room.hostId && who.id !== room.hostId) return no("Only the host can close the vote.");
+      if (!scene.vote) return no("msg.noVote");
+      if (room.hostId && who.id !== room.hostId) return no("msg.hostOnlyClose");
       return closeVote();
     }
 
     case "tiebreak": {
-      if (!scene.vote?.tie) return no("There's no tie to break.");
-      if (room.hostId && who.id !== room.hostId) return no("Only the host can break the tie.");
-      if (!scene.vote.tie.includes(action.suspect)) return no("Pick one of the tied suspects.");
+      if (!scene.vote?.tie) return no("msg.noTie");
+      if (room.hostId && who.id !== room.hostId) return no("msg.hostOnlyTie");
+      if (!scene.vote.tie.includes(action.suspect)) return no("msg.pickTied");
       return finish(action.suspect, tally(scene.vote.votes));
     }
   }

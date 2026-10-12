@@ -15,6 +15,7 @@ const messages: Record<keyof typeof en, string> = {
   "board.stat.hints": "힌트",
   "board.morePlayers": "+{n}",
   "board.timeNote": "시간은 사건을 연 순간부터 마지막 답까지예요.",
+  "board.unsolved": "잘못된 지목",
 };
 
 export default messages;

@@ -263,6 +263,8 @@ export interface LeaderboardRow {
   finishedAt: string;
   /** this is the requesting room's entry */
   mine: boolean;
+  /** false: finished with a wrong answer (ranked below every solve) */
+  solved: boolean;
 }
 
 export interface LeaderboardResponse {

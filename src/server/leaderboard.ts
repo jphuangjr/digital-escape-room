@@ -3,6 +3,7 @@ import type { Ending, LeaderboardResponse, LeaderboardRow } from "@/lib/types";
 import type { LeaderboardEntry } from "@prisma/client";
 import { db } from "./db";
 import { BONUS_PUZZLE_IDS, normalizeRoomCode } from "./logic";
+import { getGame } from "@/lib/games";
 
 export const LEADERBOARD_SIZE = 10;
 const MAX_INT = 2_147_483_647;
@@ -12,12 +13,17 @@ const MAX_INT = 2_147_483_647;
  * how long it took (room creation to final answer), and how many answers and hints it took.
  * Runs once per room; later activity doesn't change the entry.
  */
-export async function recordLeaderboardEntry(roomId: string): Promise<void> {
+export async function recordLeaderboardEntry(
+  roomId: string,
+  extra: { solved?: boolean; hintsUsed?: number; ending?: string } = {},
+): Promise<void> {
   const room = await db.room.findUnique({
     where: { id: roomId },
     include: { players: { orderBy: { createdAt: "asc" }, select: { displayName: true, color: true } } },
   });
   if (!room?.finishedAt) return;
+  // Games in staging (admin playtests) stay off the public board.
+  if (getGame(room.gameId)?.status === "staging") return;
   const until = { lte: room.finishedAt };
   const mainPuzzles = { notIn: BONUS_PUZZLE_IDS }; // the HarbourMail Easter egg doesn't count against a team
   const [attempts, wrongAttempts, hintsUsed] = await Promise.all([
@@ -37,7 +43,9 @@ export async function recordLeaderboardEntry(roomId: string): Promise<void> {
       durationMs: Math.min(room.finishedAt.getTime() - room.createdAt.getTime(), MAX_INT),
       attempts,
       wrongAttempts,
-      hintsUsed,
+      hintsUsed: extra.hintsUsed ?? hintsUsed,
+      solved: extra.solved ?? true,
+      ending: extra.ending ?? null,
     },
     update: {},
   });
@@ -47,8 +55,8 @@ export async function recordLeaderboardEnding(roomId: string, ending: string): P
   await db.leaderboardEntry.updateMany({ where: { roomRef: roomId }, data: { ending } });
 }
 
-// Faster time wins; on equal times, fewer wrong answers, then whoever finished first.
-const ORDER = [{ durationMs: "asc" }, { wrongAttempts: "asc" }, { finishedAt: "asc" }] as const;
+// Solved beats unsolved; then faster time wins; on equal times, fewer wrong answers, then whoever finished first.
+const ORDER = [{ solved: "desc" }, { durationMs: "asc" }, { wrongAttempts: "asc" }, { finishedAt: "asc" }] as const;
 
 function toRow(e: LeaderboardEntry, rank: number, mine: boolean): LeaderboardRow {
   const players = Array.isArray(e.players) ? (e.players as { name?: unknown; color?: unknown }[]) : [];
@@ -61,6 +69,7 @@ function toRow(e: LeaderboardEntry, rank: number, mine: boolean): LeaderboardRow
     wrongAttempts: e.wrongAttempts,
     hintsUsed: e.hintsUsed,
     ending: (e.ending as Ending | null) ?? null,
+    solved: e.solved,
     finishedAt: e.finishedAt.toISOString(),
     mine,
   };
@@ -77,15 +86,17 @@ export async function getLeaderboard(gameId: string, roomCode?: string | null): 
   ]);
   let mine: LeaderboardRow | null = null;
   if (own && own.gameId === gameId) {
+    const sameSolved = {
+      OR: [
+        { durationMs: { lt: own.durationMs } },
+        { durationMs: own.durationMs, wrongAttempts: { lt: own.wrongAttempts } },
+        { durationMs: own.durationMs, wrongAttempts: own.wrongAttempts, finishedAt: { lt: own.finishedAt } },
+      ],
+    };
     const ahead = await db.leaderboardEntry.count({
-      where: {
-        gameId,
-        OR: [
-          { durationMs: { lt: own.durationMs } },
-          { durationMs: own.durationMs, wrongAttempts: { lt: own.wrongAttempts } },
-          { durationMs: own.durationMs, wrongAttempts: own.wrongAttempts, finishedAt: { lt: own.finishedAt } },
-        ],
-      },
+      where: own.solved
+        ? { gameId, solved: true, ...sameSolved }
+        : { gameId, OR: [{ solved: true }, { solved: false, ...sameSolved }] },
     });
     mine = toRow(own, ahead + 1, true);
   }

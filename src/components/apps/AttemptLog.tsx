@@ -37,7 +37,11 @@ export function AttemptLog({ ctx }: { ctx: GameCtx }) {
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline gap-2">
                 <span className="truncate font-semibold text-zinc-200">{a.playerName}</span>
-                <span className="truncate text-xs text-zinc-500">{a.puzzleId in PUZZLE_LABELS ? t(`room.puzzle.${a.puzzleId}`) : a.puzzleId}</span>
+                <span className="truncate text-xs text-zinc-500">{a.puzzleId in PUZZLE_LABELS
+                    ? t(`room.puzzle.${a.puzzleId}`)
+                    : a.puzzleId.startsWith("nx-")
+                      ? t(`train.attempt.${a.puzzleId.slice(3)}`)
+                      : a.puzzleId}</span>
               </div>
               <div className="break-all font-mono text-[13px] text-zinc-300">{a.input || t("room.attempts.emptyInput")}</div>
             </div>

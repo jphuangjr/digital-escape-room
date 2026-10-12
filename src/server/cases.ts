@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "./db";
+import { getGame } from "@/lib/games";
 
 /**
  * Write a permanent CaseRecord for every signed-in player once a room escapes (final phrase solved).
@@ -8,6 +9,7 @@ import { db } from "./db";
 export async function recordFinishedCase(roomId: string): Promise<void> {
   const room = await db.room.findUnique({ where: { id: roomId }, include: { players: true } });
   if (!room?.finishedAt) return;
+  if (getGame(room.gameId)?.status === "staging") return; // admin playtests aren't anyone's case history
   const durationMs = room.finishedAt.getTime() - room.createdAt.getTime();
   await Promise.all(
     room.players
