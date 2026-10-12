@@ -120,6 +120,10 @@ const messages: Record<keyof typeof en, string> = {
   "room.ending.compassEarned": "コンパスバッジを獲得",
   "room.ending.compassNote": "Ada's Personal フォルダを開きました。",
   "room.ending.keepBrowsingLaptop": "エイダのノートPCを引き続き見て回る",
+  "room.ending.backToLobby": "すべての脱出ゲーム",
+  "room.leave.button": "ロビーに戻る",
+  "room.leave.note": "ルームは開いたままです。コード {code} でいつでも戻れます。",
+  "room.leave.confirm": "ゲームを抜けてロビーに戻りますか？\n\nルームは開いたままです。コード {code} でいつでも再参加できます。",
   "room.ending.pill": "事件解決 · エンディングを見る",
 };
 

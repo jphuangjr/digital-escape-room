@@ -120,6 +120,10 @@ const messages: Record<keyof typeof en, string> = {
   "room.ending.compassEarned": "Ganaste la insignia de la brújula",
   "room.ending.compassNote": "Abriste la carpeta Ada's Personal.",
   "room.ending.keepBrowsingLaptop": "Seguir explorando la laptop de Ada",
+  "room.ending.backToLobby": "Todos los escape rooms",
+  "room.leave.button": "Salir al vestíbulo",
+  "room.leave.note": "La sala sigue abierta. Vuelve cuando quieras con el código {code}.",
+  "room.leave.confirm": "¿Salir del juego y volver al vestíbulo?\n\nLa sala sigue abierta: vuelve cuando quieras con el código {code}.",
   "room.ending.pill": "Caso cerrado · ver el final",
 };
 

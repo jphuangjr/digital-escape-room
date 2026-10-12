@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { QrCode } from "@/components/site/QrCode";
 import type { GameCtx } from "@/lib/client/game";
@@ -46,6 +47,7 @@ export function RoomSheet({
 }) {
   const [copied, setCopied] = useState(false);
   const t = useT();
+  const router = useRouter();
 
   useEffect(() => {
     if (!open) return;
@@ -178,6 +180,19 @@ export function RoomSheet({
               <InviteQr code={ctx.code} />
               <div className="mt-3 flex justify-center">
                 <LanguageSwitcher tone="shell" />
+              </div>
+              <div className="mt-4 border-t border-stone-800 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(t("room.leave.confirm", { code: ctx.code }))) router.push("/");
+                  }}
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-stone-700 text-sm text-stone-300 active:bg-stone-900"
+                >
+                  <span aria-hidden>←</span>
+                  {t("room.leave.button")}
+                </button>
+                <p className="mt-2 text-center text-xs text-stone-500">{t("room.leave.note", { code: ctx.code.replace("-", "\u2011") })}</p>
               </div>
             </>
           )}
