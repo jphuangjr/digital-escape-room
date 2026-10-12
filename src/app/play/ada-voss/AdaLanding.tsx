@@ -231,8 +231,12 @@ export function AdaLanding() {
               placeholder={t("site.ada.namePlaceholder")}
               maxLength={24}
               autoComplete="nickname"
+              aria-describedby="name-notice"
               className="min-h-12 rounded-lg border border-noir-line bg-noir-bg-3 px-3 text-noir-ink placeholder:text-noir-ink-faint"
             />
+            <span id="name-notice" className="text-xs leading-relaxed text-noir-ink-faint">
+              {t("site.form.nameNotice")}
+            </span>
           </label>
 
           <fieldset className="flex flex-col gap-2">

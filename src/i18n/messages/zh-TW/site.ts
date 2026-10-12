@@ -24,6 +24,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.join.invalidCode": "房間代碼的格式像是 ADA-7K2Q。",
 
   "site.form.yourName": "你的名字",
+  "site.form.nameNotice": "隊友會看到這個名字；隊伍逃脫後，它也會顯示在公開排行榜上。不想公開真名的話，請用暱稱。",
   "site.form.avatarColor": "頭像顏色",
   "site.form.colorAria": "顏色 {color}",
   "site.form.joinInvestigation": "加入調查",

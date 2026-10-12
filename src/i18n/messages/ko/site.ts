@@ -24,6 +24,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.join.invalidCode": "방 코드는 ADA-7K2Q 같은 형식이에요.",
 
   "site.form.yourName": "이름",
+  "site.form.nameNotice": "팀원들에게 보이고, 팀이 탈출하면 공개 리더보드에도 표시돼요. 실명을 밝히고 싶지 않다면 닉네임을 쓰세요.",
   "site.form.avatarColor": "아바타 색상",
   "site.form.colorAria": "색상 {color}",
   "site.form.joinInvestigation": "수사에 참가하기",
