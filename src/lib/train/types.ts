@@ -44,7 +44,24 @@ export type HotspotId =
   | "gramophone"
   | "records"
   | "stole"
-  | "dining-window";
+  | "dining-window"
+  // things to look at that have nothing to do with the case
+  | "plaque"
+  | "heater"
+  | "hatbox"
+  | "safety-card"
+  | "umbrella"
+  | "painting"
+  | "carafe"
+  | "toiletries"
+  | "water-sign"
+  | "shaker"
+  | "stools"
+  | "vase"
+  | "porthole"
+  | "crate"
+  | "photo"
+  | "palm";
 
 export type ItemId =
   | "pouch"

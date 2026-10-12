@@ -88,7 +88,24 @@ export function closeupText(id: HotspotId, has: Has, T: TT): Closeup {
     case "kitchen-door":
     case "gramophone":
     case "dining-window":
+    case "plaque":
+    case "heater":
+    case "safety-card":
+    case "umbrella":
+    case "painting":
+    case "carafe":
+    case "toiletries":
+    case "water-sign":
+    case "shaker":
+    case "stools":
+    case "vase":
+    case "porthole":
+    case "photo":
+    case "palm":
       return simple();
+    case "hatbox":
+    case "crate":
+      return { title: c("title"), lines: L("text"), doc: { kind: "note", lines: L("note") }, actions: [] };
     case "newspaper":
       return {
         title: c("title"),
