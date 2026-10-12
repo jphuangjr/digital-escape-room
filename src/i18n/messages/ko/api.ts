@@ -62,7 +62,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.attempt.solved.adminConsole": "관리자 콘솔이 열렸어요.",
   "api.decode.badShift": "이동 값은 정수여야 해요.",
   "api.decode.nothingYet": "아직 해독할 내용이 없어요.",
-  "api.attempt.solved.maraReset": "복구 연락처로 임시 비밀번호를 보냈습니다. 에이다의 이메일을 확인하세요.",
+  "api.attempt.solved.maraReset": "복구 연락처로 임시 비밀번호를 보냈습니다.",
   "api.attempt.solved.maraLogin": "마라의 HarbourMail에 로그인했습니다.",
 };
 

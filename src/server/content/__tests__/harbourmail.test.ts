@@ -50,6 +50,9 @@ describe("HarbourMail Easter egg", () => {
       expect(mail.body).toContain(MARA_TEMP_PASSWORD);
       expect(mail.body).toContain("mara.voss@harbourmail.net");
       expect(mail.body).not.toMatch(/\{\w+\}/);
+      // This is the investigator's inbox: Ada, the recovery contact, forwards the reset.
+      expect(mail.from).toBe("Ada Voss <ada@ada-voss.net>");
+      expect(mail.body).toContain("no-reply@harbourmail.net");
     }
   });
 

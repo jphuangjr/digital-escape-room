@@ -62,7 +62,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.attempt.solved.adminConsole": "管理コンソールのロックを解除しました。",
   "api.decode.badShift": "シフトは整数で指定してください。",
   "api.decode.nothingYet": "まだ解読するものがありません。",
-  "api.attempt.solved.maraReset": "復旧用の連絡先に仮パスワードを送りました。エイダのメールを確認してください。",
+  "api.attempt.solved.maraReset": "復旧用の連絡先に仮パスワードを送りました。",
   "api.attempt.solved.maraLogin": "マーラの HarbourMail にログインしました。",
 };
 
