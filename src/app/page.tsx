@@ -4,6 +4,7 @@ import { Compass } from "@/components/site/Compass";
 import { LanguageSwitcher } from "@/i18n/client";
 import { getT } from "@/i18n/server";
 import { DirectoryAccount, DirectoryCases, JoinBox } from "./DirectoryClient";
+import { VaultIntro } from "@/components/site/VaultIntro";
 
 function GameCard({ game, t }: { game: GameInfo; t: Translate }) {
   const live = game.status === "live";
@@ -51,6 +52,7 @@ export default async function Directory() {
   const t = await getT();
   return (
     <main className="noir-vignette min-h-dvh pt-safe pb-safe px-safe">
+      <VaultIntro />
       <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 pb-10 pt-10">
         <LanguageSwitcher tone="noir" className="-mb-6 -mt-6 justify-end self-end" />
         <header className="flex flex-col items-center gap-3 text-center">

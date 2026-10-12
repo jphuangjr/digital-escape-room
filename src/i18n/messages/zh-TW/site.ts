@@ -10,6 +10,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.ada-voss.difficulty": "中等",
   "site.game.ada-voss.tone": "黑色懸疑",
 
+  "site.vault.unlocking": "解鎖中",
+  "site.vault.granted": "存取已核准",
+  "site.vault.skip": "輕觸以略過",
   "site.directory.eyebrow": "線上密室逃脫",
   "site.directory.intro": "大家各用自己的手機，一起破解的解謎懸案。選一個案件，邀請你的夥伴，然後逃出去。",
   "site.directory.casesHeading": "案件",

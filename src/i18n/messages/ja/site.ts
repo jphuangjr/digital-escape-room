@@ -10,6 +10,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.ada-voss.difficulty": "ふつう",
   "site.game.ada-voss.tone": "ノワール・ミステリー",
 
+  "site.vault.unlocking": "解錠中",
+  "site.vault.granted": "アクセス許可",
+  "site.vault.skip": "タップでスキップ",
   "site.directory.eyebrow": "オンライン脱出ゲーム",
   "site.directory.intro": "それぞれのスマホで、みんなで解く謎解きミステリー。事件を選んで、仲間を招待して、脱出しましょう。",
   "site.directory.casesHeading": "事件",
