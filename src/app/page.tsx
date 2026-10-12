@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { GAMES, SITE_NAME, gameText, type GameInfo, type Translate } from "@/lib/games";
+import { SITE_NAME, gameText, visibleGames, type GameInfo, type Translate } from "@/lib/games";
+import { getSessionUser } from "@/server/auth";
+import { isAdmin } from "@/server/purchases";
 import { Compass } from "@/components/site/Compass";
 import { LanguageSwitcher } from "@/i18n/client";
 import { getT } from "@/i18n/server";
@@ -7,7 +9,8 @@ import { DirectoryAccount, DirectoryCases, JoinBox } from "./DirectoryClient";
 import { VaultIntro } from "@/components/site/VaultIntro";
 
 function GameCard({ game, t }: { game: GameInfo; t: Translate }) {
-  const live = game.status === "live";
+  const staging = game.status === "staging";
+  const live = game.status === "live" || staging;
   const body = (
     <article
       className={`flex h-full flex-col gap-4 rounded-xl border p-5 ${
@@ -19,6 +22,9 @@ function GameCard({ game, t }: { game: GameInfo; t: Translate }) {
         <div className="min-w-0">
           <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-noir-ink-faint">
             {live ? gameText(t, game, "tone") : t("site.directory.comingSoon")}
+            {staging && (
+              <span className="ml-2 rounded border border-noir-blood/70 px-1.5 py-0.5 text-noir-blood">Staging · admins only</span>
+            )}
           </p>
           <h2 className="mt-1 font-serif text-2xl leading-tight text-noir-ink">{gameText(t, game, "title")}</h2>
           <p className="mt-1 font-serif italic text-noir-ink-dim">{gameText(t, game, "tagline")}</p>
@@ -50,6 +56,7 @@ function GameCard({ game, t }: { game: GameInfo; t: Translate }) {
 
 export default async function Directory() {
   const t = await getT();
+  const games = visibleGames(isAdmin(await getSessionUser().catch(() => null)));
   return (
     <main className="noir-vignette min-h-dvh pt-safe pb-safe px-safe">
       <VaultIntro />
@@ -73,7 +80,7 @@ export default async function Directory() {
             {t("site.directory.casesHeading")}
           </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {GAMES.map((g) => (
+            {games.map((g) => (
               <GameCard key={g.id} game={g} t={t} />
             ))}
             <div className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-noir-line/70 p-5 text-center">

@@ -127,6 +127,8 @@ export interface RoomState {
   emails: EmailDTO[]; // base emails + voicemails unlocked by hints/progress
   vote: VoteState | null;
   ending: EndingDTO | null;
+  /** Physical-room games (The Nightingale Express) only: the shared scene. */
+  scene?: import("@/lib/train/types").SceneDTO;
 }
 
 // ---------- Fake internet ----------

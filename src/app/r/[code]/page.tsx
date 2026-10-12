@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { db } from "@/server/db";
 import { RoomClient } from "./RoomClient";
 
 export async function generateMetadata({ params }: { params: Promise<{ code: string }> }): Promise<Metadata> {
@@ -16,6 +17,8 @@ export const viewport: Viewport = {
 };
 
 export default async function RoomPage({ params }: { params: Promise<{ code: string }> }) {
-  const { code } = await params;
-  return <RoomClient code={decodeURIComponent(code).toUpperCase()} />;
+  const code = decodeURIComponent((await params).code).toUpperCase();
+  // Which escape room this is, so the join screen shows the right title before the player joins.
+  const room = await db.room.findUnique({ where: { code }, select: { gameId: true } }).catch(() => null);
+  return <RoomClient code={code} gameId={room?.gameId ?? "ada-voss"} />;
 }

@@ -5,7 +5,7 @@ import { error, json, readBody, translateLogicError } from "@/server/http";
 import { initialProgress, validateColor, validateDisplayName } from "@/server/logic";
 import { newPlayerToken, newRoomCode, openRoomsHostedBy, setPlayerCookie, sweepExpiredRooms } from "@/server/session";
 import { publish } from "@/server/realtime";
-import { ownsGame } from "@/server/purchases";
+import { isAdmin, ownsGame } from "@/server/purchases";
 import { getGame } from "@/lib/games";
 import { track } from "@/server/analytics";
 import { getSessionUser, googleEnabled } from "@/server/auth";
@@ -23,7 +23,11 @@ export async function POST(req: Request) {
   const color = validateColor(body.color);
   if (!color) return error(400, t("api.player.badColor"));
   const gameId = typeof body.gameId === "string" ? body.gameId : "ada-voss";
-  if (getGame(gameId)?.status !== "live") return error(400, t("api.common.unknownGame"));
+  const game = getGame(gameId);
+  // Staging games are hosted by admins only (and need Google sign-in to know who's an admin).
+  if (!game || game.status === "soon" || (game.status === "staging" && !isAdmin(user))) {
+    return error(400, t("api.common.unknownGame"));
+  }
   // Hosting a game requires owning it (joining a friend's room is free).
   if (user && !(await ownsGame(user, gameId))) {
     return error(403, t("api.rooms.unlockToHost"), { purchaseRequired: true, gameId });
