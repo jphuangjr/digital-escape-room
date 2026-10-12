@@ -190,7 +190,7 @@ export function Browser({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {/* Toolbar */}
-      <div className="relative z-10 shrink-0 border-b border-stone-800 bg-stone-900">
+      <div className="relative z-30 shrink-0 border-b border-stone-800 bg-stone-900">
         <div className="flex items-center gap-0.5 px-1 py-1">
           <button
             className={`${btn} hidden sm:flex`}
@@ -341,7 +341,7 @@ export function Browser({
       {/* Viewport */}
       <div
         ref={scrollRef}
-        className="relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-stone-950"
+        className="relative isolate min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-stone-950"
         onClick={() => menuOpen && setMenuOpen(false)}
       >
         {view.kind === "newtab" && (
