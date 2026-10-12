@@ -1,5 +1,31 @@
 {
  "sitesFresh": {
+  "ada-voss.net": {
+   "address": "ada-voss.net",
+   "title": "Website archived",
+   "theme": "archived",
+   "blocks": [
+    {
+     "type": "heading",
+     "level": 1,
+     "text": "This website has been archived"
+    },
+    {
+     "type": "paragraph",
+     "text": "ada-voss.net is no longer active. The owner archived this site and its contents are no longer available."
+    },
+    {
+     "type": "notice",
+     "tone": "info",
+     "text": "Archived by the site owner 2 days ago."
+    },
+    {
+     "type": "footer",
+     "text": "Harbourline Hosting · Archived site"
+    }
+   ],
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <!-- Harbourline Hosting: archived placeholder -->\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Website archived</title>\n    <link rel=\"stylesheet\" href=\"/static/archived.css\" />\n  </head>\n  <body class=\"theme-archived\">\n    <main>\n      <h1>This website has been archived</h1>\n      <p>ada-voss.net is no longer active. The owner archived this site and its contents are no longer available.</p>\n      <div class=\"notice notice-info\">Archived by the site owner 2 days ago.</div>\n      <footer>Harbourline Hosting · Archived site</footer>\n    </main>\n  </body>\n</html>"
+  },
   "harbourcc.edu": {
    "address": "harbourcc.edu",
    "title": "Harbour Community College",
@@ -1462,6 +1488,32 @@
   }
  },
  "sitesSolved": {
+  "ada-voss.net": {
+   "address": "ada-voss.net",
+   "title": "Website archived",
+   "theme": "archived",
+   "blocks": [
+    {
+     "type": "heading",
+     "level": 1,
+     "text": "This website has been archived"
+    },
+    {
+     "type": "paragraph",
+     "text": "ada-voss.net is no longer active. The owner archived this site and its contents are no longer available."
+    },
+    {
+     "type": "notice",
+     "tone": "info",
+     "text": "Archived by the site owner 2 days ago."
+    },
+    {
+     "type": "footer",
+     "text": "Harbourline Hosting · Archived site"
+    }
+   ],
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <!-- Harbourline Hosting: archived placeholder -->\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Website archived</title>\n    <link rel=\"stylesheet\" href=\"/static/archived.css\" />\n  </head>\n  <body class=\"theme-archived\">\n    <main>\n      <h1>This website has been archived</h1>\n      <p>ada-voss.net is no longer active. The owner archived this site and its contents are no longer available.</p>\n      <div class=\"notice notice-info\">Archived by the site owner 2 days ago.</div>\n      <footer>Harbourline Hosting · Archived site</footer>\n    </main>\n  </body>\n</html>"
+  },
   "harbourcc.edu": {
    "address": "harbourcc.edu",
    "title": "Harbour Community College",
