@@ -4,21 +4,21 @@
 export type AppId = "browser" | "notes" | "email" | "files" | "decoder";
 
 export type PuzzleId =
-  | "shift-key" // submitted on lostpaws.net "decode listings" form; unlocks plaintext listings
+  | "shift-key" // submitted on lostpaws.com "decode listings" form; unlocks plaintext listings
   | "intranet-login" // intranet login form (username + password joined as "user:pass")
-  | "final-phrase" // switch.ada-voss.net input
+  | "final-phrase" // switch.ada-voss.com input
   | "bonus-pin" // Files app "Ada's Personal" PIN
   | "tools-folder" // Files app "Ada's Tools" security question; unlocks the Decoder
   | "binary-lesson" // harbourcc.edu practice quiz; installs the Binary tab in the Decoder
   | "admin-console" // the Vault's Systems Admin console (password shown in binary on the dashboard)
-  | "mara-reset" // Easter egg: harbourmail.net "forgot password" for Mara's address; mails a temp password to Ada
+  | "mara-reset" // Easter egg: harbourmail.com "forgot password" for Mara's address; mails a temp password to Ada
   | "mara-login"; // Easter egg: sign in to Mara's HarbourMail with that temp password ("address:password")
 
 /** Puzzles that have hints. Includes navigation milestones that aren't attempt-validated. */
 export type HintPuzzleId =
   | "find-blog" // Site 1 -> Site 2
   | "shift-key"
-  | "find-pets" // Site 3 -> lostpaws.net
+  | "find-pets" // Site 3 -> lostpaws.com
   | "pet-id"
   | "intranet-login"
   | "final-phrase"
@@ -144,7 +144,7 @@ export interface ImageFileInfo {
 export type Block =
   | { type: "heading"; text: string; level?: 1 | 2 | 3 }
   | { type: "paragraph"; text: string }
-  | { type: "link"; text: string; href: string } // href is an in-game address, e.g. "meridian-inst.net/about"
+  | { type: "link"; text: string; href: string } // href is an in-game address, e.g. "meridian-inst.com/about"
   | { type: "nav"; links: { text: string; href: string }[] }
   | { type: "image"; alt: string; caption?: string; art: string; fileInfo: ImageFileInfo } // art = emoji/glyph or key for an SVG placeholder
   | { type: "redacted"; text: string; label?: string } // tap-to-reveal
@@ -168,7 +168,7 @@ export type SiteFormId = "shift-key" | "intranet-login" | "final-phrase" | "bina
 export type SiteTheme = "meridian" | "drift" | "runnerboard" | "lostpaws" | "intranet" | "switch" | "honeypot" | "harbourcc" | "harbourmail" | "archived";
 
 export interface SitePage {
-  address: string; // canonical, e.g. "meridian-inst.net/about"
+  address: string; // canonical, e.g. "meridian-inst.com/about"
   title: string;
   theme: SiteTheme;
   blocks: Block[];

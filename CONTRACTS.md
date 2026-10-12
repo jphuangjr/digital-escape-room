@@ -53,8 +53,8 @@ bonusFiles(): { name: string; body: string }[]   // returned via GET /api/rooms/
 HINT_PUZZLES: HintPuzzleId[]
 ```
 Decoder: unlocked by solving `tools-folder` (requires `bonus-pin`), not by visiting a site.
-Gating: `intranet.meridian-inst.net` subpages beyond login require `intranet-login` solved;
-`switch.ada-voss.net` unreachable until `intranet-login` solved. lostpaws listings render ciphertext until
+Gating: `intranet.meridian-inst.com` subpages beyond login require `intranet-login` solved;
+`switch.ada-voss.com` unreachable until `intranet-login` solved. lostpaws listings render ciphertext until
 `shift-key` solved, then plaintext.
 
 Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, files}`.

@@ -3,7 +3,7 @@ import { pick, type Locale } from "@/i18n/config";
 import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
 
-export const RUNNERBOARD_HOST = "runnerboard.net";
+export const RUNNERBOARD_HOST = "runnerboard.com";
 
 export interface ForumPost {
   author: string;

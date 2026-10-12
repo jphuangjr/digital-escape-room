@@ -77,11 +77,11 @@ describe("Portuguese switch", () => {
   });
 
   it("is hidden until the admin console is solved", () => {
-    expect(content.resolveSite("switch.ada-voss.net", progress(["intranet-login"]), "pt-BR")).toBeNull();
+    expect(content.resolveSite("switch.ada-voss.com", progress(["intranet-login"]), "pt-BR")).toBeNull();
   });
 
   it("countdown page explains the proof-of-life phrase", () => {
-    const p = content.resolveSite("switch.ada-voss.net", progress(["intranet-login", "admin-console"]), "pt-BR")!;
+    const p = content.resolveSite("switch.ada-voss.com", progress(["intranet-login", "admin-console"]), "pt-BR")!;
     const json = JSON.stringify(p.blocks);
     expect(json).toMatch(PT);
     expect(json).toContain("Biscuit");
@@ -90,7 +90,7 @@ describe("Portuguese switch", () => {
   });
 
   it("solved page is Portuguese", () => {
-    const p = content.resolveSite("switch.ada-voss.net", progress(["intranet-login", "admin-console", "final-phrase"]), "pt-BR")!;
+    const p = content.resolveSite("switch.ada-voss.com", progress(["intranet-login", "admin-console", "final-phrase"]), "pt-BR")!;
     const json = JSON.stringify(p.blocks);
     expect(json).toMatch(PT);
     expect(json).toContain("Você me encontrou");

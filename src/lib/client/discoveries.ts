@@ -35,13 +35,13 @@ export function discoveryWho(d: Discovery, t: Translate, isMe = false): string {
 export const PUZZLE_AFFECTS_HOSTS: Record<PuzzleId, string[]> = {
   "bonus-pin": [],
   "tools-folder": [],
-  "shift-key": ["lostpaws.net"],
-  "intranet-login": ["intranet.meridian-inst.net"],
+  "shift-key": ["lostpaws.com"],
+  "intranet-login": ["intranet.meridian-inst.com"],
   "binary-lesson": ["harbourcc.edu"],
-  "admin-console": ["intranet.meridian-inst.net", "switch.ada-voss.net"],
-  "final-phrase": ["switch.ada-voss.net"],
-  "mara-reset": ["harbourmail.net"],
-  "mara-login": ["harbourmail.net"],
+  "admin-console": ["intranet.meridian-inst.com", "switch.ada-voss.com"],
+  "final-phrase": ["switch.ada-voss.com"],
+  "mara-reset": ["harbourmail.com"],
+  "mara-login": ["harbourmail.com"],
 };
 
 /** Space between "who" and "what" in a discovery line: none in Chinese or Japanese, which don't use word spaces. */

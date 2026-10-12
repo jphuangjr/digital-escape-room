@@ -4,7 +4,7 @@ import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { caesar, LOSTPAWS_CIPHERTEXT_CHUNKS, LOSTPAWS_PLAINTEXT_CHUNKS } from "../cipher";
 import { page } from "./source";
 
-export const LOSTPAWS_HOST = "lostpaws.net";
+export const LOSTPAWS_HOST = "lostpaws.com";
 
 interface PetListing {
   title: Tr;

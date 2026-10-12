@@ -20,7 +20,7 @@ const messages: Record<keyof typeof en, string> = {
   "tour.email.title": "電子郵件：從這裡開始",
   "tour.email.body": "艾達的最後一則訊息和她妹妹的電子郵件正在等你，先讀這兩封。艾達傳來的提示語音留言也會出現在這裡。",
   "tour.browser.title": "瀏覽器",
-  "tour.browser.body": "這是一個自成一格的小網路。試著輸入像 meridian-inst.net 這樣的網址。每個頁面都有「檢視原始碼」，點一下黑色塗條就能顯示文字，圖片則有「檔案資訊」。",
+  "tour.browser.body": "這是一個自成一格的小網路。試著輸入像 meridian-inst.com 這樣的網址。每個頁面都有「檢視原始碼」，點一下黑色塗條就能顯示文字，圖片則有「檔案資訊」。",
   "tour.notes.title": "筆記",
   "tour.notes.body": "把你發現的東西記下來。在你點「分享到房間」之前，筆記只有你看得到。幫重要的線索（名字、年份、ID）加上標籤，隊友就能一眼找到。",
   "tour.files.title": "檔案",

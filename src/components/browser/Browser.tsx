@@ -1,5 +1,6 @@
 "use client";
 
+import { modernizeAddress } from "@/lib/domains";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { useLocale, useT } from "@/i18n/client";
@@ -23,11 +24,11 @@ interface Bookmark {
   address: string;
   title: string;
 }
-const DEFAULT_BOOKMARKS: Bookmark[] = [{ address: "meridian-inst.net", title: "Meridian Institute" }];
+const DEFAULT_BOOKMARKS: Bookmark[] = [{ address: "meridian-inst.com", title: "Meridian Institute" }];
 
 /** The starter bookmark is stored in English; show it in the player's language. */
 function bookmarkTitle(b: Bookmark, x: ReturnType<typeof pick>): string {
-  return b.address === "meridian-inst.net" && b.title === "Meridian Institute"
+  return b.address === "meridian-inst.com" && b.title === "Meridian Institute"
     ? x({ en: "Meridian Institute", ko: "메리디언 연구소", "zh-TW": "子午研究院", es: "Instituto Meridian", ja: "メリディアン研究所", "pt-BR": "Instituto Meridian" })
     : b.title;
 }
@@ -44,7 +45,7 @@ function loadBookmarks(code: string): Bookmark[] {
     const raw = localStorage.getItem(`ada_bookmarks_${code}`);
     if (raw) {
       const parsed = JSON.parse(raw) as Bookmark[];
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) return parsed.map((b) => ({ ...b, address: modernizeAddress(String(b.address ?? "")) }));
     }
   } catch {}
   return DEFAULT_BOOKMARKS;

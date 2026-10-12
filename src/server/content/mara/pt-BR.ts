@@ -28,7 +28,7 @@ const text: MaraText = {
     {
       id: "tom-seating",
       folder: "inbox",
-      party: "Tom Achebe <tom.achebe@harbourmail.net>",
+      party: "Tom Achebe <tom.achebe@harbourmail.com>",
       subject: "Mapa de mesas (desculpa)",
       date: "Hoje, 07:02",
       body: [
@@ -65,7 +65,7 @@ const text: MaraText = {
     {
       id: "liaison",
       folder: "inbox",
-      party: "Family Liaison Office, Meridian Institute <liaison@meridian-inst.net>",
+      party: "Family Liaison Office, Meridian Institute <liaison@meridian-inst.com>",
       subject: "Apoio a você neste momento difícil",
       date: "Ontem, 11:40",
       body: [
@@ -123,15 +123,15 @@ const text: MaraText = {
     {
       id: "welcome",
       folder: "inbox",
-      party: "HarbourMail <welcome@harbourmail.net>",
+      party: "HarbourMail <welcome@harbourmail.com>",
       subject: "Boas-vindas ao HarbourMail, Mara!",
       date: "set. 2006",
       body: [
         "Boas-vindas ao HarbourMail!",
         "",
-        "Seu novo endereço é mara.voss@harbourmail.net.",
+        "Seu novo endereço é mara.voss@harbourmail.com.",
         "",
-        "Esta conta foi criada para você por Ada Voss (ada@ada-voss.net), que está cadastrada como seu contato de recuperação. Se um dia você esquecer a senha, vamos enviar uma senha temporária para a Ada.",
+        "Esta conta foi criada para você por Ada Voss (ada@ada-voss.com), que está cadastrada como seu contato de recuperação. Se um dia você esquecer a senha, vamos enviar uma senha temporária para a Ada.",
         "",
         "Mensagem da Ada: \"Você VAI esquecer. É por isso que eu sou o reserva. Bem-vinda à internet, peixinho. — A.\"",
       ],
@@ -167,7 +167,7 @@ const text: MaraText = {
     {
       id: "draft-sorry",
       folder: "drafts",
-      party: "Ada Voss <ada@ada-voss.net>",
+      party: "Ada Voss <ada@ada-voss.com>",
       subject: "(sem assunto)",
       date: "Editado pela última vez há 2 anos",
       body: [
@@ -183,7 +183,7 @@ const text: MaraText = {
     {
       id: "draft-14th",
       folder: "drafts",
-      party: "Ada Voss <ada@ada-voss.net>",
+      party: "Ada Voss <ada@ada-voss.com>",
       subject: "Dia 14",
       date: "Editado pela última vez ontem, 23:58",
       body: [
@@ -197,7 +197,7 @@ const text: MaraText = {
     {
       id: "sent-tom",
       folder: "sent",
-      party: "Tom Achebe <tom.achebe@harbourmail.net>",
+      party: "Tom Achebe <tom.achebe@harbourmail.com>",
       subject: "Re: Mapa de mesas (desculpa)",
       date: "Hoje, 07:20",
       body: ["Guarda um lugar para ela. Do meu lado.", "", "bj"],
@@ -221,7 +221,7 @@ const text: MaraText = {
     {
       id: "sent-liaison",
       folder: "sent",
-      party: "Family Liaison Office, Meridian Institute <liaison@meridian-inst.net>",
+      party: "Family Liaison Office, Meridian Institute <liaison@meridian-inst.com>",
       subject: "Re: Apoio a você neste momento difícil",
       date: "Ontem, 12:15",
       body: ["Não.", "", "Não entrem mais em contato comigo.", "", "Mara Voss"],
@@ -237,7 +237,7 @@ const text: MaraText = {
       "",
       "Senha temporária: {password}",
       "",
-      "Entre em harbourmail.net. Se não foi você que pediu, pode ignorar este e-mail.",
+      "Entre em harbourmail.com. Se não foi você que pediu, pode ignorar este e-mail.",
       "",
       "— Contas HarbourMail",
     ],

@@ -19,7 +19,7 @@ const ko = (address: string, solved: RoomProgress["solved"] = []) => content.res
 
 describe("Korean Vault (intranet)", () => {
   it("login page is Korean and keeps the username/vault-code clues", () => {
-    const login = ko("intranet.meridian-inst.net");
+    const login = ko("intranet.meridian-inst.com");
     expect(JSON.stringify(login.blocks)).toMatch(HANGUL);
     expect(login.source).toContain("firstname.lastname");
     expect(login.source).toContain("TRUE");
@@ -28,38 +28,38 @@ describe("Korean Vault (intranet)", () => {
   });
 
   it("dashboard keeps the binary password and class link", () => {
-    const dash = ko("intranet.meridian-inst.net", ["intranet-login"]);
+    const dash = ko("intranet.meridian-inst.com", ["intranet-login"]);
     const json = JSON.stringify(dash.blocks);
     expect(json).toMatch(HANGUL);
     expect(json).toContain("01100 00001 01110 10100 00101 10010 01110");
     expect(json).toContain("wren.okafor");
-    expect(json).not.toContain("switch.ada-voss.net");
+    expect(json).not.toContain("switch.ada-voss.com");
     expect(dash.source).toContain("harbourcc.edu/cs110");
   });
 
   it("admin console memo keeps the redacted switch address", () => {
-    const gate = ko("intranet.meridian-inst.net/admin", ["intranet-login"]);
-    expect(JSON.stringify(gate)).not.toContain("switch.ada-voss.net");
-    const open = ko("intranet.meridian-inst.net/admin", ["intranet-login", "admin-console"]);
+    const gate = ko("intranet.meridian-inst.com/admin", ["intranet-login"]);
+    expect(JSON.stringify(gate)).not.toContain("switch.ada-voss.com");
+    const open = ko("intranet.meridian-inst.com/admin", ["intranet-login", "admin-console"]);
     const memo = open.blocks.find((b) => b.type === "memo");
-    expect(memo && memo.type === "memo" && memo.parts.some((p) => "redacted" in p && p.redacted === "switch.ada-voss.net")).toBe(true);
+    expect(memo && memo.type === "memo" && memo.parts.some((p) => "redacted" in p && p.redacted === "switch.ada-voss.com")).toBe(true);
     expect(JSON.stringify(memo)).toMatch(HANGUL);
     expect(JSON.stringify(open.blocks)).toContain("23:58");
   });
 
   it("records and memos are Korean", () => {
     for (const path of ["records", "memos"]) {
-      const p = ko(`intranet.meridian-inst.net/${path}`, ["intranet-login"]);
+      const p = ko(`intranet.meridian-inst.com/${path}`, ["intranet-login"]);
       expect(JSON.stringify(p.blocks)).toMatch(HANGUL);
-      expect(JSON.stringify(p.blocks)).not.toContain("switch.ada-voss.net");
+      expect(JSON.stringify(p.blocks)).not.toContain("switch.ada-voss.com");
     }
-    expect(JSON.stringify(ko("intranet.meridian-inst.net/records", ["intranet-login"]).blocks)).toContain("1978");
+    expect(JSON.stringify(ko("intranet.meridian-inst.com/records", ["intranet-login"]).blocks)).toContain("1978");
   });
 });
 
 describe("Korean switch", () => {
   it("countdown page explains the proof-of-life phrase", () => {
-    const p = ko("switch.ada-voss.net", ["intranet-login", "admin-console"]);
+    const p = ko("switch.ada-voss.com", ["intranet-login", "admin-console"]);
     const json = JSON.stringify(p.blocks);
     expect(json).toMatch(HANGUL);
     expect(json).toContain("Biscuit");
@@ -68,7 +68,7 @@ describe("Korean switch", () => {
   });
 
   it("solved page is Korean", () => {
-    const p = ko("switch.ada-voss.net", ["intranet-login", "admin-console", "final-phrase"]);
+    const p = ko("switch.ada-voss.com", ["intranet-login", "admin-console", "final-phrase"]);
     expect(JSON.stringify(p.blocks)).toMatch(HANGUL);
   });
 });
@@ -78,7 +78,7 @@ describe("Korean emails", () => {
     const emails = content.baseEmails("ko");
     const ada = emails.find((e) => e.id === "email-ada-last")!;
     expect(ada.body).toMatch(HANGUL);
-    expect(ada.body).toContain("meridian-inst.net");
+    expect(ada.body).toContain("meridian-inst.com");
     const sister = emails.find((e) => e.id === "email-sister-engagement")!;
     expect(sister.body).toMatch(HANGUL);
     expect(sister.body).toContain("3월 14일");
@@ -92,7 +92,7 @@ describe("Korean emails", () => {
   it("voicemails (ambient and hint) are Korean", () => {
     const hints = HINT_PUZZLES.map((id) => ({ puzzleId: id, tier: 1 as const, text: content.getHint(id, 1, "ko"), unlockedAt: "2026-01-01T09:30:00Z" }));
     const all = progress(["shift-key", "intranet-login", "admin-console", "final-phrase"]);
-    all.visitedSites = ["thedrift.blog", "trapdoor.net"];
+    all.visitedSites = ["thedrift.blog", "trapdoor.com"];
     const vms = content.voicemailsFor(all, hints, "ko");
     expect(vms.length).toBe(6 + hints.length);
     for (const v of vms) {
@@ -106,9 +106,9 @@ describe("Korean emails", () => {
 
 describe("Korean hints", () => {
   const TOKENS: Record<HintPuzzleId, string[]> = {
-    "find-blog": ["meridian-inst.net/vault-2019"],
+    "find-blog": ["meridian-inst.com/vault-2019"],
     "shift-key": ["DRIFT", "7"],
-    "find-pets": ["compass_needle", "LOSTPAWS", "lostpaws.net"],
+    "find-pets": ["compass_needle", "LOSTPAWS", "lostpaws.com"],
     "pet-id": ["Biscuit", "0412"],
     "intranet-login": ["wren.okafor", "1987", "19870412"],
     "final-phrase": ["wren-1987-0412"],

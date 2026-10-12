@@ -58,12 +58,12 @@ export function normalizePhrase(input: string): string {
 }
 
 /** Mara's HarbourMail account (the Easter egg). Resets go to her recovery contact: Ada. */
-export const MARA_ADDRESS = "mara.voss@harbourmail.net";
+export const MARA_ADDRESS = "mara.voss@harbourmail.com";
 export const MARA_TEMP_PASSWORD = "GULL-7316";
-/** "mara.voss", "mara.voss@harbourmail.net" or the US spelling "harbormail.net". */
+/** "mara.voss" or mara.voss@ harbourmail/harbormail (US spelling), .com or the old .net. */
 const isMaraAddress = (input: string) => {
   const s = normalize(input).replace(/\s+/g, "");
-  return s === "mara.voss" || s === MARA_ADDRESS || s === "mara.voss@harbormail.net";
+  return s === "mara.voss" || /^mara\.voss@harbou?rmail\.(com|net)$/.test(s);
 };
 
 export function checkAnswer(puzzleId: PuzzleId, input: string): boolean {

@@ -71,11 +71,11 @@ describe("Japanese switch", () => {
   });
 
   it("is hidden until the admin console is solved", () => {
-    expect(content.resolveSite("switch.ada-voss.net", progress(["intranet-login"]), "ja")).toBeNull();
+    expect(content.resolveSite("switch.ada-voss.com", progress(["intranet-login"]), "ja")).toBeNull();
   });
 
   it("countdown page explains the proof-of-life phrase", () => {
-    const p = content.resolveSite("switch.ada-voss.net", progress(["intranet-login", "admin-console"]), "ja")!;
+    const p = content.resolveSite("switch.ada-voss.com", progress(["intranet-login", "admin-console"]), "ja")!;
     const json = JSON.stringify(p.blocks);
     expect(json).toMatch(KANA);
     expect(json).toContain("Biscuit");
@@ -84,7 +84,7 @@ describe("Japanese switch", () => {
   });
 
   it("solved page is Japanese", () => {
-    const p = content.resolveSite("switch.ada-voss.net", progress(["intranet-login", "admin-console", "final-phrase"]), "ja")!;
+    const p = content.resolveSite("switch.ada-voss.com", progress(["intranet-login", "admin-console", "final-phrase"]), "ja")!;
     expect(JSON.stringify(p.blocks)).toMatch(KANA);
   });
 });

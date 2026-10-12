@@ -44,9 +44,9 @@ describe("Spanish Drift, RunnerBoard and Lost Paws pages", () => {
       "thedrift.blog",
       "thedrift.blog/about",
       ...DRIFT_POSTS.map((p) => `thedrift.blog/post/${p.slug}`),
-      "runnerboard.net",
-      "runnerboard.net/scores",
-      "lostpaws.net",
+      "runnerboard.com",
+      "runnerboard.com/scores",
+      "lostpaws.com",
     ];
     for (const a of addrs) {
       const p = es(a);
@@ -54,7 +54,7 @@ describe("Spanish Drift, RunnerBoard and Lost Paws pages", () => {
       expect(text(p.blocks), a).toMatch(SPANISH);
       expect(p.source, a).toMatch(SPANISH);
     }
-    expect(text(es("lostpaws.net", ["shift-key"]).blocks)).toMatch(SPANISH);
+    expect(text(es("lostpaws.com", ["shift-key"]).blocks)).toMatch(SPANISH);
   });
 
   it("Drift: Field Notes titles on the Spanish page still start with the English title and spell DRIFT oldest-first, days 2,1,1,2,1 (sum 7)", () => {
@@ -93,13 +93,13 @@ describe("Spanish Drift, RunnerBoard and Lost Paws pages", () => {
   });
 
   it("RunnerBoard: timestamps decode to LOSTPAWS / TRAPDOOR on the Spanish page, Biscuit is mentioned", () => {
-    const shown = posts(es("runnerboard.net").blocks);
+    const shown = posts(es("runnerboard.com").blocks);
     const spell = (u: string) => shown.filter((p) => p.author === u).map((p) => decodeTimestamp(p.time!)).join("");
     expect(spell("compass_needle")).toBe("LOSTPAWS");
     expect(spell("needle_compass")).toBe("TRAPDOOR");
     expect(shown.some((p) => p.author === "compass_needle" && p.body.includes("Biscuit") && SPANISH.test(p.body))).toBe(true);
-    expect(text(es("runnerboard.net").blocks)).toContain("Circuit Runner '94");
-    expect(text(es("runnerboard.net/scores").blocks)).toContain("W.OKAFOR — 2,418,770");
+    expect(text(es("runnerboard.com").blocks)).toContain("Circuit Runner '94");
+    expect(text(es("runnerboard.com/scores").blocks)).toContain("W.OKAFOR — 2,418,770");
   });
 
   it("RunnerBoard: Spanish dates keep the day numbers; bodies add no usernames or HH:MM", () => {
@@ -115,13 +115,13 @@ describe("Spanish Drift, RunnerBoard and Lost Paws pages", () => {
   });
 
   it("Lost Paws: Spanish page keeps the ciphertext bodies, pet names and Biscuit's ID 0412", () => {
-    const before = listings(es("lostpaws.net").blocks);
+    const before = listings(es("lostpaws.com").blocks);
     expect(before.map((l) => l.body)).toEqual([...LOSTPAWS_CIPHERTEXT_CHUNKS]);
     const biscuit = before.find((l) => l.title.startsWith("Biscuit"));
     expect(biscuit?.petId).toBe("0412");
-    expect(biscuit?.title).not.toBe(listings(en("lostpaws.net").blocks).find((l) => l.title.startsWith("Biscuit"))?.title);
-    expect(es("lostpaws.net").blocks.some((b) => b.type === "form" && b.form === "shift-key" && SPANISH.test(b.prompt))).toBe(true);
-    const after = listings(es("lostpaws.net", ["shift-key"]).blocks);
+    expect(biscuit?.title).not.toBe(listings(en("lostpaws.com").blocks).find((l) => l.title.startsWith("Biscuit"))?.title);
+    expect(es("lostpaws.com").blocks.some((b) => b.type === "form" && b.form === "shift-key" && SPANISH.test(b.prompt))).toBe(true);
+    const after = listings(es("lostpaws.com", ["shift-key"]).blocks);
     expect(after.map((l) => l.body).join(" ")).toBe(LOSTPAWS_PLAINTEXT);
   });
 

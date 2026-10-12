@@ -145,22 +145,22 @@ describe("answers", () => {
 
 describe("sites & gating", () => {
   it("normalizes addresses", () => {
-    for (const a of ["https://www.Meridian-Inst.net/", "meridian-inst.net", "http://meridian-inst.net/?x=1#top"]) {
-      expect(resolveSite(a, fresh())?.address).toBe("meridian-inst.net");
+    for (const a of ["https://www.Meridian-Inst.com/", "meridian-inst.com", "http://meridian-inst.com/?x=1#top"]) {
+      expect(resolveSite(a, fresh())?.address).toBe("meridian-inst.com");
     }
     expect(resolveSite("nowhere.example", fresh())).toBeNull();
   });
 
   it("meridian home source contains the vault comment and 1978 footer on all pages", () => {
-    expect(resolveSite("meridian-inst.net", fresh())!.source).toContain("<!-- archive migration complete: see /vault-2019 -->");
+    expect(resolveSite("meridian-inst.com", fresh())!.source).toContain("<!-- archive migration complete: see /vault-2019 -->");
     for (const p of ["", "/staff", "/about", "/vault-2019"]) {
-      const page = resolveSite(`meridian-inst.net${p}`, fresh())!;
+      const page = resolveSite(`meridian-inst.com${p}`, fresh())!;
       expect(page.blocks.some((b) => b.type === "footer" && b.text.includes("© since 1978."))).toBe(true);
     }
   });
 
   it("staff has 12 people and Wren has no photo", () => {
-    const staff = resolveSite("meridian-inst.net/staff", fresh())!.blocks.find((b) => b.type === "staff");
+    const staff = resolveSite("meridian-inst.com/staff", fresh())!.blocks.find((b) => b.type === "staff");
     expect(staff && staff.type === "staff" && staff.people.length).toBe(12);
     const wren = staff && staff.type === "staff" ? staff.people.find((p) => p.name === "Wren Okafor") : undefined;
     expect(wren?.photo).toBeNull();
@@ -168,38 +168,38 @@ describe("sites & gating", () => {
   });
 
   it("vault image comment points to the blog", () => {
-    const img = resolveSite("meridian-inst.net/vault-2019", fresh())!.blocks.find((b) => b.type === "image");
+    const img = resolveSite("meridian-inst.com/vault-2019", fresh())!.blocks.find((b) => b.type === "image");
     expect(img && img.type === "image" && img.fileInfo.comment).toBe("draft uploaded to thedrift.blog");
   });
 
   it("switch unreachable before the admin console", () => {
-    expect(resolveSite("switch.ada-voss.net", fresh())).toBeNull();
-    expect(resolveSite("switch.ada-voss.net", fresh(["shift-key"]))).toBeNull();
-    expect(resolveSite("switch.ada-voss.net", fresh(["intranet-login"]))).toBeNull();
-    expect(resolveSite("switch.ada-voss.net", fresh(["intranet-login", "admin-console"]))).not.toBeNull();
+    expect(resolveSite("switch.ada-voss.com", fresh())).toBeNull();
+    expect(resolveSite("switch.ada-voss.com", fresh(["shift-key"]))).toBeNull();
+    expect(resolveSite("switch.ada-voss.com", fresh(["intranet-login"]))).toBeNull();
+    expect(resolveSite("switch.ada-voss.com", fresh(["intranet-login", "admin-console"]))).not.toBeNull();
   });
 
   it("intranet gated", () => {
-    const login = resolveSite("intranet.meridian-inst.net/records", fresh())!;
+    const login = resolveSite("intranet.meridian-inst.com/records", fresh())!;
     expect(login.blocks.some((b) => b.type === "form" && b.form === "intranet-login")).toBe(true);
     expect(login.blocks.some((b) => b.type === "diff")).toBe(false);
-    const dash = resolveSite("intranet.meridian-inst.net", fresh(["intranet-login"]))!;
+    const dash = resolveSite("intranet.meridian-inst.com", fresh(["intranet-login"]))!;
     expect(dash.blocks.some((b) => b.type === "diff")).toBe(true);
-    expect(JSON.stringify(dash.blocks)).not.toContain("switch.ada-voss.net");
+    expect(JSON.stringify(dash.blocks)).not.toContain("switch.ada-voss.com");
     expect(JSON.stringify(dash.blocks)).toContain("01100 00001 01110 10100 00101 10010 01110");
     expect(dash.source).toContain("harbourcc.edu/cs110");
-    const memos = resolveSite("intranet.meridian-inst.net/memos", fresh(["intranet-login"]))!;
-    expect(JSON.stringify(memos.blocks)).not.toContain("switch.ada-voss.net");
+    const memos = resolveSite("intranet.meridian-inst.com/memos", fresh(["intranet-login"]))!;
+    expect(JSON.stringify(memos.blocks)).not.toContain("switch.ada-voss.com");
   });
 
   it("admin console gated by its own password", () => {
-    expect(resolveSite("intranet.meridian-inst.net/admin", fresh())!.blocks.some((b) => b.type === "form" && b.form === "intranet-login")).toBe(true);
-    const gate = resolveSite("intranet.meridian-inst.net/admin", fresh(["intranet-login"]))!;
+    expect(resolveSite("intranet.meridian-inst.com/admin", fresh())!.blocks.some((b) => b.type === "form" && b.form === "intranet-login")).toBe(true);
+    const gate = resolveSite("intranet.meridian-inst.com/admin", fresh(["intranet-login"]))!;
     expect(gate.blocks.some((b) => b.type === "form" && b.form === "admin-login")).toBe(true);
-    expect(JSON.stringify(gate)).not.toContain("switch.ada-voss.net");
-    const open = resolveSite("intranet.meridian-inst.net/admin", fresh(["intranet-login", "admin-console"]))!;
+    expect(JSON.stringify(gate)).not.toContain("switch.ada-voss.com");
+    const open = resolveSite("intranet.meridian-inst.com/admin", fresh(["intranet-login", "admin-console"]))!;
     const memo = open.blocks.find((b) => b.type === "memo");
-    expect(memo && memo.type === "memo" && memo.parts.some((p) => "redacted" in p && p.redacted === "switch.ada-voss.net")).toBe(true);
+    expect(memo && memo.type === "memo" && memo.parts.some((p) => "redacted" in p && p.redacted === "switch.ada-voss.com")).toBe(true);
   });
 
   it("binary lesson: sheet, quiz, and never shows the admin password", () => {
@@ -215,18 +215,18 @@ describe("sites & gating", () => {
   });
 
   it("lostpaws ciphertext until shift-key solved", () => {
-    const before = resolveSite("lostpaws.net", fresh())!;
+    const before = resolveSite("lostpaws.com", fresh())!;
     expect(listingBodies(before.blocks).join(" ")).toBe(LOSTPAWS_CIPHERTEXT_CHUNKS.join(" "));
     expect(before.blocks.some((b) => b.type === "form" && b.form === "shift-key")).toBe(true);
     expect(before.source).not.toContain("WREN HAS");
-    const after = resolveSite("lostpaws.net", fresh(["shift-key"]))!;
+    const after = resolveSite("lostpaws.com", fresh(["shift-key"]))!;
     expect(listingBodies(after.blocks).join(" ")).toBe(LOSTPAWS_PLAINTEXT);
     const biscuit = after.blocks.find((b) => b.type === "listing" && b.title.startsWith("Biscuit"));
     expect(biscuit && biscuit.type === "listing" && biscuit.petId).toBe("0412");
   });
 
   it("every site resolves with source", () => {
-    for (const a of ["thedrift.blog", "runnerboard.net", "trapdoor.net", "lostpaws.net", "intranet.meridian-inst.net", "harbourcc.edu"]) {
+    for (const a of ["thedrift.blog", "runnerboard.com", "trapdoor.com", "lostpaws.com", "intranet.meridian-inst.com", "harbourcc.edu"]) {
       const p = resolveSite(a, fresh());
       expect(p).not.toBeNull();
       expect(p!.source.startsWith("<!DOCTYPE html>")).toBe(true);
@@ -254,13 +254,13 @@ describe("hints, emails, endings", () => {
 });
 
 describe("Branch B entry", () => {
-  it("Wren's staff entry links to the forum by its full address", () => {
-    const page = resolveSite("meridian-inst.net/staff", fresh());
+  it("Wren's staff entry names the forum but doesn't link it (players type it themselves)", () => {
+    const page = resolveSite("meridian-inst.com/staff", fresh());
     const staff = page?.blocks.find((b): b is Extract<Block, { type: "staff" }> => b.type === "staff");
     const wren = staff?.people.find((p) => p.name === "Wren Okafor");
-    expect(wren?.bio).toContain("runnerboard.net");
-    expect(wren?.link?.href).toBe("runnerboard.net");
-    expect(resolveSite(wren!.link!.href, fresh())).not.toBeNull();
+    expect(wren?.bio).toContain("runnerboard.com");
+    expect(wren?.link).toBeUndefined();
+    expect(resolveSite("runnerboard.com", fresh())).not.toBeNull();
   });
 });
 
@@ -278,10 +278,10 @@ describe("Ada's Tools security question", () => {
 
 describe("Vault entry", () => {
   it("Meridian's nav links to the staff portal, which is branded as the Vault", () => {
-    const home = resolveSite("meridian-inst.net", fresh());
+    const home = resolveSite("meridian-inst.com", fresh());
     const nav = home?.blocks.find((b): b is Extract<Block, { type: "nav" }> => b.type === "nav");
     const portal = nav?.links.find((l) => l.text === "Staff portal");
-    expect(portal?.href).toBe("intranet.meridian-inst.net");
+    expect(portal?.href).toBe("intranet.meridian-inst.com");
     const login = resolveSite(portal!.href, fresh());
     expect(login?.title).toMatch(/Vault/);
     expect(login?.blocks.some((b) => b.type === "form" && /vault code/i.test(b.prompt))).toBe(true);

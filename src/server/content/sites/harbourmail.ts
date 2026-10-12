@@ -11,11 +11,11 @@ import type { MaraFolder } from "../mara/types";
  * investigator. "Forgot password" mails a temporary password to the recovery contact (Ada, i.e. the
  * Email app on this laptop); signing in with it opens her inbox. Reachable from the start.
  */
-export const HARBOURMAIL_HOST = "harbourmail.net";
+export const HARBOURMAIL_HOST = "harbourmail.com";
 /** The US spelling resolves to the same site. */
-export const HARBORMAIL_HOST = "harbormail.net";
+export const HARBORMAIL_HOST = "harbormail.com";
 
-const RECOVERY_MASKED = "a•••@ada-voss.net";
+const RECOVERY_MASKED = "a•••@ada-voss.com";
 const FOLDERS: MaraFolder[] = ["inbox", "sent", "drafts", "spam"];
 
 function signIn(progress: RoomProgress, loc: Locale, gated: boolean): SitePage {

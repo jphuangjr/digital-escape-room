@@ -365,7 +365,7 @@ function AdminLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
   );
 }
 
-/** harbourmail.net sign-in (Easter egg). Submitted as "address:password". */
+/** harbourmail.com sign-in (Easter egg). Submitted as "address:password". */
 function MailLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
   const x = useStory();
   const { t } = env;
@@ -422,7 +422,7 @@ function MailLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
   );
 }
 
-/** harbourmail.net "forgot password": sends a temporary password to the account's recovery contact. */
+/** harbourmail.com "forgot password": sends a temporary password to the account's recovery contact. */
 function MailResetForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
   const x = useStory();
   const { t } = env;
@@ -447,7 +447,7 @@ function MailResetForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         value={v}
         onChange={(e) => setV(e.target.value)}
         enterKeyHint="send"
-        placeholder="name@harbourmail.net"
+        placeholder="name@harbourmail.com"
         className={`h-11 w-full px-3 text-base ${t.input}`}
       />
       <button

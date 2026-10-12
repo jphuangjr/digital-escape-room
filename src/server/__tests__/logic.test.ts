@@ -66,7 +66,7 @@ describe("identity validation", () => {
 describe("addresses", () => {
   it("canonicalizes", () => {
     expect(canonicalAddress("HTTPS://www.TheDrift.blog/")).toBe("thedrift.blog");
-    expect(canonicalAddress("meridian-inst.net/vault-2019/?x=1")).toBe("meridian-inst.net/vault-2019");
+    expect(canonicalAddress("meridian-inst.com/vault-2019/?x=1")).toBe("meridian-inst.com/vault-2019");
   });
 });
 

@@ -20,7 +20,7 @@ describe("Chinese emails", () => {
     const emails = content.baseEmails("zh-TW");
     const ada = emails.find((e) => e.id === "email-ada-last")!;
     expect(ada.body).toMatch(CJK);
-    expect(ada.body).toContain("meridian-inst.net");
+    expect(ada.body).toContain("meridian-inst.com");
     expect(ada.body).toContain("Mara");
     const sister = emails.find((e) => e.id === "email-sister-engagement")!;
     expect(sister.body).toMatch(CJK);
@@ -35,7 +35,7 @@ describe("Chinese emails", () => {
   it("voicemails (ambient and hint) are Chinese", () => {
     const hints = HINT_PUZZLES.map((id) => ({ puzzleId: id, tier: 1 as const, text: content.getHint(id, 1, "zh-TW"), unlockedAt: "2026-01-01T09:30:00Z" }));
     const all = progress(["shift-key", "intranet-login", "admin-console", "final-phrase"]);
-    all.visitedSites = ["thedrift.blog", "trapdoor.net"];
+    all.visitedSites = ["thedrift.blog", "trapdoor.com"];
     const vms = content.voicemailsFor(all, hints, "zh-TW");
     expect(vms.length).toBe(6 + hints.length);
     for (const v of vms) {
@@ -49,9 +49,9 @@ describe("Chinese emails", () => {
 
 describe("Chinese hints", () => {
   const TOKENS: Record<HintPuzzleId, string[]> = {
-    "find-blog": ["meridian-inst.net/vault-2019"],
+    "find-blog": ["meridian-inst.com/vault-2019"],
     "shift-key": ["DRIFT", "7"],
-    "find-pets": ["compass_needle", "LOSTPAWS", "lostpaws.net"],
+    "find-pets": ["compass_needle", "LOSTPAWS", "lostpaws.com"],
     "pet-id": ["Biscuit", "0412"],
     "intranet-login": ["wren.okafor", "1987", "19870412"],
     "final-phrase": ["wren-1987-0412"],

@@ -5,7 +5,7 @@ import { HINT_PUZZLES, HINT_TITLES } from "./hints";
 import { MARA_ADDRESS, MARA_TEMP_PASSWORD } from "./answers";
 import { fill, maraText } from "./mara";
 
-const SISTER = "Mara Voss <mara.voss@harbourmail.net>";
+const SISTER = "Mara Voss <mara.voss@harbourmail.com>";
 const ADA = "Ada Voss";
 
 export function baseEmails(loc: Locale): EmailDTO[] {
@@ -13,7 +13,7 @@ export function baseEmails(loc: Locale): EmailDTO[] {
   return [
     {
       id: "email-ada-last",
-      from: "Ada Voss <ada@ada-voss.net>",
+      from: "Ada Voss <ada@ada-voss.com>",
       subject: x({ en: "(no subject)", ko: "(제목 없음)", "zh-TW": "（無主旨）", es: "(sin asunto)", ja: "（件名なし）", "pt-BR": "(sem assunto)" }),
       date: x({ en: "2 days ago, 23:57", ko: "2일 전 23:57", "zh-TW": "2 天前 23:57", es: "hace 2 días, 23:57", ja: "2日前 23:57", "pt-BR": "há 2 dias, 23:57" }),
       kind: "email",
@@ -21,7 +21,7 @@ export function baseEmails(loc: Locale): EmailDTO[] {
         en: [
           "If you're reading this, I got too close. Start at the beginning.",
           "",
-          "meridian-inst.net",
+          "meridian-inst.com",
           "",
           "— A.",
           "",
@@ -30,7 +30,7 @@ export function baseEmails(loc: Locale): EmailDTO[] {
         ko: [
           "이걸 읽고 있다면, 내가 너무 가까이 갔던 거야. 처음부터 시작해.",
           "",
-          "meridian-inst.net",
+          "meridian-inst.com",
           "",
           "— A.",
           "",
@@ -39,7 +39,7 @@ export function baseEmails(loc: Locale): EmailDTO[] {
         "zh-TW": [
           "如果你正在讀這封信，代表我靠得太近了。從頭開始。",
           "",
-          "meridian-inst.net",
+          "meridian-inst.com",
           "",
           "— A.",
           "",
@@ -48,7 +48,7 @@ export function baseEmails(loc: Locale): EmailDTO[] {
         es: [
           "Si estás leyendo esto, me acerqué demasiado. Empieza por el principio.",
           "",
-          "meridian-inst.net",
+          "meridian-inst.com",
           "",
           "— A.",
           "",
@@ -57,7 +57,7 @@ export function baseEmails(loc: Locale): EmailDTO[] {
         ja: [
           "これを読んでいるなら、わたしは近づきすぎた。最初から始めて。",
           "",
-          "meridian-inst.net",
+          "meridian-inst.com",
           "",
           "— A.",
           "",
@@ -66,7 +66,7 @@ export function baseEmails(loc: Locale): EmailDTO[] {
         "pt-BR": [
           "Se você está lendo isto, eu cheguei perto demais. Comece pelo começo.",
           "",
-          "meridian-inst.net",
+          "meridian-inst.com",
           "",
           "— A.",
           "",
@@ -170,7 +170,7 @@ export function baseEmails(loc: Locale): EmailDTO[] {
     },
     {
       id: "email-institute-pr",
-      from: "Office of the Director, Meridian Institute <press@meridian-inst.net>",
+      from: "Office of the Director, Meridian Institute <press@meridian-inst.com>",
       subject: x({ en: "Statement regarding Dr. A. Voss", ko: "A. 보스 박사 관련 입장문", "zh-TW": "關於 A. 佛斯博士之聲明", es: "Declaración sobre la Dra. A. Voss", ja: "A・ヴォス博士に関する声明", "pt-BR": "Declaração sobre a Dra. A. Voss" }),
       date: x({ en: "Yesterday, 16:02", ko: "어제 16:02", "zh-TW": "昨天 16:02", es: "Ayer, 16:02", ja: "昨日 16:02", "pt-BR": "Ontem, 16:02" }),
       kind: "email",
@@ -263,7 +263,7 @@ const AMBIENT: Ambient[] = [
   },
   {
     id: "vm-ambient-trapdoor",
-    when: (p) => p.visitedSites.some((s) => s.startsWith("trapdoor.net")),
+    when: (p) => p.visitedSites.some((s) => s.startsWith("trapdoor.com")),
     subject: { en: "Voicemail — 0:18", ko: "음성 메시지 — 0:18", "zh-TW": "語音留言 — 0:18", es: "Mensaje de voz — 0:18", ja: "留守電メッセージ — 0:18", "pt-BR": "Mensagem de voz — 0:18" },
     body: {
       en: "[wind] They built that door for people like you. Don't take it personally. Go back to the forum. My needle points true; theirs only points back at them. [click]",
@@ -372,11 +372,11 @@ export function bonusEmails(progress: RoomProgress, loc: Locale): EmailDTO[] {
   const r = maraText(loc).resetEmail;
   const values = { address: MARA_ADDRESS, password: MARA_TEMP_PASSWORD };
   const subject = fill(r.subject, values);
-  const original = { from: "HarbourMail Accounts <no-reply@harbourmail.net>", subject };
+  const original = { from: "HarbourMail Accounts <no-reply@harbourmail.com>", subject };
   return [
     {
       id: "email-harbourmail-reset",
-      from: "Ada Voss <ada@ada-voss.net>",
+      from: "Ada Voss <ada@ada-voss.com>",
       subject: fill(r.forward.subject, { subject }),
       date: r.date,
       body: [

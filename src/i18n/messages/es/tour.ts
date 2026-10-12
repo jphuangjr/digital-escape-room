@@ -20,7 +20,7 @@ const messages: Record<keyof typeof en, string> = {
   "tour.email.title": "Correo: empieza aquí",
   "tour.email.body": "Te esperan el último mensaje de Ada y el correo de su hermana. Léelos primero. Los mensajes de voz con pistas de Ada también llegan aquí.",
   "tour.browser.title": "El navegador",
-  "tour.browser.body": "Un pequeño internet propio. Escribe direcciones como meridian-inst.net. Cada página tiene Ver código fuente, las barras negras se pueden tocar para revelar el texto y las imágenes tienen Información del archivo.",
+  "tour.browser.body": "Un pequeño internet propio. Escribe direcciones como meridian-inst.com. Cada página tiene Ver código fuente, las barras negras se pueden tocar para revelar el texto y las imágenes tienen Información del archivo.",
   "tour.notes.title": "Notas",
   "tour.notes.body": "Anota lo que encuentres. Las notas son privadas hasta que toques Compartir con la sala. Etiqueta lo importante (un nombre, un año, un ID) para que el equipo lo encuentre.",
   "tour.files.title": "Archivos",

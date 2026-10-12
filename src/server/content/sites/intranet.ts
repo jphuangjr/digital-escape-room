@@ -4,7 +4,7 @@ import type { Block, RoomProgress, SitePage } from "@/lib/types";
 import { page } from "./source";
 import { ADMIN_PASSWORD, toBinary5 } from "../answers";
 
-export const INTRANET_HOST = "intranet.meridian-inst.net";
+export const INTRANET_HOST = "intranet.meridian-inst.com";
 
 type X = ReturnType<typeof pick>;
 
@@ -141,7 +141,7 @@ const memo = (x: X): Block => ({
         "pt-BR": "Para: Vice-diretor T. Kell. De: Segurança (L. Ash). Voss não foi localizada. O crachá dela foi usado pela última vez na sala de servidores às 23:58. Acreditamos que ela deixou algo em funcionamento em um servidor externo. Nossos analistas rastrearam o tráfego de saída até ",
       }),
     },
-    { redacted: "switch.ada-voss.net" },
+    { redacted: "switch.ada-voss.com" },
     {
       text: x({
         en: ". It appears to be a dead man's switch: if the timer runs out, the unaltered records go to every newsroom in the city. Recommend we locate her before it fires. Recommend we do not involve the police. Recommend we do not involve ",
