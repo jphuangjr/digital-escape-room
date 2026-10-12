@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MeResponse, OpenHostedRoom } from "@/lib/types";
 import { AccountBar, GoogleButton, MyCases } from "@/components/site/Account";
+import { Leaderboard } from "@/components/site/Leaderboard";
 import { Compass } from "@/components/site/Compass";
 import { ReplaceRoomDialog } from "@/components/site/ReplaceRoomDialog";
 import { RedeemBox } from "@/components/site/RedeemBox";
@@ -285,6 +286,8 @@ export function AdaLanding() {
         </form>
 
         {me && <MyCases me={me} gameId="ada-voss" />}
+
+        <Leaderboard gameId={GAME_ID} />
 
         <footer className="text-center font-mono text-[11px] text-noir-ink-faint">
           {t("site.ada.footer")}

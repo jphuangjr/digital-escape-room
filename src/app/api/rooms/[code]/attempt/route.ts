@@ -7,6 +7,7 @@ import { publish } from "@/server/realtime";
 import { track } from "@/server/analytics";
 import { checkAnswer } from "@/server/content";
 import { recordFinishedCase } from "@/server/cases";
+import { recordLeaderboardEntry } from "@/server/leaderboard";
 import { lockoutRemainingSec, WRONG_ANSWER_LOCKOUT_MS } from "@/lib/rules";
 import { getT } from "@/i18n/server";
 
@@ -110,7 +111,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     });
     nextProgress = res.progress;
     solvedNow = res.changed;
-    if (solvedNow && puzzleId === "final-phrase") await recordFinishedCase(room.id).catch(() => {});
+    if (solvedNow && puzzleId === "final-phrase") {
+      await Promise.all([recordFinishedCase(room.id).catch(() => {}), recordLeaderboardEntry(room.id).catch(() => {})]);
+    }
     if (solvedNow) {
       track(room.id, player.id, "puzzle.solved", {
         puzzleId,
