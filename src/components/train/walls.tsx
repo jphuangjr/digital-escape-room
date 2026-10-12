@@ -22,6 +22,10 @@ export const WALL_NAMES: Record<WallId, string> = {
   door: "Door",
   berths: "Berths",
   washstand: "Washstand",
+  bar: "Bar",
+  tables: "Tables",
+  kitchen: "Kitchen end",
+  lounge: "Lounge end",
 };
 
 export const HOTSPOTS: Record<WallId, Hotspot[]> = {
@@ -46,6 +50,27 @@ export const HOTSPOTS: Record<WallId, Hotspot[]> = {
     { id: "mirror", label: "Mirror", x: 98, y: 58, w: 104, h: 132 },
     { id: "washstand", label: "Washstand", x: 90, y: 208, w: 120, h: 132 },
     { id: "towel", label: "Towel", x: 222, y: 222, w: 58, h: 86 },
+  ],
+  bar: [
+    { id: "bottles", label: "Bottles", x: 30, y: 46, w: 240, h: 110 },
+    { id: "cashbox", label: "Cash box", x: 56, y: 172, w: 80, h: 52 },
+    { id: "bell", label: "Service bell", x: 206, y: 186, w: 50, h: 38 },
+  ],
+  tables: [
+    { id: "dining-window", label: "Window", x: 30, y: 34, w: 240, h: 92 },
+    { id: "champagne", label: "Champagne glass", x: 214, y: 156, w: 44, h: 56 },
+    { id: "sugar", label: "Sugar bowl", x: 44, y: 176, w: 56, h: 44 },
+    { id: "bridge", label: "Bridge game", x: 104, y: 184, w: 104, h: 62 },
+  ],
+  kitchen: [
+    { id: "menu", label: "Menu board", x: 26, y: 46, w: 128, h: 150 },
+    { id: "dumbwaiter", label: "Dumbwaiter", x: 34, y: 212, w: 116, h: 104 },
+    { id: "kitchen-door", label: "Kitchen door", x: 172, y: 64, w: 108, h: 292 },
+  ],
+  lounge: [
+    { id: "gramophone", label: "Gramophone", x: 34, y: 126, w: 124, h: 156 },
+    { id: "records", label: "Records", x: 38, y: 284, w: 116, h: 62 },
+    { id: "stole", label: "Fur stole", x: 184, y: 66, w: 96, h: 186 },
   ],
 };
 
@@ -391,23 +416,225 @@ function WashstandWall({ flags, mirrorLetters }: { flags: string[]; mirrorLetter
   );
 }
 
+function BarWall({ flags }: { flags: string[] }) {
+  const open = flags.includes("cashbox.open");
+  return (
+    <Room>
+      {/* mirrored back bar with shelves of bottles */}
+      <rect x="28" y="40" width="244" height="120" rx="6" fill="#26303a" stroke="url(#nx-brass)" strokeWidth="2" />
+      {[86, 128].map((y) => (
+        <path key={y} d={`M32 ${y} H268`} stroke="url(#nx-brass)" strokeWidth="2.5" />
+      ))}
+      {[
+        [44, 58, "#3f6b3a"],
+        [60, 52, "#8a2c1f"],
+        [78, 60, "#c9a227"],
+        [96, 54, "#2f4a6b"],
+        [116, 58, "#6b3a5a"],
+        [182, 54, "#3f6b3a"],
+        [202, 60, "#c98b3a"],
+        [222, 52, "#8a2c1f"],
+        [244, 58, "#efe6d2"],
+        [52, 98, "#c9a227"],
+        [74, 102, "#3f6b3a"],
+        [196, 100, "#8a2c1f"],
+        [220, 98, "#2f4a6b"],
+        [242, 104, "#c98b3a"],
+      ].map(([x, y, c]) => (
+        <g key={`${x}-${y}`}>
+          <rect x={Number(x) - 5} y={Number(y)} width="10" height={(y as number) < 86 ? 86 - Number(y) : 128 - Number(y)} rx="3" fill={c as string} opacity="0.9" />
+          <rect x={Number(x) - 2} y={Number(y) - 7} width="4" height="8" fill={c as string} />
+        </g>
+      ))}
+      <text x="150" y="152" textAnchor="middle" fontSize="8" fill={C.brass} fontFamily="Georgia, serif" letterSpacing="3">
+        THE NIGHTINGALE
+      </text>
+      {/* counter */}
+      <rect x="18" y="222" width="264" height="14" rx="3" fill="#7a3a1e" stroke={C.ink} />
+      <rect x="24" y="236" width="252" height="90" fill="#4a2414" stroke={C.ink} />
+      <path d="M24 280 H276" stroke="url(#nx-brass)" strokeWidth="3" />
+      {[60, 110, 160, 210].map((x) => (
+        <rect key={x} x={x} y="246" width="34" height="26" rx="3" fill="none" stroke="#6b3a20" />
+      ))}
+      {/* cash box */}
+      <rect x="62" y="186" width="68" height="36" rx="3" fill="#5f6870" stroke="#2a2f34" strokeWidth="1.5" />
+      {open ? (
+        <path d="M62 186 L70 166 H138 L130 186 Z" fill="#717b84" stroke="#2a2f34" />
+      ) : (
+        [72, 86, 100, 114].map((x) => <rect key={x} x={x} y="196" width="10" height="16" rx="2" fill="url(#nx-brass)" stroke="#7a5f12" strokeWidth="0.6" />)
+      )}
+      {/* bell */}
+      <path d="M216 222 Q216 200 231 198 Q246 200 246 222 Z" fill="url(#nx-brass)" stroke="#7a5f12" />
+      <rect x="212" y="220" width="38" height="4" rx="2" fill="#7a5f12" />
+      <circle cx="231" cy="196" r="3" fill="url(#nx-brass)" />
+      {/* stools */}
+      {[70, 150, 230].map((x) => (
+        <g key={x}>
+          <ellipse cx={x} cy="332" rx="18" ry="5" fill="#2f5d4a" stroke={C.ink} />
+          <path d={`M${x} 337 V356`} stroke="url(#nx-brass)" strokeWidth="3" />
+        </g>
+      ))}
+    </Room>
+  );
+}
+
+function TablesWall({ taken }: { taken: boolean }) {
+  return (
+    <Room>
+      {/* window with the mountains and snow */}
+      <rect x="30" y="36" width="240" height="88" rx="10" fill="url(#nx-night)" stroke="url(#nx-brass)" strokeWidth="4" />
+      <path d="M34 120 L80 70 L112 100 L150 56 L196 104 L228 78 L266 120 Z" fill="#2c3a52" />
+      <path d="M150 56 L138 70 L150 66 L162 72 Z M80 70 L72 80 L84 78 Z" fill="#dfe6ee" />
+      <g className="nx-rain" stroke="#e8eef5" strokeWidth="1.5" strokeLinecap="round" opacity="0.7">
+        {[54, 92, 130, 168, 206, 244].map((x, i) => (
+          <path key={x} d={`M${x} ${48 + (i % 2) * 18} l-2 3`} />
+        ))}
+      </g>
+      {/* chairs */}
+      {[48, 252].map((x) => (
+        <rect key={x} x={x - 22} y="150" width="44" height="130" rx="8" fill="url(#nx-velvet)" stroke={C.ink} />
+      ))}
+      {/* table */}
+      <path d="M40 222 H260 L270 268 H30 Z" fill="#f4efe2" stroke="#b8ad92" />
+      <path d="M30 268 Q150 280 270 268 V282 Q150 294 30 282 Z" fill="#e8e0cc" />
+      <rect x="140" y="282" width="20" height="74" fill={C.walnutDark} />
+      {/* bridge: four hands and a scorecard */}
+      {[
+        [130, 236, -20],
+        [150, 232, 0],
+        [170, 236, 20],
+        [150, 254, 180],
+      ].map(([x, y, r]) => (
+        <g key={`${x}-${y}`} transform={`rotate(${r} ${x} ${y})`}>
+          {[-8, -4, 0, 4, 8].map((dx) => (
+            <rect key={dx} x={Number(x) + dx - 4} y={Number(y) - 10} width="8" height="12" rx="1" fill="#fff" stroke="#9a8f78" strokeWidth="0.5" />
+          ))}
+        </g>
+      ))}
+      {!taken && <rect x="186" y="244" width="18" height="14" fill="#fffaf0" stroke="#9a8f78" strokeWidth="0.6" transform="rotate(8 195 251)" />}
+      {/* name cards */}
+      {[112, 188].map((x) => (
+        <path key={x} d={`M${x - 9} 230 l3 -7 h12 l3 7 z`} fill="#fffaf0" stroke="#9a8f78" strokeWidth="0.6" />
+      ))}
+      {/* sugar bowl and spill */}
+      <path d="M58 214 Q58 196 72 196 Q86 196 86 214 Z" fill="#e8eef2" stroke="#9aa6ad" />
+      <ellipse cx="72" cy="196" rx="14" ry="3" fill="#cfd8dc" />
+      <ellipse cx="94" cy="218" rx="6" ry="1.6" fill="#ffffff" opacity="0.9" />
+      {/* champagne coupe */}
+      <path d="M222 172 Q236 190 250 172 Z" fill="#f2e4b0" stroke="#b8ad92" opacity="0.9" />
+      <path d="M236 182 V206 M228 208 H244" stroke="#b8ad92" strokeWidth="1.5" />
+      <path d="M244 172 q2 3 -1 5" stroke="#a3302a" strokeWidth="2" fill="none" />
+    </Room>
+  );
+}
+
+function KitchenWall({ flags }: { flags: string[] }) {
+  const open = flags.includes("dumbwaiter.open");
+  const raised = flags.includes("dumbwaiter.raised");
+  return (
+    <Room>
+      {/* chalk menu */}
+      <rect x="30" y="50" width="120" height="142" rx="4" fill="#1d2420" stroke="url(#nx-brass)" strokeWidth="3" />
+      <text x="90" y="72" textAnchor="middle" fontSize="11" fill="#e8e4d8" fontFamily="'Segoe Script', 'Brush Script MT', cursive">
+        Tonight
+      </text>
+      <g stroke="#cfcab9" strokeWidth="1" opacity="0.8">
+        {[86, 100, 114, 128].map((y) => (
+          <path key={y} d={`M44 ${y} H${118 + (y % 3) * 6}`} strokeDasharray="5 2" />
+        ))}
+        <path d="M44 162 H136" strokeDasharray="3 2" />
+        <path d="M44 174 H110" strokeDasharray="3 2" />
+      </g>
+      {/* dumbwaiter hatch */}
+      <rect x="40" y="218" width="104" height="92" rx="3" fill={open ? "#090604" : C.walnutDark} stroke="url(#nx-brass)" strokeWidth="2" />
+      {open ? (
+        <g>
+          {raised && (
+            <g>
+              <rect x="50" y="250" width="84" height="56" fill="#5a3a22" stroke={C.ink} />
+              <path d="M50 250 H134" stroke="url(#nx-brass)" strokeWidth="2" />
+              <path d="M78 246 q8 -12 20 -8 q12 2 10 10 z" fill="#efe6d2" stroke="#b8ad92" />
+              <circle cx="96" cy="244" r="2.5" fill="#3a5cc9" />
+            </g>
+          )}
+          <path d="M40 218 L24 210 V318 L40 310" fill="#3d2615" stroke={C.ink} />
+        </g>
+      ) : (
+        <g>
+          <rect x="52" y="230" width="80" height="68" rx="2" fill="none" stroke={C.walnutLine} />
+          <circle cx="126" cy="264" r="4" fill="url(#nx-brass)" />
+        </g>
+      )}
+      <rect x="150" y="262" width="12" height="12" rx="2" fill="#1b120b" stroke="url(#nx-brass)" />
+      <rect x="153" y="265" width="6" height="6" fill="#090604" />
+      {/* kitchen door */}
+      <rect x="176" y="70" width="98" height="286" rx="3" fill={C.walnutDark} stroke={C.ink} strokeWidth="1.5" />
+      <circle cx="225" cy="120" r="22" fill="#2a1f14" stroke="url(#nx-brass)" strokeWidth="3" />
+      <rect x="186" y="186" width="78" height="20" rx="2" fill={C.cream} />
+      <text x="225" y="199" textAnchor="middle" fontSize="6.5" fill={C.ink} fontFamily="Georgia, serif" letterSpacing="0.5">
+        KITCHEN CLOSED
+      </text>
+      <rect x="252" y="230" width="8" height="24" rx="3" fill="url(#nx-brass)" />
+    </Room>
+  );
+}
+
+function LoungeWall({ flags }: { flags: string[] }) {
+  const searched = flags.includes("stole.searched");
+  return (
+    <Room>
+      {/* gramophone */}
+      <rect x="44" y="214" width="104" height="70" rx="4" fill="#4a2a18" stroke={C.ink} />
+      <rect x="52" y="200" width="88" height="16" rx="2" fill="#5b3a22" stroke={C.ink} />
+      <ellipse cx="96" cy="200" rx="30" ry="6" fill="#111" />
+      <path d="M118 198 L130 170" stroke="url(#nx-brass)" strokeWidth="3" />
+      <path d="M128 172 Q118 140 76 132 Q60 150 72 172 Q100 168 128 172 Z" fill="url(#nx-brass)" stroke="#7a5f12" />
+      {/* records */}
+      <g>
+        {[0, 1, 2, 3, 4].map((i) => (
+          <rect key={i} x={52 + i * 4} y={292 - i * 2} width="80" height="52" rx="2" fill={["#c9b48a", "#8a2c1f", "#2f4a6b", "#c9a227", "#efe6d2"][i]} stroke={C.ink} strokeWidth="0.6" />
+        ))}
+        <circle cx="108" cy="312" r="12" fill="#111" />
+        <circle cx="108" cy="312" r="3" fill="#c9a227" />
+      </g>
+      {/* coat stand and fur stole */}
+      <path d="M232 70 V346 M210 346 H254" stroke="url(#nx-brass)" strokeWidth="4" />
+      <path d="M232 80 L212 92 M232 80 L252 92" stroke="url(#nx-brass)" strokeWidth="3" />
+      <path
+        d="M210 92 Q232 84 254 92 Q262 150 250 220 Q236 236 222 222 Q206 160 210 92 Z"
+        fill="#cfcfd4"
+        stroke="#8f8f99"
+      />
+      <path d="M216 120 q16 8 32 0 M218 160 q14 8 28 0 M222 196 q10 6 20 0" stroke="#a9a9b2" fill="none" />
+      {!searched && <ellipse cx="236" cy="206" rx="8" ry="5" fill="#a9a9b2" />}
+      <Sconce x={150} />
+    </Room>
+  );
+}
+
 export function WallArt({
   wall,
   flags,
   mirrorLetters,
   pouchHere,
+  scorecardHere,
 }: {
   wall: WallId;
   flags: string[];
   mirrorLetters: string | null;
   pouchHere: boolean;
+  scorecardHere: boolean;
 }) {
   return (
-    <svg viewBox="0 0 300 400" className="h-full w-full" role="img" aria-label={`${WALL_NAMES[wall]} wall of Compartment 12B`}>
+    <svg viewBox="0 0 300 400" className="h-full w-full" role="img" aria-label={`${WALL_NAMES[wall]} wall`}>
       {wall === "window" && <WindowWall />}
       {wall === "door" && <DoorWall flags={flags} />}
       {wall === "berths" && <BerthWall flags={flags} pouchHere={pouchHere} />}
       {wall === "washstand" && <WashstandWall flags={flags} mirrorLetters={mirrorLetters} />}
+      {wall === "bar" && <BarWall flags={flags} />}
+      {wall === "tables" && <TablesWall taken={!scorecardHere} />}
+      {wall === "kitchen" && <KitchenWall flags={flags} />}
+      {wall === "lounge" && <LoungeWall flags={flags} />}
     </svg>
   );
 }

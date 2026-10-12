@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RoomState } from "@/lib/types";
-import type { HotspotId, ItemDTO, ItemId, SceneAction, SceneActionResponse, SceneDTO, TrainRoomId, WallId } from "@/lib/train/types";
-import { WALLS_12B } from "@/lib/train/types";
+import type { HotspotId, ItemDTO, ItemId, SceneAction, SceneActionResponse, SceneDTO, Suspect, TrainRoomId, WallId } from "@/lib/train/types";
+import { SUIT_SYMBOLS, SUSPECTS, WALLS_12B, WALLS_DINING } from "@/lib/train/types";
 import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
 import { useChat } from "@/lib/client/chat";
 import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
@@ -24,8 +25,10 @@ const TABS: RoomTab[] = ["people", "chat"];
 
 export function TrainShell({ code, state, refresh }: { code: string; state: RoomState; refresh: () => Promise<void> }) {
   const scene = state.scene as SceneDTO;
-  const [wallIdx, setWallIdx] = useState(0);
   const [place, setPlace] = useState<TrainRoomId>("12b");
+  const [wallIdxBy, setWallIdxBy] = useState<Record<"12b" | "dining", number>>({ "12b": 0, dining: 0 });
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [intro, setIntro] = useState(false);
   const [closeup, setCloseup] = useState<HotspotId | null>(null);
   const [itemOpen, setItemOpen] = useState<ItemId | null>(null);
   const [busy, setBusy] = useState(false);
@@ -35,7 +38,15 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const toastId = useRef(0);
   const chat = useChat(code, state.me.id);
-  const wall: WallId = WALLS_12B[wallIdx];
+  const walls = place === "dining" ? WALLS_DINING : WALLS_12B;
+  const wallIdx = place === "dining" ? wallIdxBy.dining : wallIdxBy["12b"];
+  const wall: WallId = walls[wallIdx];
+  // First time on this device: the premise and how to play.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("nx_intro_done") !== "1") setIntro(true);
+    } catch {}
+  }, []);
 
   const toast = useCallback<GameCtx["toast"]>((msg, tone = "info", action) => {
     const id = ++toastId.current;
@@ -69,6 +80,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
 
   // ---------- presence ----------
   const view = place === "corridor" ? "train:corridor" : `train:${wall}`;
+  const roomName = place === "dining" ? "Dining car" : "Compartment 12B";
   const viewRef = useRef(view);
   useEffect(() => {
     viewRef.current = view;
@@ -150,8 +162,12 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
 
   // ---------- swipe between walls ----------
   const swipe = useRef<{ x: number; y: number } | null>(null);
-  const turn = (d: number) => setWallIdx((i) => (i + d + WALLS_12B.length) % WALLS_12B.length);
-  const pouchHere = !scene.inventory.some((i) => i.id === "pouch") && Boolean(scene.closeups["under-berth"]?.takes.length);
+  const turn = (d: number) => {
+    if (place === "corridor") return;
+    setWallIdxBy((m) => ({ ...m, [place]: (m[place] + d + walls.length) % walls.length }));
+  };
+  const pouchHere = Boolean(scene.closeups["under-berth"]?.takes.length);
+  const scorecardHere = Boolean(scene.closeups.bridge?.takes.length);
   const here = state.players.filter((p) => p.online && p.id !== state.me.id && p.currentView === view);
 
   return (
@@ -161,9 +177,20 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
         <header className="flex h-12 shrink-0 items-center gap-2 border-b border-[#3d2615] px-3">
           <div className="min-w-0 flex-1">
             <p className="truncate font-serif text-base text-[#ecd27a]">
-              {place === "corridor" ? "The corridor" : `Compartment 12B · ${WALL_NAMES[wall]}`}
+              {place === "corridor" ? "The corridor" : `${roomName} · ${WALL_NAMES[wall]}`}
             </p>
           </div>
+          <button
+            type="button"
+            onClick={() => setNotesOpen(true)}
+            aria-label="Ring for Teodor (hints)"
+            className="relative flex h-10 w-10 items-center justify-center rounded-md text-[#ecd27a] active:bg-[#3d2615]"
+          >
+            🛎
+            {scene.nextHint && !scene.nextHint.readyAt && scene.hints.length === 0 && (
+              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#ecd27a]" aria-hidden />
+            )}
+          </button>
           <button
             type="button"
             onClick={toggleSound}
@@ -194,7 +221,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
           onPointerUp={(e) => {
             const s = swipe.current;
             swipe.current = null;
-            if (!s || place !== "12b") return;
+            if (!s || place === "corridor") return;
             const dx = e.clientX - s.x;
             if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - s.y) * 1.5) turn(dx < 0 ? 1 : -1);
           }}
@@ -204,7 +231,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               <CorridorArt />
             ) : (
               <>
-                <WallArt wall={wall} flags={scene.flags} mirrorLetters={scene.mirrorLetters} pouchHere={pouchHere} />
+                <WallArt wall={wall} flags={scene.flags} mirrorLetters={scene.mirrorLetters} pouchHere={pouchHere} scorecardHere={scorecardHere} />
                 {HOTSPOTS[wall].map((h) => (
                   <button
                     key={h.id}
@@ -233,8 +260,17 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             )}
           </div>
 
-          {place === "12b" ? (
+          {place !== "corridor" ? (
             <>
+              {place === "dining" && (
+                <button
+                  type="button"
+                  onClick={() => setPlace("corridor")}
+                  className="absolute left-2 top-2 min-h-9 rounded-md bg-black/50 px-3 text-xs text-[#ecd27a] active:bg-black/70"
+                >
+                  ← Corridor
+                </button>
+              )}
               <button
                 type="button"
                 aria-label="Turn left"
@@ -252,7 +288,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
                 ›
               </button>
               <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5" aria-hidden>
-                {WALLS_12B.map((w, i) => (
+                {walls.map((w, i) => (
                   <span key={w} className={`h-1.5 w-1.5 rounded-full ${i === wallIdx ? "bg-[#ecd27a]" : "bg-stone-600"}`} />
                 ))}
               </div>
@@ -260,13 +296,18 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
           ) : (
             <div className="absolute inset-x-0 bottom-4 mx-auto flex w-[min(92%,22rem)] flex-col gap-2 rounded-xl border border-[#c9a227]/40 bg-[#1b120b]/95 p-4 text-center">
               <p className="font-serif text-[#ecd27a]">The corridor is dark and empty.</p>
-              <p className="text-sm text-stone-300">
-                At the far end, warm light shows through the dining car door. The dining car opens in the next update.
-              </p>
+              <p className="text-sm text-stone-300">At the far end, warm light shows through the dining car door.</p>
+              <button
+                type="button"
+                onClick={() => setPlace("dining")}
+                className="mt-1 min-h-11 rounded-md bg-[#c9a227] text-sm font-semibold text-[#1b120b] active:bg-[#ecd27a]"
+              >
+                Into the dining car →
+              </button>
               <button
                 type="button"
                 onClick={() => setPlace("12b")}
-                className="mt-1 min-h-11 rounded-md border border-[#c9a227]/50 text-sm text-[#ecd27a] active:bg-[#3d2615]"
+                className="min-h-11 rounded-md border border-[#c9a227]/50 text-sm text-[#ecd27a] active:bg-[#3d2615]"
               >
                 ← Back to Compartment 12B
               </button>
@@ -314,9 +355,23 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             others={scene.inventory.filter((i) => i.id !== itemOpen)}
             busy={busy}
             onClose={() => setItemOpen(null)}
+            onItemAction={(op) => void act({ type: "item", item: itemOpen, op })}
             onCombine={async (other) => {
               const r = await act({ type: "combine", items: [itemOpen, other] });
               if (r?.ok) setItemOpen(null);
+            }}
+          />
+        )}
+        {notesOpen && <NotesSheet scene={scene} busy={busy} onClose={() => setNotesOpen(false)} onRing={() => void act({ type: "hint" })} />}
+        {scene.vote && !scene.ending && <VotePanel state={state} scene={scene} busy={busy} act={act} />}
+        {scene.ending && <EndingPanel scene={scene} />}
+        {intro && (
+          <IntroCard
+            onClose={() => {
+              setIntro(false);
+              try {
+                localStorage.setItem("nx_intro_done", "1");
+              } catch {}
             }}
           />
         )}
@@ -403,6 +458,7 @@ function CloseupSheet({
           key={c.lock.id}
           length={c.lock.length}
           label={c.lock.label}
+          faces={c.lock.kind === "symbols" ? SUIT_SYMBOLS : undefined}
           busy={busy}
           shake={shake}
           onTry={(input) => void act({ type: "unlock", lock: c.lock!.id, input })}
@@ -448,12 +504,14 @@ function ItemSheet({
   busy,
   onClose,
   onCombine,
+  onItemAction,
 }: {
   item: ItemDTO | null;
   others: ItemDTO[];
   busy: boolean;
   onClose: () => void;
   onCombine: (other: ItemId) => void;
+  onItemAction: (op: string) => void;
 }) {
   if (!item) return null;
   return (
@@ -464,6 +522,17 @@ function ItemSheet({
       </div>
       {item.evidence && <p className="text-xs text-[#ecd27a]">🔍 Evidence. Keep it for when you name the thief.</p>}
       <ItemReading item={item} />
+      {item.actions?.map((a) => (
+        <button
+          key={a.op}
+          type="button"
+          disabled={busy}
+          onClick={() => onItemAction(a.op)}
+          className="min-h-12 w-full rounded-lg bg-[#c9a227] font-semibold text-[#1b120b] active:bg-[#ecd27a] disabled:opacity-60"
+        >
+          {a.label}
+        </button>
+      ))}
       {others.length > 0 && (
         <div className="border-t border-[#3d2615] pt-3">
           <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">Combine with</p>
@@ -485,5 +554,203 @@ function ItemSheet({
       )}
       <p className="text-xs text-stone-500">To use it on something, tap that thing in the room.</p>
     </Sheet>
+  );
+}
+
+const SUSPECT_INFO: Record<Suspect, { name: string; line: string }> = {
+  varga: { name: "Countess Ilona Varga", line: "Owner of the Star of Varga. Berth 10." },
+  carrow: { name: "Mr. Roland Carrow", line: "The insurance assessor. Berth 14." },
+  osei: { name: "Dr. Amara Osei", line: "The Countess's physician. Berth 11." },
+  lindqvist: { name: "Mrs. Hedda Lindqvist", line: "Retired schoolteacher. Berth 12A, next door." },
+};
+
+function useNow(ms: number) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), ms);
+    return () => clearInterval(id);
+  }, [ms]);
+  return now;
+}
+
+/** Teodor the porter's notes: the hint system. */
+function NotesSheet({ scene, busy, onClose, onRing }: { scene: SceneDTO; busy: boolean; onClose: () => void; onRing: () => void }) {
+  const now = useNow(1000);
+  const next = scene.nextHint;
+  const wait = next?.readyAt ? Math.max(0, Math.ceil((new Date(next.readyAt).getTime() - now) / 1000)) : 0;
+  return (
+    <Sheet title="Teodor's notes" onClose={onClose}>
+      <p className="text-sm text-stone-400">Stuck? Ring for the night porter. Each ring brings a clearer note, and everyone in your party sees it.</p>
+      {[...scene.hints].reverse().map((h) => (
+        <div key={h.id} className="rotate-[-0.5deg] rounded-sm bg-[#f7f2e4] px-4 py-3 text-stone-800 shadow">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-stone-500">
+            {h.title} · note {h.tier} of 3
+          </p>
+          <p className="mt-1 text-[15px] leading-relaxed" style={{ fontFamily: "Georgia, serif" }}>
+            {h.text}
+          </p>
+        </div>
+      ))}
+      {next ? (
+        <button
+          type="button"
+          disabled={busy || wait > 0}
+          onClick={onRing}
+          className="min-h-12 w-full rounded-lg bg-[#c9a227] font-semibold text-[#1b120b] active:bg-[#ecd27a] disabled:opacity-60"
+        >
+          {wait > 0 ? `Teodor is busy (${wait}s)` : `🛎 Ring for a note: ${next.title} (${next.tier}/3)`}
+        </button>
+      ) : (
+        <p className="text-sm text-stone-500">Teodor has nothing more to add.</p>
+      )}
+    </Sheet>
+  );
+}
+
+function EvidenceStrip({ items }: { items: ItemDTO[] }) {
+  return (
+    <div className="flex flex-wrap justify-center gap-1.5">
+      {items.map((it) => (
+        <span key={it.id} className="flex w-16 flex-col items-center rounded-lg border border-[#3d2615] bg-[#24160c] px-1 py-1" title={it.name}>
+          <ItemIcon id={it.id} className="h-8 w-8" />
+          <span className="line-clamp-1 text-[10px] text-stone-300">{it.name}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/** The accusation: every player picks a suspect; a clear majority closes the case, the host breaks ties. */
+function VotePanel({ state, scene, busy, act }: { state: RoomState; scene: SceneDTO; busy: boolean; act: (a: SceneAction) => Promise<SceneActionResponse | null> }) {
+  const vote = scene.vote!;
+  const mine = vote.votes[state.me.id];
+  const isHost = state.me.isHost;
+  const voters = state.players.filter((p) => p.online || vote.votes[p.id]);
+  const count = (s: Suspect) => Object.values(vote.votes).filter((v) => v === s).length;
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#120c07] px-4 pb-8" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label="Name the thief">
+      <div className="mx-auto w-full max-w-md space-y-4">
+        <p className="pt-4 text-center font-mono text-[11px] uppercase tracking-[0.3em] text-[#c9a227]">The conductor is here</p>
+        <h1 className="text-center font-serif text-3xl text-[#ecd27a]">Who stole the Star of Varga?</h1>
+        <p className="text-center text-sm text-stone-300">The border is an hour away. Decide together: majority wins, and the host breaks a tie. You only get one accusation.</p>
+        <EvidenceStrip items={scene.evidence} />
+        <div className="space-y-2">
+          {SUSPECTS.map((s) => (
+            <button
+              key={s}
+              type="button"
+              disabled={busy || Boolean(vote.tie)}
+              onClick={() => void act({ type: "vote", suspect: s })}
+              className={`flex min-h-16 w-full items-center gap-3 rounded-xl border px-4 text-left ${
+                mine === s ? "border-[#ecd27a] bg-[#3d2615]" : "border-[#3d2615] bg-[#1b120b] active:bg-[#24160c]"
+              } disabled:opacity-80`}
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block font-serif text-lg text-stone-100">{SUSPECT_INFO[s].name}</span>
+                <span className="block text-xs text-stone-400">{SUSPECT_INFO[s].line}</span>
+              </span>
+              <span className="font-mono text-xl text-[#ecd27a]">{count(s) || ""}</span>
+            </button>
+          ))}
+        </div>
+        <p className="text-center text-xs text-stone-500">
+          {Object.keys(vote.votes).length}/{voters.length} voted{mine ? " · tap another name to change your vote" : ""}
+        </p>
+        {vote.tie &&
+          (isHost ? (
+            <div className="space-y-2 rounded-xl border border-[#c9a227]/50 p-3">
+              <p className="text-center text-sm text-[#ecd27a]">It&apos;s a tie. You&apos;re the host: your call decides it.</p>
+              {vote.tie.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void act({ type: "tiebreak", suspect: s })}
+                  className="min-h-11 w-full rounded-lg bg-[#c9a227] font-semibold text-[#1b120b] disabled:opacity-60"
+                >
+                  Accuse {SUSPECT_INFO[s].name}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-sm text-[#ecd27a]">It&apos;s a tie. Waiting for the host to decide…</p>
+          ))}
+        {isHost && !vote.tie && Object.keys(vote.votes).length > 0 && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void act({ type: "close-vote" })}
+            className="min-h-11 w-full rounded-lg border border-[#c9a227]/50 text-sm text-[#ecd27a] active:bg-[#3d2615] disabled:opacity-60"
+          >
+            Close the vote now
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EndingPanel({ scene }: { scene: SceneDTO }) {
+  const e = scene.ending!;
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#120c07] px-4 pb-10" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label={e.title}>
+      <article className="mx-auto max-w-md space-y-5 pt-6">
+        <p className={`text-center font-mono text-[11px] uppercase tracking-[0.3em] ${e.correct ? "text-[#c9a227]" : "text-red-400"}`}>
+          {e.correct ? "Case solved" : "Case closed"} · {SUSPECT_INFO[e.accused].name} accused
+        </p>
+        <h1 className="text-center font-serif text-4xl text-[#ecd27a]">{e.title}</h1>
+        <div className="space-y-4 font-serif text-[16px] leading-relaxed text-stone-200">
+          {e.paragraphs.map((p, i) => (
+            <p key={i}>{p}</p>
+          ))}
+        </div>
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="rounded-lg border border-[#3d2615] p-2">
+            <p className="text-[10px] uppercase tracking-wider text-stone-500">Time</p>
+            <p className="font-mono text-lg text-stone-100">{e.minutes} min</p>
+          </div>
+          <div className="rounded-lg border border-[#3d2615] p-2">
+            <p className="text-[10px] uppercase tracking-wider text-stone-500">Evidence</p>
+            <p className="font-mono text-lg text-stone-100">
+              {e.evidenceFound}/{e.evidenceTotal}
+            </p>
+          </div>
+          <div className="rounded-lg border border-[#3d2615] p-2">
+            <p className="text-[10px] uppercase tracking-wider text-stone-500">Votes</p>
+            <p className="font-mono text-lg text-stone-100">{e.counts[e.accused]}</p>
+          </div>
+        </div>
+        {e.everyClue && (
+          <p className="mx-auto w-fit rounded-full border border-[#c9a227]/60 bg-[#c9a227]/10 px-3 py-1 text-xs font-semibold text-[#ecd27a]">🔍 Every clue: you found all six pieces of evidence</p>
+        )}
+        <Link href="/" className="block min-h-12 rounded-lg bg-[#c9a227] py-3 text-center font-semibold text-[#1b120b]">
+          All escape rooms
+        </Link>
+      </article>
+    </div>
+  );
+}
+
+function IntroCard({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4" role="dialog" aria-modal="true" aria-label="The Nightingale Express">
+      <div className="w-full max-w-sm space-y-3 rounded-2xl border border-[#c9a227]/50 bg-[#1b120b] p-5">
+        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#c9a227]">00:40 · somewhere past Kessel</p>
+        <h2 className="font-serif text-2xl text-[#ecd27a]">You wake in Compartment 12B</h2>
+        <p className="font-serif text-[15px] leading-relaxed text-stone-200">
+          The door is locked from the outside. The Countess Varga&apos;s sapphire has been stolen tonight, and someone wants it to look like you
+          took it. The police board at the border at six. Get out, find the Star, and name the thief.
+        </p>
+        <ul className="space-y-1.5 text-sm text-stone-300">
+          <li>‹ › Swipe or tap the arrows to turn between the walls.</li>
+          <li>👆 Tap anything to look closer, open it or pick it up.</li>
+          <li>🎒 Your things are shared with your whole party. Tap one to read it or combine it.</li>
+          <li>🛎 Stuck? Ring for Teodor, the night porter.</li>
+        </ul>
+        <button type="button" onClick={onClose} className="min-h-12 w-full rounded-lg bg-[#c9a227] font-semibold text-[#1b120b] active:bg-[#ecd27a]">
+          Start searching
+        </button>
+      </div>
+    </div>
   );
 }
