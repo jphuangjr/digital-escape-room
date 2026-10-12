@@ -64,6 +64,7 @@ export function StatusBar({
           {ctx.code}
         </span>
         <button
+          data-tour="room"
           onClick={onRoom}
           aria-label={t("shell.status.roomAria", { online: online.length })}
           className="flex h-11 items-center gap-1.5 rounded-md px-2 active:bg-stone-900"

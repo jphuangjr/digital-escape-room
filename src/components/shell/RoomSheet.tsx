@@ -37,6 +37,7 @@ export function RoomSheet({
   tab,
   setTab,
   chat,
+  onTour,
 }: {
   ctx: GameCtx;
   open: boolean;
@@ -44,6 +45,7 @@ export function RoomSheet({
   tab: RoomTab;
   setTab: (t: RoomTab) => void;
   chat: Chat;
+  onTour: () => void;
 }) {
   const [copied, setCopied] = useState(false);
   const t = useT();
@@ -95,6 +97,7 @@ export function RoomSheet({
             <p className="font-mono text-lg font-semibold text-amber-300">{ctx.code}</p>
           </div>
           <button
+            data-tour="invite"
             onClick={share}
             className="flex h-11 items-center gap-2 rounded-md border border-amber-500/50 px-3 text-sm text-amber-300 active:bg-amber-500/10"
           >
@@ -119,6 +122,7 @@ export function RoomSheet({
             <button
               key={id}
               role="tab"
+              data-tour={`tab-${id}`}
               aria-selected={tab === id}
               onClick={() => setTab(id)}
               className={`min-h-11 flex-1 border-b-2 text-sm ${
@@ -182,6 +186,14 @@ export function RoomSheet({
                 <LanguageSwitcher tone="shell" />
               </div>
               <div className="mt-4 border-t border-stone-800 pt-4">
+                <button
+                  type="button"
+                  onClick={onTour}
+                  className="mb-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-amber-500/40 text-sm text-amber-300 active:bg-amber-500/10"
+                >
+                  <span aria-hidden>?</span>
+                  {t("tour.replay")}
+                </button>
                 <button
                   type="button"
                   onClick={() => {

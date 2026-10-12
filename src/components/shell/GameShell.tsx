@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useT } from "@/i18n/client";
 import { pick } from "@/i18n/config";
 import { useChat } from "@/lib/client/chat";
+import { Tour, TOUR_DONE_KEY } from "./Tour";
 import type { RoomTab } from "./RoomSheet";
 import { describeDiscovery, discoverySeparator, discoveryWho } from "@/lib/client/discoveries";
 import type { AppId, RoomState } from "@/lib/types";
@@ -37,6 +38,31 @@ export function GameShell({
   const [browserAddress, setBrowserAddress] = useState<string | null>(null);
   const [roomOpen, setRoomOpen] = useState(false);
   const [roomTab, setRoomTab] = useState<RoomTab>("people");
+  const [tourOpen, setTourOpen] = useState(false);
+  // First visit on this device: run the tour once the laptop has settled (not during the vote/ending).
+  useEffect(() => {
+    let done = false;
+    try {
+      done = localStorage.getItem(TOUR_DONE_KEY) === "1";
+    } catch {}
+    if (done || state.status !== "playing") return;
+    const id = window.setTimeout(() => setTourOpen(true), 900);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const tourSheet = useCallback((tab: RoomTab | null) => {
+    if (tab === null) setRoomOpen(false);
+    else {
+      setRoomTab(tab);
+      setRoomOpen(true);
+    }
+  }, []);
+  const closeTour = useCallback(() => {
+    setTourOpen(false);
+    try {
+      localStorage.setItem(TOUR_DONE_KEY, "1");
+    } catch {}
+  }, []);
   const chat = useChat(code, state.me.id);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [unreadEmails, setUnreadEmails] = useState(0);
@@ -287,7 +313,12 @@ export function GameShell({
           tab={roomTab}
           setTab={setRoomTab}
           chat={chat}
+          onTour={() => {
+            setRoomOpen(false);
+            setTourOpen(true);
+          }}
         />
+        {tourOpen && <Tour onClose={closeTour} showSheet={tourSheet} openApp={openApp} />}
         <Toasts
           items={toasts}
           placement={roomOpen ? "top" : "bottom"}
@@ -320,6 +351,7 @@ export function AppTile({
   return (
     <button
       onClick={onClick}
+      data-tour={`app-${app}`}
       aria-label={t("shell.dock.appAria", { app: label, locked, unread: badge ?? 0 })}
       aria-current={active ? "true" : undefined}
       className={`group relative flex flex-col items-center gap-1.5 rounded-xl p-2 ${size === "lg" ? "w-24" : "w-20"} ${

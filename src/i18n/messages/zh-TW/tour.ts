@@ -1,0 +1,32 @@
+import type en from "../en/tour";
+
+const messages: Record<keyof typeof en, string> = {
+  "tour.next": "下一步",
+  "tour.back": "上一步",
+  "tour.skip": "略過導覽",
+  "tour.done": "打開我的電子郵件",
+  "tour.progress": "{n}／{total}",
+  "tour.replay": "玩法說明",
+  "tour.welcome.title": "歡迎來到艾達的筆電",
+  "tour.welcome.body": "艾達・佛斯博士失蹤了，這是她的筆電。房間裡的每個人都在用自己的手機看同一台筆電，只要有一個人解鎖了什麼，大家都會拿到。我們快速導覽一下。",
+  "tour.room.title": "你的房間",
+  "tour.room.body": "點「房間」可以看到有誰在、誰在線上，以及每個人正在看什麼。房間代碼就在最上方。",
+  "tour.invite.title": "邀請你的隊友",
+  "tour.invite.body": "點「邀請」分享連結，或請朋友掃描成員清單下方的 QR 碼。可以使用 Google 登入，或只輸入名字加入。",
+  "tour.chat.title": "聊天",
+  "tour.chat.body": "在這裡跟隊友聊天。有人傳訊息時，「房間」上會出現紅色標記。",
+  "tour.hints.title": "提示與紀錄",
+  "tour.hints.body": "卡關了嗎？向艾達索取提示：提示會對整個房間解鎖，並以語音留言送達。「案件紀錄」會列出房間已發現的東西，「嘗試紀錄」會顯示每一個試過的答案，免得大家重複嘗試。",
+  "tour.email.title": "電子郵件：從這裡開始",
+  "tour.email.body": "艾達的最後一則訊息和她妹妹的電子郵件正在等你，先讀這兩封。艾達傳來的提示語音留言也會出現在這裡。",
+  "tour.browser.title": "瀏覽器",
+  "tour.browser.body": "這是一個自成一格的小網路。試著輸入像 meridian-inst.net 這樣的網址。每個頁面都有「檢視原始碼」，點一下黑色塗條就能顯示文字，圖片則有「檔案資訊」。",
+  "tour.notes.title": "筆記",
+  "tour.notes.body": "把你發現的東西記下來。在你點「分享到房間」之前，筆記只有你看得到。幫重要的線索（名字、年份、ID）加上標籤，隊友就能一眼找到。",
+  "tour.files.title": "檔案",
+  "tour.files.body": "這是艾達的檔案。有些資料夾上了鎖，密碼藏在故事裡。其中一個會解鎖「解碼器」，這是破解密碼時需要的工具。",
+  "tour.end.title": "從頭開始",
+  "tour.end.body": "導覽就到這裡。艾達最後留下的話是「從頭開始。」祝你好運，偵探。你隨時可以從「房間」重新觀看這段導覽。",
+};
+
+export default messages;
