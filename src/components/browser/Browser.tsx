@@ -60,8 +60,10 @@ export function Browser({
   onAddressChange?: (address: string | null) => void;
 }) {
   const t = useT();
-  const x = pick(useLocale());
+  const locale = useLocale();
+  const x = pick(locale);
   const { code } = ctx;
+  const [reloading, setReloading] = useState(false);
   const [history, setHistory] = useState<{ entries: string[]; idx: number }>({ entries: [], idx: -1 });
   const [view, setViewState] = useState<View>({ kind: "newtab" });
   const [input, setInput] = useState("");
@@ -157,9 +159,20 @@ export function Browser({
     setHistory((h) => ({ ...h, idx }));
     void load(history.entries[idx], "stay");
   };
-  const reload = () => {
-    if (current) void load(current, "stay", true);
+  const reload = async () => {
+    if (!current || reloading) return;
+    setReloading(true);
+    await load(current, "stay", true);
+    setReloading(false);
   };
+
+  // Pages are rendered by the server in the player's language: refetch the open page when it changes.
+  const lastLocale = useRef(locale);
+  useEffect(() => {
+    if (lastLocale.current === locale) return;
+    lastLocale.current = locale;
+    if (current) void load(current, "stay", true);
+  }, [locale, current, load]);
 
   // A solve (by anyone in the room) can change what a site shows: reload the open page if it's affected.
   const solvedKey = ctx.state.progress.solved.join(",");
@@ -239,7 +252,7 @@ export function Browser({
             />
           </form>
           <button className={btn} onClick={reload} disabled={!current} aria-label={t("browser.toolbar.reload")}>
-            <ReloadIcon className="h-5 w-5" />
+            <ReloadIcon className={`h-5 w-5 ${reloading ? "animate-spin" : ""}`} />
           </button>
           <button
             className={btn}
