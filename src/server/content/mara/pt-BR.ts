@@ -241,6 +241,21 @@ const text: MaraText = {
       "",
       "— Contas HarbourMail",
     ],
+    forward: {
+      subject: "Fwd: {subject}",
+      note: [
+        "Alguém acabou de tentar entrar no e-mail da minha irmã mais nova. Imagino que tenha sido você.",
+        "",
+        "Tudo bem. Leia os rascunhos. Ela nunca mostraria pra você.",
+        "",
+        "— A.",
+      ],
+      header: [
+        "---------- Mensagem encaminhada ----------",
+        "De: {from}",
+        "Assunto: {subject}",
+      ],
+    },
   },
   epilogue: [
     "A caixa chega na manhã seguinte, embrulhada em papel pardo, com o carimbo da Pell & Daughters em cada emenda. Dentro estão os livros-caixa do pai dela, um crachá da autoridade portuária e um caderno barato com uma página dobrada: \"Lâmpadas acesas no escritório do Truste. Contei a eles o que vi. Eles me disseram que eu não vi.\"",

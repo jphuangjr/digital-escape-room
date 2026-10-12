@@ -363,18 +363,29 @@ function formatWhen(iso: string, unknown: string): string {
   return `${unknown} · ${hh}:${mm}`;
 }
 
-/** Easter egg: once someone asks HarbourMail for a reset, the temporary password lands here (Ada is Mara's recovery contact). */
+/**
+ * Easter egg: a HarbourMail reset sends Mara's temporary password to her recovery contact, Ada. This
+ * inbox is the investigator's, so Ada, alive and watching, forwards it here with a note.
+ */
 export function bonusEmails(progress: RoomProgress, loc: Locale): EmailDTO[] {
   if (!progress.solved.includes("mara-reset")) return [];
   const r = maraText(loc).resetEmail;
   const values = { address: MARA_ADDRESS, password: MARA_TEMP_PASSWORD };
+  const subject = fill(r.subject, values);
+  const original = { from: "HarbourMail Accounts <no-reply@harbourmail.net>", subject };
   return [
     {
       id: "email-harbourmail-reset",
-      from: "HarbourMail Accounts <no-reply@harbourmail.net>",
-      subject: fill(r.subject, values),
+      from: "Ada Voss <ada@ada-voss.net>",
+      subject: fill(r.forward.subject, { subject }),
       date: r.date,
-      body: r.body.map((l) => fill(l, values)).join("\n"),
+      body: [
+        ...r.forward.note,
+        "",
+        ...r.forward.header.map((l) => fill(l, original)),
+        "",
+        ...r.body.map((l) => fill(l, values)),
+      ].join("\n"),
       kind: "email",
     },
   ];

@@ -41,8 +41,20 @@ export interface MaraText {
     bodyComment: string;
   };
   messages: MaraMessage[];
-  /** Lands in Ada's Email app after a reset; {address} = Mara's address, {password} = temporary password */
-  resetEmail: { subject: string; date: string; body: string[] };
+  /**
+   * The reset goes to Mara's recovery contact, Ada; {address} = Mara's address, {password} = temporary
+   * password. Ada (alive, watching) forwards it to the investigator's inbox with a note.
+   */
+  resetEmail: {
+    subject: string;
+    date: string;
+    body: string[];
+    forward: {
+      subject: string; // "Fwd: {subject}"
+      note: string[]; // Ada's lines above the forwarded message
+      header: string[]; // "---------- Forwarded message ----------", "From: {from}", "Subject: {subject}"
+    };
+  };
   /** Extra ending-screen section for teams who read Mara's inbox */
   epilogue: string[];
 }

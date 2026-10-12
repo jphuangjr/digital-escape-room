@@ -241,6 +241,21 @@ const text: MaraText = {
       "",
       "— HarbourMail Accounts",
     ],
+    forward: {
+      subject: "Fwd: {subject}",
+      note: [
+        "Someone just tried to get into my little sister's email. I'm guessing it was you.",
+        "",
+        "Fine. Read the drafts. She'd never show you herself.",
+        "",
+        "— A.",
+      ],
+      header: [
+        "---------- Forwarded message ----------",
+        "From: {from}",
+        "Subject: {subject}",
+      ],
+    },
   },
   epilogue: [
     "The box arrives the next morning, wrapped in brown paper with the Pell & Daughters stamp on every seam. Inside are her father's ledgers, a harbour-board ID card and a cheap notebook with one page folded down: \"Lamps on in the Trust office. I told them what I saw. They told me I didn't.\"",

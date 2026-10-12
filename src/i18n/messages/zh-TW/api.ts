@@ -62,7 +62,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.attempt.solved.adminConsole": "管理員主控台已解鎖。",
   "api.decode.badShift": "位移必須是整數。",
   "api.decode.nothingYet": "目前還沒有可解碼的內容。",
-  "api.attempt.solved.maraReset": "臨時密碼已寄到備援聯絡人信箱。去看看艾達的電子郵件。",
+  "api.attempt.solved.maraReset": "臨時密碼已寄到備援聯絡人信箱。",
   "api.attempt.solved.maraLogin": "已登入瑪拉的 HarbourMail。",
 };
 
