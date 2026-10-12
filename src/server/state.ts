@@ -123,6 +123,6 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
       room.gameId === TRAIN_GAME_ID ? [] : [...baseEmails(loc), ...voicemailsFor(progress, hints, loc), ...bonusEmails(progress, loc)],
     vote,
     ending,
-    ...(room.gameId === TRAIN_GAME_ID ? { scene: sceneDTO(parseScene(room.scene)) } : {}),
+    ...(room.gameId === TRAIN_GAME_ID ? { scene: sceneDTO(parseScene(room.scene), { startedAt: room.createdAt, now }) } : {}),
   };
 }

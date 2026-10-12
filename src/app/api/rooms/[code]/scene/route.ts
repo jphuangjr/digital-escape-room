@@ -2,12 +2,12 @@ import type { SceneAction, SceneActionResponse } from "@/lib/train/types";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { db } from "@/server/db";
 import { error, isResponse, json, readBody, requirePlayer } from "@/server/http";
-import { ATTEMPT_WINDOW_MS, rateLimitDecision } from "@/server/logic";
+import { ATTEMPT_WINDOW_MS, ONLINE_WINDOW_MS, rateLimitDecision } from "@/server/logic";
 import { publish } from "@/server/realtime";
 import { applyAction, parseScene, sceneDTO } from "@/server/train/scene";
 import { mutateScene } from "@/server/train/store";
 
-const TYPES = new Set(["take", "operate", "use", "combine", "unlock"]);
+const TYPES = new Set(["take", "operate", "use", "combine", "unlock", "item", "hint", "vote", "close-vote", "tiebreak"]);
 
 /** One player action in a physical-room game: take, operate, use, combine or unlock. */
 export async function POST(req: Request, { params }: { params: Promise<{ code: string }> }) {
@@ -30,13 +30,23 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     const rl = rateLimitDecision(recent.map((r) => r.createdAt), now);
     if (rl.limited) {
       return json<SceneActionResponse>(
-        { ok: false, message: `Too many tries. Wait ${rl.retryAfterSec}s.`, retryAfterSec: rl.retryAfterSec, scene: sceneDTO(parseScene(room.scene)) },
+        { ok: false, message: `Too many tries. Wait ${rl.retryAfterSec}s.`, retryAfterSec: rl.retryAfterSec, scene: sceneDTO(parseScene(room.scene), { startedAt: room.createdAt }) },
         429,
       );
     }
   }
 
-  const res = await mutateScene(room.id, (cur) => applyAction(cur, action, { id: player.id, name: player.displayName }));
+  // The vote closes by itself once everyone online has voted.
+  const players = await db.player.findMany({ where: { roomId: room.id }, select: { id: true, lastSeenAt: true } });
+  const onlineIds = players
+    .filter((p) => p.id === player.id || Date.now() - p.lastSeenAt.getTime() <= ONLINE_WINDOW_MS)
+    .map((p) => p.id);
+  const res = await mutateScene(room.id, (cur) =>
+    applyAction(cur, action, { id: player.id, name: player.displayName }, { hostId: room.hostId, onlineIds }),
+  );
+  if (res.finished) {
+    await db.room.update({ where: { id: room.id }, data: { status: "finished", finishedAt: new Date() } });
+  }
   if (res.attempt) {
     await db.attempt.create({
       data: { roomId: room.id, playerId: player.id, puzzleId: `nx-${res.attempt.lock}`, input: res.attempt.input, correct: res.attempt.correct },
@@ -44,5 +54,5 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     await publish(room.code, "attempt.logged", { puzzleId: `nx-${res.attempt.lock}`, correct: res.attempt.correct });
   }
   if (res.changed) await publish(room.code, "progress.updated", { reason: "scene" });
-  return json<SceneActionResponse>({ ok: res.ok, message: res.message, scene: sceneDTO(res.scene) });
+  return json<SceneActionResponse>({ ok: res.ok, message: res.message, scene: sceneDTO(res.scene, { startedAt: room.createdAt }) });
 }

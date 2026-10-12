@@ -44,6 +44,49 @@ export function ItemIcon({ id, className = "h-10 w-10" }: { id: ItemId; classNam
           <path d="M10 14 H30 M10 19 H30 M10 24 H28 M10 29 H24" stroke="#6b6250" strokeWidth="1.2" />
         </g>
       )}
+      {id === "scorecard" && (
+        <g>
+          <rect x="9" y="6" width="22" height="28" rx="1" fill="#fffaf0" stroke="#9a8f78" />
+          <path d="M12 12 H28 M12 17 H26 M12 22 H27 M12 27 H22" stroke="#6b6250" strokeWidth="1.2" />
+          <text x="26" y="13" fontSize="6" fill="#a3302a">♦</text>
+        </g>
+      )}
+      {id === "keyring" && (
+        <g>
+          <circle cx="14" cy="14" r="7" fill="none" stroke="#c9a227" strokeWidth="2.5" />
+          <path d="M18 19 L30 31 M26 27 l3 -3 M29 30 l3 -3" stroke="#c9a227" strokeWidth="2.5" />
+          <path d="M10 20 L8 34 M7 30 h4" stroke="#a88a2a" strokeWidth="2.2" />
+        </g>
+      )}
+      {id === "crank" && (
+        <g>
+          <path d="M8 30 H22 V12 H32" stroke="#c9a227" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+          <rect x="4" y="27" width="7" height="7" fill="#7a5f12" />
+          <circle cx="32" cy="12" r="3.5" fill="#5b3a22" />
+        </g>
+      )}
+      {id === "powder" && (
+        <g>
+          <rect x="14" y="6" width="12" height="6" rx="1" fill="#2a1f14" />
+          <rect x="11" y="12" width="18" height="24" rx="4" fill="#6b3f1e" stroke="#3d2615" />
+          <rect x="13" y="18" width="14" height="10" fill="#efe6d2" />
+          <path d="M27 18 l-4 4" stroke="#b8ad92" strokeWidth="1.5" />
+        </g>
+      )}
+      {id === "bank-notice" && (
+        <g>
+          <rect x="7" y="8" width="26" height="26" fill="#f5f0e2" stroke="#9a8f78" />
+          <text x="20" y="16" textAnchor="middle" fontSize="5" fontFamily="Georgia, serif" fill="#2f4a6b">KESSEL BANK</text>
+          <path d="M11 21 H29 M11 25 H29 M11 29 H22" stroke="#6b6250" strokeWidth="1" />
+          <circle cx="27" cy="30" r="3" fill="#a3302a" />
+        </g>
+      )}
+      {id === "star" && (
+        <g>
+          <path d="M6 30 q2 -16 14 -18 q12 -2 14 8 q2 8 -6 12 z" fill="#efe6d2" stroke="#b8ad92" />
+          <path d="M20 13 l5 6 -5 7 -5 -7 z" fill="#2f5bd9" stroke="#bcd0ff" strokeWidth="0.8" />
+        </g>
+      )}
       {id === "cufflink" && (
         <g>
           <ellipse cx="20" cy="18" rx="10" ry="8" fill="#e3bf4a" stroke="#8a6b1a" />
@@ -154,6 +197,47 @@ export function CloseupDocView({ doc }: { doc: CloseupDoc }) {
       </div>
     );
   }
+  if (doc.kind === "scorecard") {
+    return (
+      <div className="mx-auto w-64 rounded-sm bg-[#fffaf0] p-4 text-stone-800 shadow" style={{ fontFamily: "Georgia, serif" }}>
+        <p className="text-center text-xs font-bold uppercase tracking-[0.2em]">{doc.title}</p>
+        <table className="mt-2 w-full text-sm">
+          <tbody>
+            {doc.rows.slice(1).map((r) => (
+              <tr key={r[0]} className="border-b border-stone-300">
+                <td className="py-1">{r[0]}</td>
+                <td className="py-1 text-right font-mono text-base">{r[1]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="mt-3 -rotate-2 text-base text-[#2f4a6b]" style={{ fontFamily: "'Segoe Script', 'Brush Script MT', cursive" }}>
+          {doc.note}
+        </p>
+      </div>
+    );
+  }
+  if (doc.kind === "chalk") {
+    return (
+      <div className="mx-auto w-64 rounded border-4 border-[#c9a227] bg-[#1d2420] px-4 py-3 text-center text-[#e8e4d8]" style={{ fontFamily: "'Segoe Script', 'Brush Script MT', cursive" }}>
+        <p className="text-xl">{doc.title}</p>
+        {doc.lines.map((l, i) => (
+          <p key={i} className={l ? "text-base" : "h-3"}>
+            {l}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  if (doc.kind === "engraving") {
+    return (
+      <div className="mx-auto w-60 rounded-md border border-[#2a2f34] bg-gradient-to-b from-[#8a949c] to-[#5f6870] px-4 py-3 text-center">
+        <p className="font-serif text-lg italic tracking-wide text-[#20262b]" style={{ textShadow: "0 1px 0 rgba(255,255,255,0.35)" }}>
+          {doc.text}
+        </p>
+      </div>
+    );
+  }
   // mirror
   return (
     <div className="mx-auto flex h-44 w-32 items-center justify-center rounded-[50%] border-4 border-[#c9a227] bg-gradient-to-br from-[#c9d4da] via-[#8fa0aa] to-[#b8c4ca]">
@@ -175,15 +259,19 @@ export function LockDial({
   busy,
   shake,
   onTry,
+  faces,
 }: {
   length: number;
   label: string;
   busy: boolean;
   shake: boolean;
   onTry: (code: string) => void;
+  /** Wheel faces; digits 0–9 by default. */
+  faces?: string[];
 }) {
+  const wheel = faces ?? ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
   const [digits, setDigits] = useState<number[]>(() => Array.from({ length }, () => 0));
-  const bump = (i: number, d: number) => setDigits((ds) => ds.map((v, j) => (j === i ? (v + d + 10) % 10 : v)));
+  const bump = (i: number, d: number) => setDigits((ds) => ds.map((v, j) => (j === i ? (v + d + wheel.length) % wheel.length : v)));
   return (
     <div className="rounded-xl border border-[#c9a227]/50 bg-[#1b120b] p-4">
       <p className="text-center font-mono text-[11px] uppercase tracking-[0.3em] text-[#c9a227]">{label}</p>
@@ -202,7 +290,7 @@ export function LockDial({
               aria-label={`Wheel ${i + 1}`}
               className="flex h-14 w-12 items-center justify-center border-y border-[#7a5f12] bg-gradient-to-b from-[#ecd27a] via-[#c9a227] to-[#8a6b1a] font-mono text-3xl font-bold text-[#1b120b]"
             >
-              {v}
+              <span className={faces && (wheel[v] === "♥" || wheel[v] === "♦") ? "text-[#8a1f17]" : undefined}>{wheel[v]}</span>
             </output>
             <button
               type="button"
@@ -218,7 +306,7 @@ export function LockDial({
       <button
         type="button"
         disabled={busy}
-        onClick={() => onTry(digits.join(""))}
+        onClick={() => onTry(digits.map((v) => wheel[v]).join(""))}
         className="mt-4 min-h-11 w-full rounded-md bg-[#c9a227] font-semibold text-[#1b120b] active:bg-[#ecd27a] disabled:opacity-60"
       >
         {busy ? "Trying…" : "Try the lock"}

@@ -98,7 +98,7 @@ export function TrainLanding() {
           <button type="submit" disabled={busy} className="min-h-12 rounded-lg bg-noir-brass font-semibold text-noir-bg disabled:opacity-60">
             {busy ? "Boarding…" : "Board the train"}
           </button>
-          <p className="text-xs text-noir-ink-faint">Invite playtesters from the Room menu once you&apos;re aboard. Room 2 and the finale arrive in the next update.</p>
+          <p className="text-xs text-noir-ink-faint">Invite playtesters from the Room menu once you&apos;re aboard.</p>
         </form>
       </div>
     </main>
