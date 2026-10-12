@@ -71,3 +71,19 @@ describe("HarbourMail Easter egg", () => {
     }
   });
 });
+
+describe("ada-voss.net", () => {
+  it("is an archived dead end on every path, in every language", () => {
+    for (const loc of LOCALES) {
+      for (const a of ["ada-voss.net", "www.ada-voss.net/about", "https://ada-voss.net/blog/2019"]) {
+        const page = content.resolveSite(a, progress(), loc)!;
+        expect(page.theme).toBe("archived");
+        expect(page.blocks.some((b) => b.type === "link" || b.type === "nav" || b.type === "form")).toBe(false);
+      }
+    }
+  });
+
+  it("leaves the switch subdomain alone", () => {
+    expect(content.resolveSite("switch.ada-voss.net", progress(), "en")).toBeNull();
+  });
+});

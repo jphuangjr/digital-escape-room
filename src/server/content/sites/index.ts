@@ -1,6 +1,7 @@
 import "server-only";
 import type { Locale } from "@/i18n/config";
 import type { RoomProgress, SitePage } from "@/lib/types";
+import { ADAVOSS_HOST, resolveAdaVoss } from "./adavoss";
 import { DRIFT_HOST, resolveDrift } from "./drift";
 import { HARBOURCC_HOST, resolveHarbourcc } from "./harbourcc";
 import { HARBORMAIL_HOST, HARBOURMAIL_HOST, resolveHarbourmail } from "./harbourmail";
@@ -23,6 +24,7 @@ const SITES: Record<string, Resolver> = {
   [SWITCH_HOST]: resolveSwitch,
   [HARBOURCC_HOST]: resolveHarbourcc,
   [HARBOURMAIL_HOST]: resolveHarbourmail,
+  [ADAVOSS_HOST]: resolveAdaVoss,
 };
 
 export const SITE_HOSTS = Object.keys(SITES);

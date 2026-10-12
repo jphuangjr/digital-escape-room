@@ -165,7 +165,7 @@ export type Block =
 
 export type SiteFormId = "shift-key" | "intranet-login" | "final-phrase" | "binary-quiz" | "admin-login" | "mara-reset" | "mara-login";
 
-export type SiteTheme = "meridian" | "drift" | "runnerboard" | "lostpaws" | "intranet" | "switch" | "honeypot" | "harbourcc" | "harbourmail";
+export type SiteTheme = "meridian" | "drift" | "runnerboard" | "lostpaws" | "intranet" | "switch" | "honeypot" | "harbourcc" | "harbourmail" | "archived";
 
 export interface SitePage {
   address: string; // canonical, e.g. "meridian-inst.net/about"
