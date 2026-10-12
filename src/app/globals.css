@@ -134,3 +134,140 @@ button {
 :lang(ja) {
   line-break: strict;
 }
+
+/* ---------- Lobby vault intro (src/components/site/VaultIntro.tsx) ----------
+   0.00 door fades in · 0.35 wheel spins · 1.05 bolts retract · 1.30 click + "access granted"
+   1.55 door swings open, light spills out · 2.15 push through the doorway and fade · 2.80 done */
+.vault-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(201, 162, 39, 0.07), transparent 55%),
+    radial-gradient(ellipse at 50% 50%, #17171c 0%, #0b0b0d 70%);
+  cursor: pointer;
+  animation: vi-exit 0.65s cubic-bezier(0.55, 0, 0.75, 0.2) 2.15s forwards;
+  transition: opacity 0.25s ease-out;
+}
+.vault-intro[data-skip] {
+  display: none;
+}
+.vault-intro.is-skipping {
+  opacity: 0;
+  pointer-events: none;
+}
+.vi-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  animation: vi-enter 0.45s ease-out both;
+}
+.vi-hole {
+  position: relative;
+  width: min(72vw, 50vh, 340px);
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background: radial-gradient(circle, #050506 60%, #0e0e11 100%);
+  box-shadow:
+    0 0 0 10px #1f1f25,
+    0 0 0 12px #34343c,
+    0 0 0 13px #0b0b0d,
+    inset 0 0 40px rgba(0, 0, 0, 0.9),
+    0 30px 80px rgba(0, 0, 0, 0.7);
+  perspective: 900px;
+}
+.vi-light {
+  position: absolute;
+  inset: 6%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, #fff3c4 0%, #e3bf4a 35%, rgba(201, 162, 39, 0.35) 65%, transparent 75%);
+  opacity: 0;
+  animation: vi-light 0.6s ease-out 1.55s forwards;
+}
+.vi-door {
+  position: absolute;
+  inset: 0;
+  transform-origin: 6% 50%;
+  animation: vi-swing 0.75s cubic-bezier(0.5, 0, 0.7, 0.4) 1.55s forwards;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.6));
+}
+.vi-wheel {
+  transform-box: view-box;
+  transform-origin: 100px 100px;
+  animation: vi-wheel 0.8s cubic-bezier(0.6, 0, 0.3, 1) 0.35s both;
+}
+.vi-bolt {
+  animation: vi-bolt 0.25s cubic-bezier(0.7, 0, 0.3, 1) 1.05s both;
+}
+.vi-glint {
+  opacity: 0;
+  animation: vi-glint 0.45s ease-out 1.3s both;
+}
+.vi-status {
+  position: relative;
+  height: 1.25rem;
+  min-width: 16rem;
+  text-align: center;
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+}
+.vi-status > span {
+  position: absolute;
+  inset: 0;
+}
+.vi-status-a {
+  color: var(--noir-ink-faint);
+  animation: vi-out 0.2s ease-out 1.3s forwards;
+}
+.vi-status-b {
+  color: var(--noir-brass-hi);
+  opacity: 0;
+  animation: vi-in 0.25s ease-out 1.3s forwards;
+}
+.vi-skip {
+  position: absolute;
+  bottom: max(1.5rem, env(safe-area-inset-bottom));
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--noir-ink-faint);
+  opacity: 0.7;
+}
+@keyframes vi-enter {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes vi-wheel {
+  0% { transform: rotate(0deg); }
+  70% { transform: rotate(-290deg); }
+  100% { transform: rotate(-270deg); }
+}
+@keyframes vi-bolt {
+  to { transform: translateY(13px); }
+}
+@keyframes vi-glint {
+  0% { opacity: 0; }
+  30% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+@keyframes vi-swing {
+  to { transform: rotateY(-112deg); filter: brightness(0.55) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.6)); }
+}
+@keyframes vi-light {
+  to { opacity: 1; }
+}
+@keyframes vi-in {
+  to { opacity: 1; }
+}
+@keyframes vi-out {
+  to { opacity: 0; }
+}
+@keyframes vi-exit {
+  to { opacity: 0; transform: scale(2.6); visibility: hidden; pointer-events: none; }
+}

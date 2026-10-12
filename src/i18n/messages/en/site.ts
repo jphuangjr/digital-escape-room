@@ -10,6 +10,9 @@ const messages = {
   "site.game.ada-voss.tone": "Noir mystery",
 
   // Directory
+  "site.vault.unlocking": "Unlocking",
+  "site.vault.granted": "Access granted",
+  "site.vault.skip": "Tap to skip",
   "site.directory.eyebrow": "Online escape rooms",
   "site.directory.intro": "Puzzle mysteries you solve together, each on your own phone. Pick a case, invite your crew, and get out.",
   "site.directory.casesHeading": "Cases",

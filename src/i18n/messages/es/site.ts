@@ -10,6 +10,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.ada-voss.difficulty": "Media",
   "site.game.ada-voss.tone": "Misterio noir",
 
+  "site.vault.unlocking": "Desbloqueando",
+  "site.vault.granted": "Acceso concedido",
+  "site.vault.skip": "Toca para saltar",
   "site.directory.eyebrow": "Escape rooms en línea",
   "site.directory.intro": "Misterios de enigmas que resuelven juntos, cada quien en su propio teléfono. Elige un caso, invita a tu equipo y escapa.",
   "site.directory.casesHeading": "Casos",

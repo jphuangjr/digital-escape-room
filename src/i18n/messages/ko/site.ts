@@ -10,6 +10,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.ada-voss.difficulty": "보통",
   "site.game.ada-voss.tone": "누아르 미스터리",
 
+  "site.vault.unlocking": "잠금 해제 중",
+  "site.vault.granted": "접근 허가",
+  "site.vault.skip": "탭하여 건너뛰기",
   "site.directory.eyebrow": "온라인 방탈출",
   "site.directory.intro": "각자 자기 휴대폰으로 함께 푸는 추리 퍼즐이에요. 사건을 고르고 친구들을 초대해서 탈출해 보세요.",
   "site.directory.casesHeading": "사건",
