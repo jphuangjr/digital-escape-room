@@ -120,6 +120,10 @@ const messages: Record<keyof typeof en, string> = {
   "room.ending.compassEarned": "獲得指南針徽章",
   "room.ending.compassNote": "你打開了 Ada's Personal 資料夾。",
   "room.ending.keepBrowsingLaptop": "繼續瀏覽艾達的筆電",
+  "room.ending.backToLobby": "所有密室逃脫",
+  "room.leave.button": "返回大廳",
+  "room.leave.note": "房間會繼續開著，隨時可以用代碼 {code} 回來。",
+  "room.leave.confirm": "要離開遊戲並返回大廳嗎？\n\n房間會繼續開著，隨時可以用代碼 {code} 重新加入。",
   "room.ending.pill": "案件已結案 · 查看結局",
 };
 

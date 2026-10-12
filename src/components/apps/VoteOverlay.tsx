@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useT } from "@/i18n/client";
 import type { GameCtx } from "@/lib/client/game";
 import type { Ending } from "@/lib/types";
@@ -254,10 +255,13 @@ function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
             </div>
           )}
 
-          <div className="flex justify-center">
+          <div className="flex flex-wrap justify-center gap-2">
             <button className={btnGhost} onClick={onMinimize}>
               {t("room.ending.keepBrowsingLaptop")}
             </button>
+            <Link href="/" className={btnGhost}>
+              {t("room.ending.backToLobby")}
+            </Link>
           </div>
         </article>
       </div>

@@ -120,6 +120,10 @@ const messages: Record<keyof typeof en, string> = {
   "room.ending.compassEarned": "나침반 배지 획득",
   "room.ending.compassNote": "Ada's Personal 폴더를 열었어요.",
   "room.ending.keepBrowsingLaptop": "에이다의 노트북 계속 둘러보기",
+  "room.ending.backToLobby": "모든 방탈출",
+  "room.leave.button": "로비로 나가기",
+  "room.leave.note": "방은 계속 열려 있어요. 코드 {code}로 언제든 돌아올 수 있어요.",
+  "room.leave.confirm": "게임에서 나가 로비로 돌아갈까요?\n\n방은 계속 열려 있어요. 코드 {code}로 언제든 다시 참가할 수 있어요.",
   "room.ending.pill": "사건 종결 · 엔딩 보기",
 };
 

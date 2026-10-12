@@ -118,6 +118,10 @@ const messages = {
   "room.ending.compassEarned": "Compass badge earned",
   "room.ending.compassNote": "You opened Ada's Personal folder.",
   "room.ending.keepBrowsingLaptop": "Keep browsing Ada's laptop",
+  "room.ending.backToLobby": "All escape rooms",
+  "room.leave.button": "Exit to lobby",
+  "room.leave.note": "The room stays open. Come back anytime with code {code}.",
+  "room.leave.confirm": "Leave the game and go back to the lobby?\n\nThe room stays open: rejoin anytime with code {code}.",
   "room.ending.pill": "Case closed · view ending",
 } as const;
 
