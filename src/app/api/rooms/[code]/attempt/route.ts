@@ -21,6 +21,8 @@ const PREREQS: Partial<Record<PuzzleId, PuzzleId>> = {
 const SOLVED_MESSAGES: Partial<Record<PuzzleId, string>> = {
   "binary-lesson": "api.attempt.solved.binaryLesson",
   "admin-console": "api.attempt.solved.adminConsole",
+  "mara-reset": "api.attempt.solved.maraReset",
+  "mara-login": "api.attempt.solved.maraLogin",
 };
 
 export async function POST(req: Request, { params }: { params: Promise<{ code: string }> }) {
@@ -103,6 +105,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
       if (puzzleId === "bonus-pin" && !p.badges.includes("compass")) p.badges = [...p.badges, "compass"];
       if (puzzleId === "tools-folder" && !p.unlockedApps.includes("decoder")) p.unlockedApps = [...p.unlockedApps, "decoder"];
       if (puzzleId === "binary-lesson" && !p.badges.includes("binary")) p.badges = [...p.badges, "binary"];
+      if (puzzleId === "mara-login" && !p.badges.includes("envelope")) p.badges = [...p.badges, "envelope"];
       const data =
         puzzleId === "final-phrase" && status === "playing"
           ? { status: "voting", voteDeadline: new Date(Date.now() + VOTE_DURATION_MS), finishedAt: new Date() }

@@ -125,6 +125,13 @@ const messages: Record<keyof typeof en, string> = {
   "room.leave.note": "ルームは開いたままです。コード {code} でいつでも戻れます。",
   "room.leave.confirm": "ゲームを抜けてロビーに戻りますか？\n\nルームは開いたままです。コード {code} でいつでも再参加できます。",
   "room.ending.pill": "事件解決 · エンディングを見る",
+  "room.puzzle.mara-reset": "HarbourMail パスワード再設定",
+  "room.puzzle.mara-login": "マーラの HarbourMail",
+  "room.discovery.mara-reset": "マーラの HarbourMail のパスワードを再設定した",
+  "room.discovery.mara-login": "マーラの HarbourMail に入った",
+  "room.ending.envelopeEarned": "封筒バッジを獲得",
+  "room.ending.envelopeNote": "マーラの受信トレイを読んだ。",
+  "room.ending.maraHeading": "マーラ",
 };
 
 export default messages;

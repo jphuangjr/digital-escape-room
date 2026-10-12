@@ -10,7 +10,9 @@ export type PuzzleId =
   | "bonus-pin" // Files app "Ada's Personal" PIN
   | "tools-folder" // Files app "Ada's Tools" security question; unlocks the Decoder
   | "binary-lesson" // harbourcc.edu practice quiz; installs the Binary tab in the Decoder
-  | "admin-console"; // the Vault's Systems Admin console (password shown in binary on the dashboard)
+  | "admin-console" // the Vault's Systems Admin console (password shown in binary on the dashboard)
+  | "mara-reset" // Easter egg: harbourmail.net "forgot password" for Mara's address; mails a temp password to Ada
+  | "mara-login"; // Easter egg: sign in to Mara's HarbourMail with that temp password ("address:password")
 
 /** Puzzles that have hints. Includes navigation milestones that aren't attempt-validated. */
 export type HintPuzzleId =
@@ -106,6 +108,7 @@ export interface EndingDTO {
   body: string; // narrative, \n\n paragraphs
   summary: { EXPOSE: number; PROTECT: number; tieBrokenByHost: boolean };
   bonusEpilogue: string | null; // present when bonus-pin solved
+  maraEpilogue: string | null; // present when the team got into Mara's HarbourMail (Easter egg)
 }
 
 export interface RoomState {
@@ -157,11 +160,12 @@ export type Block =
   | { type: "bits" } // interactive 5-bit place-value widget (generic teaching tool, no answers)
   | { type: "notice"; tone: "info" | "warning" | "danger" | "success"; text: string }
   | { type: "footer"; text: string }
+  | { type: "mail"; subject: string; party: string; date: string; body: string; tag?: string } // webmail message, tap to open
   | { type: "compass" }; // the broken-needle compass motif (7 notches)
 
-export type SiteFormId = "shift-key" | "intranet-login" | "final-phrase" | "binary-quiz" | "admin-login";
+export type SiteFormId = "shift-key" | "intranet-login" | "final-phrase" | "binary-quiz" | "admin-login" | "mara-reset" | "mara-login";
 
-export type SiteTheme = "meridian" | "drift" | "runnerboard" | "lostpaws" | "intranet" | "switch" | "honeypot" | "harbourcc";
+export type SiteTheme = "meridian" | "drift" | "runnerboard" | "lostpaws" | "intranet" | "switch" | "honeypot" | "harbourcc" | "harbourmail";
 
 export interface SitePage {
   address: string; // canonical, e.g. "meridian-inst.net/about"

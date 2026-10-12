@@ -3,6 +3,7 @@ import type { Locale } from "@/i18n/config";
 import type { RoomProgress, SitePage } from "@/lib/types";
 import { DRIFT_HOST, resolveDrift } from "./drift";
 import { HARBOURCC_HOST, resolveHarbourcc } from "./harbourcc";
+import { HARBORMAIL_HOST, HARBOURMAIL_HOST, resolveHarbourmail } from "./harbourmail";
 import { INTRANET_HOST, resolveIntranet } from "./intranet";
 import { LOSTPAWS_HOST, resolveLostpaws } from "./lostpaws";
 import { MERIDIAN_HOST, resolveMeridian } from "./meridian";
@@ -21,6 +22,7 @@ const SITES: Record<string, Resolver> = {
   [INTRANET_HOST]: resolveIntranet,
   [SWITCH_HOST]: resolveSwitch,
   [HARBOURCC_HOST]: resolveHarbourcc,
+  [HARBOURMAIL_HOST]: resolveHarbourmail,
 };
 
 export const SITE_HOSTS = Object.keys(SITES);
@@ -42,7 +44,8 @@ export function resolveSite(address: string, progress: RoomProgress, loc: Locale
   const a = normalizeAddress(address);
   if (!a) return null;
   const slash = a.indexOf("/");
-  const host = (slash < 0 ? a : a.slice(0, slash)).replace(/:\d+$/, "");
+  let host = (slash < 0 ? a : a.slice(0, slash)).replace(/:\d+$/, "");
+  if (host === HARBORMAIL_HOST) host = HARBOURMAIL_HOST; // US spelling of Mara's webmail
   const path = slash < 0 ? "" : a.slice(slash);
   const resolver = SITES[host];
   if (!resolver) return null;

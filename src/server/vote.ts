@@ -6,7 +6,7 @@ import { db } from "./db";
 import { decideVote, isEnding, ONLINE_WINDOW_MS, parseProgress, tally } from "./logic";
 import { publish } from "./realtime";
 import { track } from "./analytics";
-import { bonusEpilogue, endingText } from "./content";
+import { bonusEpilogue, endingText, maraEpilogue } from "./content";
 import { recordCaseEnding } from "./cases";
 import { recordLeaderboardEnding } from "./leaderboard";
 
@@ -48,6 +48,7 @@ export async function buildEnding(room: Room): Promise<EndingDTO | null> {
     // A tie can only be resolved by the host, so equal counts imply a host tie-break.
     summary: { ...summary, tieBrokenByHost: summary.EXPOSE === summary.PROTECT },
     bonusEpilogue: progress.solved.includes("bonus-pin") ? bonusEpilogue(loc) : null,
+    maraEpilogue: progress.solved.includes("mara-login") ? maraEpilogue(loc) : null,
   };
 }
 

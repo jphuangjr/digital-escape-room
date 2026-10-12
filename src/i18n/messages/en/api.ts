@@ -61,6 +61,8 @@ const messages = {
   "api.attempt.solved.adminConsole": "Admin console unlocked.",
   "api.decode.badShift": "shift must be an integer.",
   "api.decode.nothingYet": "Nothing to decode yet.",
+  "api.attempt.solved.maraReset": "Temporary password sent to the recovery contact. Check Ada's email.",
+  "api.attempt.solved.maraLogin": "Signed in to Mara's HarbourMail.",
 } as const;
 
 export default messages;

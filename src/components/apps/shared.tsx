@@ -115,3 +115,16 @@ export function writeJSON(key: string, value: unknown): void {
     /* ignore */
   }
 }
+
+/** Badge for the HarbourMail Easter egg (Mara's inbox). */
+export function EnvelopeBadge({ label }: { label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-400/50 bg-sky-400/10 px-3 py-1 text-xs font-semibold text-sky-300">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="3" y="6" width="18" height="12" rx="2" />
+        <path d="M3.5 7 L12 13 L20.5 7" />
+      </svg>
+      {label}
+    </span>
+  );
+}

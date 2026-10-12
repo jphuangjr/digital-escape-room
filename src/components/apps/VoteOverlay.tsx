@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useT } from "@/i18n/client";
 import type { GameCtx } from "@/lib/client/game";
 import type { Ending } from "@/lib/types";
-import { ColorDot, CompassBadge, btnGhost, formatCountdown, useNow } from "./shared";
+import { ColorDot, CompassBadge, EnvelopeBadge, btnGhost, formatCountdown, useNow } from "./shared";
 
 /** Labels and blurbs are the `room.vote.choice.<id>` / `room.vote.blurb.<id>` messages. */
 const CHOICES: { id: Ending; tone: string }[] = [
@@ -184,6 +184,7 @@ function VotingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
 function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => void }) {
   const ending = ctx.state.ending!;
   const hasCompass = ctx.state.progress.badges.includes("compass");
+  const hasEnvelope = ctx.state.progress.badges.includes("envelope");
   const { summary } = ending;
   const t = useT();
   const endingLabel = t(`room.vote.choice.${ending.ending}`);
@@ -249,6 +250,26 @@ function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
                 ))}
               </div>
             </section>
+          )}
+
+          {ending.maraEpilogue && (
+            <section className="rounded-xl border border-sky-400/30 bg-sky-400/5 p-4">
+              <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-sky-300">{t("room.ending.maraHeading")}</h2>
+              <div className="space-y-3 text-[15px] italic leading-relaxed text-zinc-200">
+                {ending.maraEpilogue.split(/\n{2,}/).map((p, i) => (
+                  <p key={i} className="whitespace-pre-wrap">
+                    {p}
+                  </p>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {hasEnvelope && (
+            <div className="flex flex-col items-center gap-2 text-center">
+              <EnvelopeBadge label={t("room.ending.envelopeEarned")} />
+              <p className="text-xs text-zinc-500">{t("room.ending.envelopeNote")}</p>
+            </div>
           )}
 
           {hasCompass && (

@@ -63,6 +63,8 @@ const messages: Record<keyof typeof en, string> = {
   "api.attempt.solved.adminConsole": "Console de administração desbloqueado.",
   "api.decode.badShift": "O deslocamento deve ser um número inteiro.",
   "api.decode.nothingYet": "Ainda não há nada para decifrar.",
+  "api.attempt.solved.maraReset": "Senha temporária enviada ao contato de recuperação. Confira o e-mail da Ada.",
+  "api.attempt.solved.maraLogin": "Você entrou no HarbourMail da Mara.",
 };
 
 export default messages;

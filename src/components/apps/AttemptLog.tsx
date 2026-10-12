@@ -14,6 +14,8 @@ export const PUZZLE_LABELS: Record<PuzzleId, string> = {
   "admin-console": "Admin console",
   "final-phrase": "Dead man's switch",
   "bonus-pin": "Ada's Personal PIN",
+  "mara-reset": "HarbourMail password reset",
+  "mara-login": "Mara's HarbourMail",
 };
 
 export function AttemptLog({ ctx }: { ctx: GameCtx }) {

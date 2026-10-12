@@ -15,6 +15,8 @@ export const PUZZLE_DISCOVERY: Record<PuzzleId, string> = {
   "binary-lesson": "passed the binary lesson (Decoder now reads binary)",
   "admin-console": "broke into the Vault's admin console",
   "final-phrase": "entered the proof of life",
+  "mara-reset": "reset Mara's HarbourMail password",
+  "mara-login": "got into Mara's HarbourMail",
 };
 
 /** The predicate ("cracked the Lost Paws cipher"). Pass `t` for the viewer's language; without it, English. */
@@ -38,6 +40,8 @@ export const PUZZLE_AFFECTS_HOSTS: Record<PuzzleId, string[]> = {
   "binary-lesson": ["harbourcc.edu"],
   "admin-console": ["intranet.meridian-inst.net", "switch.ada-voss.net"],
   "final-phrase": ["switch.ada-voss.net"],
+  "mara-reset": ["harbourmail.net"],
+  "mara-login": ["harbourmail.net"],
 };
 
 /** Space between "who" and "what" in a discovery line: none in Chinese or Japanese, which don't use word spaces. */

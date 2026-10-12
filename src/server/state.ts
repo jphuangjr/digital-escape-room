@@ -15,7 +15,7 @@ import { db } from "./db";
 import { hintCooldownUntil, isFragmentTag, ONLINE_WINDOW_MS, parseProgress } from "./logic";
 import type { Locale } from "@/i18n/config";
 import { getLocale } from "@/i18n/server";
-import { baseEmails, getHint, voicemailsFor } from "./content";
+import { baseEmails, bonusEmails, getHint, voicemailsFor } from "./content";
 import { buildEnding, loadVoteState } from "./vote";
 
 export function isOnline(p: Pick<Player, "lastSeenAt">, now = new Date()): boolean {
@@ -118,7 +118,7 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
     attempts: attemptDTOs,
     hints,
     hintCooldowns,
-    emails: [...baseEmails(loc), ...voicemailsFor(progress, hints, loc)],
+    emails: [...baseEmails(loc), ...voicemailsFor(progress, hints, loc), ...bonusEmails(progress, loc)],
     vote,
     ending,
   };

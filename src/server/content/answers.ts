@@ -57,6 +57,15 @@ export function normalizePhrase(input: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+/** Mara's HarbourMail account (the Easter egg). Resets go to her recovery contact: Ada. */
+export const MARA_ADDRESS = "mara.voss@harbourmail.net";
+export const MARA_TEMP_PASSWORD = "GULL-7316";
+/** "mara.voss", "mara.voss@harbourmail.net" or the US spelling "harbormail.net". */
+const isMaraAddress = (input: string) => {
+  const s = normalize(input).replace(/\s+/g, "");
+  return s === "mara.voss" || s === MARA_ADDRESS || s === "mara.voss@harbormail.net";
+};
+
 export function checkAnswer(puzzleId: PuzzleId, input: string): boolean {
   if (typeof input !== "string") return false;
   switch (puzzleId) {
@@ -85,6 +94,14 @@ export function checkAnswer(puzzleId: PuzzleId, input: string): boolean {
       return normalize(input).replace(/[^a-z]/g, "") === BINARY_PRACTICE_WORD;
     case "admin-console":
       return normalize(input).replace(/[^a-z]/g, "") === ADMIN_PASSWORD;
+    case "mara-reset":
+      return isMaraAddress(input);
+    case "mara-login": {
+      const idx = input.lastIndexOf(":");
+      if (idx < 0) return false;
+      const pass = input.slice(idx + 1).toUpperCase().replace(/[^A-Z0-9]/g, "");
+      return isMaraAddress(input.slice(0, idx)) && pass === MARA_TEMP_PASSWORD.replace(/-/g, "");
+    }
     default:
       return false;
   }

@@ -2,6 +2,8 @@ import "server-only";
 import { pick, type Locale, type Tr } from "@/i18n/config";
 import type { EmailDTO, HintDTO, RoomProgress } from "@/lib/types";
 import { HINT_PUZZLES, HINT_TITLES } from "./hints";
+import { MARA_ADDRESS, MARA_TEMP_PASSWORD } from "./answers";
+import { fill, maraText } from "./mara";
 
 const SISTER = "Mara Voss <mara.voss@harbourmail.net>";
 const ADA = "Ada Voss";
@@ -359,4 +361,21 @@ function formatWhen(iso: string, unknown: string): string {
   const hh = String(d.getUTCHours()).padStart(2, "0");
   const mm = String(d.getUTCMinutes()).padStart(2, "0");
   return `${unknown} · ${hh}:${mm}`;
+}
+
+/** Easter egg: once someone asks HarbourMail for a reset, the temporary password lands here (Ada is Mara's recovery contact). */
+export function bonusEmails(progress: RoomProgress, loc: Locale): EmailDTO[] {
+  if (!progress.solved.includes("mara-reset")) return [];
+  const r = maraText(loc).resetEmail;
+  const values = { address: MARA_ADDRESS, password: MARA_TEMP_PASSWORD };
+  return [
+    {
+      id: "email-harbourmail-reset",
+      from: "HarbourMail Accounts <no-reply@harbourmail.net>",
+      subject: fill(r.subject, values),
+      date: r.date,
+      body: r.body.map((l) => fill(l, values)).join("\n"),
+      kind: "email",
+    },
+  ];
 }

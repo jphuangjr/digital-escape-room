@@ -126,6 +126,14 @@ function blockToHtml(b: Block, d: number): string[] {
       return [`${i}<div class="notice notice-${b.tone}">${esc(b.text)}</div>`];
     case "footer":
       return [`${i}<footer>${esc(b.text)}</footer>`];
+    case "mail":
+      return [
+        `${i}<details class="message">`,
+        `${i}  <summary>${esc(b.party)} — ${esc(b.subject)} <time>${esc(b.date)}</time></summary>`,
+        ...(b.tag ? [`${i}  <p class="tag">${esc(b.tag)}</p>`] : []),
+        ...b.body.split("\n").map((l) => `${i}  <p>${esc(l)}</p>`),
+        `${i}</details>`,
+      ];
     case "compass":
       return [
         `${i}<svg class="compass" viewBox="0 0 64 64" aria-hidden="true">`,

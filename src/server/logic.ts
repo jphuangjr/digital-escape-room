@@ -70,7 +70,11 @@ export const PUZZLE_IDS: PuzzleId[] = [
   "admin-console",
   "final-phrase",
   "bonus-pin",
+  "mara-reset",
+  "mara-login",
 ];
+/** Easter-egg puzzles: optional side story, left out of leaderboard answer counts. */
+export const BONUS_PUZZLE_IDS: PuzzleId[] = ["mara-reset", "mara-login"];
 export const FRAGMENT_TAGS: FragmentTag[] = ["name", "year", "id", "cipher", "address"];
 
 export function initialProgress(): RoomProgress {
