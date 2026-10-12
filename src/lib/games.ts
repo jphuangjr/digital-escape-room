@@ -13,8 +13,11 @@ export interface GameInfo {
   duration: string;
   difficulty: "Easy" | "Medium" | "Hard";
   tone: string;
-  /** "live" games link to their page; "soon" games show as teasers. */
-  status: "live" | "soon";
+  /**
+   * "live" games link to their page; "soon" games show as teasers; "staging" games are in development:
+   * only admins (ACCOUNT_ADMIN) see them, open their page or host them.
+   */
+  status: "live" | "soon" | "staging";
   /** The game's own landing page (create/join a room). */
   href: string;
 }
@@ -37,7 +40,25 @@ export const GAMES: GameInfo[] = [
     status: "live",
     href: "/play/ada-voss",
   },
+  {
+    id: "nightingale-express",
+    title: "The Nightingale Express",
+    tagline: "A sapphire is missing. They locked you in with the evidence.",
+    blurb:
+      "1934, the overnight sleeper to the border. You wake in Compartment 12B with the door locked from outside and an empty jewel pouch under your berth. Search the compartment, then the dining car, and name the thief before the police board at dawn.",
+    players: "Solo or up to 8",
+    duration: "45–60 min",
+    difficulty: "Medium",
+    tone: "Art Deco mystery",
+    status: "staging",
+    href: "/play/nightingale-express",
+  },
 ];
+
+/** Games a viewer may see and host: everything that isn't in staging, plus staging for admins. */
+export function visibleGames(isAdmin: boolean): GameInfo[] {
+  return GAMES.filter((g) => g.status !== "staging" || isAdmin);
+}
 
 export function getGame(gameId: string): GameInfo | undefined {
   return GAMES.find((g) => g.id === gameId);

@@ -17,6 +17,7 @@ import type { Locale } from "@/i18n/config";
 import { getLocale } from "@/i18n/server";
 import { baseEmails, bonusEmails, getHint, voicemailsFor } from "./content";
 import { buildEnding, loadVoteState } from "./vote";
+import { parseScene, sceneDTO, TRAIN_GAME_ID } from "./train/scene";
 
 export function isOnline(p: Pick<Player, "lastSeenAt">, now = new Date()): boolean {
   return now.getTime() - p.lastSeenAt.getTime() <= ONLINE_WINDOW_MS;
@@ -118,8 +119,10 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
     attempts: attemptDTOs,
     hints,
     hintCooldowns,
-    emails: [...baseEmails(loc), ...voicemailsFor(progress, hints, loc), ...bonusEmails(progress, loc)],
+    emails:
+      room.gameId === TRAIN_GAME_ID ? [] : [...baseEmails(loc), ...voicemailsFor(progress, hints, loc), ...bonusEmails(progress, loc)],
     vote,
     ending,
+    ...(room.gameId === TRAIN_GAME_ID ? { scene: sceneDTO(parseScene(room.scene)) } : {}),
   };
 }

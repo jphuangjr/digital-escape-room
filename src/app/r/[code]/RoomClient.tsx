@@ -8,6 +8,8 @@ import { apiFetch } from "@/lib/client/game";
 import { useRoomChannel } from "@/lib/realtime/client";
 import { CHAT_MESSAGE_EVENT, CHAT_POLL_EVENT } from "@/lib/client/chat";
 import { GameShell } from "@/components/shell/GameShell";
+import { TrainShell } from "@/components/train/TrainShell";
+import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { CompassMark } from "@/components/shell/icons";
 import { FormattedMessage } from "react-intl";
 import { LanguageSwitcher, useT } from "@/i18n/client";
@@ -31,7 +33,7 @@ export const AVATAR_COLORS = [
   "#eab308",
 ];
 
-export function RoomClient({ code }: { code: string }) {
+export function RoomClient({ code, gameId = "ada-voss" }: { code: string; gameId?: string }) {
   const t = useT();
   const [phase, setPhase] = useState<Phase>({ kind: "loading" });
 
@@ -71,7 +73,7 @@ export function RoomClient({ code }: { code: string }) {
           </button>
         </Splash>
       )}
-      {phase.kind === "join" && <JoinForm code={code} onJoined={load} onNotFound={() => setPhase({ kind: "notfound" })} />}
+      {phase.kind === "join" && <JoinForm code={code} gameId={gameId} onJoined={load} onNotFound={() => setPhase({ kind: "notfound" })} />}
       {phase.kind === "ready" && <LiveRoom code={code} state={phase.state} load={load} />}
     </div>
   );
@@ -99,6 +101,7 @@ function LiveRoom({ code, state, load }: { code: string; state: RoomState; load:
     [],
   );
   useRoomChannel(code, onEvent);
+  if (state.gameId === TRAIN_GAME_ID && state.scene) return <TrainShell code={code} state={state} refresh={load} />;
   return <GameShell code={code} state={state} refresh={load} />;
 }
 
@@ -133,10 +136,12 @@ function NotFound() {
 
 function JoinForm({
   code,
+  gameId,
   onJoined,
   onNotFound,
 }: {
   code: string;
+  gameId: string;
   onJoined: () => Promise<void>;
   onNotFound: () => void;
 }) {
@@ -210,7 +215,7 @@ function JoinForm({
           <CompassMark className="h-10 w-10 text-amber-500" />
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-amber-500/80">{t("site.room.caseFile")}</p>
-            <h1 className="font-serif text-xl text-stone-100">{gameText(t, getGame("ada-voss")!, "title")}</h1>
+            <h1 className="font-serif text-xl text-stone-100">{gameText(t, getGame(gameId) ?? getGame("ada-voss")!, "title")}</h1>
           </div>
         </div>
         <p className="mt-4 text-sm text-stone-400">

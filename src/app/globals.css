@@ -271,3 +271,44 @@ button {
 @keyframes vi-exit {
   to { opacity: 0; transform: scale(2.6); visibility: hidden; pointer-events: none; }
 }
+
+/* ---------- The Nightingale Express (src/components/train) ---------- */
+.nx-rain path {
+  animation: nx-rain 0.9s linear infinite;
+}
+.nx-rain path:nth-child(2n) {
+  animation-delay: -0.45s;
+}
+.nx-rain path:nth-child(3n) {
+  animation-delay: -0.2s;
+}
+@keyframes nx-rain {
+  from { transform: translate(0, -24px); opacity: 0; }
+  20% { opacity: 1; }
+  to { transform: translate(-10px, 30px); opacity: 0; }
+}
+.nx-lights circle {
+  animation: nx-lights 3.2s linear infinite;
+}
+.nx-lights circle:nth-child(2) { animation-delay: -1.1s; }
+.nx-lights circle:nth-child(3) { animation-delay: -2.3s; }
+@keyframes nx-lights {
+  from { transform: translateX(170px); opacity: 0; }
+  10%, 90% { opacity: 1; }
+  to { transform: translateX(-170px); opacity: 0; }
+}
+.nx-steam {
+  animation: nx-steam 2.4s ease-in-out infinite;
+}
+@keyframes nx-steam {
+  0%, 100% { transform: translateY(0); opacity: 0.45; }
+  50% { transform: translateY(-6px); opacity: 0.8; }
+}
+.nx-shake {
+  animation: nx-shake 0.45s ease-in-out;
+}
+@keyframes nx-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}

@@ -24,6 +24,11 @@ function describeView(view: string | null, t: ReturnType<typeof useT>): string {
     return t("room.view.app", { app: name });
   }
   if (view === "desktop") return t("room.view.desktop");
+  // The Nightingale Express (staging, English only): "train:door", "train:corridor".
+  if (view.startsWith("train:")) {
+    const w = view.slice(6);
+    return w === "corridor" ? "the corridor" : `the ${w} wall`;
+  }
   return view;
 }
 
@@ -38,6 +43,7 @@ export function RoomSheet({
   setTab,
   chat,
   onTour,
+  tabs,
 }: {
   ctx: GameCtx;
   open: boolean;
@@ -45,7 +51,10 @@ export function RoomSheet({
   tab: RoomTab;
   setTab: (t: RoomTab) => void;
   chat: Chat;
-  onTour: () => void;
+  /** Replays the first-time tour; the button is hidden when absent. */
+  onTour?: () => void;
+  /** Tabs to show (default: all). Games without Ada's hints or case log pass a subset. */
+  tabs?: RoomTab[];
 }) {
   const [copied, setCopied] = useState(false);
   const t = useT();
@@ -118,7 +127,7 @@ export function RoomSheet({
               ["attempts", t("room.tab.attempts")],
               ["hints", t("room.tab.hints")],
             ] as [Tab, string][]
-          ).map(([id, label]) => (
+          ).filter(([id]) => !tabs || tabs.includes(id)).map(([id, label]) => (
             <button
               key={id}
               role="tab"
@@ -186,14 +195,14 @@ export function RoomSheet({
                 <LanguageSwitcher tone="shell" />
               </div>
               <div className="mt-4 border-t border-stone-800 pt-4">
-                <button
+                {onTour && <button
                   type="button"
                   onClick={onTour}
                   className="mb-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-amber-500/40 text-sm text-amber-300 active:bg-amber-500/10"
                 >
                   <span aria-hidden>?</span>
                   {t("tour.replay")}
-                </button>
+                </button>}
                 <button
                   type="button"
                   onClick={() => {
