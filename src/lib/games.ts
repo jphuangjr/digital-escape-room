@@ -53,6 +53,19 @@ export const GAMES: GameInfo[] = [
     status: "staging",
     href: "/play/nightingale-express",
   },
+  {
+    id: "atlas-silent-worlds",
+    title: "The Atlas of Silent Worlds",
+    tagline: "The doors beneath the Observatory lead somewhere else.",
+    blurb:
+      "You wake in a deserted observatory on an unmapped island. Beneath it, ancient doorways called Thresholds open onto other worlds, and someone fragmented the network on purpose. Learn the rule that governs the gates, and decide what to do with what you find.",
+    players: "Solo or up to 8",
+    duration: "90–120 min",
+    difficulty: "Hard",
+    tone: "Atmospheric mystery",
+    status: "staging",
+    href: "/play/atlas-silent-worlds",
+  },
 ];
 
 /** Games a viewer may see and host: everything that isn't in staging, plus staging for admins. */
