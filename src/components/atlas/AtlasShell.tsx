@@ -14,11 +14,11 @@ import { LockDial } from "@/components/train/parts";
 import { useT } from "@/i18n/client";
 import { AtlasDocView, GatePanel, MirrorGrid, TankPanel, useSecondsUntil, ValvePanel } from "./parts";
 import { CorePanel, EndingPanel, PlatePanel, VotePanel } from "./finale";
-import { PLACE_TINT, SPOTS } from "./walls";
+import { WallArt, type WallState } from "./art";
+import { SPOTS } from "./walls";
 
 /**
- * The room screen for The Atlas of Silent Worlds (staging): one wall at a time with placeholder art, tap to
- * look closer, a shared inventory, the Atlas of places reached. Where each player stands is their own;
+ * The room screen for The Atlas of Silent Worlds (staging): one illustrated wall at a time, tap to look closer, a shared inventory, the Atlas of places reached. Where each player stands is their own;
  * everything found or opened is shared with the room. English only while in staging.
  */
 
@@ -49,6 +49,12 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
   const [itemOpen, setItemOpen] = useState<ItemId | null>(null);
   const [notesOpen, setNotesOpen] = useState(false);
   const [notebookOpen, setNotebookOpen] = useState(false);
+  const [showSpots, setShowSpots] = useState(false);
+  useEffect(() => {
+    if (!showSpots) return;
+    const id = setTimeout(() => setShowSpots(false), 1800);
+    return () => clearTimeout(id);
+  }, [showSpots]);
   const [placesOpen, setPlacesOpen] = useState(false);
   const [intro, setIntro] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -171,6 +177,14 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
   const swipe = useRef<{ x: number; y: number } | null>(null);
   const others = state.players.filter((p) => p.online && p.id !== state.me.id && p.currentView === view);
   const nextHint = scene.nextHints[here] ?? null;
+  const wallState: WallState = useMemo(
+    () => ({
+      flags: scene.flags,
+      takes: new Set(Object.entries(scene.closeups).flatMap(([h, c]) => (c && c.takes.length ? [h as HotspotId] : []))),
+      tanks: scene.closeups.tanks?.tanks?.levels ?? null,
+    }),
+    [scene.flags, scene.closeups],
+  );
 
   return (
     <GameContext.Provider value={ctx}>
@@ -226,24 +240,15 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
             if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - s.y) * 1.5) turn(dx < 0 ? 1 : -1);
           }}
         >
-          <div className={`relative aspect-[3/4] h-full max-h-full max-w-full bg-gradient-to-b ${PLACE_TINT[here]}`}>
-            <p className="absolute inset-x-0 top-3 text-center font-mono text-[10px] uppercase tracking-[0.35em] text-[#6f9aa6]" aria-hidden>
-              {t(`atlas.wall.${wall}`)}
-            </p>
-            {SPOTS[wall].map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setCloseup(s.id)}
-                className="absolute flex flex-col items-center justify-center gap-1 rounded-xl border border-[#9fd3c7]/30 bg-[#0d1f26]/70 text-center outline-none ring-[#f4e7b5]/70 focus-visible:ring-2 active:bg-[#1f3640]"
-                style={{ left: `${(s.x / 300) * 100}%`, top: `${(s.y / 400) * 100}%`, width: `${(s.w / 300) * 100}%`, height: `${(s.h / 400) * 100}%` }}
-              >
-                <span className="text-3xl leading-none" aria-hidden>
-                  {s.icon}
-                </span>
-                <span className="px-1 text-xs text-[#d6f2ec]">{t(`atlas.spot.${s.id}`)}</span>
-              </button>
-            ))}
+          <div className="relative aspect-[3/4] h-full max-h-full max-w-full">
+            <WallArt
+              wall={wall}
+              state={wallState}
+              label={t("atlas.wallAria", { wall: t(`atlas.wall.${wall}`) })}
+              spots={SPOTS[wall].map((s) => ({ ...s, label: t(`atlas.spot.${s.id}`) }))}
+              pulse={showSpots}
+              onTap={setCloseup}
+            />
             {others.length > 0 && (
               <div className="absolute right-2 top-2 flex -space-x-1.5" aria-label={t("atlas.lookingHere", { names: others.map((p) => p.displayName).join(", ") })}>
                 {others.map((p) => (
@@ -261,6 +266,14 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
               </button>
               <button type="button" aria-label={t("atlas.turnRight")} onClick={() => turn(1)} className="absolute right-1 top-1/2 flex h-14 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-black/40 text-2xl text-[#f4e7b5] active:bg-black/60">
                 ›
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowSpots(true)}
+                aria-label={t("atlas.showSpots")}
+                className="absolute bottom-1 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-base active:bg-black/70"
+              >
+                👁
               </button>
               <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5" aria-hidden>
                 {walls.map((w, i) => (

@@ -71,6 +71,8 @@ const messages = {
   "atlas.spot.book-halloran": "Halloran's registry",
   "atlas.spot.desk": "Registrar's desk",
   "atlas.spot.seed": "Dormant seed",
+  "atlas.wallAria": "{wall} wall",
+  "atlas.showSpots": "Show what you can tap",
   "atlas.turnLeft": "Turn left",
   "atlas.turnRight": "Turn right",
   "atlas.places": "Places",
