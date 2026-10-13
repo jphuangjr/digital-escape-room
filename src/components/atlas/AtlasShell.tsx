@@ -9,6 +9,7 @@ import { useChat } from "@/lib/client/chat";
 import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
+import { NotebookSheet } from "@/components/scene/NotebookSheet";
 import { LockDial } from "@/components/train/parts";
 import { useT } from "@/i18n/client";
 import { AtlasDocView, GatePanel, useSecondsUntil, ValvePanel } from "./parts";
@@ -34,6 +35,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
   const [closeup, setCloseup] = useState<HotspotId | null>(null);
   const [itemOpen, setItemOpen] = useState<ItemId | null>(null);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [notebookOpen, setNotebookOpen] = useState(false);
   const [placesOpen, setPlacesOpen] = useState(false);
   const [intro, setIntro] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -164,6 +166,14 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
           <p className="min-w-0 flex-1 truncate font-serif text-base text-[#f4e7b5]">{t("atlas.title", { place: placeName, wall: t(`atlas.wall.${wall}`) })}</p>
           <button
             type="button"
+            onClick={() => setNotebookOpen(true)}
+            aria-label={t("shell.app.notes")}
+            className="flex h-10 w-10 items-center justify-center rounded-md active:bg-[#1f3640]"
+          >
+            📝
+          </button>
+          <button
+            type="button"
             onClick={() => setNotesOpen(true)}
             aria-label={t("atlas.notesAria")}
             className="relative flex h-10 w-10 items-center justify-center rounded-md active:bg-[#1f3640]"
@@ -260,6 +270,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
 
         {closeup && <CloseupSheet id={closeup} scene={scene} busy={busy} shake={shake} onClose={() => setCloseup(null)} act={act} go={go} />}
         {itemOpen && <ItemSheet item={scene.inventory.find((i) => i.id === itemOpen) ?? null} onClose={() => setItemOpen(null)} />}
+        {notebookOpen && <NotebookSheet ctx={ctx} onClose={() => setNotebookOpen(false)} closeLabel={t("atlas.close")} />}
         {notesOpen && <NotesSheet scene={scene} here={here} busy={busy} onClose={() => setNotesOpen(false)} onAsk={() => void act({ type: "hint", where: here })} />}
         {placesOpen && <PlacesSheet scene={scene} here={here} onClose={() => setPlacesOpen(false)} onGo={go} />}
         {intro && (
@@ -273,7 +284,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
           />
         )}
         <RoomSheet ctx={ctx} open={roomOpen} onClose={() => setRoomOpen(false)} tab={roomTab} setTab={setRoomTab} chat={chat} tabs={TABS} />
-        <Toasts items={toasts} onDismiss={(id) => setToasts((ts) => ts.filter((x) => x.id !== id))} placement={closeup || itemOpen || roomOpen ? "top" : "bottom"} />
+        <Toasts items={toasts} onDismiss={(id) => setToasts((ts) => ts.filter((x) => x.id !== id))} placement={closeup || itemOpen || roomOpen || notebookOpen ? "top" : "bottom"} />
       </div>
     </GameContext.Provider>
   );
