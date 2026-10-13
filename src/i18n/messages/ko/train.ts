@@ -4,6 +4,7 @@ const messages: Record<keyof typeof en, string> = {
   "train.room.12b": "12B 객실",
   "train.room.dining": "식당차",
   "train.room.corridor": "복도",
+  "train.room.boarding": "나이팅게일 익스프레스에 탑승하는 중…",
   "train.title": "{room} · {wall}",
   "train.wall.window": "창문",
   "train.wall.door": "문",

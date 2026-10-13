@@ -4,6 +4,7 @@ const messages: Record<keyof typeof en, string> = {
   "train.room.12b": "Compartimento 12B",
   "train.room.dining": "Vagón restaurante",
   "train.room.corridor": "El pasillo",
+  "train.room.boarding": "Subiendo al Expreso Nightingale…",
   "train.title": "{room} · {wall}",
   "train.wall.window": "Ventanilla",
   "train.wall.door": "Puerta",

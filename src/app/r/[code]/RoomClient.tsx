@@ -58,7 +58,7 @@ export function RoomClient({ code, gameId = "ada-voss" }: { code: string; gameId
 
   return (
     <div className="min-h-[100dvh] bg-[#0b0a08] text-stone-200">
-      {phase.kind === "loading" && <Splash text={t("site.room.booting")} />}
+      {phase.kind === "loading" && <Splash text={t(gameId === TRAIN_GAME_ID ? "train.room.boarding" : "site.room.booting")} />}
       {phase.kind === "notfound" && <NotFound />}
       {phase.kind === "error" && (
         <Splash text={phase.status ? t("site.room.serverError", { status: phase.status }) : t("site.room.networkError")}>
