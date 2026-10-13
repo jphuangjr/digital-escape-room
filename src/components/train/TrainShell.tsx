@@ -14,7 +14,7 @@ import { CloseIcon } from "@/components/shell/icons";
 import { NotebookSheet } from "@/components/scene/NotebookSheet";
 import { useT } from "@/i18n/client";
 import { Leaderboard } from "@/components/site/Leaderboard";
-import { CorridorArt, HOTSPOTS, WallArt } from "./walls";
+import { CorridorArt, WallArt } from "./walls";
 import { CloseupDocView, ItemIcon, ItemReading, LockDial } from "./parts";
 import { setSoundPreferred, soundPreferred, TrainAmbience } from "./sound";
 
@@ -268,23 +268,17 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
         >
           <div className="relative aspect-[3/4] h-full max-h-full max-w-full" data-tour="nx-wall">
             {place === "corridor" ? (
-              <CorridorArt />
+              <CorridorArt onDining={() => setPlace("dining")} />
             ) : (
-              <>
-                <WallArt wall={wall} flags={scene.flags} mirrorLetters={scene.mirrorLetters} pouchHere={pouchHere} scorecardHere={scorecardHere} />
-                {HOTSPOTS[wall].map((h) => (
-                  <button
-                    key={h.id}
-                    type="button"
-                    aria-label={t(`train.spot.${h.id}`)}
-                    onClick={() => setCloseup(h.id)}
-                    className={`absolute rounded-lg outline-none ring-[#ecd27a]/70 transition hover:ring-2 focus-visible:ring-2 active:bg-[#ecd27a]/15 ${
-                      showSpots ? "animate-pulse bg-[#ecd27a]/15 ring-2" : ""
-                    }`}
-                    style={{ left: `${(h.x / 300) * 100}%`, top: `${(h.y / 400) * 100}%`, width: `${(h.w / 300) * 100}%`, height: `${(h.h / 400) * 100}%` }}
-                  />
-                ))}
-              </>
+              <WallArt
+                wall={wall}
+                flags={scene.flags}
+                mirrorLetters={scene.mirrorLetters}
+                pouchHere={pouchHere}
+                scorecardHere={scorecardHere}
+                pulse={showSpots}
+                onTap={setCloseup}
+              />
             )}
             {here.length > 0 && (
               <div className="absolute right-2 top-2 flex -space-x-1.5" aria-label={t("train.lookingHere", { names: here.map((p) => p.displayName).join(", ") })}>
@@ -347,18 +341,6 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             </>
           ) : (
             <>
-              {/* the dining car door at the end of the corridor is itself the way in */}
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div className="relative aspect-[3/4] h-full max-h-full max-w-full">
-                  <button
-                    type="button"
-                    aria-label={t("train.corridor.dining")}
-                    onClick={() => setPlace("dining")}
-                    className="pointer-events-auto absolute rounded-md outline-none ring-[#ecd27a]/70 hover:ring-2 focus-visible:ring-2 active:bg-[#ecd27a]/15"
-                    style={{ left: `${(126 / 300) * 100}%`, top: `${(158 / 400) * 100}%`, width: `${(48 / 300) * 100}%`, height: `${(100 / 400) * 100}%` }}
-                  />
-                </div>
-              </div>
               <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 bg-gradient-to-t from-[#0b0806] via-[#0b0806]/80 to-transparent px-4 pb-3 pt-12">
                 <p className="text-center font-serif text-sm italic text-stone-300">{t("train.corridor.text")}</p>
                 <div className="mx-auto flex w-full max-w-sm gap-2">
