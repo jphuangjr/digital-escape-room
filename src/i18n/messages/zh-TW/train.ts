@@ -157,7 +157,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.nightingale-express.blurb": "1934 年，開往邊境的夜行臥鋪列車。你在 12B 號包廂醒來，門從外面鎖上，臥鋪底下還有一個空空的珠寶袋。搜查包廂，再搜查餐車，趕在警方黎明登車前指認出竊賊。",
   "site.game.nightingale-express.players": "單人或最多 8 人",
   "site.game.nightingale-express.duration": "45–60 分鐘",
-  "site.game.nightingale-express.difficulty": "中等",
+  "site.game.nightingale-express.difficulty": "簡單",
   "site.game.nightingale-express.tone": "裝飾藝術風懸疑",
 };
 

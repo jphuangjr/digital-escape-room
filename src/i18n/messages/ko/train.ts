@@ -157,7 +157,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.nightingale-express.blurb": "1934년, 국경으로 향하는 야간 침대열차. 눈을 떠 보니 12B 객실, 문은 밖에서 잠겨 있고 침대 밑에는 빈 보석 주머니가 놓여 있어요. 객실을, 이어서 식당차를 샅샅이 뒤져서, 새벽에 경찰이 오르기 전에 도둑의 이름을 밝혀내세요.",
   "site.game.nightingale-express.players": "혼자서 또는 최대 8명",
   "site.game.nightingale-express.duration": "45–60분",
-  "site.game.nightingale-express.difficulty": "보통",
+  "site.game.nightingale-express.difficulty": "쉬움",
   "site.game.nightingale-express.tone": "아르데코 미스터리",
 };
 

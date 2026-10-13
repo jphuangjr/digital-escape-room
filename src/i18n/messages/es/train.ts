@@ -157,7 +157,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.nightingale-express.blurb": "1934, el coche cama nocturno hacia la frontera. Despiertas en el Compartimento 12B con la puerta cerrada desde fuera y una bolsita para joyas vacía bajo tu litera. Registra el compartimento, luego el vagón restaurante, y nombra al ladrón antes de que la policía suba al amanecer.",
   "site.game.nightingale-express.players": "Solo o hasta 8",
   "site.game.nightingale-express.duration": "45–60 min",
-  "site.game.nightingale-express.difficulty": "Media",
+  "site.game.nightingale-express.difficulty": "Fácil",
   "site.game.nightingale-express.tone": "Misterio art déco",
 };
 
