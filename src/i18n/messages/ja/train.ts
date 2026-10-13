@@ -157,7 +157,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.nightingale-express.blurb": "1934年、国境行きの夜行寝台列車。目を覚ますと、そこは外から鍵を掛けられた12B号室。寝台の下には空の宝石袋。個室を、そして食堂車を調べ、夜明けに警察が乗り込んでくる前に犯人を名指ししましょう。",
   "site.game.nightingale-express.players": "1人〜8人",
   "site.game.nightingale-express.duration": "45〜60分",
-  "site.game.nightingale-express.difficulty": "ふつう",
+  "site.game.nightingale-express.difficulty": "かんたん",
   "site.game.nightingale-express.tone": "アール・デコ・ミステリー",
 };
 

@@ -48,7 +48,7 @@ export const GAMES: GameInfo[] = [
       "1934, the overnight sleeper to the border. You wake in Compartment 12B with the door locked from outside and an empty jewel pouch under your berth. Search the compartment, then the dining car, and name the thief before the police board at dawn.",
     players: "Solo or up to 8",
     duration: "45–60 min",
-    difficulty: "Medium",
+    difficulty: "Easy",
     tone: "Art Deco mystery",
     status: "staging",
     href: "/play/nightingale-express",

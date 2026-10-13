@@ -157,7 +157,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.nightingale-express.blurb": "1934, o trem-leito noturno rumo à fronteira. Você acorda na Cabine 12B com a porta trancada por fora e uma bolsinha de joias vazia debaixo do seu leito. Vasculhe a cabine, depois o vagão-restaurante, e aponte o ladrão antes que a polícia embarque ao amanhecer.",
   "site.game.nightingale-express.players": "Sozinho ou até 8",
   "site.game.nightingale-express.duration": "45–60 min",
-  "site.game.nightingale-express.difficulty": "Média",
+  "site.game.nightingale-express.difficulty": "Fácil",
   "site.game.nightingale-express.tone": "Mistério art déco",
 };
 
