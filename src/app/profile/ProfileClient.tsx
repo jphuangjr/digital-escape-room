@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useIntl } from "react-intl";
 import type { ProfileResponse } from "@/lib/types";
-import { formatDuration, localGameTitle } from "@/lib/games";
-import { TRAIN_GAME_ID } from "@/lib/train/types";
+import { endingLabel, formatDuration, localGameTitle } from "@/lib/games";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { GoogleButton, useMe } from "@/components/site/Account";
 
@@ -61,7 +60,7 @@ function Profile({ data }: { data: ProfileResponse }) {
   const intl = useIntl();
   const date = (iso: string) => intl.formatDate(iso, { year: "numeric", month: "short", day: "numeric" });
   const earned = data.achievements.filter((a) => a.earnedAt);
-  const ending = (gameId: string, e: string) => (gameId === TRAIN_GAME_ID ? t(`train.suspect.${e}`) : t("site.cases.ending", { ending: e }));
+  const ending = (gameId: string, e: string) => endingLabel(t, gameId, e);
 
   return (
     <>

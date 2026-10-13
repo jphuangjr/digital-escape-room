@@ -69,6 +69,11 @@ export const SPOTS: Record<WallId, Spot[]> = {
     { id: "chest", icon: "🧰", x: 40, y: 200, w: 120, h: 120 },
     { id: "altar", icon: "🛐", x: 180, y: 160, w: 90, h: 120 },
   ],
+  "cathedral-nave": [{ id: "core", icon: "🌐", x: 50, y: 70, w: 200, h: 240 }],
+  "cathedral-door": [
+    { id: "lectern", icon: "📜", x: 30, y: 160, w: 110, h: 150 },
+    { id: "cathedral-gate", icon: "⬛", x: 160, y: 90, w: 110, h: 220 },
+  ],
   "pelagic-arrival": [{ id: "pelagic-gate", icon: "🌊", x: 60, y: 100, w: 180, h: 200 }],
   "pelagic-airlock": [
     { id: "tanks", icon: "🛢", x: 30, y: 80, w: 150, h: 220 },
@@ -97,5 +102,6 @@ export const PLACE_TINT: Record<string, string> = {
   meridian: "from-[#2b2213] to-[#16100a]",
   sanctum: "from-[#2b1d10] to-[#120a05]",
   archive: "from-[#0d2a2a] to-[#05120f]",
+  cathedral: "from-[#1a1424] to-[#06040a]",
   pelagic: "from-[#0f1c2e] to-[#070d18]",
 };

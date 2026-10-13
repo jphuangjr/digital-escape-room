@@ -334,6 +334,32 @@ export function ValvePanel({ valves, busy, onTurn }: { valves: Record<ValveId, b
   );
 }
 
+/** One gate ring: seven glyph buttons, one chosen. */
+export function RingPicker({ label, value, onChange }: { label: string; value: GlyphId; onChange: (g: GlyphId) => void }) {
+  const t = useT();
+  return (
+    <fieldset>
+      <legend className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.25em] text-[#9fd3c7]">{label}</legend>
+      <div className="grid grid-cols-7 gap-1">
+        {GLYPHS.map((g) => (
+          <button
+            key={g.id}
+            type="button"
+            aria-pressed={value === g.id}
+            aria-label={t("atlas.gate.pick", { ring: label, glyph: g.char })}
+            onClick={() => onChange(g.id)}
+            className={`flex h-11 items-center justify-center rounded-md border text-xl ${
+              value === g.id ? "border-[#f4e7b5] bg-[#3a3320] text-[#f4e7b5]" : "border-[#2c4a55] bg-[#0b1a1f] text-stone-300"
+            }`}
+          >
+            {g.char}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
 /** The Threshold's two rings and lever. Glyphs are sent by id; their values never reach the client. */
 export function GatePanel({
   powered,
@@ -350,31 +376,10 @@ export function GatePanel({
   const [outer, setOuter] = useState<GlyphId>(GLYPHS[0].id);
   const [inner, setInner] = useState<GlyphId>(GLYPHS[0].id);
   const wait = useSecondsUntil(jammedUntil);
-  const ring = (label: string, value: GlyphId, set: (g: GlyphId) => void) => (
-    <fieldset>
-      <legend className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.25em] text-[#9fd3c7]">{label}</legend>
-      <div className="grid grid-cols-7 gap-1">
-        {GLYPHS.map((g) => (
-          <button
-            key={g.id}
-            type="button"
-            aria-pressed={value === g.id}
-            aria-label={t("atlas.gate.pick", { ring: label, glyph: g.char })}
-            onClick={() => set(g.id)}
-            className={`flex h-11 items-center justify-center rounded-md border text-xl ${
-              value === g.id ? "border-[#f4e7b5] bg-[#3a3320] text-[#f4e7b5]" : "border-[#2c4a55] bg-[#0b1a1f] text-stone-300"
-            }`}
-          >
-            {g.char}
-          </button>
-        ))}
-      </div>
-    </fieldset>
-  );
   return (
     <div className={`space-y-3 rounded-xl border p-3 ${powered ? "border-[#9fd3c7]/60 bg-[#0d2228]" : "border-[#2c4a55] bg-[#0b1418] opacity-80"}`}>
-      {ring(t("atlas.gate.outer"), outer, setOuter)}
-      {ring(t("atlas.gate.inner"), inner, setInner)}
+      <RingPicker label={t("atlas.gate.outer")} value={outer} onChange={setOuter} />
+      <RingPicker label={t("atlas.gate.inner")} value={inner} onChange={setInner} />
       <button
         type="button"
         disabled={busy || wait > 0}

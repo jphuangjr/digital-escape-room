@@ -171,6 +171,18 @@ Reading Room (the hall and the registry).
 The three optional secrets are now the Meridian vault (needs the Verdant lens), the Library glass (needs the
 Meridian hand mirror) and the Verdant seed (needs Library sea water).
 
+## Act III as built (answer key)
+| Step | Solution |
+|---|---|
+| The seven sockets | Back in the Observatory, seat each seal in its own Age's node socket (Halloran's registry): Leaf in ◈, Sun in ≈, Tide in ☉. Wrong sockets refuse the seal (three in a row and the plate needs a minute). All three seated restores the Cathedral's registration; the △ socket lights. |
+| The route | From the Observatory gate (0), the Cathedral (△ = 6) needs 2R + S ≡ 6 (mod 7): e.g. outer ☉, inner ☾. Several settings work. |
+| The Atlas Core | Corin Ashe's page on the lectern (he wrote the journal) sets out the choice. **Call the room to decide** opens the vote: Restore or Sever, plus Reroute if it has been unlocked. |
+| Reroute (optional) | Needs all three secrets. Set each Age gate so it routes home to the Observatory (0) from its own number: Verdant (1) ☉/☾, Meridian (2) ≈/◈, Pelagic (3) ≈/☾ (other settings that come to 0 also work). |
+| The vote | Everyone online votes; a clear majority wins, the host breaks a tie. Every ending counts as an escape on the leaderboard. Case badges: `atlas-secrets` (all three secrets), `atlas-reroute`. |
+
+Act III's notes are only offered once they can be acted on (the plate after every Age's seal is found, the route
+after the registration is restored).
+
 Glyph values (taught in the Verdant Archive, server only): ☾ 0, ◈ 1, ≈ 2, ☉ 3, ⌘ 4, ✶ 5, △ 6. Nodes: 0 Observatory,
 1 Verdant, 2 Meridian, 3 Pelagic, 4–5 empty, 6 Null Cathedral (registration revoked). From the Observatory
 (origin 0) the Cathedral needs 2R + S ≡ 6 (mod 7), e.g. ☉/☾.
@@ -179,7 +191,7 @@ Glyph values (taught in the Verdant Archive, server only): ☾ 0, ◈ 1, ≈ 2, 
 1. Shared scene engine, with Nightingale ported onto it. **Done.**
 2. Atlas added to `GAMES` as `staging`; router and tests; Act I playable with placeholder art. **Done.**
 3. One PR per Age. Verdant Archive, Sunken Meridian and Pelagic Library **done**.
-4. Null Cathedral, endings, leaderboard and case records.
+4. Null Cathedral, endings, leaderboard and case records. **Done.**
 5. Art pass.
 6. Playtests, using the stuck-puzzle analytics to tune timing and hints.
 7. The five other languages, once the English text stops changing.

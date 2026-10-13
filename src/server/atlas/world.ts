@@ -1,5 +1,5 @@
 import "server-only";
-import type { AtlasDoc, ChartStar, GlyphId, HotspotId, ItemId, LocationId, LockId } from "@/lib/atlas/types";
+import type { AgeId, AtlasDoc, ChartStar, GlyphId, HotspotId, ItemId, LocationId, LockId } from "@/lib/atlas/types";
 import { HOTSPOT_WALL, WALLS } from "@/lib/atlas/types";
 import type { AtlasTextKey } from "./text";
 
@@ -31,6 +31,7 @@ export const PLACE_NEEDS: Record<LocationId, Cond> = {
   sanctum: { all: ["reached.meridian", "meridian.lit"] },
   pelagic: { all: ["reached.pelagic"] },
   archive: { all: ["reached.pelagic", "pelagic.airlock.open"] },
+  cathedral: { all: ["reached.cathedral"] },
 };
 
 export interface ActionDef {
@@ -161,6 +162,19 @@ export function pour(levels: number[], from: number, to: number, caps = TANKS.ca
   return levels.map((l, i) => (i === from ? l - moved : i === to ? l + moved : l));
 }
 
+/**
+ * Act III. Each routing seal goes in the plate socket of its own Age's node (Halloran's registry: Verdant ◈,
+ * Meridian ≈, Pelagic ☉); all three seated restores the Cathedral's registration.
+ */
+export const SEAL_SOCKETS: Partial<Record<ItemId, GlyphId>> = { "seal-leaf": "eye", "seal-sun": "wave", "seal-tide": "sun" };
+export const SEALS = Object.keys(SEAL_SOCKETS) as ItemId[];
+
+/** The three optional cross-Age secrets: all three let the Core reroute the Ages (the third ending). */
+export const SECRETS: ItemId[] = ["star-map", "tide-chart", "night-bloom"];
+
+/** Which Age each seal belongs to (for the plate's log line). */
+export const SEAL_AGE: Record<string, AgeId> = { "seal-leaf": "verdant", "seal-sun": "meridian", "seal-tide": "pelagic" };
+
 /** The hour the buried sundial's shadow really falls on (the great mirror shows it reversed, at 8). */
 export const DIAL_HOUR = 4;
 
@@ -181,7 +195,14 @@ export const HOTSPOTS: Record<HotspotId, HotspotDef> = {
     text: [{ when: { all: ["clock.set"] }, key: "c.clock.set" }, { key: "c.clock.text" }],
     doc: { when: { all: ["clock.set"] }, doc: { kind: "glyph", caption: "c.clock.glyph", glyph: "star" } },
   },
-  plate: { title: "c.plate.title", text: [{ key: "c.plate.text" }] },
+  plate: {
+    title: "c.plate.title",
+    text: [
+      { when: { all: ["cathedral.registered"] }, key: "c.plate.registered" },
+      { when: { all: ["plate.any"] }, key: "c.plate.seated" },
+      { key: "c.plate.text" },
+    ],
+  },
   "stair-door": {
     title: "c.stair-door.title",
     text: [{ when: { all: ["stairs.open"] }, key: "c.stair-door.open" }, { key: "c.stair-door.text" }],
@@ -259,6 +280,13 @@ export const HOTSPOTS: Record<HotspotId, HotspotDef> = {
   "book-halloran": { title: "c.book-halloran.title", text: [{ key: "c.book-halloran.text" }], doc: { doc: { kind: "note", key: "c.book-halloran.note" } } },
   desk: { title: "c.desk.title", text: [{ when: { all: ["pelagic.desk.open"] }, key: "c.desk.open" }, { key: "c.desk.text" }] },
   seed: { title: "c.seed.title", text: [{ when: { all: ["verdant.seed.bloomed"] }, key: "c.seed.bloomed" }, { key: "c.seed.text" }] },
+  core: { title: "c.core.title", text: [{ when: { all: ["core.convened"] }, key: "c.core.convened" }, { key: "c.core.text" }] },
+  lectern: { title: "c.lectern.title", text: [{ key: "c.lectern.text" }], doc: { doc: { kind: "note", key: "c.lectern.note" } } },
+  "cathedral-gate": {
+    title: "c.cathedral-gate.title",
+    text: [{ key: "c.cathedral-gate.text" }],
+    actions: [{ op: "go:chamber", label: "c.cathedral-gate.go" }],
+  },
   "pelagic-gate": { title: "c.pelagic-gate.title", text: [{ key: "c.pelagic-gate.text" }], actions: ageHome },
 };
 
@@ -381,9 +409,10 @@ export const LOCKS: Record<LockId, LockDef> = {
 
 /**
  * The Cartographer's notes (hints), per puzzle, and which puzzles belong to each place. A player asking for
- * help gets the first unsolved puzzle where they stand, else the first unsolved one anywhere.
+ * help gets the first unsolved puzzle where they stand, else the first unsolved one anywhere. A puzzle with
+ * `ready` isn't offered until that holds.
  */
-export const HINT_PUZZLES: { id: string; place: LocationId; solved: Cond }[] = [
+export const HINT_PUZZLES: { id: string; place: LocationId; solved: Cond; ready?: Cond }[] = [
   { id: "clock", place: "observatory", solved: { all: ["clock.set"] } },
   { id: "stairs", place: "observatory", solved: { all: ["stairs.open"] } },
   { id: "valves", place: "waterworks", solved: { all: ["water.drained"] } },
@@ -395,6 +424,10 @@ export const HINT_PUZZLES: { id: string; place: LocationId; solved: Cond }[] = [
   { id: "dial", place: "sanctum", solved: { all: ["meridian.chest.open"] } },
   { id: "tanks", place: "pelagic", solved: { all: ["pelagic.airlock.open"] } },
   { id: "registry", place: "archive", solved: { all: ["pelagic.desk.open"] } },
+  // Act III's notes only come once they can be acted on: all three seals found, then the registration restored.
+  { id: "plate", place: "observatory", solved: { all: ["cathedral.registered"] }, ready: { all: ["verdant.door.open", "meridian.chest.open", "pelagic.desk.open"] } },
+  { id: "route", place: "chamber", solved: { all: ["reached.cathedral"] }, ready: { all: ["cathedral.registered"] } },
+  { id: "core", place: "cathedral", solved: { all: ["core.convened"] } },
 ];
 export const HINT_COOLDOWN_SEC = 60;
 
