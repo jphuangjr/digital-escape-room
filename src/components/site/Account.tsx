@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { signIn, signOut } from "next-auth/react";
 import { FormattedMessage, useIntl } from "react-intl";
 import type { MeResponse } from "@/lib/types";
-import { formatDuration, localGameTitle } from "@/lib/games";
+import { endingLabel, formatDuration, localGameTitle } from "@/lib/games";
 import { useT } from "@/i18n/client";
 
 let mePromise: Promise<MeResponse | null> | null = null;
@@ -192,7 +192,7 @@ export function MyCases({ me, gameId }: { me: MeResponse; gameId?: string }) {
                     </span>
                   </td>
                   <td className="py-2 pr-3 font-mono text-noir-brass">{formatDuration(c.durationMs)}</td>
-                  <td className="py-2 text-noir-ink-dim">{t("site.cases.ending", { ending: c.ending ?? "none" })}</td>
+                  <td className="py-2 text-noir-ink-dim">{endingLabel(t, c.gameId, c.ending)}</td>
                 </tr>
               ))}
             </tbody>

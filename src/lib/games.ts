@@ -101,6 +101,14 @@ export function localGameTitle(t: Translate, gameId: string): string {
   return game ? gameText(t, game, "title") : gameId;
 }
 
+/** How a finished case ended, in the viewer's language: the train's accused, the Atlas's choice, Ada's vote. */
+export function endingLabel(t: Translate, gameId: string, ending: string | null): string {
+  if (!ending) return t("site.cases.ending", { ending: "none" });
+  if (gameId === "nightingale-express") return t(`train.suspect.${ending}`);
+  if (gameId === "atlas-silent-worlds") return t(`atlas.ending.${ending}`);
+  return t("site.cases.ending", { ending });
+}
+
 /** 1:04:09 or 47:12 */
 export function formatDuration(ms: number): string {
   const s = Math.max(0, Math.round(ms / 1000));

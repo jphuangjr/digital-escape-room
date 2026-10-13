@@ -32,8 +32,8 @@ export const NODES: NodeSlot[] = [
   { kind: "cathedral" },
 ];
 
-/** Each gate's origin index. Only the Observatory's gate exists so far; the Ages' gates arrive with them. */
-export const GATE_ORIGIN = { observatory: 0 } as const;
+/** Each gate's origin index: its own node. The Ages' gates are what the Atlas Core can reroute. */
+export const GATE_ORIGIN = { observatory: 0, verdant: 1, meridian: 2, pelagic: 3 } as const;
 
 export type Crossing =
   | { kind: "unpowered" }
@@ -44,14 +44,14 @@ export type Crossing =
 
 /**
  * Where a gate sends you. The gate must be powered and the node registered. The Null Cathedral's registration
- * was revoked; the seals restore it in Act III, which will extend this.
+ * was revoked; seating the three seals in the Observatory plate restores it (`cathedralRegistered`).
  */
-export function traverse(opts: { origin: number; outer: GlyphId; inner: GlyphId; powered: boolean }): Crossing {
+export function traverse(opts: { origin: number; outer: GlyphId; inner: GlyphId; powered: boolean; cathedralRegistered?: boolean }): Crossing {
   if (!opts.powered) return { kind: "unpowered" };
   const d = route(opts.origin, GLYPH_VALUE[opts.outer], GLYPH_VALUE[opts.inner], NODES.length);
   const slot = NODES[d];
   if (d === opts.origin) return { kind: "self" };
   if (slot.kind === "empty") return { kind: "empty" };
-  if (slot.kind === "cathedral") return { kind: "withheld" };
+  if (slot.kind === "cathedral") return opts.cathedralRegistered ? { kind: "arrive", place: "cathedral" } : { kind: "withheld" };
   return { kind: "arrive", place: slot.place };
 }

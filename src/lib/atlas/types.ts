@@ -8,13 +8,31 @@ import type {
   SceneItemDTO,
   SceneLockDTO,
   SceneLogEntry,
+  SceneVoteDTO,
 } from "@/lib/scene/types";
 
 export const ATLAS_GAME_ID = "atlas-silent-worlds";
 
 /** Places a player can stand. Personal (each player's own), but only reachable once the team opens the way. */
-export type LocationId = "observatory" | "waterworks" | "chamber" | "verdant" | "meridian" | "sanctum" | "pelagic" | "archive";
-export const LOCATIONS: LocationId[] = ["observatory", "waterworks", "chamber", "verdant", "meridian", "sanctum", "pelagic", "archive"];
+export type LocationId =
+  | "observatory"
+  | "waterworks"
+  | "chamber"
+  | "verdant"
+  | "meridian"
+  | "sanctum"
+  | "pelagic"
+  | "archive"
+  | "cathedral";
+export const LOCATIONS: LocationId[] = ["observatory", "waterworks", "chamber", "verdant", "meridian", "sanctum", "pelagic", "archive", "cathedral"];
+
+/** The three Ages, whose gates the Atlas Core can reroute. */
+export type AgeId = "verdant" | "meridian" | "pelagic";
+export const AGES: AgeId[] = ["verdant", "meridian", "pelagic"];
+
+/** How the game can end: the room votes. Reroute is offered only once the Core has been rerouted. */
+export type AtlasEnding = "restore" | "sever" | "reroute";
+export const ATLAS_ENDINGS: AtlasEnding[] = ["restore", "sever", "reroute"];
 
 /** Every wall, in turning order per place (right turns go forward). */
 export type WallId =
@@ -38,7 +56,9 @@ export type WallId =
   | "pelagic-arrival"
   | "pelagic-airlock"
   | "archive-hall"
-  | "archive-registry";
+  | "archive-registry"
+  | "cathedral-nave"
+  | "cathedral-door";
 
 export const WALLS: Record<LocationId, WallId[]> = {
   observatory: ["telescope", "desk", "clock", "stairs"],
@@ -49,6 +69,7 @@ export const WALLS: Record<LocationId, WallId[]> = {
   sanctum: ["sanctum-mirror", "sanctum-study"],
   pelagic: ["pelagic-arrival", "pelagic-airlock"],
   archive: ["archive-hall", "archive-registry"],
+  cathedral: ["cathedral-nave", "cathedral-door"],
 };
 
 /** Things you can tap, and the wall each one is on. */
@@ -95,6 +116,9 @@ export const HOTSPOT_WALL = {
   "book-halloran": "archive-registry",
   "desk": "archive-registry",
   "seed": "verdant-beds",
+  "core": "cathedral-nave",
+  "lectern": "cathedral-door",
+  "cathedral-gate": "cathedral-door",
 } as const satisfies Record<string, WallId>;
 export type HotspotId = keyof typeof HOTSPOT_WALL;
 
@@ -186,6 +210,10 @@ export interface AtlasCloseupDTO {
   valves?: Record<ValveId, boolean>;
   /** The plaza mirrors (Sunken Meridian). */
   mirrors?: MirrorGridDTO;
+  /** The Observatory plate's seven sockets and the seal seated in each, if any. */
+  plate?: { sockets: { glyph: GlyphId; seal: ItemId | null }[]; registered: boolean };
+  /** The Atlas Core: whether the team may reroute the Ages (all three secrets found), and each Age gate's number. */
+  core?: { canReroute: boolean; rerouted: boolean; gates: { age: AgeId; name: string; origin: number }[]; jammedUntil?: string; convened: boolean };
   /** The Pelagic airlock's three tanks: capacities and current levels (big, pressure, small). */
   tanks?: { caps: number[]; levels: number[]; balanced: boolean };
   /** This close-up has the Threshold rings (the gate). */
@@ -209,6 +237,23 @@ export interface AtlasSceneDTO {
   /** What the Cartographer's next note would help with, for a player standing in each place. */
   nextHints: Partial<Record<LocationId, NextHintDTO | null>>;
   places: PlaceDTO[];
+  vote: AtlasVoteDTO | null;
+  ending: AtlasEndingDTO | null;
+}
+
+export interface AtlasVoteDTO extends SceneVoteDTO<AtlasEnding> {
+  /** The endings on offer, with their words (Reroute only once the Core has been rerouted). */
+  choices: { id: AtlasEnding; name: string; line: string }[];
+}
+
+export interface AtlasEndingDTO {
+  choice: AtlasEnding;
+  title: string;
+  paragraphs: string[];
+  counts: Record<AtlasEnding, number>;
+  secretsFound: number;
+  secretsTotal: number;
+  minutes: number;
 }
 
 export type AtlasSceneAction =
@@ -217,7 +262,14 @@ export type AtlasSceneAction =
   | { type: "use"; item: ItemId; target: HotspotId }
   | { type: "unlock"; lock: LockId; input: string }
   | { type: "dial"; outer: GlyphId; inner: GlyphId }
-  | { type: "hint"; where: LocationId };
+  | { type: "hint"; where: LocationId }
+  /** Seat a routing seal in one of the Observatory plate's sockets. */
+  | { type: "seat"; seal: ItemId; socket: GlyphId }
+  /** Set every Age's gate so it routes only to the Observatory. */
+  | { type: "reroute"; rings: Record<AgeId, { outer: GlyphId; inner: GlyphId }> }
+  | { type: "vote"; choice: AtlasEnding }
+  | { type: "close-vote" }
+  | { type: "tiebreak"; choice: AtlasEnding };
 
 export interface AtlasActionResponse extends SceneActionResponseOf<AtlasSceneDTO> {
   /** Set when a gate crossing succeeds: where the player who dialled now stands. */

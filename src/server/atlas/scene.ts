@@ -1,6 +1,9 @@
 import "server-only";
 import type {
+  AgeId,
   AtlasCloseupDTO,
+  AtlasEnding,
+  AtlasEndingDTO,
   AtlasItemDTO,
   AtlasSceneAction,
   AtlasSceneDTO,
@@ -11,7 +14,7 @@ import type {
   LockId,
   ValveId,
 } from "@/lib/atlas/types";
-import { GLYPHS, HOTSPOT_WALL, LOCATIONS, VALVES } from "@/lib/atlas/types";
+import { AGES, ATLAS_ENDINGS, GLYPHS, HOTSPOT_WALL, LOCATIONS, VALVES } from "@/lib/atlas/types";
 import type { HintNote, SceneLogEntry } from "@/lib/scene/types";
 import type { Locale } from "@/i18n/config";
 import {
@@ -23,17 +26,21 @@ import {
   nextHintTier,
   parseHints,
   parseJams,
+  parseVote,
   recordGuess,
+  stepVote,
   type Jams,
   type RoomCtx,
   type StoredHint,
   type StoredLogBase,
+  type StoredVote,
+  type VoteStep,
   type Who,
 } from "../scene/engine";
 import type { SceneResult } from "../scene/registry";
-import { GATE_ORIGIN, GLYPH_VALUE, traverse } from "./router";
+import { GATE_ORIGIN, GLYPH_VALUE, NODES, route, traverse } from "./router";
 import { atlasLines, atlasT, type AT, type AtlasTextKey } from "./text";
-import { docFor, HINT_COOLDOWN_SEC, HINT_PUZZLES, holds, HOTSPOTS, hotspotPlace, ITEM_PLACES, LOCKS, PLACE_NEEDS, PLAZA, pour, ROOTS_ANSWER, TANKS, traceBeam, USES } from "./world";
+import { docFor, HINT_COOLDOWN_SEC, HINT_PUZZLES, holds, HOTSPOTS, hotspotPlace, ITEM_PLACES, LOCKS, PLACE_NEEDS, PLAZA, pour, ROOTS_ANSWER, SEAL_SOCKETS, SEALS, SECRETS, TANKS, traceBeam, USES } from "./world";
 
 /** A case-log line as stored: no words, so each viewer reads it in their own language. */
 interface StoredLog extends StoredLogBase {
@@ -41,11 +48,12 @@ interface StoredLog extends StoredLogBase {
   item?: ItemId;
   place?: LocationId;
   thing?: JamId;
+  ending?: AtlasEnding;
 }
 
 /** Locks that jam: the two padlocks and the gate (three misroutes in a row). */
-type JamId = LockId | "gate" | "roots";
-const JAM_IDS: JamId[] = ["clock", "engine", "index", "dial", "registry", "gate", "roots"];
+type JamId = LockId | "gate" | "roots" | "plate" | "core";
+const JAM_IDS: JamId[] = ["clock", "engine", "index", "dial", "registry", "gate", "roots", "plate", "core"];
 const TANK_NAMES = ["c.tanks.big", "c.tanks.pressure", "c.tanks.small"] as const;
 
 /** What an Atlas room stores in Room.scene. Shared by everyone in the room. */
@@ -63,6 +71,9 @@ export interface AtlasScene {
   log: StoredLog[];
   hints: StoredHint[];
   jams: Jams<JamId>;
+  /** The room vote on the ending, once someone calls it at the Atlas Core. */
+  vote: StoredVote<AtlasEnding> | null;
+  ending: { choice: AtlasEnding; at: string; counts: Record<AtlasEnding, number>; secrets: number } | null;
 }
 
 const ITEM_IDS = Object.keys(ITEM_PLACES) as ItemId[];
@@ -71,7 +82,7 @@ const GLYPH_IDS = GLYPHS.map((g) => g.id);
 const LOCK_IDS = Object.keys(LOCKS) as LockId[];
 
 export function initialScene(): AtlasScene {
-  return { v: 1, flags: [], inventory: [], found: [], tanks: [...TANKS.start], valveRun: [], log: [], hints: [], jams: {} };
+  return { v: 1, flags: [], inventory: [], found: [], tanks: [...TANKS.start], valveRun: [], log: [], hints: [], jams: {}, vote: null, ending: null };
 }
 
 export function parseScene(raw: unknown): AtlasScene {
@@ -88,6 +99,8 @@ export function parseScene(raw: unknown): AtlasScene {
     log: Array.isArray(s.log) ? (s.log as StoredLog[]).filter((l) => l && typeof l.key === "string").slice(-MAX_LOG) : [],
     hints: parseHints(s.hints),
     jams: parseJams(s.jams, JAM_IDS),
+    vote: parseVote(s.vote, isEnding),
+    ending: s.ending && isEnding(s.ending.choice) ? s.ending : null,
   };
 }
 
@@ -101,6 +114,12 @@ function validTanks(v: unknown): v is number[] {
     v.reduce((a: number, b: number) => a + b, 0) === total
   );
 }
+
+const isEnding = (v: unknown): v is AtlasEnding => typeof v === "string" && (ATLAS_ENDINGS as string[]).includes(v);
+
+/** The endings on offer: Reroute only once the Core has been rerouted. */
+const choicesFor = (scene: AtlasScene): AtlasEnding[] => (scene.flags.includes("core.rerouted") ? ATLAS_ENDINGS : ["restore", "sever"]);
+const secretsFound = (scene: AtlasScene) => SECRETS.filter((i) => scene.found.includes(i)).length;
 
 const hasIn = (scene: AtlasScene) => (f: string) => scene.flags.includes(f);
 const reachable = (scene: AtlasScene, place: LocationId) => holds(PLACE_NEEDS[place], hasIn(scene));
@@ -137,7 +156,7 @@ function takeablesAt(scene: AtlasScene, at: HotspotId): ItemId[] {
 /** The first unsolved puzzle where the player stands, else the first unsolved one anywhere. */
 function hintPuzzle(scene: AtlasScene, where: LocationId) {
   const has = hasIn(scene);
-  const open = HINT_PUZZLES.filter((p) => !holds(p.solved, has));
+  const open = HINT_PUZZLES.filter((p) => !holds(p.solved, has) && holds(p.ready, has));
   return open.find((p) => p.place === where) ?? open[0] ?? null;
 }
 
@@ -164,6 +183,30 @@ function closeupDTO(h: HotspotId, scene: AtlasScene, T: AT, now: Date): AtlasClo
     c.gate = { powered: has("engine.on"), ...(until ? { jammedUntil: until } : {}) };
   }
   // With the can in hand, each pot can be watered until the right one opens the little door.
+  if (h === "plate") {
+    const sockets = GLYPHS.map((g) => {
+      const seal = SEALS.find((s) => SEAL_SOCKETS[s] === g.id && has(`seated.${s}`)) ?? null;
+      return { glyph: g.id, seal };
+    });
+    c.plate = { sockets, registered: has("cathedral.registered") };
+    if (!has("cathedral.registered") && SEALS.some((s) => scene.inventory.includes(s))) c.lines.push(T("c.plate.how"));
+  }
+  if (h === "core") {
+    const canReroute = SECRETS.every((i) => scene.found.includes(i));
+    const until = jammedUntil(scene.jams, "core", now);
+    c.core = {
+      canReroute,
+      rerouted: has("core.rerouted"),
+      gates: AGES.map((age) => ({ age, name: T(`place.${age}`), origin: GATE_ORIGIN[age] })),
+      convened: has("core.convened"),
+      ...(until ? { jammedUntil: until } : {}),
+    };
+    if (!has("core.convened")) {
+      if (has("core.rerouted")) c.lines.push(T("c.core.rerouted"));
+      else if (canReroute) c.lines.push(T("c.core.canReroute"));
+      c.actions.push({ op: "convene", label: T("c.core.convene") });
+    }
+  }
   if (h === "tanks") {
     const balanced = has("pelagic.airlock.open");
     c.tanks = { caps: TANKS.caps, levels: scene.tanks, balanced };
@@ -226,6 +269,7 @@ export function sceneDTO(scene: AtlasScene, opts: { startedAt?: Date; now?: Date
       item: l.item ? T(`item.${l.item}.log`) : "",
       place: l.place ? T(`place.${l.place}`) : "",
       thing: l.thing ? T(`thing.${l.thing}`) : "",
+      ending: l.ending ? T(`ending.${l.ending}.name`) : "",
     }),
   }));
   return {
@@ -236,6 +280,30 @@ export function sceneDTO(scene: AtlasScene, opts: { startedAt?: Date; now?: Date
     hints,
     nextHints,
     places: LOCATIONS.map((id) => ({ id, name: T(`place.${id}`), reachable: open.includes(id) })),
+    vote:
+      scene.vote && !scene.ending
+        ? {
+            open: true,
+            votes: scene.vote.votes,
+            tie: scene.vote.tie,
+            choices: choicesFor(scene).map((id) => ({ id, name: T(`ending.${id}.name`), line: T(`ending.${id}.line`) })),
+          }
+        : null,
+    ending: endingDTO(scene, opts.startedAt ?? null, T),
+  };
+}
+
+function endingDTO(scene: AtlasScene, startedAt: Date | null, T: AT): AtlasEndingDTO | null {
+  const e = scene.ending;
+  if (!e) return null;
+  return {
+    choice: e.choice,
+    title: T(`ending.${e.choice}.title`),
+    paragraphs: atlasLines(T, `ending.${e.choice}.text`),
+    counts: e.counts,
+    secretsFound: e.secrets,
+    secretsTotal: SECRETS.length,
+    minutes: startedAt ? Math.max(1, Math.round((new Date(e.at).getTime() - startedAt.getTime()) / 60000)) : 0,
   };
 }
 
@@ -252,13 +320,12 @@ export function applyAction(
   prev: AtlasScene,
   action: AtlasSceneAction,
   who: Who,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- part of the SceneGame signature; Atlas has no vote yet
-  _room: RoomCtx = { hostId: null, onlineIds: [] },
+  room: RoomCtx = { hostId: null, onlineIds: [] },
   now = new Date(),
   loc: Locale = "en",
 ): AtlasResult {
   const T = atlasT(loc);
-  const scene: AtlasScene = { ...prev, flags: [...prev.flags], inventory: [...prev.inventory], found: [...prev.found], tanks: [...prev.tanks], valveRun: [...prev.valveRun] };
+  const scene: AtlasScene = { ...prev, flags: [...prev.flags], inventory: [...prev.inventory], found: [...prev.found], tanks: [...prev.tanks], valveRun: [...prev.valveRun], vote: prev.vote };
   const has = hasIn(scene);
   const set = (...fs: string[]) => fs.forEach((f) => !has(f) && scene.flags.push(f));
   const clear = (pred: (f: string) => boolean) => (scene.flags = scene.flags.filter((f) => !pred(f)));
@@ -275,7 +342,34 @@ export function applyAction(
   const canReach = (h: HotspotId) => reachable(prev, hotspotPlace(h));
   const secs = (until: string) => Math.ceil((new Date(until).getTime() - now.getTime()) / 1000);
 
+  if (prev.ending) return no("msg.closed");
+  if (prev.vote && !["vote", "close-vote", "tiebreak", "hint"].includes(action.type)) return no("msg.waiting");
+
+  /** A move in the vote: a clear winner ends the game; a tie goes to the host. */
+  const voted = (step: VoteStep<AtlasEnding>): AtlasResult => {
+    if (step.kind === "refused") return no(`msg.${step.reason}`);
+    scene.vote = step.vote;
+    if (step.kind === "recorded") return ok();
+    if (step.kind === "tie") return ok("msg.tie");
+    scene.ending = { choice: step.choice, at: now.toISOString(), counts: step.counts, secrets: secretsFound(scene) };
+    log("log.ended", { ending: step.choice });
+    return { scene, changed: true, ok: true, finished: true };
+  };
+
   switch (action.type) {
+    case "vote":
+      return voted(stepVote(prev.vote, { type: "vote", choice: action.choice }, who, room, choicesFor(prev)));
+    case "close-vote":
+      return voted(stepVote(prev.vote, { type: "close" }, who, room, choicesFor(prev)));
+    case "tiebreak":
+      return voted(stepVote(prev.vote, { type: "tiebreak", choice: action.choice }, who, room, choicesFor(prev)));
+
+    case "seat":
+      return seatSeal(action.seal, action.socket);
+
+    case "reroute":
+      return reroute(action.rings);
+
     case "take": {
       const place = ITEM_PLACES[action.item];
       if (!place || !canReach(place.at) || !takeablesAt(prev, place.at).includes(action.item)) return no("msg.nothingToTake");
@@ -325,6 +419,13 @@ export function applyAction(
       if (target === "roots" && op.startsWith("water:")) return waterPot(op.slice(6));
       if (target === "mirrors" && op.startsWith("mirror:")) return tiltMirror(Number(op.slice(7)));
       if (target === "tanks" && (op === "reset" || op.startsWith("pour:"))) return pourTank(op);
+      if (target === "core" && op === "convene") {
+        if (has("core.convened")) return no("msg.nothing");
+        set("core.convened");
+        scene.vote = { votes: {}, tie: null };
+        log("log.convened");
+        return ok("msg.convened");
+      }
       return no("msg.nothing");
     }
 
@@ -333,7 +434,13 @@ export function applyAction(
       if (!reachable(prev, "chamber")) return no("msg.cantReach");
       const jammed = jammedUntil(prev.jams, "gate", now);
       if (jammed) return no("msg.gate.jammed", { s: secs(jammed) });
-      const crossing = traverse({ origin: GATE_ORIGIN.observatory, outer: action.outer, inner: action.inner, powered: has("engine.on") });
+      const crossing = traverse({
+        origin: GATE_ORIGIN.observatory,
+        outer: action.outer,
+        inner: action.inner,
+        powered: has("engine.on"),
+        cathedralRegistered: has("cathedral.registered"),
+      });
       if (crossing.kind === "unpowered") return no("msg.gate.unpowered");
       const correct = crossing.kind === "arrive";
       const attempt = { lock: "gate", input: `${action.outer}/${action.inner}`, correct };
@@ -347,7 +454,8 @@ export function applyAction(
       const first = !has(`reached.${crossing.place}`);
       set("crossed", `reached.${crossing.place}`);
       if (first) log("log.crossed", { place: crossing.place });
-      return { ...ok("msg.gate.arrive", { place: T(`place.${crossing.place}`) }), attempt, reply: { arrived: crossing.place } };
+      const arrive = crossing.place === "cathedral" ? "msg.gate.cathedral" : "msg.gate.arrive";
+      return { ...ok(arrive, { place: T(`place.${crossing.place}`) }), attempt, reply: { arrived: crossing.place } };
     }
 
     case "hint": {
@@ -362,6 +470,57 @@ export function applyAction(
     }
   }
   return no("msg.nothing");
+
+  /**
+   * The Observatory plate: seat a seal in a socket. Each seal fits only its own Age's node socket; three wrong
+   * tries in a row and the plate needs a minute. All three seated restores the Null Cathedral's registration.
+   */
+  function seatSeal(seal: ItemId, socket: GlyphId): AtlasResult {
+    if (!(SEALS as string[]).includes(seal)) return no("msg.notSeal");
+    if (!isGlyph(socket)) return no("msg.nothing");
+    if (!scene.inventory.includes(seal)) return no("msg.dontHave");
+    if (!reachable(prev, "observatory") || has("cathedral.registered")) return no("msg.nothing");
+    const jammed = jammedUntil(prev.jams, "plate", now);
+    if (jammed) return no("msg.plateJammed", { s: secs(jammed) });
+    const correct = SEAL_SOCKETS[seal] === socket;
+    const attempt = { lock: "plate", input: `${seal}/${socket}`, correct };
+    const guess = recordGuess(prev.jams, "plate", correct, now);
+    scene.jams = guess.jams;
+    if (!correct) {
+      if (guess.jammedNow) log("log.jammed", { thing: "plate" });
+      return { scene, changed: true, ok: false, message: guess.jammedNow ? T("msg.plateJamsNow", { s: JAM_SEC }) : T("msg.wrongSocket"), attempt };
+    }
+    scene.inventory = scene.inventory.filter((i) => i !== seal);
+    set(`seated.${seal}`, "plate.any");
+    log("log.seated", { item: seal });
+    if (!SEALS.every((s) => has(`seated.${s}`))) return { ...ok("msg.seated"), attempt };
+    set("cathedral.registered");
+    log("log.registered");
+    return { ...ok("msg.registered"), attempt };
+  }
+
+  /**
+   * The Atlas Core: set each Age's gate so it routes only to the Observatory (node 0) from its own number. Needs
+   * all three cross-Age secrets; three wrong tries and the rings need a minute. Unlocks the Reroute ending.
+   */
+  function reroute(rings: Record<AgeId, { outer: GlyphId; inner: GlyphId }>): AtlasResult {
+    if (!reachable(prev, "cathedral") || has("core.rerouted") || has("core.convened")) return no("msg.nothing");
+    if (!SECRETS.every((i) => scene.found.includes(i))) return no("msg.rerouteNeedsSecrets");
+    if (!rings || !AGES.every((a) => rings[a] && isGlyph(rings[a].outer) && isGlyph(rings[a].inner))) return no("msg.nothing");
+    const jammed = jammedUntil(prev.jams, "core", now);
+    if (jammed) return no("msg.rerouteJammed", { s: secs(jammed) });
+    const home = AGES.every((a) => route(GATE_ORIGIN[a], GLYPH_VALUE[rings[a].outer], GLYPH_VALUE[rings[a].inner], NODES.length) === GATE_ORIGIN.observatory);
+    const attempt = { lock: "core", input: AGES.map((a) => `${rings[a].outer}/${rings[a].inner}`).join(" "), correct: home };
+    const guess = recordGuess(prev.jams, "core", home, now);
+    scene.jams = guess.jams;
+    if (!home) {
+      if (guess.jammedNow) log("log.jammed", { thing: "core" });
+      return { scene, changed: true, ok: false, message: guess.jammedNow ? T("msg.rerouteJamsNow", { s: JAM_SEC }) : T("msg.rerouteWrong"), attempt };
+    }
+    set("core.rerouted");
+    log("log.rerouted");
+    return { ...ok("msg.rerouted"), attempt };
+  }
 
   /** The Pelagic tanks: pour one into another, or drain all back to the start. Exactly 4 in the pressure tank opens the airlock. */
   function pourTank(op: string): AtlasResult {

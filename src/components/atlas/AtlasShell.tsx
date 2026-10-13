@@ -13,6 +13,7 @@ import { NotebookSheet } from "@/components/scene/NotebookSheet";
 import { LockDial } from "@/components/train/parts";
 import { useT } from "@/i18n/client";
 import { AtlasDocView, GatePanel, MirrorGrid, TankPanel, useSecondsUntil, ValvePanel } from "./parts";
+import { CorePanel, EndingPanel, PlatePanel, VotePanel } from "./finale";
 import { PLACE_TINT, SPOTS } from "./walls";
 
 /**
@@ -285,6 +286,8 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
         {notebookOpen && <NotebookSheet ctx={ctx} onClose={() => setNotebookOpen(false)} closeLabel={t("atlas.close")} />}
         {notesOpen && <NotesSheet scene={scene} here={here} busy={busy} onClose={() => setNotesOpen(false)} onAsk={() => void act({ type: "hint", where: here })} />}
         {placesOpen && <PlacesSheet scene={scene} here={here} onClose={() => setPlacesOpen(false)} onGo={go} />}
+        {scene.vote && !scene.ending && <VotePanel state={state} scene={scene} busy={busy} act={act} />}
+        {scene.ending && <EndingPanel scene={scene} code={code} />}
         {intro && (
           <IntroCard
             onClose={() => {
@@ -372,6 +375,15 @@ function CloseupSheet({
       {c.doc && <AtlasDocView doc={c.doc} />}
       {c.mirrors && <MirrorGrid grid={c.mirrors} busy={busy} onTilt={(i) => void act({ type: "operate", target: id, op: `mirror:${i}` })} />}
       {c.tanks && <TankPanel tanks={c.tanks} />}
+      {c.plate && (
+        <PlatePanel
+          plate={c.plate}
+          held={scene.inventory.filter((i) => i.id.startsWith("seal-")).map((i) => ({ id: i.id, name: i.name }))}
+          busy={busy}
+          act={act}
+        />
+      )}
+      {c.core && <CorePanel core={c.core} busy={busy} act={act} />}
       {c.valves && <ValvePanel valves={c.valves} busy={busy} onTurn={(v) => void act({ type: "operate", target: id, op: v })} />}
       {c.gate && <GatePanel powered={c.gate.powered} jammedUntil={c.gate.jammedUntil} busy={busy} onPull={(outer, inner) => void act({ type: "dial", outer, inner })} />}
       {c.lock && (

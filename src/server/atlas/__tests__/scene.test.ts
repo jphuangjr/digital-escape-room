@@ -63,7 +63,9 @@ describe("Act I: the Drowned Observatory", () => {
   it("never sends a code, a glyph's value or an unearned mark", () => {
     const json = JSON.stringify(sceneDTO(initialScene()));
     expect(json).not.toContain("0435");
-    expect(json).not.toMatch(/"(star|wave)"/); // the clock and wheel marks show only once earned
+    const dto = sceneDTO(initialScene());
+    expect(dto.closeups.clock?.doc).toBeUndefined(); // the clock's mark shows only once it's set
+    expect(dto.closeups.wheel).toBeUndefined(); // the wheel is in the Waterworks, not reachable yet
     const full = run([...TO_WATERWORKS, ...DRAIN, ...POWER]).scene;
     const all = JSON.stringify(sceneDTO(full));
     expect(all).not.toContain("✶≈◈");
@@ -163,6 +165,7 @@ describe("the registry entry", () => {
     expect(atlasGame.guessedLock({ type: "unlock", lock: "clock", input: "1" })).toBe("clock");
     expect(atlasGame.guessedLock({ type: "operate", target: "valves", op: "intake" })).toBeNull();
     expect(atlasGame.isAction({ type: "dial" })).toBe(true);
-    expect(atlasGame.isAction({ type: "vote" })).toBe(false);
+    expect(atlasGame.isAction({ type: "vote" })).toBe(true);
+    expect(atlasGame.isAction({ type: "dance" })).toBe(false);
   });
 });
