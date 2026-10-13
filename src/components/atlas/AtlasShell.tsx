@@ -12,7 +12,7 @@ import { CloseIcon } from "@/components/shell/icons";
 import { NotebookSheet } from "@/components/scene/NotebookSheet";
 import { LockDial } from "@/components/train/parts";
 import { useT } from "@/i18n/client";
-import { AtlasDocView, GatePanel, useSecondsUntil, ValvePanel } from "./parts";
+import { AtlasDocView, GatePanel, MirrorGrid, useSecondsUntil, ValvePanel } from "./parts";
 import { PLACE_TINT, SPOTS } from "./walls";
 
 /**
@@ -24,7 +24,14 @@ import { PLACE_TINT, SPOTS } from "./walls";
 const PRESENCE_MS = 15_000;
 const TABS: RoomTab[] = ["people", "chat", "attempts"];
 const INTRO_KEY = "atlas_intro_done";
-const ITEM_ICON: Record<ItemId, string> = { token: "🪙", gear: "⚙️", numerals: "🔢", can: "🪣", "seal-leaf": "🟢", "memory-verdant": "✉️" };
+const ITEM_ICON: Record<ItemId, string> = { token: "🪙", gear: "⚙️", numerals: "🔢", can: "🪣", "seal-leaf": "🟢", "memory-verdant": "✉️",
+  "sun-lens": "🔍",
+  "hand-mirror": "🪞",
+  "engineer-note": "📜",
+  "seal-sun": "🟡",
+  "memory-meridian": "✉️",
+  "star-map": "🗺️",
+};
 
 export function AtlasShell({ code, state, refresh }: { code: string; state: RoomState; refresh: () => Promise<void> }) {
   const scene = state.scene as AtlasSceneDTO;
@@ -358,6 +365,7 @@ function CloseupSheet({
         </p>
       ))}
       {c.doc && <AtlasDocView doc={c.doc} />}
+      {c.mirrors && <MirrorGrid grid={c.mirrors} busy={busy} onTilt={(i) => void act({ type: "operate", target: id, op: `mirror:${i}` })} />}
       {c.valves && <ValvePanel valves={c.valves} busy={busy} onTurn={(v) => void act({ type: "operate", target: id, op: v })} />}
       {c.gate && <GatePanel powered={c.gate.powered} jammedUntil={c.gate.jammedUntil} busy={busy} onPull={(outer, inner) => void act({ type: "dial", outer, inner })} />}
       {c.lock && (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { AtlasDoc, ChartStar, GlyphId, ValveId } from "@/lib/atlas/types";
+import type { AtlasDoc, ChartStar, GlyphId, MirrorGridDTO, ValveId } from "@/lib/atlas/types";
 import { GLYPHS, glyphChar, VALVES } from "@/lib/atlas/types";
 import { useT } from "@/i18n/client";
 
@@ -131,6 +131,8 @@ export function AtlasDocView({ doc }: { doc: AtlasDoc }) {
           <p className="mt-2 border-t border-dashed border-stone-400 pt-2 text-xs italic text-stone-600">{doc.torn}</p>
         </div>
       );
+    case "mirrordial":
+      return <MirrorDial caption={doc.caption} hour={doc.hour} />;
     case "roots":
       return <RootLadder caption={doc.caption} pots={doc.pots} grafts={doc.grafts} rows={doc.rows} door={doc.door} />;
     case "glyph":
@@ -143,6 +145,102 @@ export function AtlasDocView({ doc }: { doc: AtlasDoc }) {
         </figure>
       );
   }
+}
+
+/**
+ * The buried sundial as the great mirror shows it: a dial with twelve Roman hours and a shadow, the whole
+ * drawing flipped left to right, numerals included (so IV reads VI, and the shadow seems to fall at VIII).
+ */
+function MirrorDial({ caption, hour }: { caption: string; hour: number }) {
+  const t = useT();
+  const at = (h: number, r: number) => {
+    const a = ((h * 30 - 90) * Math.PI) / 180;
+    return [150 + Math.cos(a) * r, 150 + Math.sin(a) * r];
+  };
+  const [sx, sy] = at(hour, 112);
+  return (
+    <figure className="rounded-xl border border-[#8a7440] bg-gradient-to-b from-[#3a2c14] to-[#1c140a] p-3">
+      <svg viewBox="0 0 300 300" className="mx-auto w-full max-w-[280px]" role="img" aria-label={t("atlas.dial.aria")}>
+        <g transform="translate(300 0) scale(-1 1)">
+          <circle cx="150" cy="150" r="136" fill="#d9c08a" stroke="#8a7440" strokeWidth="4" />
+          {NUMERALS.map((n, i) => {
+            const [x, y] = at(i + 1, 116);
+            return (
+              <text key={n} x={x} y={y + 6} textAnchor="middle" fontSize="18" fontFamily="Georgia, serif" fill="#3a2c14">
+                {n}
+              </text>
+            );
+          })}
+          <line x1="150" y1="150" x2={sx} y2={sy} stroke="#2a1f0e" strokeWidth="10" strokeLinecap="round" opacity="0.6" />
+          <circle cx="150" cy="150" r="9" fill="#8a7440" />
+        </g>
+      </svg>
+      <figcaption className="mt-2 text-center text-xs text-[#e9d9a6]">{caption}</figcaption>
+    </figure>
+  );
+}
+
+/** The Meridian plaza: tap a mirror to tilt it; the sunbeam is drawn where it goes now. */
+export function MirrorGrid({ grid, busy, onTilt }: { grid: MirrorGridDTO; busy: boolean; onTilt: (i: number) => void }) {
+  const t = useT();
+  const cell = 52;
+  const pad = 30;
+  const cx = (x: number) => pad + x * cell + cell / 2;
+  const cy = (y: number) => pad + y * cell + cell / 2;
+  const width = pad * 2 + grid.w * cell;
+  const height = pad * 2 + grid.h * cell;
+  const beam = [[pad - 26, cy(0)] as [number, number], ...grid.path.map(([x, y]) => [cx(x), cy(y)] as [number, number])];
+  // The beam leaves the grid one step past the last cell, or stops at a pillar.
+  if (grid.path.length > 1) {
+    const [lx, ly] = grid.path[grid.path.length - 1];
+    const [px, py] = grid.path[grid.path.length - 2];
+    const [dx, dy] = [lx - px, ly - py];
+    const next: [number, number] = [lx + dx, ly + dy];
+    if (!grid.pillars.some(([x, y]) => x === next[0] && y === next[1])) beam.push([cx(lx) + (dx * cell) / 1.4, cy(ly) + (dy * cell) / 1.4]);
+  }
+  return (
+    <figure className="rounded-xl border border-[#8a7440] bg-[#1c140a] p-2">
+      <svg viewBox={`0 0 ${width} ${height}`} className="mx-auto w-full max-w-[320px]" role="group" aria-label={t("atlas.mirrors.aria")}>
+        <rect x={pad} y={pad} width={grid.w * cell} height={grid.h * cell} fill="#3a2c14" />
+        {Array.from({ length: grid.w + 1 }, (_, i) => (
+          <line key={`v${i}`} x1={pad + i * cell} y1={pad} x2={pad + i * cell} y2={pad + grid.h * cell} stroke="#4d3b1c" />
+        ))}
+        {Array.from({ length: grid.h + 1 }, (_, i) => (
+          <line key={`h${i}`} x1={pad} y1={pad + i * cell} x2={pad + grid.w * cell} y2={pad + i * cell} stroke="#4d3b1c" />
+        ))}
+        {/* the slit and the sun door */}
+        <rect x={0} y={cy(0) - 8} width={pad - 6} height={16} fill="#f4e7b5" opacity="0.8" />
+        <rect x={cx(grid.door) - 18} y={pad + grid.h * cell + 4} width={36} height={pad - 8} rx={3} fill={grid.lit ? "#ffd75e" : "#8a7440"} stroke="#f4e7b5" />
+        {grid.pillars.map(([x, y]) => (
+          <circle key={`p${x}${y}`} cx={cx(x)} cy={cy(y)} r={15} fill="#6b5a3a" stroke="#2a1f0e" strokeWidth="3" />
+        ))}
+        <polyline points={beam.map((p) => p.join(",")).join(" ")} fill="none" stroke="#fff1a8" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" opacity="0.9" />
+        {grid.mirrors.map((m, i) => {
+          const d = 17;
+          const [x1, y1, x2, y2] = m.back ? [cx(m.x) - d, cy(m.y) - d, cx(m.x) + d, cy(m.y) + d] : [cx(m.x) - d, cy(m.y) + d, cx(m.x) + d, cy(m.y) - d];
+          return (
+            <g key={i}>
+              <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#cfe3ea" strokeWidth="6" strokeLinecap="round" />
+              <rect
+                x={cx(m.x) - cell / 2}
+                y={cy(m.y) - cell / 2}
+                width={cell}
+                height={cell}
+                fill="transparent"
+                role="button"
+                tabIndex={grid.lit ? -1 : 0}
+                aria-label={t("atlas.mirrors.mirror", { n: i + 1, way: m.back ? "\\" : "/" })}
+                aria-disabled={busy || grid.lit}
+                className={grid.lit ? undefined : "cursor-pointer"}
+                onClick={() => !busy && !grid.lit && onTilt(i)}
+                onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && !busy && !grid.lit && onTilt(i)}
+              />
+            </g>
+          );
+        })}
+      </svg>
+    </figure>
+  );
 }
 
 /** The Verdant roots as a ladder: seven roots straight down, grafts joining neighbours, the little door below one. */

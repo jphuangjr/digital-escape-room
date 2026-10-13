@@ -13,8 +13,8 @@ import type {
 export const ATLAS_GAME_ID = "atlas-silent-worlds";
 
 /** Places a player can stand. Personal (each player's own), but only reachable once the team opens the way. */
-export type LocationId = "observatory" | "waterworks" | "chamber" | "verdant" | "meridian" | "pelagic";
-export const LOCATIONS: LocationId[] = ["observatory", "waterworks", "chamber", "verdant", "meridian", "pelagic"];
+export type LocationId = "observatory" | "waterworks" | "chamber" | "verdant" | "meridian" | "sanctum" | "pelagic";
+export const LOCATIONS: LocationId[] = ["observatory", "waterworks", "chamber", "verdant", "meridian", "sanctum", "pelagic"];
 
 /** Every wall, in turning order per place (right turns go forward). */
 export type WallId =
@@ -32,6 +32,9 @@ export type WallId =
   | "verdant-shelves"
   | "verdant-roots"
   | "meridian-arrival"
+  | "meridian-plaza"
+  | "sanctum-mirror"
+  | "sanctum-study"
   | "pelagic-arrival";
 
 export const WALLS: Record<LocationId, WallId[]> = {
@@ -39,7 +42,8 @@ export const WALLS: Record<LocationId, WallId[]> = {
   waterworks: ["valves", "tunnel", "wheel"],
   chamber: ["gate", "engine"],
   verdant: ["verdant-arrival", "verdant-beds", "verdant-shelves", "verdant-roots"],
-  meridian: ["meridian-arrival"],
+  meridian: ["meridian-arrival", "meridian-plaza"],
+  sanctum: ["sanctum-mirror", "sanctum-study"],
   pelagic: ["pelagic-arrival"],
 };
 
@@ -68,12 +72,31 @@ export const HOTSPOT_WALL = {
   "roots": "verdant-roots",
   "root-door": "verdant-roots",
   "meridian-gate": "meridian-arrival",
+  "mirrors": "meridian-plaza",
+  "sun-door": "meridian-plaza",
+  "vault": "meridian-plaza",
+  "great-mirror": "sanctum-mirror",
+  "tablet": "sanctum-mirror",
+  "chest": "sanctum-study",
+  "altar": "sanctum-study",
   "pelagic-gate": "pelagic-arrival",
 } as const satisfies Record<string, WallId>;
 export type HotspotId = keyof typeof HOTSPOT_WALL;
 
-export type ItemId = "token" | "gear" | "numerals" | "can" | "seal-leaf" | "memory-verdant";
-export type LockId = "clock" | "engine" | "index";
+export type ItemId =
+  | "token"
+  | "gear"
+  | "numerals"
+  | "can"
+  | "seal-leaf"
+  | "memory-verdant"
+  | "sun-lens"
+  | "hand-mirror"
+  | "engineer-note"
+  | "seal-sun"
+  | "memory-meridian"
+  | "star-map";
+export type LockId = "clock" | "engine" | "index" | "dial";
 export type ValveId = "intake" | "reservoir" | "outflow";
 export const VALVES: ValveId[] = ["intake", "reservoir", "outflow"];
 
@@ -109,7 +132,24 @@ export type AtlasDoc =
   | { kind: "ledger"; title: string; rows: { name: string; outer: GlyphId; inner: GlyphId }[]; torn: string }
   | { kind: "glyph"; caption: string; glyph: GlyphId }
   /** A ladder of roots: follow each pot's root down; where two roots are grafted, cross over. */
-  | { kind: "roots"; caption: string; pots: GlyphId[]; grafts: [row: number, left: number][]; rows: number; door: number };
+  | { kind: "roots"; caption: string; pots: GlyphId[]; grafts: [row: number, left: number][]; rows: number; door: number }
+  /** A sundial seen only in a mirror: drawn left-right reversed, numerals and all. */
+  | { kind: "mirrordial"; caption: string; hour: number };
+
+/**
+ * The Meridian plaza's mirrors: sunlight enters from the left on row 0 heading right; each mirror leans one of
+ * two ways ("/" or "\"); pillars stop the light. `path` is the cells the beam crosses now.
+ */
+export interface MirrorGridDTO {
+  w: number;
+  h: number;
+  mirrors: { x: number; y: number; back: boolean }[];
+  pillars: [number, number][];
+  /** The sun door's column, below the bottom row. */
+  door: number;
+  path: [number, number][];
+  lit: boolean;
+}
 
 /** A close-up action. `go:<place>` actions move only the player who taps them and never reach the server. */
 export type AtlasAction = CloseupAction;
@@ -124,6 +164,8 @@ export interface AtlasCloseupDTO {
   lock?: SceneLockDTO<LockId>;
   /** The three valves and whether each is open (Waterworks). */
   valves?: Record<ValveId, boolean>;
+  /** The plaza mirrors (Sunken Meridian). */
+  mirrors?: MirrorGridDTO;
   /** This close-up has the Threshold rings (the gate). */
   gate?: { powered: boolean; jammedUntil?: string };
 }

@@ -144,7 +144,18 @@ Four walls: arrival (the gate home), growing beds, shelves, roots.
 | Index cabinet | The spiral creeper's record (each morning it grows as many new leaves as it had two mornings before) reads ☾ ◈ ◈ ≈ ☉ ✶ = 0 1 1 2 3 5, which is only consistent with those values. The doubling fern reads ◈ ≈ ⌘ = 1 2 4. The sign says the pots count from nothing to six, so △ = 6. Set the seven wheels in counting order: `☾◈≈☉⌘✶△`. Inside: the **numeral card** (the glyph values, kept for Act III) and a watering can. |
 | The roots | A ladder of roots under seven pots (☉ ☾ ✶ ◈ △ ≈ ⌘). Follow each root down, crossing at every graft: only ☾ reaches the little door. Water it (three wrong pots in a row and the soil needs a minute to drain). Behind the door: the **Seal of the Leaf** and **Ilse Varro's letter** (the first Cartographer memory). |
 
-Not built yet: the optional secret (the Verdant sun-lens that needs Meridian light) arrives with the Sunken Meridian.
+The Verdant arrival wall also holds a **sun lens**: carry it to the Sunken Meridian for the optional secret.
+
+## The Sunken Meridian as built (answer key)
+Two places: the Meridian (arrival with the gate home, and the mirror plaza) and, once the sun door opens, the Sun
+Temple (the great mirror, and the keeper's room).
+
+| Step | Solution |
+|---|---|
+| Mirror plaza | Sunlight enters on row 0 from the west. Five tilting mirrors, two pillars, the sun door below column 3. Only one setting lands the beam on the door, and it uses every mirror: the two mirrors in column 1 and the one in column 3 lean `\`, the two in column 2 lean `/`. Lit, the sun door opens onto the Sun Temple. |
+| Keeper's chest | The tablet forbids looking at the dial: read it from the great mirror, which shows the buried sundial reversed. The shadow seems to fall at 8, on a numeral that reads VI; really it falls at IV. Set `04` (decoys: 08, 06). Inside: the **engineer's note** (the rule: the Observatory gate is 0, the outer ring counts twice, the inner once, count round seven), the **Seal of the Sun** and **Corin Ashe's letter** (the second memory, contradicting Ilse's). |
+| Engineer's note | Written backwards until the team holds the **hand mirror** from the temple altar. |
+| Optional secret | Use the Verdant sun lens on the dark shaft by the plaza: the sunken vault lights up and holds **the first map** (the Ages joined only to the Observatory, a hint at the Reroute ending). |
 
 Glyph values (taught in the Verdant Archive, server only): ☾ 0, ◈ 1, ≈ 2, ☉ 3, ⌘ 4, ✶ 5, △ 6. Nodes: 0 Observatory,
 1 Verdant, 2 Meridian, 3 Pelagic, 4–5 empty, 6 Null Cathedral (registration revoked). From the Observatory
@@ -153,7 +164,7 @@ Glyph values (taught in the Verdant Archive, server only): ☾ 0, ◈ 1, ≈ 2, 
 ## Build order
 1. Shared scene engine, with Nightingale ported onto it. **Done.**
 2. Atlas added to `GAMES` as `staging`; router and tests; Act I playable with placeholder art. **Done.**
-3. One PR per Age. Verdant Archive **done**; Sunken Meridian and Pelagic Library next.
+3. One PR per Age. Verdant Archive and Sunken Meridian **done**; Pelagic Library next.
 4. Null Cathedral, endings, leaderboard and case records.
 5. Art pass.
 6. Playtests, using the stuck-puzzle analytics to tune timing and hints.
