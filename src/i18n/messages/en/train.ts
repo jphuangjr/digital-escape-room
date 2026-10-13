@@ -4,6 +4,7 @@ const messages = {
   "train.room.12b": "Compartment 12B",
   "train.room.dining": "Dining car",
   "train.room.corridor": "The corridor",
+  "train.room.boarding": "Boarding the Nightingale Express…",
   "train.title": "{room} · {wall}",
   "train.wall.window": "Window",
   "train.wall.door": "Door",
