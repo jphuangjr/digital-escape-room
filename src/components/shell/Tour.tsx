@@ -14,13 +14,14 @@ import type { RoomTab } from "./RoomSheet";
 
 export const TOUR_DONE_KEY = "escape_tour_done_v1";
 
-type Step = {
+export type TourStep = {
   id: string;
   target?: string; // data-tour value; none = centred card
   sheet?: RoomTab | null; // open the Room sheet on this tab (null = close it)
 };
 
-const STEPS: Step[] = [
+/** Ada's laptop. Each game passes its own steps and message prefix. */
+export const ADA_TOUR: TourStep[] = [
   { id: "welcome", sheet: null },
   { id: "room", target: "room", sheet: null },
   { id: "invite", target: "invite", sheet: "people" },
@@ -54,10 +55,19 @@ export function Tour({
   onClose,
   showSheet,
   openApp,
+  steps: STEPS = ADA_TOUR,
+  prefix = "tour",
+  doneKey = "tour.done",
 }: {
   onClose: (finished: boolean) => void;
   showSheet: (tab: RoomTab | null) => void;
-  openApp: (app: AppId) => void;
+  /** Ada's tour ends by opening the email app. */
+  openApp?: (app: AppId) => void;
+  steps?: TourStep[];
+  /** Step words come from `${prefix}.<step>.title` / `.body`. */
+  prefix?: string;
+  /** The last step's button. */
+  doneKey?: string;
 }) {
   const t = useT();
   const [i, setI] = useState(0);
@@ -96,7 +106,7 @@ export function Tour({
   const finish = (completed: boolean) => {
     showSheet(null);
     onClose(completed);
-    if (completed) openApp("email");
+    if (completed) openApp?.("email");
   };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -113,14 +123,22 @@ export function Tour({
   // Card goes on whichever side of the target has more room, lined up with it horizontally (kept on
   // screen), with an arrow pointing at the target like a tooltip. Centred when there's no target.
   const cardW = Math.min(vw * 0.92, CARD_MAX_W);
-  const below = spot ? spot.top + spot.height / 2 < vh / 2 : false;
+  const spaceAbove = spot ? spot.top : 0;
+  const spaceBelow = spot ? vh - (spot.top + spot.height) : 0;
+  const below = spot ? spaceBelow >= spaceAbove : false;
   const targetX = spot ? spot.left + spot.width / 2 : vw / 2;
   const cardLeft = spot ? Math.min(Math.max(targetX - cardW / 2, EDGE), vw - cardW - EDGE) : (vw - cardW) / 2;
   const arrowX = Math.min(Math.max(targetX - cardLeft, 22), cardW - 22);
+  // A target that fills most of the screen (a whole wall) leaves no room on either side: the card then
+  // sits at the bottom, over the target, with no arrow.
+  const roomNeeded = 250;
+  const fits = spot ? Math.max(spaceAbove, spaceBelow) >= roomNeeded : true;
   const cardStyle: React.CSSProperties = spot
-    ? below
-      ? { top: Math.min(spot.top + spot.height + GAP, vh - 220), left: cardLeft, width: cardW }
-      : { bottom: Math.max(vh - spot.top + GAP, EDGE), left: cardLeft, width: cardW }
+    ? !fits
+      ? { bottom: EDGE, left: (vw - cardW) / 2, width: cardW }
+      : below
+        ? { top: Math.min(spot.top + spot.height + GAP, vh - 220), left: cardLeft, width: cardW }
+        : { bottom: Math.max(vh - spot.top + GAP, EDGE), left: cardLeft, width: cardW }
     : { top: "50%", left: cardLeft, width: cardW, transform: "translateY(-50%)" };
 
   return (
@@ -142,7 +160,7 @@ export function Tour({
         className="absolute rounded-2xl border border-amber-500/30 bg-stone-950 p-4 shadow-2xl shadow-black"
         style={cardStyle}
       >
-        {spot && (
+        {spot && fits && (
           <span
             aria-hidden
             className={`absolute h-3.5 w-3.5 -translate-x-1/2 rotate-45 border-amber-500/30 bg-stone-950 ${
@@ -162,9 +180,9 @@ export function Tour({
           )}
         </div>
         <h2 id="tour-title" className="font-serif text-xl text-stone-50">
-          {t(`tour.${step.id}.title`)}
+          {t(`${prefix}.${step.id}.title`)}
         </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-stone-300">{t(`tour.${step.id}.body`)}</p>
+        <p className="mt-1.5 text-sm leading-relaxed text-stone-300">{t(`${prefix}.${step.id}.body`)}</p>
         <div className="mt-3 flex items-center gap-1" aria-hidden>
           {STEPS.map((s, n) => (
             <span key={s.id} className={`h-1 flex-1 rounded-full ${n <= i ? "bg-amber-400" : "bg-stone-800"}`} />
@@ -186,7 +204,7 @@ export function Tour({
             onClick={() => (last ? finish(true) : setI((n) => n + 1))}
             className="min-h-11 flex-1 rounded-lg bg-amber-500 px-4 text-sm font-semibold text-black active:bg-amber-400"
           >
-            {last ? t("tour.done") : t("tour.next")}
+            {last ? t(doneKey) : t("tour.next")}
           </button>
         </div>
       </div>

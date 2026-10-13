@@ -8,6 +8,7 @@ import { SUIT_SYMBOLS, SUSPECTS, TRAIN_GAME_ID, WALLS_12B, WALLS_DINING } from "
 import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
 import { useChat } from "@/lib/client/chat";
 import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
+import { Tour, type TourStep } from "@/components/shell/Tour";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
 import { useT } from "@/i18n/client";
@@ -24,6 +25,20 @@ import { setSoundPreferred, soundPreferred, TrainAmbience } from "./sound";
 
 const PRESENCE_MS = 15_000;
 const TABS: RoomTab[] = ["people", "chat", "attempts"];
+const TOUR_DONE_KEY = "nx_tour_done_v1";
+
+/** The first-time tour of the train: each step spotlights a real control (its data-tour name). */
+const TRAIN_TOUR: TourStep[] = [
+  { id: "wall", target: "nx-wall", sheet: null },
+  { id: "turn", target: "nx-turn", sheet: null },
+  { id: "spots", target: "nx-spots", sheet: null },
+  { id: "things", target: "nx-things", sheet: null },
+  { id: "teodor", target: "nx-hints", sheet: null },
+  { id: "room", target: "nx-room", sheet: null },
+  { id: "invite", target: "invite", sheet: "people" },
+  { id: "attempts", target: "tab-attempts", sheet: "people" },
+  { id: "end", sheet: null },
+];
 
 export function TrainShell({ code, state, refresh }: { code: string; state: RoomState; refresh: () => Promise<void> }) {
   const scene = state.scene as SceneDTO;
@@ -31,6 +46,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   const [wallIdxBy, setWallIdxBy] = useState<Record<"12b" | "dining", number>>({ "12b": 0, dining: 0 });
   const [notesOpen, setNotesOpen] = useState(false);
   const [intro, setIntro] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const [showSpots, setShowSpots] = useState(false);
   useEffect(() => {
     if (!showSpots) return;
@@ -54,6 +70,8 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   useEffect(() => {
     try {
       if (localStorage.getItem("nx_intro_done") !== "1") setIntro(true);
+      // Players who saw the intro before the tour existed get the tour once, after a moment.
+      else if (localStorage.getItem(TOUR_DONE_KEY) !== "1") window.setTimeout(() => setTourOpen(true), 900);
     } catch {}
   }, []);
 
@@ -194,6 +212,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             type="button"
             onClick={() => setNotesOpen(true)}
             aria-label={t("train.hintsAria")}
+            data-tour="nx-hints"
             className="relative flex h-10 w-10 items-center justify-center rounded-md text-[#ecd27a] active:bg-[#3d2615]"
           >
             🛎
@@ -213,6 +232,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
           <button
             type="button"
             onClick={() => setRoomOpen(true)}
+            data-tour="nx-room"
             className="relative flex h-10 items-center gap-1.5 rounded-md border border-[#c9a227]/50 px-3 text-sm text-[#ecd27a] active:bg-[#3d2615]"
           >
             {t("train.roomButton", { count: state.players.filter((p) => p.online).length })}
@@ -236,7 +256,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - s.y) * 1.5) turn(dx < 0 ? 1 : -1);
           }}
         >
-          <div className="relative aspect-[3/4] h-full max-h-full max-w-full">
+          <div className="relative aspect-[3/4] h-full max-h-full max-w-full" data-tour="nx-wall">
             {place === "corridor" ? (
               <CorridorArt />
             ) : (
@@ -294,6 +314,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               <button
                 type="button"
                 aria-label={t("train.turnRight")}
+                data-tour="nx-turn"
                 onClick={() => turn(1)}
                 className="absolute right-1 top-1/2 flex h-14 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-black/40 text-2xl text-[#ecd27a] active:bg-black/60"
               >
@@ -303,6 +324,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
                 type="button"
                 onClick={() => setShowSpots(true)}
                 aria-label={t("train.showSpots")}
+                data-tour="nx-spots"
                 className="absolute bottom-1 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-base active:bg-black/70"
               >
                 👁
@@ -351,7 +373,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
         </main>
 
         {/* inventory */}
-        <footer className="shrink-0 border-t border-[#3d2615] bg-[#1b120b] px-2 pt-1.5" style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}>
+        <footer data-tour="nx-things" className="shrink-0 border-t border-[#3d2615] bg-[#1b120b] px-2 pt-1.5" style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}>
           <p className="px-1 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("train.things")}</p>
           <div className="flex min-h-16 gap-1.5 overflow-x-auto py-1">
             {scene.inventory.length === 0 && <p className="self-center px-1 text-sm text-stone-500">{t("train.thingsEmpty")}</p>}
@@ -406,11 +428,42 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               setIntro(false);
               try {
                 localStorage.setItem("nx_intro_done", "1");
+                if (localStorage.getItem(TOUR_DONE_KEY) !== "1") setTourOpen(true);
               } catch {}
             }}
           />
         )}
-        <RoomSheet ctx={ctx} open={roomOpen} onClose={() => setRoomOpen(false)} tab={roomTab} setTab={setRoomTab} chat={chat} tabs={TABS} />
+        <RoomSheet
+          ctx={ctx}
+          open={roomOpen}
+          onClose={() => setRoomOpen(false)}
+          tab={roomTab}
+          setTab={setRoomTab}
+          chat={chat}
+          tabs={TABS}
+          onTour={() => {
+            setRoomOpen(false);
+            setPlace("12b");
+            setTourOpen(true);
+          }}
+        />
+        {tourOpen && (
+          <Tour
+            steps={TRAIN_TOUR}
+            prefix="train.tour"
+            doneKey="train.tour.done"
+            showSheet={(tab) => {
+              if (tab) setRoomTab(tab);
+              setRoomOpen(tab !== null);
+            }}
+            onClose={() => {
+              setTourOpen(false);
+              try {
+                localStorage.setItem(TOUR_DONE_KEY, "1");
+              } catch {}
+            }}
+          />
+        )}
         <Toasts items={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} placement={closeup || itemOpen || roomOpen ? "top" : "bottom"} />
       </div>
     </GameContext.Provider>
@@ -785,12 +838,6 @@ function IntroCard({ onClose }: { onClose: () => void }) {
         <p className="font-serif text-[15px] leading-relaxed text-stone-200">
           {t("train.intro.text")}
         </p>
-        <ul className="space-y-1.5 text-sm text-stone-300">
-          <li>{t("train.intro.tip1")}</li>
-          <li>{t("train.intro.tip2")}</li>
-          <li>{t("train.intro.tip3")}</li>
-          <li>{t("train.intro.tip4")}</li>
-        </ul>
         <button type="button" onClick={onClose} className="min-h-12 w-full rounded-lg bg-[#c9a227] font-semibold text-[#1b120b] active:bg-[#ecd27a]">
           {t("train.intro.start")}
         </button>
