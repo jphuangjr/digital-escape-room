@@ -314,24 +314,39 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               </div>
             </>
           ) : (
-            <div className="absolute inset-x-0 bottom-4 mx-auto flex w-[min(92%,22rem)] flex-col gap-2 rounded-xl border border-[#c9a227]/40 bg-[#1b120b]/95 p-4 text-center">
-              <p className="font-serif text-[#ecd27a]">{t("train.corridor.title")}</p>
-              <p className="text-sm text-stone-300">{t("train.corridor.text")}</p>
-              <button
-                type="button"
-                onClick={() => setPlace("dining")}
-                className="mt-1 min-h-11 rounded-md bg-[#c9a227] text-sm font-semibold text-[#1b120b] active:bg-[#ecd27a]"
-              >
-                {t("train.corridor.dining")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPlace("12b")}
-                className="min-h-11 rounded-md border border-[#c9a227]/50 text-sm text-[#ecd27a] active:bg-[#3d2615]"
-              >
-                {t("train.corridor.back")}
-              </button>
-            </div>
+            <>
+              {/* the dining car door at the end of the corridor is itself the way in */}
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="relative aspect-[3/4] h-full max-h-full max-w-full">
+                  <button
+                    type="button"
+                    aria-label={t("train.corridor.dining")}
+                    onClick={() => setPlace("dining")}
+                    className="pointer-events-auto absolute rounded-md outline-none ring-[#ecd27a]/70 hover:ring-2 focus-visible:ring-2 active:bg-[#ecd27a]/15"
+                    style={{ left: `${(126 / 300) * 100}%`, top: `${(158 / 400) * 100}%`, width: `${(48 / 300) * 100}%`, height: `${(100 / 400) * 100}%` }}
+                  />
+                </div>
+              </div>
+              <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 bg-gradient-to-t from-[#0b0806] via-[#0b0806]/80 to-transparent px-4 pb-3 pt-12">
+                <p className="text-center font-serif text-sm italic text-stone-300">{t("train.corridor.text")}</p>
+                <div className="mx-auto flex w-full max-w-sm gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPlace("12b")}
+                    className="min-h-11 flex-1 rounded-md border border-[#c9a227]/50 bg-black/40 px-2 py-1 text-sm leading-tight text-[#ecd27a] active:bg-[#3d2615]"
+                  >
+                    {t("train.corridor.back")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPlace("dining")}
+                    className="min-h-11 flex-[1.3] rounded-md bg-[#c9a227] px-2 py-1 text-sm font-semibold leading-tight text-[#1b120b] active:bg-[#ecd27a]"
+                  >
+                    {t("train.corridor.dining")}
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </main>
 
