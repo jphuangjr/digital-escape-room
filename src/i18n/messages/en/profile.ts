@@ -61,6 +61,14 @@ const messages = {
   "profile.ach.nx-thief.how": "Name the real thief on the Nightingale Express.",
   "profile.ach.nx-every-clue.name": "Every clue",
   "profile.ach.nx-every-clue.how": "Find all six pieces of evidence before ringing the bell.",
+  "profile.ach.atlas-escaped.name": "Worlds decided",
+  "profile.ach.atlas-escaped.how": "Reach the Atlas Core and decide the fate of the Silent Worlds.",
+  "profile.ach.atlas-secrets.name": "Every secret",
+  "profile.ach.atlas-secrets.how": "Find all three cross-Age secrets in The Atlas of Silent Worlds.",
+  "profile.ach.atlas-reroute.name": "The third way",
+  "profile.ach.atlas-reroute.how": "Reroute every gate to the Observatory: the ending only the secrets unlock.",
+  "profile.ach.atlas-every-ending.name": "Every road",
+  "profile.ach.atlas-every-ending.how": "Restore, Sever and Reroute: see all three of the Atlas's endings.",
 };
 
 export default messages;

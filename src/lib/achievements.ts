@@ -24,4 +24,8 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: "ada-envelope", icon: "✉️", gameId: "ada-voss" },
   { id: "nx-thief", icon: "💎", gameId: "nightingale-express" },
   { id: "nx-every-clue", icon: "🔍", gameId: "nightingale-express" },
+  { id: "atlas-escaped", icon: "🔭", gameId: "atlas-silent-worlds" },
+  { id: "atlas-secrets", icon: "🗺️", gameId: "atlas-silent-worlds" },
+  { id: "atlas-reroute", icon: "🌀", gameId: "atlas-silent-worlds" },
+  { id: "atlas-every-ending", icon: "🌒", gameId: "atlas-silent-worlds" },
 ];
