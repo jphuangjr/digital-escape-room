@@ -15,6 +15,7 @@ import { useT } from "@/i18n/client";
 import { AtlasDocView, GatePanel, MirrorGrid, TankPanel, useSecondsUntil, ValvePanel } from "./parts";
 import { CorePanel, EndingPanel, PlatePanel, VotePanel } from "./finale";
 import { WallArt, type WallState } from "./art";
+import { AtlasItemIcon } from "./items";
 import { SPOTS } from "./walls";
 
 /**
@@ -25,19 +26,6 @@ import { SPOTS } from "./walls";
 const PRESENCE_MS = 15_000;
 const TABS: RoomTab[] = ["people", "chat", "attempts"];
 const INTRO_KEY = "atlas_intro_done";
-const ITEM_ICON: Record<ItemId, string> = { token: "🪙", gear: "⚙️", numerals: "🔢", can: "🪣", "seal-leaf": "🟢", "memory-verdant": "✉️",
-  "sun-lens": "🔍",
-  "hand-mirror": "🪞",
-  "engineer-note": "📜",
-  "seal-sun": "🟡",
-  "memory-meridian": "✉️",
-  "star-map": "🗺️",
-  brine: "🧪",
-  "seal-tide": "🔵",
-  "memory-pelagic": "✉️",
-  "tide-chart": "🌊",
-  "night-bloom": "🌸",
-};
 
 export function AtlasShell({ code, state, refresh }: { code: string; state: RoomState; refresh: () => Promise<void> }) {
   const scene = state.scene as AtlasSceneDTO;
@@ -325,9 +313,7 @@ function ItemTile({ item, onClick, small }: { item: AtlasItemDTO; onClick: () =>
       onClick={onClick}
       className="flex w-16 shrink-0 flex-col items-center rounded-lg border border-[#1f3640] bg-[#0f2129] px-1 py-1 active:border-[#d8b56a] disabled:opacity-60"
     >
-      <span className={small ? "text-2xl" : "text-3xl"} aria-hidden>
-        {ITEM_ICON[item.id]}
-      </span>
+      <AtlasItemIcon id={item.id} className={small ? "h-8 w-8" : "h-9 w-9"} />
       <span className="mt-0.5 line-clamp-1 text-[10px] text-stone-300">{item.name}</span>
     </button>
   );
@@ -419,9 +405,7 @@ function CloseupSheet({
           onClick={() => void act({ type: "take", item: it.id })}
           className="flex min-h-14 w-full items-center gap-3 rounded-lg border border-[#d8b56a]/50 bg-[#0f2129] px-3 text-left active:bg-[#1f3640] disabled:opacity-60"
         >
-          <span className="text-3xl" aria-hidden>
-            {ITEM_ICON[it.id]}
-          </span>
+          <AtlasItemIcon id={it.id} className="h-10 w-10 shrink-0" />
           <span className="min-w-0 flex-1">
             <span className="block text-sm font-semibold text-[#f4e7b5]">{t("atlas.take", { item: it.name })}</span>
             <span className="block text-xs text-stone-400">{it.description}</span>
@@ -459,9 +443,7 @@ function ItemSheet({ item, onClose }: { item: AtlasItemDTO | null; onClose: () =
   return (
     <Sheet title={item.name} onClose={onClose}>
       <div className="flex items-center gap-3">
-        <span className="text-5xl" aria-hidden>
-          {ITEM_ICON[item.id]}
-        </span>
+        <AtlasItemIcon id={item.id} className="h-16 w-16 shrink-0" />
         <p className="text-[15px] leading-relaxed text-stone-200">{item.description}</p>
       </div>
       {item.reading && <AtlasDocView doc={{ kind: "note", lines: [item.reading.title, ...item.reading.lines] }} />}
