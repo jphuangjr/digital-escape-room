@@ -33,7 +33,7 @@ import {
 import type { SceneResult } from "../scene/registry";
 import { GATE_ORIGIN, GLYPH_VALUE, traverse } from "./router";
 import { atlasLines, atlasT, type AT, type AtlasTextKey } from "./text";
-import { docFor, HINT_COOLDOWN_SEC, HINT_PUZZLES, holds, HOTSPOTS, hotspotPlace, ITEM_PLACES, LOCKS, PLACE_NEEDS, PLAZA, ROOTS_ANSWER, traceBeam, USES } from "./world";
+import { docFor, HINT_COOLDOWN_SEC, HINT_PUZZLES, holds, HOTSPOTS, hotspotPlace, ITEM_PLACES, LOCKS, PLACE_NEEDS, PLAZA, pour, ROOTS_ANSWER, TANKS, traceBeam, USES } from "./world";
 
 /** A case-log line as stored: no words, so each viewer reads it in their own language. */
 interface StoredLog extends StoredLogBase {
@@ -45,7 +45,8 @@ interface StoredLog extends StoredLogBase {
 
 /** Locks that jam: the two padlocks and the gate (three misroutes in a row). */
 type JamId = LockId | "gate" | "roots";
-const JAM_IDS: JamId[] = ["clock", "engine", "index", "dial", "gate", "roots"];
+const JAM_IDS: JamId[] = ["clock", "engine", "index", "dial", "registry", "gate", "roots"];
+const TANK_NAMES = ["c.tanks.big", "c.tanks.pressure", "c.tanks.small"] as const;
 
 /** What an Atlas room stores in Room.scene. Shared by everyone in the room. */
 export interface AtlasScene {
@@ -55,6 +56,8 @@ export interface AtlasScene {
   inventory: ItemId[];
   /** Every item ever picked up (taken items never reappear). */
   found: ItemId[];
+  /** Water in the Pelagic airlock's tanks (big, pressure, small). */
+  tanks: number[];
   /** Valve turns since the tunnel last flooded, e.g. ["+intake", "+reservoir"]. */
   valveRun: string[];
   log: StoredLog[];
@@ -68,7 +71,7 @@ const GLYPH_IDS = GLYPHS.map((g) => g.id);
 const LOCK_IDS = Object.keys(LOCKS) as LockId[];
 
 export function initialScene(): AtlasScene {
-  return { v: 1, flags: [], inventory: [], found: [], valveRun: [], log: [], hints: [], jams: {} };
+  return { v: 1, flags: [], inventory: [], found: [], tanks: [...TANKS.start], valveRun: [], log: [], hints: [], jams: {} };
 }
 
 export function parseScene(raw: unknown): AtlasScene {
@@ -80,11 +83,23 @@ export function parseScene(raw: unknown): AtlasScene {
     flags: strings(s.flags),
     inventory: items(s.inventory),
     found: items(s.found),
+    tanks: validTanks(s.tanks) ? s.tanks : [...TANKS.start],
     valveRun: strings(s.valveRun),
     log: Array.isArray(s.log) ? (s.log as StoredLog[]).filter((l) => l && typeof l.key === "string").slice(-MAX_LOG) : [],
     hints: parseHints(s.hints),
     jams: parseJams(s.jams, JAM_IDS),
   };
+}
+
+/** Stored tank levels are kept only if they're whole numbers within each tank and add up to the water there is. */
+function validTanks(v: unknown): v is number[] {
+  const total = TANKS.start.reduce((a, b) => a + b, 0);
+  return (
+    Array.isArray(v) &&
+    v.length === TANKS.caps.length &&
+    v.every((l, i) => Number.isInteger(l) && l >= 0 && l <= TANKS.caps[i]) &&
+    v.reduce((a: number, b: number) => a + b, 0) === total
+  );
 }
 
 const hasIn = (scene: AtlasScene) => (f: string) => scene.flags.includes(f);
@@ -97,6 +112,7 @@ function readingFor(id: ItemId, T: AT, mirror: boolean): AtlasItemDTO["reading"]
     return { title: T("item.numerals.title"), lines: byValue.map((g) => `${g.char} = ${GLYPH_VALUE[g.id]}`) };
   }
   if (id === "memory-verdant") return { title: T("item.memory-verdant.title"), lines: atlasLines(T, "item.memory-verdant.lines") };
+  if (id === "memory-pelagic") return { title: T("item.memory-pelagic.title"), lines: atlasLines(T, "item.memory-pelagic.lines") };
   if (id === "memory-meridian") return { title: T("item.memory-meridian.title"), lines: atlasLines(T, "item.memory-meridian.lines") };
   // Mirror writing: each line runs backwards until the team has the hand mirror to read it in.
   if (id === "engineer-note") {
@@ -148,6 +164,17 @@ function closeupDTO(h: HotspotId, scene: AtlasScene, T: AT, now: Date): AtlasClo
     c.gate = { powered: has("engine.on"), ...(until ? { jammedUntil: until } : {}) };
   }
   // With the can in hand, each pot can be watered until the right one opens the little door.
+  if (h === "tanks") {
+    const balanced = has("pelagic.airlock.open");
+    c.tanks = { caps: TANKS.caps, levels: scene.tanks, balanced };
+    if (!balanced) {
+      c.lines.push(T("c.tanks.how"));
+      const names = TANK_NAMES.map((k) => T(k));
+      for (let a = 0; a < 3; a++)
+        for (let b = 0; b < 3; b++) if (a !== b) c.actions.push({ op: `pour:${a}:${b}`, label: T("c.tanks.pour", { from: names[a], to: names[b] }) });
+      c.actions.push({ op: "reset", label: T("c.tanks.reset") });
+    }
+  }
   if (h === "mirrors") {
     const back = PLAZA.mirrors.map((_, i) => has(`mirror.${i}`));
     const beam = traceBeam(back);
@@ -231,7 +258,7 @@ export function applyAction(
   loc: Locale = "en",
 ): AtlasResult {
   const T = atlasT(loc);
-  const scene: AtlasScene = { ...prev, flags: [...prev.flags], inventory: [...prev.inventory], found: [...prev.found], valveRun: [...prev.valveRun] };
+  const scene: AtlasScene = { ...prev, flags: [...prev.flags], inventory: [...prev.inventory], found: [...prev.found], tanks: [...prev.tanks], valveRun: [...prev.valveRun] };
   const has = hasIn(scene);
   const set = (...fs: string[]) => fs.forEach((f) => !has(f) && scene.flags.push(f));
   const clear = (pred: (f: string) => boolean) => (scene.flags = scene.flags.filter((f) => !pred(f)));
@@ -297,6 +324,7 @@ export function applyAction(
       if (target === "valves" && (VALVES as string[]).includes(op)) return turnValve(op as ValveId);
       if (target === "roots" && op.startsWith("water:")) return waterPot(op.slice(6));
       if (target === "mirrors" && op.startsWith("mirror:")) return tiltMirror(Number(op.slice(7)));
+      if (target === "tanks" && (op === "reset" || op.startsWith("pour:"))) return pourTank(op);
       return no("msg.nothing");
     }
 
@@ -334,6 +362,24 @@ export function applyAction(
     }
   }
   return no("msg.nothing");
+
+  /** The Pelagic tanks: pour one into another, or drain all back to the start. Exactly 4 in the pressure tank opens the airlock. */
+  function pourTank(op: string): AtlasResult {
+    if (has("pelagic.airlock.open")) return no("msg.tanksDone");
+    if (op === "reset") {
+      scene.tanks = [...TANKS.start];
+      return ok("msg.reset");
+    }
+    const [from, to] = op.slice(5).split(":").map(Number);
+    if (![from, to].every((n) => Number.isInteger(n) && n >= 0 && n < TANKS.caps.length) || from === to) return no("msg.nothing");
+    const next = pour(prev.tanks, from, to);
+    if (next.every((l, i) => l === prev.tanks[i])) return no("msg.pourNothing");
+    scene.tanks = next;
+    if (next[TANKS.pressure] !== TANKS.target) return ok("msg.pour", { from: T(TANK_NAMES[from]), to: T(TANK_NAMES[to]) });
+    set("pelagic.airlock.open");
+    log("log.balanced");
+    return { ...ok("msg.balanced"), attempt: { lock: "tanks", input: next.join("/"), correct: true } };
+  }
 
   /** The Meridian plaza: tilt one mirror. When the light lands on the sun door, the door opens for good. */
   function tiltMirror(i: number): AtlasResult {

@@ -30,6 +30,7 @@ export const PLACE_NEEDS: Record<LocationId, Cond> = {
   meridian: { all: ["reached.meridian"] },
   sanctum: { all: ["reached.meridian", "meridian.lit"] },
   pelagic: { all: ["reached.pelagic"] },
+  archive: { all: ["reached.pelagic", "pelagic.airlock.open"] },
 };
 
 export interface ActionDef {
@@ -148,6 +149,18 @@ export function traceBeam(back: boolean[], plaza = PLAZA): { path: [number, numb
   return { path, lit: false };
 }
 
+/**
+ * The Pelagic airlock's tanks: big, pressure, small. Pour until one is empty or the other full; the airlock opens
+ * when the pressure tank holds exactly `target`. Starts with the big tank full (shortest solution: six pours).
+ */
+export const TANKS = { caps: [8, 5, 3], start: [8, 0, 0], pressure: 1, target: 4 };
+
+/** Pour tank `from` into tank `to`: as much as fits. */
+export function pour(levels: number[], from: number, to: number, caps = TANKS.caps): number[] {
+  const moved = Math.min(levels[from], caps[to] - levels[to]);
+  return levels.map((l, i) => (i === from ? l - moved : i === to ? l + moved : l));
+}
+
 /** The hour the buried sundial's shadow really falls on (the great mirror shows it reversed, at 8). */
 export const DIAL_HOUR = 4;
 
@@ -228,6 +241,24 @@ export const HOTSPOTS: Record<HotspotId, HotspotDef> = {
   tablet: { title: "c.tablet.title", text: [{ key: "c.tablet.text" }], doc: { doc: { kind: "plaque", key: "c.tablet.plaque" } } },
   chest: { title: "c.chest.title", text: [{ when: { all: ["meridian.chest.open"] }, key: "c.chest.open" }, { key: "c.chest.text" }] },
   altar: { title: "c.altar.title", text: [{ key: "c.altar.text" }] },
+  tanks: {
+    title: "c.tanks.title",
+    text: [{ when: { all: ["pelagic.airlock.open"] }, key: "c.tanks.balanced" }, { key: "c.tanks.text" }],
+  },
+  airlock: {
+    title: "c.airlock.title",
+    text: [{ when: { all: ["pelagic.airlock.open"] }, key: "c.airlock.open" }, { key: "c.airlock.text" }],
+    actions: [{ op: "go:archive", label: "c.airlock.go", when: { all: ["pelagic.airlock.open"] } }],
+  },
+  statues: { title: "c.statues.title", text: [{ key: "c.statues.text" }], actions: [{ op: "go:pelagic", label: "c.archive-home.go" }] },
+  lamps: { title: "c.lamps.title", text: [{ key: "c.lamps.text" }] },
+  gauge: { title: "c.gauge.title", text: [{ key: "c.gauge.text" }] },
+  glass: { title: "c.glass.title", text: [{ when: { all: ["pelagic.glass.read"] }, key: "c.glass.read" }, { key: "c.glass.text" }] },
+  "book-varro": { title: "c.book-varro.title", text: [{ key: "c.book-varro.text" }], doc: { doc: { kind: "note", key: "c.book-varro.note" } } },
+  "book-ashe": { title: "c.book-ashe.title", text: [{ key: "c.book-ashe.text" }], doc: { doc: { kind: "note", key: "c.book-ashe.note" } } },
+  "book-halloran": { title: "c.book-halloran.title", text: [{ key: "c.book-halloran.text" }], doc: { doc: { kind: "note", key: "c.book-halloran.note" } } },
+  desk: { title: "c.desk.title", text: [{ when: { all: ["pelagic.desk.open"] }, key: "c.desk.open" }, { key: "c.desk.text" }] },
+  seed: { title: "c.seed.title", text: [{ when: { all: ["verdant.seed.bloomed"] }, key: "c.seed.bloomed" }, { key: "c.seed.text" }] },
   "pelagic-gate": { title: "c.pelagic-gate.title", text: [{ key: "c.pelagic-gate.text" }], actions: ageHome },
 };
 
@@ -246,6 +277,13 @@ export const ITEM_PLACES: Record<ItemId, { at: HotspotId; when: Cond }> = {
   "seal-sun": { at: "chest", when: { all: ["meridian.chest.open"] } },
   "memory-meridian": { at: "chest", when: { all: ["meridian.chest.open"] } },
   "star-map": { at: "vault", when: { all: ["meridian.vault.lit"] } },
+  brine: { at: "pelagic-gate", when: {} },
+  "seal-tide": { at: "desk", when: { all: ["pelagic.desk.open"] } },
+  "memory-pelagic": { at: "desk", when: { all: ["pelagic.desk.open"] } },
+  // The other two cross-Age secrets: the Meridian's hand mirror reads the Library's glass, and the Library's sea
+  // water wakes the Verdant seed.
+  "tide-chart": { at: "glass", when: { all: ["pelagic.glass.read"] } },
+  "night-bloom": { at: "seed", when: { all: ["verdant.seed.bloomed"] } },
 };
 
 /** Using an item on a hotspot. */
@@ -261,6 +299,8 @@ export interface UseDef {
 export const USES: UseDef[] = [
   { item: "token", target: "stair-door", when: { none: ["stairs.open"] }, sets: ["stairs.open"], consumes: true, message: "msg.stairs", log: "log.stairs" },
   { item: "gear", target: "engine", when: { none: ["engine.geared"] }, sets: ["engine.geared"], consumes: true, message: "msg.gear", log: "log.gear" },
+  { item: "hand-mirror", target: "glass", when: { none: ["pelagic.glass.read"] }, sets: ["pelagic.glass.read"], consumes: false, message: "msg.glass", log: "log.glass" },
+  { item: "brine", target: "seed", when: { none: ["verdant.seed.bloomed"] }, sets: ["verdant.seed.bloomed"], consumes: true, message: "msg.seed", log: "log.seed" },
   { item: "sun-lens", target: "vault", when: { none: ["meridian.vault.lit"] }, sets: ["meridian.vault.lit"], consumes: true, message: "msg.vault", log: "log.vault" },
 ];
 
@@ -324,6 +364,19 @@ export const LOCKS: Record<LockId, LockDef> = {
     message: "msg.dial",
     log: "log.dial",
   },
+  // Halloran's registry, the only one whose description of the hall matches it (four statues, green lamps,
+  // twelve fathoms): Verdant, Meridian, Pelagic, and the struck node.
+  registry: {
+    at: "desk",
+    kind: "symbols",
+    length: 4,
+    label: "lock.registry",
+    when: { none: ["pelagic.desk.open"] },
+    answers: ["◈≈☉△"],
+    sets: ["pelagic.desk.open"],
+    message: "msg.registry",
+    log: "log.registry",
+  },
 };
 
 /**
@@ -340,6 +393,8 @@ export const HINT_PUZZLES: { id: string; place: LocationId; solved: Cond }[] = [
   { id: "roots", place: "verdant", solved: { all: ["verdant.door.open"] } },
   { id: "mirrors", place: "meridian", solved: { all: ["meridian.lit"] } },
   { id: "dial", place: "sanctum", solved: { all: ["meridian.chest.open"] } },
+  { id: "tanks", place: "pelagic", solved: { all: ["pelagic.airlock.open"] } },
+  { id: "registry", place: "archive", solved: { all: ["pelagic.desk.open"] } },
 ];
 export const HINT_COOLDOWN_SEC = 60;
 

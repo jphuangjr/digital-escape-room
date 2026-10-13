@@ -13,8 +13,8 @@ import type {
 export const ATLAS_GAME_ID = "atlas-silent-worlds";
 
 /** Places a player can stand. Personal (each player's own), but only reachable once the team opens the way. */
-export type LocationId = "observatory" | "waterworks" | "chamber" | "verdant" | "meridian" | "sanctum" | "pelagic";
-export const LOCATIONS: LocationId[] = ["observatory", "waterworks", "chamber", "verdant", "meridian", "sanctum", "pelagic"];
+export type LocationId = "observatory" | "waterworks" | "chamber" | "verdant" | "meridian" | "sanctum" | "pelagic" | "archive";
+export const LOCATIONS: LocationId[] = ["observatory", "waterworks", "chamber", "verdant", "meridian", "sanctum", "pelagic", "archive"];
 
 /** Every wall, in turning order per place (right turns go forward). */
 export type WallId =
@@ -35,7 +35,10 @@ export type WallId =
   | "meridian-plaza"
   | "sanctum-mirror"
   | "sanctum-study"
-  | "pelagic-arrival";
+  | "pelagic-arrival"
+  | "pelagic-airlock"
+  | "archive-hall"
+  | "archive-registry";
 
 export const WALLS: Record<LocationId, WallId[]> = {
   observatory: ["telescope", "desk", "clock", "stairs"],
@@ -44,7 +47,8 @@ export const WALLS: Record<LocationId, WallId[]> = {
   verdant: ["verdant-arrival", "verdant-beds", "verdant-shelves", "verdant-roots"],
   meridian: ["meridian-arrival", "meridian-plaza"],
   sanctum: ["sanctum-mirror", "sanctum-study"],
-  pelagic: ["pelagic-arrival"],
+  pelagic: ["pelagic-arrival", "pelagic-airlock"],
+  archive: ["archive-hall", "archive-registry"],
 };
 
 /** Things you can tap, and the wall each one is on. */
@@ -80,6 +84,17 @@ export const HOTSPOT_WALL = {
   "chest": "sanctum-study",
   "altar": "sanctum-study",
   "pelagic-gate": "pelagic-arrival",
+  "tanks": "pelagic-airlock",
+  "airlock": "pelagic-airlock",
+  "statues": "archive-hall",
+  "lamps": "archive-hall",
+  "gauge": "archive-hall",
+  "glass": "archive-hall",
+  "book-varro": "archive-registry",
+  "book-ashe": "archive-registry",
+  "book-halloran": "archive-registry",
+  "desk": "archive-registry",
+  "seed": "verdant-beds",
 } as const satisfies Record<string, WallId>;
 export type HotspotId = keyof typeof HOTSPOT_WALL;
 
@@ -95,8 +110,13 @@ export type ItemId =
   | "engineer-note"
   | "seal-sun"
   | "memory-meridian"
-  | "star-map";
-export type LockId = "clock" | "engine" | "index" | "dial";
+  | "star-map"
+  | "brine"
+  | "seal-tide"
+  | "memory-pelagic"
+  | "tide-chart"
+  | "night-bloom";
+export type LockId = "clock" | "engine" | "index" | "dial" | "registry";
 export type ValveId = "intake" | "reservoir" | "outflow";
 export const VALVES: ValveId[] = ["intake", "reservoir", "outflow"];
 
@@ -166,6 +186,8 @@ export interface AtlasCloseupDTO {
   valves?: Record<ValveId, boolean>;
   /** The plaza mirrors (Sunken Meridian). */
   mirrors?: MirrorGridDTO;
+  /** The Pelagic airlock's three tanks: capacities and current levels (big, pressure, small). */
+  tanks?: { caps: number[]; levels: number[]; balanced: boolean };
   /** This close-up has the Threshold rings (the gate). */
   gate?: { powered: boolean; jammedUntil?: string };
 }

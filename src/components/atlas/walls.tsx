@@ -43,8 +43,9 @@ export const SPOTS: Record<WallId, Spot[]> = {
   ],
   "verdant-arrival": [{ id: "verdant-gate", icon: "🌿", x: 60, y: 100, w: 180, h: 200 }],
   "verdant-beds": [
-    { id: "creeper", icon: "🌱", x: 30, y: 110, w: 110, h: 190 },
-    { id: "fern", icon: "🌿", x: 160, y: 150, w: 110, h: 150 },
+    { id: "creeper", icon: "🌱", x: 30, y: 60, w: 110, h: 190 },
+    { id: "fern", icon: "🌿", x: 160, y: 100, w: 110, h: 150 },
+    { id: "seed", icon: "🌰", x: 100, y: 280, w: 100, h: 90 },
   ],
   "verdant-shelves": [
     { id: "pot-sign", icon: "🪧", x: 80, y: 40, w: 140, h: 80 },
@@ -69,6 +70,22 @@ export const SPOTS: Record<WallId, Spot[]> = {
     { id: "altar", icon: "🛐", x: 180, y: 160, w: 90, h: 120 },
   ],
   "pelagic-arrival": [{ id: "pelagic-gate", icon: "🌊", x: 60, y: 100, w: 180, h: 200 }],
+  "pelagic-airlock": [
+    { id: "tanks", icon: "🛢", x: 30, y: 80, w: 150, h: 220 },
+    { id: "airlock", icon: "🚪", x: 195, y: 110, w: 85, h: 190 },
+  ],
+  "archive-hall": [
+    { id: "statues", icon: "🗿", x: 30, y: 150, w: 100, h: 170 },
+    { id: "lamps", icon: "🏮", x: 150, y: 40, w: 120, h: 80 },
+    { id: "gauge", icon: "⏲", x: 30, y: 40, w: 100, h: 90 },
+    { id: "glass", icon: "🪟", x: 150, y: 150, w: 120, h: 170 },
+  ],
+  "archive-registry": [
+    { id: "book-varro", icon: "📕", x: 20, y: 60, w: 80, h: 100 },
+    { id: "book-ashe", icon: "📗", x: 110, y: 60, w: 80, h: 100 },
+    { id: "book-halloran", icon: "📘", x: 200, y: 60, w: 80, h: 100 },
+    { id: "desk", icon: "🗃", x: 70, y: 200, w: 160, h: 140 },
+  ],
 };
 
 /** One backdrop tint per place, so you can tell where you are at a glance. */
@@ -79,5 +96,6 @@ export const PLACE_TINT: Record<string, string> = {
   verdant: "from-[#13261a] to-[#08140c]",
   meridian: "from-[#2b2213] to-[#16100a]",
   sanctum: "from-[#2b1d10] to-[#120a05]",
+  archive: "from-[#0d2a2a] to-[#05120f]",
   pelagic: "from-[#0f1c2e] to-[#070d18]",
 };
