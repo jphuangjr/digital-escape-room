@@ -7,6 +7,7 @@ import type { AgeId, AtlasActionResponse, AtlasCloseupDTO, AtlasEnding, AtlasSce
 import { AGES, ATLAS_GAME_ID, GLYPHS } from "@/lib/atlas/types";
 import { Leaderboard } from "@/components/site/Leaderboard";
 import { useT } from "@/i18n/client";
+import { AtlasItemIcon } from "./items";
 import { RingPicker, useSecondsUntil } from "./parts";
 
 type Act = (a: AtlasSceneAction) => Promise<AtlasActionResponse | null>;
@@ -39,7 +40,8 @@ export function PlatePanel({
               onClick={() => setSeal(h.id)}
               className={`min-h-11 rounded-full border px-3 text-sm ${chosen === h.id ? "border-[#f4e7b5] bg-[#3a3320] text-[#f4e7b5]" : "border-[#8a7440]/60 text-stone-300"}`}
             >
-              {SEAL_ICON[h.id] ?? "⬤"} {h.name}
+              <AtlasItemIcon id={h.id} className="mr-1.5 inline h-6 w-6 align-middle" />
+              {h.name}
             </button>
           ))}
         </div>
@@ -58,7 +60,7 @@ export function PlatePanel({
                 s.seal ? "border-[#f4e7b5] bg-[#3a3320]" : plate.registered && s.glyph === "peak" ? "border-[#ffd75e] bg-[#5a4a1a] text-[#ffd75e]" : "border-[#8a7440] text-[#e9d9a6]"
               } disabled:opacity-90`}
             >
-              {s.seal ? SEAL_ICON[s.seal] : char}
+              {s.seal ? <AtlasItemIcon id={s.seal} className="h-9 w-9" /> : char}
             </button>
           );
         })}
@@ -67,7 +69,6 @@ export function PlatePanel({
   );
 }
 
-const SEAL_ICON: Partial<Record<ItemId, string>> = { "seal-leaf": "🟢", "seal-sun": "🟡", "seal-tide": "🔵" };
 
 /** The Atlas Core: reroute every Age gate to the Observatory (when all three secrets are found). */
 export function CorePanel({ core, busy, act }: { core: NonNullable<AtlasCloseupDTO["core"]>; busy: boolean; act: Act }) {
