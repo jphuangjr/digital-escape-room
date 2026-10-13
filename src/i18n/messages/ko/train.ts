@@ -166,7 +166,7 @@ const messages: Record<keyof typeof en, string> = {
   "train.landing.replace": "이미 {codes} 방의 방장이에요. 그 방을 닫고 새 방을 시작할까요?",
   "train.landing.board": "열차에 오르기",
   "train.landing.boarding": "탑승하는 중…",
-  "train.landing.invite": "탑승한 뒤 방 메뉴에서 플레이테스터를 초대하세요.",
+  "train.landing.invite": "탑승한 뒤 방 메뉴에서 친구를 초대하세요.",
   "train.landing.back": "← 모든 방탈출",
   "train.attempt.suitcase": "여행 가방 자물쇠",
   "train.attempt.door": "문 비상 해제 장치",

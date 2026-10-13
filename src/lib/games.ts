@@ -50,7 +50,7 @@ export const GAMES: GameInfo[] = [
     duration: "45–60 min",
     difficulty: "Easy",
     tone: "Art Deco mystery",
-    status: "staging",
+    status: "live",
     href: "/play/nightingale-express",
   },
 ];

@@ -166,7 +166,7 @@ const messages: Record<keyof typeof en, string> = {
   "train.landing.replace": "你已經是 {codes} 的房主。要關閉它並建立新房間嗎？",
   "train.landing.board": "登上列車",
   "train.landing.boarding": "登車中……",
-  "train.landing.invite": "上車後，可以從「房間」選單邀請測試玩家。",
+  "train.landing.invite": "上車後，可以從「房間」選單邀請朋友。",
   "train.landing.back": "← 所有密室逃脫",
   "train.attempt.suitcase": "行李箱鎖",
   "train.attempt.door": "門的越控鎖",

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { gameText, getGame } from "@/lib/games";
-import { ContinueRooms, MyCases, useMe } from "@/components/site/Account";
+import { AccountBar, ContinueRooms, GoogleButton, MyCases, useMe } from "@/components/site/Account";
+import { RedeemBox } from "@/components/site/RedeemBox";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { AVATAR_COLORS } from "@/app/r/[code]/RoomClient";
@@ -15,6 +16,12 @@ export function TrainLanding() {
   const router = useRouter();
   const game = getGame(TRAIN_GAME_ID)!;
   const me = useMe();
+  // Hosting needs Google sign-in and owning the game (a purchase code), like Ada's case. Joining is free.
+  const [unlocked, setUnlocked] = useState(false);
+  const [signedOut, setSignedOut] = useState(false);
+  const signedIn = Boolean(me?.user) && !signedOut;
+  const mustSignIn = Boolean(me?.googleEnabled) && !signedIn;
+  const mustUnlock = signedIn && !unlocked && !me!.ownedGames.includes(TRAIN_GAME_ID);
   const t = useT();
   const [name, setName] = useState("");
   const [color, setColor] = useState(AVATAR_COLORS[0]);
@@ -38,7 +45,21 @@ export function TrainLanding() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ gameId: TRAIN_GAME_ID, displayName, color, replaceExisting }),
     });
-    const data = (await res.json().catch(() => ({}))) as { code?: string; error?: string; replaceRequired?: boolean; openRooms?: { code: string }[] };
+    const data = (await res.json().catch(() => ({}))) as {
+      code?: string;
+      error?: string;
+      replaceRequired?: boolean;
+      signInRequired?: boolean;
+      purchaseRequired?: boolean;
+      openRooms?: { code: string }[];
+    };
+    if (data.signInRequired || data.purchaseRequired) {
+      if (data.signInRequired) setSignedOut(true);
+      else setUnlocked(false);
+      setErr(data.signInRequired ? t("site.ada.errSignIn") : t("site.ada.errPurchase"));
+      setBusy(false);
+      return;
+    }
     if (res.status === 409 && data.replaceRequired) {
       const codes = (data.openRooms ?? []).map((r) => r.code).join(", ");
       if (window.confirm(t("train.landing.replace", { codes }))) return start(true);
@@ -74,6 +95,7 @@ export function TrainLanding() {
         </header>
         <p className="font-serif leading-relaxed text-noir-ink-dim">{gameText(t, game, "blurb")}</p>
         <ContinueRooms me={me} gameId={TRAIN_GAME_ID} />
+        <AccountBar me={me} callbackUrl={`/play/${TRAIN_GAME_ID}`} />
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -107,9 +129,18 @@ export function TrainLanding() {
             ))}
           </fieldset>
           {err && <p className="text-sm text-noir-ink-dim">{err}</p>}
-          <button type="submit" disabled={busy} className="min-h-12 rounded-lg bg-noir-brass font-semibold text-noir-bg disabled:opacity-60">
-            {busy ? t("train.landing.boarding") : t("train.landing.board")}
-          </button>
+          {mustSignIn ? (
+            <div className="flex flex-col gap-2">
+              <GoogleButton label={t("site.ada.signInToHost")} callbackUrl={`/play/${TRAIN_GAME_ID}`} />
+              <p className="text-center text-xs text-noir-ink-faint">{t("site.ada.hostsSignIn")}</p>
+            </div>
+          ) : mustUnlock ? (
+            <RedeemBox gameTitle={gameText(t, game, "title")} onRedeemed={(id) => id === TRAIN_GAME_ID && setUnlocked(true)} />
+          ) : (
+            <button type="submit" disabled={busy} className="min-h-12 rounded-lg bg-noir-brass font-semibold text-noir-bg disabled:opacity-60">
+              {busy ? t("train.landing.boarding") : t("train.landing.board")}
+            </button>
+          )}
           <p className="text-xs text-noir-ink-faint">{t("train.landing.invite")}</p>
         </form>
         {me && <MyCases me={me} gameId={TRAIN_GAME_ID} />}
