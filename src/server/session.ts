@@ -88,10 +88,16 @@ export async function touchRoom(room: Pick<Room, "id" | "lastActivityAt">, force
   await db.room.update({ where: { id: room.id }, data: { lastActivityAt: new Date() } }).catch(() => {});
 }
 
-/** Non-expired rooms whose host player is this signed-in user. */
+/**
+ * Rooms this signed-in user hosts that are still being played: not expired and not yet escaped.
+ * A room counts as done once finishedAt is set (the escape), even while its ending vote is still open.
+ */
 export async function openRoomsHostedBy(userId: string) {
   const players = await db.player.findMany({
-    where: { userId, room: { lastActivityAt: { gte: new Date(Date.now() - ROOM_TTL_MS) } } },
+    where: {
+      userId,
+      room: { finishedAt: null, status: { not: "finished" }, lastActivityAt: { gte: new Date(Date.now() - ROOM_TTL_MS) } },
+    },
     include: { room: { include: { _count: { select: { players: true } } } } },
   });
   return players.filter((p) => p.room.hostId === p.id).map((p) => p.room);
