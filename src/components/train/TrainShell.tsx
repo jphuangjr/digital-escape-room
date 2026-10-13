@@ -126,7 +126,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
     if (knownLog.current) {
       for (const e of scene.log) {
         if (knownLog.current.has(e.id) || e.playerId === state.me.id) continue;
-        toast(`${e.playerName} ${e.text}`, "success");
+        toast(e.text, "success");
       }
     }
     knownLog.current = new Set(scene.log.map((e) => e.id));
