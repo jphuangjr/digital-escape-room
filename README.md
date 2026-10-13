@@ -7,6 +7,8 @@ The first one is **The Vanishing of Dr. Ada Voss** (`/play/ada-voss`).
 1. Add an entry to `GAMES` in `src/lib/games.ts` (its `id` is stored on rooms and case records).
 2. Give it a landing page at its `href` (see `src/app/play/ada-voss/`).
 3. Create its rooms with that `gameId`.
+4. Physical-room games (walls, items, locks) plug into the shared scene engine: see "Scene games" in `CONTRACTS.md`.
+   Plan for the next one: `docs/ATLAS.md` (spoilers).
 
 ## The Vanishing of Dr. Ada Voss
 
