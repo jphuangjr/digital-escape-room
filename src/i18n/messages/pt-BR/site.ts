@@ -31,6 +31,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.form.avatarColor": "Cor do avatar",
   "site.form.colorAria": "Cor {color}",
   "site.form.joinInvestigation": "Entrar na investigação",
+  "site.playAgain": "Jogar de novo",
   "site.allRooms": "Todos os escape rooms",
   "site.error.network": "Problema de rede. Tente de novo.",
 

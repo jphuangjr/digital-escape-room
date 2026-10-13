@@ -762,9 +762,14 @@ function EndingPanel({ scene, code }: { scene: SceneDTO; code: string }) {
           <p className="mx-auto w-fit rounded-full border border-[#c9a227]/60 bg-[#c9a227]/10 px-3 py-1 text-xs font-semibold text-[#ecd27a]">{t("train.end.everyClue")}</p>
         )}
         <Leaderboard gameId={TRAIN_GAME_ID} roomCode={code} tone="room" />
-        <Link href="/" className="block min-h-12 rounded-lg bg-[#c9a227] py-3 text-center font-semibold text-[#1b120b]">
-          {t("train.end.lobby")}
-        </Link>
+        <div className="flex flex-col gap-2">
+          <Link href={`/play/${TRAIN_GAME_ID}`} className="block min-h-12 rounded-lg bg-[#c9a227] py-3 text-center font-semibold text-[#1b120b]">
+            {t("site.playAgain")}
+          </Link>
+          <Link href="/" className="block min-h-12 rounded-lg border border-[#c9a227]/50 py-3 text-center text-[#ecd27a]">
+            {t("train.end.lobby")}
+          </Link>
+        </div>
       </article>
     </div>
   );

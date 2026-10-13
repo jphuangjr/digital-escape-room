@@ -31,6 +31,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.form.avatarColor": "아바타 색상",
   "site.form.colorAria": "색상 {color}",
   "site.form.joinInvestigation": "수사에 참가하기",
+  "site.playAgain": "다시 하기",
   "site.allRooms": "모든 방탈출",
   "site.error.network": "네트워크 문제가 생겼어요. 다시 시도해 주세요.",
 

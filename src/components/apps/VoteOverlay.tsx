@@ -283,6 +283,9 @@ function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
             <button className={btnGhost} onClick={onMinimize}>
               {t("room.ending.keepBrowsingLaptop")}
             </button>
+            <Link href={`/play/${ctx.state.gameId}`} className={btnGhost}>
+              {t("site.playAgain")}
+            </Link>
             <Link href="/" className={btnGhost}>
               {t("room.ending.backToLobby")}
             </Link>

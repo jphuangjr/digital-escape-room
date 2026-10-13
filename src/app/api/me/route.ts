@@ -7,7 +7,7 @@ import { cookieName, ROOM_TTL_MS } from "@/server/session";
 import { isAdmin, ownedGameIds } from "@/server/purchases";
 
 /**
- * The signed-in user (if any), the rooms they're still in, and their finished cases with times.
+ * The signed-in user (if any), the unfinished rooms they're still in, and their finished cases with times.
  * Rooms come from Google sign-in and from this browser's room cookies, so guests see theirs too.
  */
 export async function GET() {
@@ -24,7 +24,8 @@ export async function GET() {
     user ? ownedGameIds(user) : Promise.resolve([] as string[]),
     mine.length
       ? db.player.findMany({
-          where: { OR: mine, room: { lastActivityAt: { gte: new Date(Date.now() - ROOM_TTL_MS) } } },
+          // A finished room is a case now (listed under cases), not something to rejoin.
+          where: { OR: mine, room: { status: { not: "finished" }, lastActivityAt: { gte: new Date(Date.now() - ROOM_TTL_MS) } } },
           include: { room: { include: { _count: { select: { players: true } } } } },
           orderBy: { room: { lastActivityAt: "desc" } },
           take: 20,

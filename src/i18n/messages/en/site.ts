@@ -32,6 +32,7 @@ const messages = {
   "site.form.avatarColor": "Avatar color",
   "site.form.colorAria": "Color {color}",
   "site.form.joinInvestigation": "Join the investigation",
+  "site.playAgain": "Play again",
   "site.allRooms": "All escape rooms",
   "site.error.network": "Network trouble. Try again.",
 

@@ -31,6 +31,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.form.avatarColor": "頭像顏色",
   "site.form.colorAria": "顏色 {color}",
   "site.form.joinInvestigation": "加入調查",
+  "site.playAgain": "再玩一次",
   "site.allRooms": "所有密室逃脫",
   "site.error.network": "網路發生問題，請再試一次。",
 
