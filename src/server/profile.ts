@@ -4,7 +4,7 @@ import type { ProfileResponse } from "@/lib/types";
 import { ACHIEVEMENTS } from "@/lib/achievements";
 import { GAMES } from "@/lib/games";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
-import { THIEF } from "./train/content";
+import { sceneGame } from "./scene/games";
 import { db } from "./db";
 import { rankOf } from "./leaderboard";
 
@@ -19,8 +19,8 @@ export async function getProfile(user: User): Promise<ProfileResponse> {
 
   const rows = cases.map((c) => {
     const e = byRoom.get(c.roomRef);
-    // A train case is solved only by naming the thief; any finished Ada case escaped.
-    const solved = e ? e.solved : c.gameId === TRAIN_GAME_ID ? c.ending === THIEF : true;
+    // Scene games decide which endings count as solved; any finished Ada case escaped.
+    const solved = e ? e.solved : (sceneGame(c.gameId)?.solvedEnding(c.ending) ?? true);
     return { c, e, solved, rank: ranks.get(c.roomRef) ?? null };
   });
 
