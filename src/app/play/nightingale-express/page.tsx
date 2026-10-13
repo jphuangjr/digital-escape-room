@@ -6,11 +6,10 @@ import { isAdmin } from "@/server/purchases";
 import { TrainLanding } from "./TrainLanding";
 
 export const metadata: Metadata = {
-  title: "The Nightingale Express (staging) — Escape Escape",
-  robots: { index: false, follow: false },
+  title: "The Nightingale Express — Escape Escape",
 };
 
-/** Staging: only admins can see this page; everyone else gets a 404. */
+/** While a game is in staging only admins can see its page; everyone else gets a 404. */
 export default async function Page() {
   const game = getGame("nightingale-express");
   const user = await getSessionUser();

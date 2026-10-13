@@ -166,7 +166,7 @@ const messages: Record<keyof typeof en, string> = {
   "train.landing.replace": "すでに {codes} のホストになっています。そのルームを閉じて、新しいルームを始めますか？",
   "train.landing.board": "列車に乗る",
   "train.landing.boarding": "乗車中…",
-  "train.landing.invite": "乗車したら、「ルーム」メニューからテストプレイヤーを招待してください。",
+  "train.landing.invite": "乗車したら、「ルーム」メニューから友達を招待しましょう。",
   "train.landing.back": "← すべての脱出ゲーム",
   "train.attempt.suitcase": "スーツケースの錠",
   "train.attempt.door": "扉の解除装置",
