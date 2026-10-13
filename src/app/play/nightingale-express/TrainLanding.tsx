@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { gameText, getGame } from "@/lib/games";
+import { ContinueRooms, MyCases, useMe } from "@/components/site/Account";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { AVATAR_COLORS } from "@/app/r/[code]/RoomClient";
@@ -13,6 +14,7 @@ import { Leaderboard } from "@/components/site/Leaderboard";
 export function TrainLanding() {
   const router = useRouter();
   const game = getGame(TRAIN_GAME_ID)!;
+  const me = useMe();
   const t = useT();
   const [name, setName] = useState("");
   const [color, setColor] = useState(AVATAR_COLORS[0]);
@@ -71,6 +73,7 @@ export function TrainLanding() {
           <p className="mt-2 font-serif italic text-noir-ink-dim">{gameText(t, game, "tagline")}</p>
         </header>
         <p className="font-serif leading-relaxed text-noir-ink-dim">{gameText(t, game, "blurb")}</p>
+        <ContinueRooms me={me} gameId={TRAIN_GAME_ID} />
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -109,6 +112,7 @@ export function TrainLanding() {
           </button>
           <p className="text-xs text-noir-ink-faint">{t("train.landing.invite")}</p>
         </form>
+        {me && <MyCases me={me} gameId={TRAIN_GAME_ID} />}
         <Leaderboard gameId={TRAIN_GAME_ID} />
       </div>
     </main>

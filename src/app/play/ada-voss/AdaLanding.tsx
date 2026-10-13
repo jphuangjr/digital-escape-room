@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MeResponse, OpenHostedRoom } from "@/lib/types";
-import { AccountBar, GoogleButton, MyCases } from "@/components/site/Account";
+import { AccountBar, ContinueRooms, GoogleButton, MyCases } from "@/components/site/Account";
 import { Leaderboard } from "@/components/site/Leaderboard";
 import { Compass } from "@/components/site/Compass";
 import { ReplaceRoomDialog } from "@/components/site/ReplaceRoomDialog";
@@ -181,6 +181,8 @@ export function AdaLanding() {
           </blockquote>
           <p className="text-sm text-noir-ink-faint">{t("site.ada.solo")}</p>
         </section>
+
+        <ContinueRooms me={me} gameId={GAME_ID} />
 
         <AccountBar me={me} callbackUrl="/play/ada-voss" fallbackColor={color} />
 

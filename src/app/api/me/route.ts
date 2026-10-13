@@ -1,31 +1,44 @@
 import type { Ending, MeResponse, RoomStatus } from "@/lib/types";
 import { db } from "@/server/db";
 import { json } from "@/server/http";
+import { cookies } from "next/headers";
 import { getSessionUser, googleEnabled } from "@/server/auth";
-import { ROOM_TTL_MS } from "@/server/session";
+import { cookieName, ROOM_TTL_MS } from "@/server/session";
 import { isAdmin, ownedGameIds } from "@/server/purchases";
 
-/** The signed-in user (if any), their rooms that are still open, and their finished cases with times. */
+/**
+ * The signed-in user (if any), the unfinished rooms they're still in, and their finished cases with times.
+ * Rooms come from Google sign-in and from this browser's room cookies, so guests see theirs too.
+ */
 export async function GET() {
   const user = await getSessionUser();
-  if (!user) return json<MeResponse>({ googleEnabled, isAdmin: false, ownedGames: [], user: null, activeRooms: [], cases: [] });
+  const prefix = cookieName("");
+  const tokens = (await cookies())
+    .getAll()
+    .filter((c) => c.name.startsWith(prefix))
+    .map((c) => c.value)
+    .slice(0, 40);
+  const mine = [...(user ? [{ userId: user.id }] : []), ...(tokens.length ? [{ token: { in: tokens } }] : [])];
 
   const [ownedGames, players, cases] = await Promise.all([
-    ownedGameIds(user),
-    db.player.findMany({
-      where: { userId: user.id, room: { lastActivityAt: { gte: new Date(Date.now() - ROOM_TTL_MS) } } },
-      include: { room: { include: { _count: { select: { players: true } } } } },
-      orderBy: { room: { lastActivityAt: "desc" } },
-      take: 20,
-    }),
-    db.caseRecord.findMany({ where: { userId: user.id }, orderBy: { finishedAt: "desc" }, take: 50 }),
+    user ? ownedGameIds(user) : Promise.resolve([] as string[]),
+    mine.length
+      ? db.player.findMany({
+          // A finished room is a case now (listed under cases), not something to rejoin.
+          where: { OR: mine, room: { status: { not: "finished" }, lastActivityAt: { gte: new Date(Date.now() - ROOM_TTL_MS) } } },
+          include: { room: { include: { _count: { select: { players: true } } } } },
+          orderBy: { room: { lastActivityAt: "desc" } },
+          take: 20,
+        })
+      : Promise.resolve([]),
+    user ? db.caseRecord.findMany({ where: { userId: user.id }, orderBy: { finishedAt: "desc" }, take: 50 }) : Promise.resolve([]),
   ]);
 
   return json<MeResponse>({
     googleEnabled,
-    isAdmin: isAdmin(user),
+    isAdmin: user ? isAdmin(user) : false,
     ownedGames,
-    user: { name: user.name, email: user.email, image: user.image },
+    user: user ? { name: user.name, email: user.email, image: user.image } : null,
     activeRooms: players.map((p) => ({
       code: p.room.code,
       gameId: p.room.gameId,

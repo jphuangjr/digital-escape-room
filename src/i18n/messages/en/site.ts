@@ -32,6 +32,7 @@ const messages = {
   "site.form.avatarColor": "Avatar color",
   "site.form.colorAria": "Color {color}",
   "site.form.joinInvestigation": "Join the investigation",
+  "site.playAgain": "Play again",
   "site.allRooms": "All escape rooms",
   "site.error.network": "Network trouble. Try again.",
 
@@ -64,6 +65,7 @@ const messages = {
   "site.account.signOut": "Sign out",
   "site.account.nudge": "Sign in to keep your cases and times, and pick up on any device.",
   "site.account.signIn": "Sign in",
+  "site.continue.title": "Pick up where you left off",
   "site.cases.heading": "My cases",
   "site.cases.roomMeta":
     "{title} · {count, plural, one {# player} other {# players}}{host, select, true { · host} other {}} · {status, select, playing {in progress} voting {voting} finished {finished} other {{status}}}",

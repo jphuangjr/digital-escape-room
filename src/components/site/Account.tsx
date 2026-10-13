@@ -105,10 +105,40 @@ export function AccountBar({ me, callbackUrl = "/", fallbackColor = "#c9a227" }:
   );
 }
 
+/** A game's landing page: the rooms of this game you're still in, to jump straight back into. Guests too. */
+export function ContinueRooms({ me, gameId }: { me: MeResponse | null; gameId: string }) {
+  const t = useT();
+  const rooms = (me?.activeRooms ?? []).filter((r) => r.gameId === gameId && r.status !== "finished");
+  if (rooms.length === 0) return null;
+  return (
+    <section className="flex flex-col gap-2 rounded-xl border border-noir-brass/40 bg-noir-bg-2/90 p-4" aria-labelledby={`continue-${gameId}`}>
+      <h2 id={`continue-${gameId}`} className="font-mono text-xs uppercase tracking-[0.3em] text-noir-brass">
+        {t("site.continue.title")}
+      </h2>
+      <ul className="flex flex-col gap-2">
+        {rooms.map((r) => (
+          <li key={r.code}>
+            <a href={`/r/${r.code}`} className="flex min-h-12 items-center justify-between gap-3 rounded-lg border border-noir-line bg-noir-bg-3 px-3 py-2 active:bg-noir-bg">
+              <span className="min-w-0">
+                <span className="block font-mono tracking-widest text-noir-ink">{r.code}</span>
+                <span className="block text-xs leading-snug text-noir-ink-faint">
+                  {t("site.cases.roomMeta", { title: localGameTitle(t, r.gameId), count: r.playerCount, host: r.isHost, status: r.status })}
+                </span>
+              </span>
+              <span className="shrink-0 rounded-md bg-noir-brass px-3 py-1.5 text-sm font-semibold text-noir-bg">{t("site.cases.rejoin")}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** Rooms and finished cases. On a game's page (gameId) the open rooms are left to ContinueRooms. */
 export function MyCases({ me, gameId }: { me: MeResponse; gameId?: string }) {
   const t = useT();
   const intl = useIntl();
-  const activeRooms = gameId ? me.activeRooms.filter((r) => r.gameId === gameId) : me.activeRooms;
+  const activeRooms = gameId ? [] : me.activeRooms;
   const cases = gameId ? me.cases.filter((c) => c.gameId === gameId) : me.cases;
   if (!me.user || (activeRooms.length === 0 && cases.length === 0)) return null;
   return (

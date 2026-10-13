@@ -31,6 +31,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.form.avatarColor": "アバターの色",
   "site.form.colorAria": "色 {color}",
   "site.form.joinInvestigation": "捜査に参加する",
+  "site.playAgain": "もう一度遊ぶ",
   "site.allRooms": "すべての脱出ゲーム",
   "site.error.network": "ネットワークに問題が発生しました。もう一度お試しください。",
 
@@ -61,6 +62,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.account.signOut": "ログアウト",
   "site.account.nudge": "ログインすると、事件とクリアタイムが保存され、どの端末からでも続きを遊べます。",
   "site.account.signIn": "ログイン",
+  "site.continue.title": "続きから遊ぶ",
   "site.cases.heading": "マイ事件",
   "site.cases.roomMeta":
     "{title} · {count, plural, other {プレイヤー #人}}{host, select, true { · ホスト} other {}} · {status, select, playing {進行中} voting {投票中} finished {終了} other {{status}}}",

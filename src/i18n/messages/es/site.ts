@@ -31,6 +31,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.form.avatarColor": "Color del avatar",
   "site.form.colorAria": "Color {color}",
   "site.form.joinInvestigation": "Unirse a la investigación",
+  "site.playAgain": "Jugar de nuevo",
   "site.allRooms": "Todos los escape rooms",
   "site.error.network": "Problemas de red. Inténtalo de nuevo.",
 
@@ -61,6 +62,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.account.signOut": "Cerrar sesión",
   "site.account.nudge": "Inicia sesión para conservar tus casos y tiempos, y continuar en cualquier dispositivo.",
   "site.account.signIn": "Iniciar sesión",
+  "site.continue.title": "Retoma tu partida",
   "site.cases.heading": "Mis casos",
   "site.cases.roomMeta":
     "{title} · {count, plural, one {# jugador} other {# jugadores}}{host, select, true { · anfitrión} other {}} · {status, select, playing {en curso} voting {votando} finished {terminado} other {{status}}}",

@@ -31,6 +31,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.form.avatarColor": "頭像顏色",
   "site.form.colorAria": "顏色 {color}",
   "site.form.joinInvestigation": "加入調查",
+  "site.playAgain": "再玩一次",
   "site.allRooms": "所有密室逃脫",
   "site.error.network": "網路發生問題，請再試一次。",
 
@@ -61,6 +62,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.account.signOut": "登出",
   "site.account.nudge": "登入即可保存你的案件與紀錄，並在任何裝置上接續遊玩。",
   "site.account.signIn": "登入",
+  "site.continue.title": "繼續之前的遊戲",
   "site.cases.heading": "我的案件",
   "site.cases.roomMeta":
     "{title} · {count, plural, other {# 位玩家}}{host, select, true { · 房主} other {}} · {status, select, playing {進行中} voting {投票中} finished {已結束} other {{status}}}",
