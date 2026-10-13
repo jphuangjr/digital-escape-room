@@ -84,25 +84,27 @@ export async function getLeaderboard(gameId: string, roomCode?: string | null): 
     db.leaderboardEntry.count({ where: { gameId } }),
     room ? db.leaderboardEntry.findUnique({ where: { roomRef: room.id } }) : null,
   ]);
-  let mine: LeaderboardRow | null = null;
-  if (own && own.gameId === gameId) {
-    const sameSolved = {
-      OR: [
-        { durationMs: { lt: own.durationMs } },
-        { durationMs: own.durationMs, wrongAttempts: { lt: own.wrongAttempts } },
-        { durationMs: own.durationMs, wrongAttempts: own.wrongAttempts, finishedAt: { lt: own.finishedAt } },
-      ],
-    };
-    const ahead = await db.leaderboardEntry.count({
-      where: own.solved
-        ? { gameId, solved: true, ...sameSolved }
-        : { gameId, OR: [{ solved: true }, { solved: false, ...sameSolved }] },
-    });
-    mine = toRow(own, ahead + 1, true);
-  }
+  const mine = own && own.gameId === gameId ? toRow(own, await rankOf(own), true) : null;
   return {
     total,
     top: top.map((e, i) => toRow(e, i + 1, e.id === own?.id)),
     mine,
   };
+}
+
+/** An entry's place on its game's board (1 = best), under the board's own ordering. */
+export async function rankOf(own: LeaderboardEntry): Promise<number> {
+  const sameSolved = {
+    OR: [
+      { durationMs: { lt: own.durationMs } },
+      { durationMs: own.durationMs, wrongAttempts: { lt: own.wrongAttempts } },
+      { durationMs: own.durationMs, wrongAttempts: own.wrongAttempts, finishedAt: { lt: own.finishedAt } },
+    ],
+  };
+  const ahead = await db.leaderboardEntry.count({
+    where: own.solved
+      ? { gameId: own.gameId, solved: true, ...sameSolved }
+      : { gameId: own.gameId, OR: [{ solved: true }, { solved: false, ...sameSolved }] },
+  });
+  return ahead + 1;
 }

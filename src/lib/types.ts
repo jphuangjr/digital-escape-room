@@ -273,3 +273,23 @@ export interface LeaderboardResponse {
   /** the requested room's own entry, with its overall rank (may be outside the top) */
   mine: LeaderboardRow | null;
 }
+
+/** GET /api/profile: a signed-in player's record across every escape room. */
+export interface ProfileResponse {
+  user: { name: string | null; image: string | null; since: string };
+  totals: { cases: number; solved: number; hosted: number; totalMs: number };
+  games: { gameId: string; plays: number; solved: number; bestMs: number | null; bestRank: number | null; boardSize: number; endings: string[] }[];
+  achievements: { id: string; icon: string; gameId: string | null; earnedAt: string | null }[];
+  recent: {
+    gameId: string;
+    finishedAt: string;
+    durationMs: number;
+    ending: string | null;
+    solved: boolean;
+    playerCount: number;
+    wasHost: boolean;
+    rank: number | null;
+    hintsUsed: number | null;
+    wrongAttempts: number | null;
+  }[];
+}

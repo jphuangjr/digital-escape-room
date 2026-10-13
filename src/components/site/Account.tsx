@@ -71,6 +71,9 @@ export function AccountBar({ me, callbackUrl = "/", fallbackColor = "#c9a227" }:
                     }}
                   />
                 </span>
+                <a href="/profile" className="min-h-11 shrink-0 content-center px-2 text-sm font-semibold text-noir-brass underline">
+                  {t("profile.link")}
+                </a>
                 {me!.isAdmin && (
                   <a href="/admin" className="min-h-11 shrink-0 content-center px-2 text-sm font-semibold text-noir-brass underline">
                     {t("site.account.admin")}

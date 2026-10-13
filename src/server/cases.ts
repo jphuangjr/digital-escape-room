@@ -1,6 +1,16 @@
 import "server-only";
 import { db } from "./db";
+import type { Room } from "@prisma/client";
 import { getGame } from "@/lib/games";
+import { TRAIN_GAME_ID } from "@/lib/train/types";
+import { parseProgress } from "./logic";
+import { parseScene } from "./train/scene";
+
+/** Badges the team earned in a room, to keep on each case record. */
+function roomBadges(room: Pick<Room, "gameId" | "progress" | "scene">): string[] {
+  if (room.gameId === TRAIN_GAME_ID) return parseScene(room.scene).ending?.everyClue ? ["everyclue"] : [];
+  return parseProgress(room.progress).badges;
+}
 
 /**
  * Write a permanent CaseRecord for every signed-in player once a room escapes (final phrase solved).
@@ -27,6 +37,7 @@ export async function recordFinishedCase(roomId: string): Promise<void> {
             durationMs,
             wasHost: p.id === room.hostId,
             playerCount: room.players.length,
+            badges: roomBadges(room),
           },
           update: {},
         }),
@@ -34,7 +45,8 @@ export async function recordFinishedCase(roomId: string): Promise<void> {
   );
 }
 
-/** Fill in the voted ending on the room's case records. */
+/** Fill in the voted ending on the room's case records, with any badges earned since the escape. */
 export async function recordCaseEnding(roomId: string, ending: string): Promise<void> {
-  await db.caseRecord.updateMany({ where: { roomRef: roomId }, data: { ending } });
+  const room = await db.room.findUnique({ where: { id: roomId }, select: { gameId: true, progress: true, scene: true } });
+  await db.caseRecord.updateMany({ where: { roomRef: roomId }, data: { ending, ...(room ? { badges: roomBadges(room) } : {}) } });
 }
