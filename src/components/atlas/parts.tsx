@@ -280,6 +280,28 @@ function RootLadder({ caption, pots, grafts, rows, door }: { caption: string; po
   );
 }
 
+/** The Pelagic airlock's tanks, drawn as glass columns: capacity in outline, water filled to its level. */
+export function TankPanel({ tanks }: { tanks: { caps: number[]; levels: number[]; balanced: boolean } }) {
+  const t = useT();
+  const names = ["atlas.tank.big", "atlas.tank.pressure", "atlas.tank.small"];
+  const unit = 20;
+  return (
+    <div className="flex items-end justify-center gap-4 rounded-xl border border-[#2c5a55] bg-[#071a1a] p-4" role="img" aria-label={t("atlas.tanks.aria", { a: tanks.levels[0], b: tanks.levels[1], c: tanks.levels[2] })}>
+      {tanks.caps.map((cap, i) => (
+        <div key={i} className="flex flex-col items-center gap-1">
+          <span className="font-mono text-sm text-[#d6f2ec]">
+            {tanks.levels[i]}/{cap}
+          </span>
+          <div className={`relative w-14 rounded-b-md border-2 ${i === 1 ? "border-[#d8b56a]" : "border-[#6f9aa6]"}`} style={{ height: cap * unit }}>
+            <div className="absolute inset-x-0 bottom-0 rounded-b-sm bg-[#2f8f8a]/80 transition-all" style={{ height: tanks.levels[i] * unit }} />
+          </div>
+          <span className={`text-[11px] uppercase tracking-wider ${i === 1 ? "text-[#f4e7b5]" : "text-stone-400"}`}>{t(names[i])}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /** The three Waterworks valves: tap one to turn it open or shut. */
 export function ValvePanel({ valves, busy, onTurn }: { valves: Record<ValveId, boolean>; busy: boolean; onTurn: (v: ValveId) => void }) {
   const t = useT();

@@ -12,7 +12,7 @@ import { CloseIcon } from "@/components/shell/icons";
 import { NotebookSheet } from "@/components/scene/NotebookSheet";
 import { LockDial } from "@/components/train/parts";
 import { useT } from "@/i18n/client";
-import { AtlasDocView, GatePanel, MirrorGrid, useSecondsUntil, ValvePanel } from "./parts";
+import { AtlasDocView, GatePanel, MirrorGrid, TankPanel, useSecondsUntil, ValvePanel } from "./parts";
 import { PLACE_TINT, SPOTS } from "./walls";
 
 /**
@@ -31,6 +31,11 @@ const ITEM_ICON: Record<ItemId, string> = { token: "🪙", gear: "⚙️", numer
   "seal-sun": "🟡",
   "memory-meridian": "✉️",
   "star-map": "🗺️",
+  brine: "🧪",
+  "seal-tide": "🔵",
+  "memory-pelagic": "✉️",
+  "tide-chart": "🌊",
+  "night-bloom": "🌸",
 };
 
 export function AtlasShell({ code, state, refresh }: { code: string; state: RoomState; refresh: () => Promise<void> }) {
@@ -366,6 +371,7 @@ function CloseupSheet({
       ))}
       {c.doc && <AtlasDocView doc={c.doc} />}
       {c.mirrors && <MirrorGrid grid={c.mirrors} busy={busy} onTilt={(i) => void act({ type: "operate", target: id, op: `mirror:${i}` })} />}
+      {c.tanks && <TankPanel tanks={c.tanks} />}
       {c.valves && <ValvePanel valves={c.valves} busy={busy} onTurn={(v) => void act({ type: "operate", target: id, op: v })} />}
       {c.gate && <GatePanel powered={c.gate.powered} jammedUntil={c.gate.jammedUntil} busy={busy} onPull={(outer, inner) => void act({ type: "dial", outer, inner })} />}
       {c.lock && (
