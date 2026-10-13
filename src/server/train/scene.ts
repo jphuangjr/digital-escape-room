@@ -29,13 +29,31 @@ import {
   THIEF,
 } from "./content";
 import { trainT, type TrainTextKey, type TT } from "./text";
+import {
+  addHint,
+  appendLog,
+  jammedUntil,
+  JAM_SEC,
+  nextHintTier,
+  parseHints,
+  parseJams,
+  parseVote,
+  recordGuess,
+  stepVote,
+  MAX_LOG,
+  type Jams,
+  type RoomCtx,
+  type StoredHint,
+  type StoredLogBase,
+  type StoredVote,
+  type VoteStep,
+  type Who,
+} from "../scene/engine";
+
+export type { RoomCtx, Who } from "../scene/engine";
 
 /** A case-log line as stored: no words, so each viewer reads it in their own language. */
-interface StoredLog {
-  id: string;
-  at: string;
-  playerId: string;
-  playerName: string;
+interface StoredLog extends StoredLogBase {
   key: TrainTextKey;
   item?: ItemId;
   suspect?: Suspect;
@@ -51,17 +69,14 @@ export interface TrainScene {
   found: ItemId[];
   log: StoredLog[];
   /** Teodor's notes, oldest first. */
-  hints: { id: string; puzzle: string; tier: 1 | 2 | 3; at: string }[];
+  hints: StoredHint[];
   /** The accusation, once the bell is rung. */
-  vote: { votes: Record<string, Suspect>; tie: Suspect[] | null } | null;
+  vote: StoredVote<Suspect> | null;
   ending: { accused: Suspect; at: string; counts: Record<Suspect, number>; everyClue: boolean } | null;
   /** Wrong guesses in a row on each lock, and when a jammed lock frees up again. */
-  jams?: Partial<Record<LockId, { wrong: number; until: string | null }>>;
+  jams?: Jams<LockId>;
 }
 
-/** Wrong guesses in a row before a lock jams, and for how long. */
-export const JAM_AFTER = 3;
-export const JAM_SEC = 60;
 const LOCK_IDS: LockId[] = ["suitcase", "door", "cashbox"];
 
 const HOTSPOTS: HotspotId[] = [
@@ -127,7 +142,6 @@ const ITEM_IDS: ItemId[] = [
   "bank-notice",
   "star",
 ];
-const MAX_LOG = 100;
 
 export function initialScene(): TrainScene {
   return { v: 1, flags: [], inventory: [], found: [], log: [], hints: [], vote: null, ending: null };
@@ -139,28 +153,16 @@ export function parseScene(raw: unknown): TrainScene {
   const s = (raw && typeof raw === "object" ? raw : {}) as Partial<TrainScene>;
   const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
   const items = (v: unknown) => strings(v).filter((x): x is ItemId => (ITEM_IDS as string[]).includes(x));
-  const vote =
-    s.vote && typeof s.vote === "object"
-      ? {
-          votes: Object.fromEntries(Object.entries(s.vote.votes ?? {}).filter(([, v]) => isSuspect(v))) as Record<string, Suspect>,
-          tie: Array.isArray(s.vote.tie) ? s.vote.tie.filter(isSuspect) : null,
-        }
-      : null;
   return {
     v: 1,
     flags: strings(s.flags),
     inventory: items(s.inventory),
     found: items(s.found),
     log: Array.isArray(s.log) ? (s.log as StoredLog[]).filter((l) => l && typeof l.key === "string").slice(-MAX_LOG) : [],
-    hints: Array.isArray(s.hints) ? s.hints : [],
-    vote,
+    hints: parseHints(s.hints),
+    vote: parseVote(s.vote, isSuspect),
     ending: s.ending && isSuspect(s.ending.accused) ? s.ending : null,
-    jams: Object.fromEntries(
-      LOCK_IDS.flatMap((l) => {
-        const j = s.jams?.[l];
-        return j && typeof j.wrong === "number" ? [[l, { wrong: j.wrong, until: typeof j.until === "string" ? j.until : null }]] : [];
-      }),
-    ),
+    jams: parseJams(s.jams, LOCK_IDS),
   };
 }
 
@@ -186,12 +188,6 @@ function takeablesAt(scene: TrainScene, at: HotspotId): ItemId[] {
   });
 }
 
-/** When a jammed lock frees up, or null if it isn't jammed now. */
-function jammedUntil(scene: TrainScene, lock: LockId, now: Date): string | null {
-  const until = scene.jams?.[lock]?.until;
-  return until && new Date(until) > now ? until : null;
-}
-
 function lockAt(h: HotspotId, has: (f: string) => boolean, T: TT, scene: TrainScene, now: Date): CloseupDTO["lock"] {
   const lock: CloseupDTO["lock"] =
     h === "suitcase" && !has("suitcase.open")
@@ -201,7 +197,7 @@ function lockAt(h: HotspotId, has: (f: string) => boolean, T: TT, scene: TrainSc
         : h === "cashbox" && !has("cashbox.open")
           ? { id: "cashbox", kind: "symbols", length: 4, label: T("lock.cashbox") }
           : undefined;
-  const until = lock && jammedUntil(scene, lock.id, now);
+  const until = lock && jammedUntil(scene.jams, lock.id, now);
   return lock && until ? { ...lock, jammedUntil: until } : lock;
 }
 
@@ -216,11 +212,8 @@ function nextHint(scene: TrainScene, now: Date, T: TT = trainT("en")): SceneDTO[
   if (scene.ending) return null;
   const p = currentPuzzle(scene);
   if (!p) return null;
-  const given = scene.hints.filter((h) => h.puzzle === p.id);
-  if (given.length >= 3) return null;
-  const last = given.at(-1);
-  const ready = last ? new Date(new Date(last.at).getTime() + HINT_COOLDOWN_SEC * 1000) : null;
-  return { title: hintTitle(T, p.id), tier: (given.length + 1) as 1 | 2 | 3, readyAt: ready && ready > now ? ready.toISOString() : null };
+  const next = nextHintTier(scene.hints, p.id, HINT_COOLDOWN_SEC, now);
+  return next && { title: hintTitle(T, p.id), ...next };
 }
 
 function endingDTO(scene: TrainScene, startedAt: Date | null, T: TT): EndingDTO | null {
@@ -285,6 +278,16 @@ export function sceneDTO(scene: TrainScene, opts: { startedAt?: Date; now?: Date
   };
 }
 
+const VOTE_REFUSALS: Record<Extract<VoteStep<Suspect>, { kind: "refused" }>["reason"], TrainTextKey> = {
+  noVote: "msg.noVote",
+  badChoice: "msg.who",
+  noVotes: "msg.noVotes",
+  hostOnlyClose: "msg.hostOnlyClose",
+  noTie: "msg.noTie",
+  hostOnlyTie: "msg.hostOnlyTie",
+  pickTied: "msg.pickTied",
+};
+
 export interface ActionResult {
   scene: TrainScene;
   changed: boolean;
@@ -294,16 +297,6 @@ export interface ActionResult {
   attempt?: { lock: LockId; input: string; correct: boolean };
   /** The accusation just closed: the room is finished. */
   finished?: boolean;
-}
-
-export type Who = { id: string; name: string };
-/** Who's in the room right now (the vote closes once every online player has voted). */
-export type RoomCtx = { hostId: string | null; onlineIds: string[] };
-
-function tally(votes: Record<string, Suspect>): Record<Suspect, number> {
-  const counts = Object.fromEntries(SUSPECTS.map((s) => [s, 0])) as Record<Suspect, number>;
-  for (const v of Object.values(votes)) counts[v] += 1;
-  return counts;
 }
 
 /** Apply one player action to the scene. Pure: no I/O, so it's unit-testable. */
@@ -334,8 +327,7 @@ export function applyAction(
     scene.flags = scene.flags.filter((x) => x !== f);
   };
   const log = (key: TrainTextKey, extra: { item?: ItemId; suspect?: Suspect } = {}) => {
-    scene.log.push({ id: `${now.getTime().toString(36)}-${scene.log.length}`, at: now.toISOString(), playerId: who.id, playerName: who.name, key, ...extra });
-    scene.log = scene.log.slice(-MAX_LOG);
+    scene.log = appendLog(scene.log, who, now, { key, ...extra });
   };
   const ok = (key?: TrainTextKey, values?: Record<string, string | number>): ActionResult => ({
     scene,
@@ -352,22 +344,14 @@ export function applyAction(
   if (prev.ending) return no("msg.closed");
   if (prev.vote && !["vote", "close-vote", "tiebreak", "hint"].includes(action.type)) return no("msg.waiting");
 
-  /** Close the vote: a clear winner ends the game; a tie goes to the host. */
-  const closeVote = (): ActionResult => {
-    const votes = scene.vote!.votes;
-    const counts = tally(votes);
-    const top = Math.max(...Object.values(counts));
-    if (top === 0) return no("msg.noVotes");
-    const leaders = SUSPECTS.filter((s) => counts[s] === top);
-    if (leaders.length > 1) {
-      scene.vote!.tie = leaders;
-      return ok("msg.tie");
-    }
-    return finish(leaders[0], counts);
-  };
-  const finish = (accused: Suspect, counts: Record<Suspect, number>): ActionResult => {
-    scene.ending = { accused, at: now.toISOString(), counts, everyClue: has("everyclue") };
-    log("log.accused", { suspect: accused });
+  /** A move in the accusation: a clear winner ends the game; a tie goes to the host. */
+  const voted = (step: VoteStep<Suspect>): ActionResult => {
+    if (step.kind === "refused") return no(VOTE_REFUSALS[step.reason]);
+    scene.vote = step.vote;
+    if (step.kind === "recorded") return ok();
+    if (step.kind === "tie") return ok("msg.tie");
+    scene.ending = { accused: step.choice, at: now.toISOString(), counts: step.counts, everyClue: has("everyclue") };
+    log("log.accused", { suspect: step.choice });
     return { scene, changed: true, ok: true, finished: true };
   };
 
@@ -518,19 +502,17 @@ export function applyAction(
       if (!reachable) return no("msg.noLock");
       const length = Array.from(LOCK_CODES[lock]).length;
       if (Array.from(input).length !== length) return no("msg.wheels", { n: length });
-      const jammed = jammedUntil(prev, lock, now);
+      const jammed = jammedUntil(prev.jams, lock, now);
       if (jammed) return no("msg.jammed", { s: Math.ceil((new Date(jammed).getTime() - now.getTime()) / 1000) });
       const correct = input === LOCK_CODES[lock];
       const attempt = { lock, input, correct };
+      // Three wrong in a row jams the wheels for a minute.
+      const guess = recordGuess(prev.jams, lock, correct, now);
+      scene.jams = guess.jams;
       if (!correct) {
-        // Three wrong in a row jams the wheels for a minute.
-        const wrong = (prev.jams?.[lock]?.wrong ?? 0) + 1;
-        const jams = wrong >= JAM_AFTER;
-        scene.jams = { ...scene.jams, [lock]: { wrong: jams ? 0 : wrong, until: jams ? new Date(now.getTime() + JAM_SEC * 1000).toISOString() : null } };
-        if (jams) log("log.jammed");
-        return { scene, changed: true, ok: false, message: jams ? T("msg.jamsNow", { s: JAM_SEC }) : T("msg.wrong"), attempt };
+        if (guess.jammedNow) log("log.jammed");
+        return { scene, changed: true, ok: false, message: guess.jammedNow ? T("msg.jamsNow", { s: JAM_SEC }) : T("msg.wrong"), attempt };
       }
-      scene.jams = { ...scene.jams, [lock]: { wrong: 0, until: null } };
       if (lock === "suitcase") {
         set("suitcase.open");
         log("log.suitcase");
@@ -551,32 +533,19 @@ export function applyAction(
       const next = nextHint(prev, now);
       if (!p || !next) return no("msg.noHint");
       if (next.readyAt) return no("msg.hintBusy");
-      scene.hints.push({ id: `${now.getTime().toString(36)}-${scene.hints.length}`, puzzle: p.id, tier: next.tier, at: now.toISOString() });
+      scene.hints = addHint(scene.hints, p.id, next.tier, now);
       log("log.hint");
       return ok("msg.hint");
     }
 
-    case "vote": {
-      if (!scene.vote) return no("msg.noVote");
-      if (!isSuspect(action.suspect)) return no("msg.who");
-      scene.vote.votes[who.id] = action.suspect;
-      scene.vote.tie = null;
-      const everyone = room.onlineIds.length > 0 && room.onlineIds.every((id) => scene.vote!.votes[id]);
-      return everyone ? closeVote() : ok();
-    }
+    case "vote":
+      return voted(stepVote(prev.vote, { type: "vote", choice: action.suspect }, who, room, SUSPECTS));
 
-    case "close-vote": {
-      if (!scene.vote) return no("msg.noVote");
-      if (room.hostId && who.id !== room.hostId) return no("msg.hostOnlyClose");
-      return closeVote();
-    }
+    case "close-vote":
+      return voted(stepVote(prev.vote, { type: "close" }, who, room, SUSPECTS));
 
-    case "tiebreak": {
-      if (!scene.vote?.tie) return no("msg.noTie");
-      if (room.hostId && who.id !== room.hostId) return no("msg.hostOnlyTie");
-      if (!scene.vote.tie.includes(action.suspect)) return no("msg.pickTied");
-      return finish(action.suspect, tally(scene.vote.votes));
-    }
+    case "tiebreak":
+      return voted(stepVote(prev.vote, { type: "tiebreak", choice: action.suspect }, who, room, SUSPECTS));
   }
 }
 

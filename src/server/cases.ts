@@ -2,13 +2,13 @@ import "server-only";
 import { db } from "./db";
 import type { Room } from "@prisma/client";
 import { getGame } from "@/lib/games";
-import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { parseProgress } from "./logic";
-import { parseScene } from "./train/scene";
+import { sceneGame } from "./scene/games";
 
 /** Badges the team earned in a room, to keep on each case record. */
 function roomBadges(room: Pick<Room, "gameId" | "progress" | "scene">): string[] {
-  if (room.gameId === TRAIN_GAME_ID) return parseScene(room.scene).ending?.everyClue ? ["everyclue"] : [];
+  const game = sceneGame(room.gameId);
+  if (game) return game.badges(game.parse(room.scene));
   return parseProgress(room.progress).badges;
 }
 

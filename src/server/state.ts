@@ -17,7 +17,7 @@ import type { Locale } from "@/i18n/config";
 import { getLocale } from "@/i18n/server";
 import { baseEmails, bonusEmails, getHint, voicemailsFor } from "./content";
 import { buildEnding, loadVoteState } from "./vote";
-import { parseScene, sceneDTO, TRAIN_GAME_ID } from "./train/scene";
+import { sceneGame } from "./scene/games";
 
 export function isOnline(p: Pick<Player, "lastSeenAt">, now = new Date()): boolean {
   return now.getTime() - p.lastSeenAt.getTime() <= ONLINE_WINDOW_MS;
@@ -49,6 +49,7 @@ export function hintDTO(h: { puzzleId: string; tier: number; createdAt: Date }, 
 
 export async function buildRoomState(room: Room, player: Player): Promise<RoomState> {
   const now = new Date();
+  const game = sceneGame(room.gameId);
   const loc = await getLocale();
   const [players, notes, attempts, hintRows, vote, ending] = await Promise.all([
     db.player.findMany({ where: { roomId: room.id }, orderBy: { createdAt: "asc" } }),
@@ -120,9 +121,9 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
     hints,
     hintCooldowns,
     emails:
-      room.gameId === TRAIN_GAME_ID ? [] : [...baseEmails(loc), ...voicemailsFor(progress, hints, loc), ...bonusEmails(progress, loc)],
+      game ? [] : [...baseEmails(loc), ...voicemailsFor(progress, hints, loc), ...bonusEmails(progress, loc)],
     vote,
     ending,
-    ...(room.gameId === TRAIN_GAME_ID ? { scene: sceneDTO(parseScene(room.scene), { startedAt: room.createdAt, now, loc }) } : {}),
+    ...(game ? { scene: game.dto(game.parse(room.scene), { startedAt: room.createdAt, now, loc }) as RoomState["scene"] } : {}),
   };
 }
