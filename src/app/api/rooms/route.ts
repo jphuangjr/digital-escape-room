@@ -76,7 +76,7 @@ export async function POST(req: Request) {
         return tx.room.update({ where: { id: r.id }, data: { hostId: p.id } });
       });
       await setPlayerCookie(code, token);
-      track(room.id, room.hostId, "room.created", {});
+      track(room.id, room.hostId, "room.created", { gameId });
       return json({ code }, 201);
     } catch (err) {
       // Unique violation on code => retry with a new code.

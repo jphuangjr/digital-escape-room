@@ -38,6 +38,7 @@ export const atlasGame = defineSceneGame<AtlasScene, AtlasSceneAction, AtlasScen
   tooManyMessage: (loc, s) => atlasT(loc)("msg.tooMany", { s }),
   ending: (scene) => scene.ending && { ending: scene.ending.choice, solved: true, hintsUsed: scene.hints.length },
   // Every cross-Age secret found, and the ending only they unlock.
+  progress: (scene) => ({ flags: scene.flags, hints: scene.hints }),
   badges: (scene) => [
     ...(scene.ending && scene.ending.secrets === SECRETS.length ? ["atlas-secrets"] : []),
     ...(scene.ending?.choice === "reroute" ? ["atlas-reroute"] : []),

@@ -3,6 +3,7 @@ import type { User } from "@prisma/client";
 import type { ProfileResponse } from "@/lib/types";
 import { ACHIEVEMENTS } from "@/lib/achievements";
 import { GAMES } from "@/lib/games";
+import { ATLAS_ENDINGS, ATLAS_GAME_ID } from "@/lib/atlas/types";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { sceneGame } from "./scene/games";
 import { db } from "./db";
@@ -29,6 +30,7 @@ export async function getProfile(user: User): Promise<ProfileResponse> {
     if (!earnedAt[id]) earnedAt[id] = at;
   };
   const adaEndings = new Set<string>();
+  const atlasEndings = new Set<string>();
   const solvedGames = new Set<string>();
   rows.forEach(({ c, e, solved, rank }, i) => {
     const at = c.finishedAt;
@@ -51,6 +53,13 @@ export async function getProfile(user: User): Promise<ProfileResponse> {
     if (c.badges.includes("envelope")) earn("ada-envelope", at);
     if (c.gameId === TRAIN_GAME_ID) earn("nx-thief", at);
     if (c.badges.includes("everyclue")) earn("nx-every-clue", at);
+    if (c.gameId === ATLAS_GAME_ID && c.ending) {
+      earn("atlas-escaped", at);
+      atlasEndings.add(c.ending);
+      if (ATLAS_ENDINGS.every((x) => atlasEndings.has(x))) earn("atlas-every-ending", at);
+    }
+    if (c.badges.includes("atlas-secrets")) earn("atlas-secrets", at);
+    if (c.badges.includes("atlas-reroute")) earn("atlas-reroute", at);
     const live = GAMES.filter((g) => g.status === "live").map((g) => g.id);
     if (live.length > 0 && live.every((g) => solvedGames.has(g))) earn("all-games", at);
   });

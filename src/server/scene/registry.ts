@@ -53,6 +53,8 @@ export interface SceneGame<S = unknown, A = unknown, D = unknown> {
   tooManyMessage(loc: Locale, retryAfterSec: number): string;
   /** How the game ended, once it has. */
   ending(scene: S): SceneEnding | null;
+  /** What the team has done so far, for playtest analytics: story flags set and hints taken. */
+  progress(scene: S): { flags: string[]; hints: { id: string; puzzle: string; tier: number }[] };
   /** Badges the team earned, kept on each case record. */
   badges(scene: S): string[];
   /** Whether a stored ending (CaseRecord.ending) counts as solving the game. */

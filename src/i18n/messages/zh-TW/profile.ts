@@ -63,6 +63,15 @@ const messages: Record<keyof typeof en, string> = {
   "profile.ach.nx-thief.how": "在夜鶯號快車上指認出真正的竊賊。",
   "profile.ach.nx-every-clue.name": "鉅細靡遺",
   "profile.ach.nx-every-clue.how": "在按鈴前找齊全部六項證據。",
+  // The Atlas is in staging, English only for now.
+  "profile.ach.atlas-escaped.name": "Worlds decided",
+  "profile.ach.atlas-escaped.how": "Reach the Atlas Core and decide the fate of the Silent Worlds.",
+  "profile.ach.atlas-secrets.name": "Every secret",
+  "profile.ach.atlas-secrets.how": "Find all three cross-Age secrets in The Atlas of Silent Worlds.",
+  "profile.ach.atlas-reroute.name": "The third way",
+  "profile.ach.atlas-reroute.how": "Reroute every gate to the Observatory: the ending only the secrets unlock.",
+  "profile.ach.atlas-every-ending.name": "Every road",
+  "profile.ach.atlas-every-ending.how": "Restore, Sever and Reroute: see all three of the Atlas's endings.",
 };
 
 export default messages;

@@ -8,6 +8,7 @@ import { mutateScene } from "@/server/scene/store";
 import { recordLeaderboardEntry } from "@/server/leaderboard";
 import { recordCaseEnding, recordFinishedCase } from "@/server/cases";
 import { getLocale } from "@/i18n/server";
+import { track } from "@/server/analytics";
 
 /** One player action in a physical-room game: take, operate, use, combine, unlock, hint or vote. */
 export async function POST(req: Request, { params }: { params: Promise<{ code: string }> }) {
@@ -45,11 +46,23 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   const onlineIds = players
     .filter((p) => p.id === player.id || Date.now() - p.lastSeenAt.getTime() <= ONLINE_WINDOW_MS)
     .map((p) => p.id);
-  const res = await mutateScene(room.id, (raw) => game.parse(raw), (cur) =>
-    game.apply(cur, action, { id: player.id, name: player.displayName }, { hostId: room.hostId, onlineIds }, new Date(), loc),
-  );
+  let before: ReturnType<typeof game.progress> = { flags: [], hints: [] };
+  const res = await mutateScene(room.id, (raw) => game.parse(raw), (cur) => {
+    before = game.progress(cur);
+    return game.apply(cur, action, { id: player.id, name: player.displayName }, { hostId: room.hostId, onlineIds }, new Date(), loc);
+  });
+  // Playtest analytics: what this action moved forward (see /api/admin/playtest).
+  const ms = Date.now() - room.createdAt.getTime();
+  const gameId = room.gameId;
+  if (res.changed) {
+    const after = game.progress(res.scene);
+    for (const flag of after.flags) if (!before.flags.includes(flag)) track(room.id, player.id, "milestone", { gameId, flag, msFromRoomStart: ms });
+    const seen = new Set(before.hints.map((h) => h.id));
+    for (const h of after.hints) if (!seen.has(h.id)) track(room.id, player.id, "hint", { gameId, puzzleId: h.puzzle, tier: h.tier });
+  }
   const ending = res.finished ? game.ending(res.scene) : null;
   if (ending) {
+    track(room.id, player.id, "ending", { gameId, ending: ending.ending, solved: ending.solved, hintsUsed: ending.hintsUsed, msFromRoomStart: ms });
     await db.room.update({ where: { id: room.id }, data: { status: "finished", finishedAt: new Date(), ending: ending.ending } });
     // Public results (skipped while the game is in staging).
     await Promise.all([
@@ -62,6 +75,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     await db.attempt.create({
       data: { roomId: room.id, playerId: player.id, puzzleId, input: res.attempt.input, correct: res.attempt.correct },
     });
+    track(room.id, player.id, "attempt", { gameId, puzzleId, correct: res.attempt.correct });
+    if (res.attempt.correct) track(room.id, player.id, "puzzle.solved", { gameId, puzzleId, msFromRoomStart: ms });
     await publish(room.code, "attempt.logged", { puzzleId, correct: res.attempt.correct });
   }
   if (res.changed) await publish(room.code, "progress.updated", { reason: "scene" });
