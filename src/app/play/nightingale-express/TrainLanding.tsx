@@ -4,15 +4,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { gameText, getGame } from "@/lib/games";
-import { ContinueRooms, MyCases, useMe } from "@/components/site/Account";
+import { AccountBar, ContinueRooms, GoogleButton, MyCases, useMe } from "@/components/site/Account";
+import { RedeemBox } from "@/components/site/RedeemBox";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { AVATAR_COLORS } from "@/app/r/[code]/RoomClient";
 import { Leaderboard } from "@/components/site/Leaderboard";
 
 /**
- * Staging landing page for a physical-room game (The Nightingale Express by default): start a room (admins
- * only). English only for now.
+ * Landing page for a physical-room game (The Nightingale Express by default): start or rejoin a room. Staging
+ * games are admins only (the page 404s for everyone else).
  */
 export function TrainLanding({
   gameId = TRAIN_GAME_ID,
@@ -22,6 +23,12 @@ export function TrainLanding({
   const router = useRouter();
   const game = getGame(gameId)!;
   const me = useMe();
+  // Hosting needs Google sign-in and owning the game (a purchase code), like Ada's case. Joining is free.
+  const [unlocked, setUnlocked] = useState(false);
+  const [signedOut, setSignedOut] = useState(false);
+  const signedIn = Boolean(me?.user) && !signedOut;
+  const mustSignIn = Boolean(me?.googleEnabled) && !signedIn;
+  const mustUnlock = signedIn && !unlocked && !me!.ownedGames.includes(gameId);
   const t = useT();
   const [name, setName] = useState("");
   const [color, setColor] = useState(AVATAR_COLORS[0]);
@@ -45,7 +52,21 @@ export function TrainLanding({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ gameId, displayName, color, replaceExisting }),
     });
-    const data = (await res.json().catch(() => ({}))) as { code?: string; error?: string; replaceRequired?: boolean; openRooms?: { code: string }[] };
+    const data = (await res.json().catch(() => ({}))) as {
+      code?: string;
+      error?: string;
+      replaceRequired?: boolean;
+      signInRequired?: boolean;
+      purchaseRequired?: boolean;
+      openRooms?: { code: string }[];
+    };
+    if (data.signInRequired || data.purchaseRequired) {
+      if (data.signInRequired) setSignedOut(true);
+      else setUnlocked(false);
+      setErr(data.signInRequired ? t("site.ada.errSignIn") : t("site.ada.errPurchase"));
+      setBusy(false);
+      return;
+    }
     if (res.status === 409 && data.replaceRequired) {
       const codes = (data.openRooms ?? []).map((r) => r.code).join(", ");
       if (window.confirm(t("train.landing.replace", { codes }))) return start(true);
@@ -81,6 +102,7 @@ export function TrainLanding({
         </header>
         <p className="font-serif leading-relaxed text-noir-ink-dim">{gameText(t, game, "blurb")}</p>
         <ContinueRooms me={me} gameId={gameId} />
+        <AccountBar me={me} callbackUrl={game.href} />
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -114,9 +136,18 @@ export function TrainLanding({
             ))}
           </fieldset>
           {err && <p className="text-sm text-noir-ink-dim">{err}</p>}
-          <button type="submit" disabled={busy} className="min-h-12 rounded-lg bg-noir-brass font-semibold text-noir-bg disabled:opacity-60">
-            {busy ? t(startingKey) : t(startKey)}
-          </button>
+          {mustSignIn ? (
+            <div className="flex flex-col gap-2">
+              <GoogleButton label={t("site.ada.signInToHost")} callbackUrl={game.href} />
+              <p className="text-center text-xs text-noir-ink-faint">{t("site.ada.hostsSignIn")}</p>
+            </div>
+          ) : mustUnlock ? (
+            <RedeemBox gameTitle={gameText(t, game, "title")} onRedeemed={(id) => id === gameId && setUnlocked(true)} />
+          ) : (
+            <button type="submit" disabled={busy} className="min-h-12 rounded-lg bg-noir-brass font-semibold text-noir-bg disabled:opacity-60">
+              {busy ? t(startingKey) : t(startKey)}
+            </button>
+          )}
           <p className="text-xs text-noir-ink-faint">{t("train.landing.invite")}</p>
         </form>
         {me && <MyCases me={me} gameId={gameId} />}

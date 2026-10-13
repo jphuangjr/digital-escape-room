@@ -166,7 +166,7 @@ const messages = {
   "train.landing.replace": "You already host {codes}. Close it and start a new room?",
   "train.landing.board": "Board the train",
   "train.landing.boarding": "Boarding…",
-  "train.landing.invite": "Invite playtesters from the Room menu once you're aboard.",
+  "train.landing.invite": "Invite your friends from the Room menu once you're aboard.",
   "train.landing.back": "← All escape rooms",
   "train.attempt.suitcase": "Suitcase lock",
   "train.attempt.door": "Door override",

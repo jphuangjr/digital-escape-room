@@ -166,7 +166,7 @@ const messages: Record<keyof typeof en, string> = {
   "train.landing.replace": "Você já é anfitrião de {codes}. Encerrar e criar uma sala nova?",
   "train.landing.board": "Embarcar no trem",
   "train.landing.boarding": "Embarcando…",
-  "train.landing.invite": "Convide testadores pelo menu Sala depois de embarcar.",
+  "train.landing.invite": "Convide seus amigos pelo menu Sala depois de embarcar.",
   "train.landing.back": "← Todos os escape rooms",
   "train.attempt.suitcase": "Fechadura da mala",
   "train.attempt.door": "Código da porta",

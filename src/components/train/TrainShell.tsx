@@ -20,7 +20,7 @@ import { setSoundPreferred, soundPreferred, TrainAmbience } from "./sound";
 /**
  * The room screen for The Nightingale Express (staging): one illustrated wall at a time, tap to look
  * closer, a shared inventory tray, padlocks. Everything found or opened is shared with the room.
- * English only while in staging.
+ * Every player reads the story in their own language (see src/server/train/text).
  */
 
 const PRESENCE_MS = 15_000;
