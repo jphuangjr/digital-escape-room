@@ -154,7 +154,7 @@ const en = {
   "c.creeper.title": "The spiral creeper",
   "c.creeper.text": "A creeper spirals up a cane in its bed. A growth record hangs from it on a string.",
   "c.creeper.note":
-    "THE SPIRAL CREEPER — leaves counted each morning\nEach morning it grows as many new leaves as it had two mornings before.\nDay 1: ☾\nDay 2: ◈\nDay 3: ◈\nDay 4: ≈\nDay 5: ☉\nDay 6: ✶\nDay 7: (the ink has run)",
+    "THE SPIRAL CREEPER — leaves counted each morning\nEach morning it grows as many new leaves as it had two mornings before, starting with zero.\nDay 1: ☾\nDay 2: ◈\nDay 3: ◈\nDay 4: ≈\nDay 5: ☉\nDay 6: ✶\nDay 7: (the ink has run)",
   "c.fern.title": "The doubling fern",
   "c.fern.text": "A fern in a pot far too small for it, with a card tucked into the soil.",
   "c.fern.note":

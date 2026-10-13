@@ -141,7 +141,7 @@ Four walls: arrival (the gate home), growing beds, shelves, roots.
 
 | Step | Solution |
 |---|---|
-| Index cabinet | The spiral creeper's record (each morning it grows as many new leaves as it had two mornings before) reads ☾ ◈ ◈ ≈ ☉ ✶ = 0 1 1 2 3 5, which is only consistent with those values. The doubling fern reads ◈ ≈ ⌘ = 1 2 4. The sign says the pots count from nothing to six, so △ = 6. Set the seven wheels in counting order: `☾◈≈☉⌘✶△`. Inside: the **numeral card** (the glyph values, kept for Act III) and a watering can. |
+| Index cabinet | The spiral creeper's record (each morning it grows as many new leaves as it had two mornings before, starting with zero) reads ☾ ◈ ◈ ≈ ☉ ✶ = 0 1 1 2 3 5, which is only consistent with those values. The doubling fern reads ◈ ≈ ⌘ = 1 2 4. The sign says the pots count from nothing to six, so △ = 6. Set the seven wheels in counting order: `☾◈≈☉⌘✶△`. Inside: the **numeral card** (the glyph values, kept for Act III) and a watering can. |
 | The roots | A ladder of roots under seven pots (☉ ☾ ✶ ◈ △ ≈ ⌘). Follow each root down, crossing at every graft: only ☾ reaches the little door. Water it (three wrong pots in a row and the soil needs a minute to drain). Behind the door: the **Seal of the Leaf** and **Ilse Varro's letter** (the first Cartographer memory). |
 
 The Verdant arrival wall also holds a **sun lens**: carry it to the Sunken Meridian for the optional secret.
