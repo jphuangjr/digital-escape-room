@@ -302,6 +302,8 @@ export function LockDial({
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [jammedUntil]);
+  // Seven wheels must still fit a phone: narrow them past five.
+  const w = length > 5 ? "w-9" : "w-12";
   const bump = (i: number, d: number) => setDigits((ds) => ds.map((v, j) => (j === i ? (v + d + wheel.length) % wheel.length : v)));
   return (
     <div className="rounded-xl border border-[#c9a227]/50 bg-[#1b120b] p-4">
@@ -313,13 +315,13 @@ export function LockDial({
               type="button"
               aria-label={t("train.lock.up", { n: i + 1 })}
               onClick={() => bump(i, 1)}
-              className="flex h-10 w-12 items-center justify-center rounded-t-md bg-[#3d2615] text-[#ecd27a] active:bg-[#5b3a22]"
+              className={`flex h-10 ${w} items-center justify-center rounded-t-md bg-[#3d2615] text-[#ecd27a] active:bg-[#5b3a22]`}
             >
               ▲
             </button>
             <output
               aria-label={t("train.lock.wheel", { n: i + 1 })}
-              className="flex h-14 w-12 items-center justify-center border-y border-[#7a5f12] bg-gradient-to-b from-[#ecd27a] via-[#c9a227] to-[#8a6b1a] font-mono text-3xl font-bold text-[#1b120b]"
+              className={`flex h-14 ${w} items-center justify-center border-y border-[#7a5f12] bg-gradient-to-b from-[#ecd27a] via-[#c9a227] to-[#8a6b1a] font-mono text-3xl font-bold text-[#1b120b]`}
             >
               <span className={faces && (wheel[v] === "♥" || wheel[v] === "♦") ? "text-[#8a1f17]" : undefined}>{wheel[v]}</span>
             </output>
@@ -327,7 +329,7 @@ export function LockDial({
               type="button"
               aria-label={t("train.lock.down", { n: i + 1 })}
               onClick={() => bump(i, -1)}
-              className="flex h-10 w-12 items-center justify-center rounded-b-md bg-[#3d2615] text-[#ecd27a] active:bg-[#5b3a22]"
+              className={`flex h-10 ${w} items-center justify-center rounded-b-md bg-[#3d2615] text-[#ecd27a] active:bg-[#5b3a22]`}
             >
               ▼
             </button>

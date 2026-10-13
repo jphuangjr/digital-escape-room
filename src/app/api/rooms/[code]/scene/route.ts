@@ -65,5 +65,5 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     await publish(room.code, "attempt.logged", { puzzleId, correct: res.attempt.correct });
   }
   if (res.changed) await publish(room.code, "progress.updated", { reason: "scene" });
-  return json<SceneActionResponseOf<unknown>>({ ok: res.ok, message: res.message, scene: view(res.scene) });
+  return json<SceneActionResponseOf<unknown>>({ ...res.reply, ok: res.ok, message: res.message, scene: view(res.scene) });
 }
