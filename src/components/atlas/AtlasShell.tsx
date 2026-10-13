@@ -9,7 +9,6 @@ import { useChat } from "@/lib/client/chat";
 import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
-import { NotebookSheet } from "@/components/scene/NotebookSheet";
 import { LockDial } from "@/components/train/parts";
 import { useT } from "@/i18n/client";
 import { AtlasDocView, GatePanel, MirrorGrid, TankPanel, useSecondsUntil, ValvePanel } from "./parts";
@@ -17,6 +16,7 @@ import { CorePanel, EndingPanel, PlatePanel, VotePanel } from "./finale";
 import { WallArt, type WallState } from "./art";
 import { AtlasItemIcon } from "./items";
 import { SPOTS } from "./walls";
+import { AtlasNotebook, useDockedNotes, useSeenClues } from "./notebook";
 
 /**
  * The room screen for The Atlas of Silent Worlds (staging): one illustrated wall at a time, tap to look closer, a shared inventory, the Atlas of places reached. Where each player stands is their own;
@@ -37,6 +37,12 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
   const [itemOpen, setItemOpen] = useState<ItemId | null>(null);
   const [notesOpen, setNotesOpen] = useState(false);
   const [notebookOpen, setNotebookOpen] = useState(false);
+  const [notesDocked, setNotesDocked] = useDockedNotes();
+  const { seen, mark: markSeen } = useSeenClues(code);
+  // Everything this player reads goes into their notebook's Clues.
+  useEffect(() => {
+    if (closeup) markSeen(closeup);
+  }, [closeup, markSeen]);
   const [showSpots, setShowSpots] = useState(false);
   useEffect(() => {
     if (!showSpots) return;
@@ -182,7 +188,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
           <button
             type="button"
             onClick={() => setNotebookOpen(true)}
-            aria-label={t("shell.app.notes")}
+            aria-label={t("atlas.notebook.title")}
             className="flex h-10 w-10 items-center justify-center rounded-md active:bg-[#1f3640]"
           >
             📝
@@ -282,9 +288,26 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
           </div>
         </footer>
 
-        {closeup && <CloseupSheet id={closeup} scene={scene} busy={busy} shake={shake} onClose={() => setCloseup(null)} act={act} go={go} />}
+        {closeup && (
+          <CloseupSheet
+            id={closeup}
+            scene={scene}
+            busy={busy}
+            shake={shake}
+            onClose={() => setCloseup(null)}
+            act={act}
+            go={go}
+            notes={notesDocked ? <AtlasNotebook ctx={ctx} scene={scene} seen={seen} current={closeup} /> : null}
+            notesOn={notesDocked}
+            onNotes={() => setNotesDocked(!notesDocked)}
+          />
+        )}
         {itemOpen && <ItemSheet item={scene.inventory.find((i) => i.id === itemOpen) ?? null} onClose={() => setItemOpen(null)} />}
-        {notebookOpen && <NotebookSheet ctx={ctx} onClose={() => setNotebookOpen(false)} closeLabel={t("atlas.close")} />}
+        {notebookOpen && (
+          <Sheet title={t("atlas.notebook.title")} onClose={() => setNotebookOpen(false)} tall bare>
+            <AtlasNotebook ctx={ctx} scene={scene} seen={seen} />
+          </Sheet>
+        )}
         {notesOpen && <NotesSheet scene={scene} here={here} busy={busy} onClose={() => setNotesOpen(false)} onAsk={() => void act({ type: "hint", where: here })} />}
         {placesOpen && <PlacesSheet scene={scene} here={here} onClose={() => setPlacesOpen(false)} onGo={go} />}
         {scene.vote && !scene.ending && <VotePanel state={state} scene={scene} busy={busy} act={act} />}
@@ -319,25 +342,66 @@ function ItemTile({ item, onClick, small }: { item: AtlasItemDTO; onClick: () =>
   );
 }
 
-function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+/**
+ * A bottom sheet. `side` docks a second panel (the notebook) under it on phones and beside it on wider screens, so
+ * a clue can stay in view while the puzzle is worked.
+ */
+function Sheet({
+  title,
+  onClose,
+  children,
+  side,
+  headerExtra,
+  tall,
+  bare,
+}: {
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+  side?: React.ReactNode;
+  headerExtra?: React.ReactNode;
+  /** Full height even when the content is short (the notebook). */
+  tall?: boolean;
+  /** No padding or scrolling of its own: the child manages both. */
+  bare?: boolean;
+}) {
   const t = useT();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+  const panel = (
+    <div
+      className={`relative flex min-h-0 w-full flex-col overflow-hidden ${side ? "flex-1 md:w-auto" : `max-w-md rounded-t-2xl border-t border-[#9fd3c7]/40 ${tall ? "h-[86dvh]" : "max-h-[86dvh]"}`} bg-[#0b161b]`}
+      style={side ? undefined : { paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+    >
+      <div className="flex items-center gap-2 px-4 pt-3">
+        <h2 className="min-w-0 flex-1 font-serif text-xl text-[#f4e7b5]">{title}</h2>
+        {headerExtra}
+        <button onClick={onClose} aria-label={t("atlas.close")} className="flex h-10 w-10 items-center justify-center rounded-md text-stone-400 active:bg-[#1f3640]">
+          <CloseIcon className="h-5 w-5" />
+        </button>
+      </div>
+      <div className={bare ? "min-h-0 flex-1" : "min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-2 pt-2"}>{children}</div>
+    </div>
+  );
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={title}>
       <button aria-label={t("atlas.close")} className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative flex max-h-[86dvh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border-t border-[#9fd3c7]/40 bg-[#0b161b]" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
-        <div className="flex items-center gap-2 px-4 pt-3">
-          <h2 className="min-w-0 flex-1 font-serif text-xl text-[#f4e7b5]">{title}</h2>
-          <button onClick={onClose} aria-label={t("atlas.close")} className="flex h-10 w-10 items-center justify-center rounded-md text-stone-400 active:bg-[#1f3640]">
-            <CloseIcon className="h-5 w-5" />
-          </button>
+      {side ? (
+        <div
+          className="relative flex h-[94dvh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border-t border-[#9fd3c7]/40 bg-[#0b161b] md:h-[86dvh] md:max-w-4xl md:flex-row"
+          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        >
+          {panel}
+          <aside aria-label={t("atlas.notebook.title")} className="flex h-[42%] min-h-0 shrink-0 flex-col border-t border-[#d8b56a]/40 bg-[#071015] md:h-auto md:w-[44%] md:border-l md:border-t-0">
+            {side}
+          </aside>
         </div>
-        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-2 pt-2">{children}</div>
-      </div>
+      ) : (
+        <div className="relative flex w-full justify-center">{panel}</div>
+      )}
     </div>
   );
 }
@@ -352,6 +416,9 @@ function CloseupSheet({
   onClose,
   act,
   go,
+  notes,
+  notesOn,
+  onNotes,
 }: {
   id: HotspotId;
   scene: AtlasSceneDTO;
@@ -360,12 +427,31 @@ function CloseupSheet({
   onClose: () => void;
   act: (a: AtlasSceneAction) => Promise<AtlasActionResponse | null>;
   go: (p: LocationId) => void;
+  /** The docked notebook, when it's on. */
+  notes: React.ReactNode;
+  notesOn: boolean;
+  onNotes: () => void;
 }) {
   const t = useT();
   const c = scene.closeups[id];
   if (!c) return null;
   return (
-    <Sheet title={c.title} onClose={onClose}>
+    <Sheet
+      title={c.title}
+      onClose={onClose}
+      side={notes}
+      headerExtra={
+        <button
+          type="button"
+          onClick={onNotes}
+          aria-pressed={notesOn}
+          className={`flex h-10 items-center gap-1 rounded-md border px-2.5 text-sm ${notesOn ? "border-[#d8b56a] bg-[#3a3320] text-[#f4e7b5]" : "border-[#d8b56a]/40 text-[#e9d9a6]"} active:bg-[#1f3640]`}
+        >
+          <span aria-hidden>📝</span>
+          {t("atlas.notebook.toggle")}
+        </button>
+      }
+    >
       {c.lines.map((l, i) => (
         <p key={i} className="text-[15px] leading-relaxed text-stone-200">
           {l}
