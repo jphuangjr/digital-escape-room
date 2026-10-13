@@ -85,3 +85,12 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   solve (`kind: "puzzle"`), with who and when. Written inside `mutateProgress` by `/api/resolve` and the attempt route.
 - Clients toast teammates' new discoveries (site toasts have an Open action), reload an open page whose content a
   solve changes (`PUZZLE_AFFECTS_HOSTS`), and list everything in the Room sheet's Case log tab.
+
+## Scene games (physical rooms: The Nightingale Express, The Atlas of Silent Worlds)
+- Shared engine: `src/lib/scene/types.ts` (client-safe DTO shapes) and `src/server/scene/` — `engine.ts` (pure
+  helpers: case log, jamming locks, hint tiers/cooldowns, room vote), `store.ts` (row-locked `Room.scene` updates),
+  `registry.ts` (the `SceneGame` interface), `games.ts` (every scene game by game id).
+- `POST /api/rooms/[code]/scene` dispatches through `sceneGame(room.gameId)`; 400 if the room's game has none.
+  `GET /state` includes `scene` for scene games; case badges and solved-ness come from the game too.
+- To add one: implement `SceneGame` in `src/server/<game>/game.ts` (via `defineSceneGame`) and list it in
+  `src/server/scene/games.ts`.
