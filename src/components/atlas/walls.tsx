@@ -42,6 +42,18 @@ export const SPOTS: Record<WallId, Spot[]> = {
     { id: "engine-plaque", icon: "🔖", x: 100, y: 50, w: 100, h: 60 },
   ],
   "verdant-arrival": [{ id: "verdant-gate", icon: "🌿", x: 60, y: 100, w: 180, h: 200 }],
+  "verdant-beds": [
+    { id: "creeper", icon: "🌱", x: 30, y: 110, w: 110, h: 190 },
+    { id: "fern", icon: "🌿", x: 160, y: 150, w: 110, h: 150 },
+  ],
+  "verdant-shelves": [
+    { id: "pot-sign", icon: "🪧", x: 80, y: 40, w: 140, h: 80 },
+    { id: "cabinet", icon: "🗄", x: 70, y: 150, w: 160, h: 200 },
+  ],
+  "verdant-roots": [
+    { id: "roots", icon: "🪴", x: 40, y: 50, w: 220, h: 170 },
+    { id: "root-door", icon: "🚪", x: 100, y: 250, w: 100, h: 110 },
+  ],
   "meridian-arrival": [{ id: "meridian-gate", icon: "☀", x: 60, y: 100, w: 180, h: 200 }],
   "pelagic-arrival": [{ id: "pelagic-gate", icon: "🌊", x: 60, y: 100, w: 180, h: 200 }],
 };

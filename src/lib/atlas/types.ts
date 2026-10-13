@@ -28,6 +28,9 @@ export type WallId =
   | "gate"
   | "engine"
   | "verdant-arrival"
+  | "verdant-beds"
+  | "verdant-shelves"
+  | "verdant-roots"
   | "meridian-arrival"
   | "pelagic-arrival";
 
@@ -35,7 +38,7 @@ export const WALLS: Record<LocationId, WallId[]> = {
   observatory: ["telescope", "desk", "clock", "stairs"],
   waterworks: ["valves", "tunnel", "wheel"],
   chamber: ["gate", "engine"],
-  verdant: ["verdant-arrival"],
+  verdant: ["verdant-arrival", "verdant-beds", "verdant-shelves", "verdant-roots"],
   meridian: ["meridian-arrival"],
   pelagic: ["pelagic-arrival"],
 };
@@ -58,13 +61,19 @@ export const HOTSPOT_WALL = {
   "engine": "engine",
   "engine-plaque": "engine",
   "verdant-gate": "verdant-arrival",
+  "creeper": "verdant-beds",
+  "fern": "verdant-beds",
+  "cabinet": "verdant-shelves",
+  "pot-sign": "verdant-shelves",
+  "roots": "verdant-roots",
+  "root-door": "verdant-roots",
   "meridian-gate": "meridian-arrival",
   "pelagic-gate": "pelagic-arrival",
 } as const satisfies Record<string, WallId>;
 export type HotspotId = keyof typeof HOTSPOT_WALL;
 
-export type ItemId = "token" | "gear";
-export type LockId = "clock" | "engine";
+export type ItemId = "token" | "gear" | "numerals" | "can" | "seal-leaf" | "memory-verdant";
+export type LockId = "clock" | "engine" | "index";
 export type ValveId = "intake" | "reservoir" | "outflow";
 export const VALVES: ValveId[] = ["intake", "reservoir", "outflow"];
 
@@ -98,7 +107,9 @@ export type AtlasDoc =
   | { kind: "plaque"; lines: string[] }
   | { kind: "starchart"; title: string; stars: ChartStar[] }
   | { kind: "ledger"; title: string; rows: { name: string; outer: GlyphId; inner: GlyphId }[]; torn: string }
-  | { kind: "glyph"; caption: string; glyph: GlyphId };
+  | { kind: "glyph"; caption: string; glyph: GlyphId }
+  /** A ladder of roots: follow each pot's root down; where two roots are grafted, cross over. */
+  | { kind: "roots"; caption: string; pots: GlyphId[]; grafts: [row: number, left: number][]; rows: number; door: number };
 
 /** A close-up action. `go:<place>` actions move only the player who taps them and never reach the server. */
 export type AtlasAction = CloseupAction;

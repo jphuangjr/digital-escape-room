@@ -31,9 +31,9 @@ import {
   type Who,
 } from "../scene/engine";
 import type { SceneResult } from "../scene/registry";
-import { GATE_ORIGIN, traverse } from "./router";
+import { GATE_ORIGIN, GLYPH_VALUE, traverse } from "./router";
 import { atlasLines, atlasT, type AT, type AtlasTextKey } from "./text";
-import { docFor, HINT_COOLDOWN_SEC, HINT_PUZZLES, holds, HOTSPOTS, hotspotPlace, ITEM_PLACES, LOCKS, PLACE_NEEDS, USES } from "./world";
+import { docFor, HINT_COOLDOWN_SEC, HINT_PUZZLES, holds, HOTSPOTS, hotspotPlace, ITEM_PLACES, LOCKS, PLACE_NEEDS, ROOTS_ANSWER, USES } from "./world";
 
 /** A case-log line as stored: no words, so each viewer reads it in their own language. */
 interface StoredLog extends StoredLogBase {
@@ -44,8 +44,8 @@ interface StoredLog extends StoredLogBase {
 }
 
 /** Locks that jam: the two padlocks and the gate (three misroutes in a row). */
-type JamId = LockId | "gate";
-const JAM_IDS: JamId[] = ["clock", "engine", "gate"];
+type JamId = LockId | "gate" | "roots";
+const JAM_IDS: JamId[] = ["clock", "engine", "index", "gate", "roots"];
 
 /** What an Atlas room stores in Room.scene. Shared by everyone in the room. */
 export interface AtlasScene {
@@ -90,8 +90,19 @@ export function parseScene(raw: unknown): AtlasScene {
 const hasIn = (scene: AtlasScene) => (f: string) => scene.flags.includes(f);
 const reachable = (scene: AtlasScene, place: LocationId) => holds(PLACE_NEEDS[place], hasIn(scene));
 
-function itemDTO(id: ItemId, T: AT): AtlasItemDTO {
-  return { id, name: T(`item.${id}.name`), description: T(`item.${id}.desc`) };
+/** Long text on an item, shown once it's held. The numeral card is the team's permanent record of the glyphs. */
+function readingFor(id: ItemId, T: AT): AtlasItemDTO["reading"] {
+  if (id === "numerals") {
+    const byValue = [...GLYPHS].sort((a, b) => GLYPH_VALUE[a.id] - GLYPH_VALUE[b.id]);
+    return { title: T("item.numerals.title"), lines: byValue.map((g) => `${g.char} = ${GLYPH_VALUE[g.id]}`) };
+  }
+  if (id === "memory-verdant") return { title: T("item.memory-verdant.title"), lines: atlasLines(T, "item.memory-verdant.lines") };
+  return undefined;
+}
+
+function itemDTO(id: ItemId, T: AT, held = false): AtlasItemDTO {
+  const reading = held ? readingFor(id, T) : undefined;
+  return { id, name: T(`item.${id}.name`), description: T(`item.${id}.desc`), ...(reading ? { reading } : {}) };
 }
 
 function takeablesAt(scene: AtlasScene, at: HotspotId): ItemId[] {
@@ -127,6 +138,10 @@ function closeupDTO(h: HotspotId, scene: AtlasScene, T: AT, now: Date): AtlasClo
   if (h === "gate") {
     const until = jammedUntil(scene.jams, "gate", now);
     c.gate = { powered: has("engine.on"), ...(until ? { jammedUntil: until } : {}) };
+  }
+  // With the can in hand, each pot can be watered until the right one opens the little door.
+  if (h === "roots" && scene.inventory.includes("can") && !has("verdant.door.open")) {
+    c.actions.push(...GLYPHS.map((g) => ({ op: `water:${g.id}`, label: T("c.roots.water", { glyph: g.char }) })));
   }
   return c;
 }
@@ -166,7 +181,7 @@ export function sceneDTO(scene: AtlasScene, opts: { startedAt?: Date; now?: Date
   }));
   return {
     flags: scene.flags,
-    inventory: scene.inventory.map((id) => itemDTO(id, T)),
+    inventory: scene.inventory.map((id) => itemDTO(id, T, true)),
     closeups,
     log,
     hints,
@@ -258,6 +273,7 @@ export function applyAction(
       const { target, op } = action;
       if (!isHotspot(target) || !canReach(target)) return no("msg.cantReach");
       if (target === "valves" && (VALVES as string[]).includes(op)) return turnValve(op as ValveId);
+      if (target === "roots" && op.startsWith("water:")) return waterPot(op.slice(6));
       return no("msg.nothing");
     }
 
@@ -295,6 +311,32 @@ export function applyAction(
     }
   }
   return no("msg.nothing");
+
+  /**
+   * The Verdant roots: water one pot. The pot whose root (followed down through every graft) reaches the
+   * little door opens it; any other just soaks the soil. Three wrong pots in a row and the soil needs to drain.
+   */
+  function waterPot(pot: string): AtlasResult {
+    if (!isGlyph(pot)) return no("msg.nothing");
+    if (has("verdant.door.open")) return no("msg.nothing");
+    if (!scene.inventory.includes("can")) return no("msg.needCan");
+    const jammed = jammedUntil(prev.jams, "roots", now);
+    if (jammed) return no("msg.rootsJammed", { s: secs(jammed) });
+    const glyph = GLYPHS.find((g) => g.id === pot)!.char;
+    const correct = pot === ROOTS_ANSWER;
+    const attempt = { lock: "roots", input: pot, correct };
+    const guess = recordGuess(prev.jams, "roots", correct, now);
+    scene.jams = guess.jams;
+    if (!correct) {
+      if (guess.jammedNow) log("log.jammed", { thing: "roots" });
+      const message = guess.jammedNow ? T("msg.rootsJamsNow", { s: JAM_SEC }) : T("msg.rootsWrong", { glyph });
+      return { scene, changed: true, ok: false, message, attempt };
+    }
+    set("verdant.door.open");
+    scene.inventory = scene.inventory.filter((i) => i !== "can");
+    log("log.roots");
+    return { ...ok("msg.rootsRight", { glyph }), attempt };
+  }
 
   /**
    * The Waterworks valves, by the standing orders: the intake opens before the reservoir; the reservoir closes
