@@ -2,7 +2,7 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 import { db } from "./db";
 
-export type AnalyticsType = "site.visit" | "attempt" | "hint" | "puzzle.solved" | "room.created" | "ending";
+export type AnalyticsType = "site.visit" | "attempt" | "hint" | "puzzle.solved" | "room.created" | "ending" | "milestone";
 
 /** Fire-and-forget analytics write. Never throws, never blocks the response. */
 export function track(roomId: string, playerId: string | null, type: AnalyticsType, data?: Record<string, unknown>): void {

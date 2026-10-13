@@ -19,6 +19,7 @@ export const trainGame = defineSceneGame<TrainScene, SceneAction, SceneDTO>({
   lockPuzzleId: (lock) => `nx-${lock}`,
   tooManyMessage: (loc, s) => trainT(loc)("msg.tooMany", { s }),
   ending: (scene) => scene.ending && { ending: scene.ending.accused, solved: scene.ending.accused === THIEF, hintsUsed: scene.hints.length },
+  progress: (scene) => ({ flags: scene.flags, hints: scene.hints }),
   badges: (scene) => (scene.ending?.everyClue ? ["everyclue"] : []),
   // A train case is solved only by naming the thief.
   solvedEnding: (ending) => ending === THIEF,

@@ -49,6 +49,8 @@ export async function GET(req: Request) {
 
   for (const e of events) {
     const d = (e.data ?? null) as Data;
+    // Scene games (the train, the Atlas) tag their events; their funnel is /api/admin/playtest.
+    if (d?.gameId && d.gameId !== "ada-voss") continue;
     switch (e.type) {
       case "room.created":
         roomsCreated.add(e.roomRef);
