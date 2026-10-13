@@ -23,7 +23,7 @@ import { PLACE_TINT, SPOTS } from "./walls";
 const PRESENCE_MS = 15_000;
 const TABS: RoomTab[] = ["people", "chat", "attempts"];
 const INTRO_KEY = "atlas_intro_done";
-const ITEM_ICON: Record<ItemId, string> = { token: "🪙", gear: "⚙️" };
+const ITEM_ICON: Record<ItemId, string> = { token: "🪙", gear: "⚙️", numerals: "🔢", can: "🪣", "seal-leaf": "🟢", "memory-verdant": "✉️" };
 
 export function AtlasShell({ code, state, refresh }: { code: string; state: RoomState; refresh: () => Promise<void> }) {
   const scene = state.scene as AtlasSceneDTO;
@@ -414,6 +414,7 @@ function ItemSheet({ item, onClose }: { item: AtlasItemDTO | null; onClose: () =
         </span>
         <p className="text-[15px] leading-relaxed text-stone-200">{item.description}</p>
       </div>
+      {item.reading && <AtlasDocView doc={{ kind: "note", lines: [item.reading.title, ...item.reading.lines] }} />}
       <p className="text-xs text-stone-500">{t("atlas.useTip")}</p>
     </Sheet>
   );

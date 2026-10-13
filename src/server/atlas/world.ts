@@ -50,7 +50,8 @@ export type DocDef =
   | { kind: "note" | "plaque"; key: AtlasTextKey }
   | { kind: "starchart"; title: AtlasTextKey }
   | { kind: "ledger"; title: AtlasTextKey; torn: AtlasTextKey }
-  | { kind: "glyph"; caption: AtlasTextKey; glyph: GlyphId };
+  | { kind: "glyph"; caption: AtlasTextKey; glyph: GlyphId }
+  | { kind: "roots"; caption: AtlasTextKey };
 
 /** Clock positions on the star chart. The Lantern (a ring of six) is at 4 and the Key (three in a line) at 7. */
 export const STAR_CHART: ChartStar[] = [
@@ -74,6 +75,34 @@ export const LEDGER: { place: LocationId; outer: GlyphId; inner: GlyphId }[] = [
   { place: "meridian", outer: "star", inner: "peak" },
   { place: "pelagic", outer: "knot", inner: "wave" },
 ];
+
+/**
+ * The Verdant Archive's root ladder: seven pots across the top (in ring order), grafts as [row, left column]
+ * joining a root to its right-hand neighbour. Follow a root down, crossing at every graft; exactly one pot
+ * reaches the little door. The answer is derived from the drawing, never written down separately.
+ */
+export const ROOTS = {
+  pots: ["sun", "moon", "star", "eye", "peak", "wave", "knot"] as GlyphId[],
+  grafts: [
+    [0, 1], [0, 4], [1, 2], [1, 5], [2, 0], [2, 3], [3, 4], [3, 1], [4, 2],
+    [4, 5], [5, 3], [5, 0], [6, 4], [6, 1], [7, 2], [7, 5], [8, 3], [8, 0],
+  ] as [number, number][],
+  rows: 9,
+  door: 5,
+};
+
+/** Which column a root starting at `col` ends in. */
+export function rootEnd(col: number, grafts: [number, number][] = ROOTS.grafts, rows = ROOTS.rows): number {
+  let c = col;
+  for (let r = 0; r < rows; r++) {
+    const g = grafts.find(([row, left]) => row === r && (left === c || left + 1 === c));
+    if (g) c = g[1] === c ? c + 1 : c - 1;
+  }
+  return c;
+}
+
+/** The pot whose root reaches the door. */
+export const ROOTS_ANSWER: GlyphId = ROOTS.pots.find((_, i) => rootEnd(i) === ROOTS.door)!;
 
 const ageHome: ActionDef[] = [{ op: "go:chamber", label: "c.age.home" }];
 
@@ -126,6 +155,13 @@ export const HOTSPOTS: Record<HotspotId, HotspotDef> = {
   // the Ages, for now just somewhere to arrive
   "verdant-gate": { title: "c.verdant-gate.title", text: [{ key: "c.verdant-gate.text" }], actions: ageHome },
   "meridian-gate": { title: "c.meridian-gate.title", text: [{ key: "c.meridian-gate.text" }], actions: ageHome },
+  creeper: { title: "c.creeper.title", text: [{ key: "c.creeper.text" }], doc: { doc: { kind: "note", key: "c.creeper.note" } } },
+  fern: { title: "c.fern.title", text: [{ key: "c.fern.text" }], doc: { doc: { kind: "note", key: "c.fern.note" } } },
+  cabinet: { title: "c.cabinet.title", text: [{ when: { all: ["verdant.index.open"] }, key: "c.cabinet.open" }, { key: "c.cabinet.text" }] },
+  "pot-sign": { title: "c.pot-sign.title", text: [{ key: "c.pot-sign.text" }], doc: { doc: { kind: "plaque", key: "c.pot-sign.plaque" } } },
+  // The water actions (one per pot) are added in ../scene.ts while the team holds the can.
+  roots: { title: "c.roots.title", text: [{ key: "c.roots.text" }], doc: { doc: { kind: "roots", caption: "c.roots.caption" } } },
+  "root-door": { title: "c.root-door.title", text: [{ when: { all: ["verdant.door.open"] }, key: "c.root-door.open" }, { key: "c.root-door.text" }] },
   "pelagic-gate": { title: "c.pelagic-gate.title", text: [{ key: "c.pelagic-gate.text" }], actions: ageHome },
 };
 
@@ -133,6 +169,10 @@ export const HOTSPOTS: Record<HotspotId, HotspotDef> = {
 export const ITEM_PLACES: Record<ItemId, { at: HotspotId; when: Cond }> = {
   token: { at: "clock", when: { all: ["clock.set"] } },
   gear: { at: "tunnel", when: { all: ["water.drained"] } },
+  numerals: { at: "cabinet", when: { all: ["verdant.index.open"] } },
+  can: { at: "cabinet", when: { all: ["verdant.index.open"] } },
+  "seal-leaf": { at: "root-door", when: { all: ["verdant.door.open"] } },
+  "memory-verdant": { at: "root-door", when: { all: ["verdant.door.open"] } },
 };
 
 /** Using an item on a hotspot. */
@@ -186,6 +226,18 @@ export const LOCKS: Record<LockId, LockDef> = {
     message: "msg.engine",
     log: "log.engine",
   },
+  // The glyphs in counting order: the creeper fixes ☾ ◈ ≈ ☉ ✶, the fern ⌘, and △ is what's left.
+  index: {
+    at: "cabinet",
+    kind: "symbols",
+    length: 7,
+    label: "lock.index",
+    when: { none: ["verdant.index.open"] },
+    answers: ["☾◈≈☉⌘✶△"],
+    sets: ["verdant.index.open"],
+    message: "msg.index",
+    log: "log.index",
+  },
 };
 
 /**
@@ -198,6 +250,8 @@ export const HINT_PUZZLES: { id: string; place: LocationId; solved: Cond }[] = [
   { id: "valves", place: "waterworks", solved: { all: ["water.drained"] } },
   { id: "engine", place: "chamber", solved: { all: ["engine.on"] } },
   { id: "gate", place: "chamber", solved: { all: ["crossed"] } },
+  { id: "index", place: "verdant", solved: { all: ["verdant.index.open"] } },
+  { id: "roots", place: "verdant", solved: { all: ["verdant.door.open"] } },
 ];
 export const HINT_COOLDOWN_SEC = 60;
 
@@ -218,5 +272,7 @@ export function docFor(def: DocDef, T: (k: AtlasTextKey, v?: Record<string, stri
       };
     case "glyph":
       return { kind: "glyph", caption: T(def.caption), glyph: def.glyph };
+    case "roots":
+      return { kind: "roots", caption: T(def.caption), pots: ROOTS.pots, grafts: ROOTS.grafts, rows: ROOTS.rows, door: ROOTS.door };
   }
 }

@@ -136,6 +136,16 @@ Code: `src/server/atlas/` (`world.ts` is the data, `scene.ts` the rules, `router
 | Engine | Chamber | Gear from the drained tunnel → engine. Plaque: hour, tide, sky = clock case ✶, wheel hub ≈, telescope lens ◈ → `✶≈◈`. |
 | First crossing | Chamber | Ledger: Verdant ☉/≈, Meridian ✶/△, Pelagic ⌘/≈ (outer/inner). |
 
+## The Verdant Archive as built (answer key)
+Four walls: arrival (the gate home), growing beds, shelves, roots.
+
+| Step | Solution |
+|---|---|
+| Index cabinet | The spiral creeper's record (each morning it grows as many new leaves as it had two mornings before) reads ☾ ◈ ◈ ≈ ☉ ✶ = 0 1 1 2 3 5, which is only consistent with those values. The doubling fern reads ◈ ≈ ⌘ = 1 2 4. The sign says the pots count from nothing to six, so △ = 6. Set the seven wheels in counting order: `☾◈≈☉⌘✶△`. Inside: the **numeral card** (the glyph values, kept for Act III) and a watering can. |
+| The roots | A ladder of roots under seven pots (☉ ☾ ✶ ◈ △ ≈ ⌘). Follow each root down, crossing at every graft: only ☾ reaches the little door. Water it (three wrong pots in a row and the soil needs a minute to drain). Behind the door: the **Seal of the Leaf** and **Ilse Varro's letter** (the first Cartographer memory). |
+
+Not built yet: the optional secret (the Verdant sun-lens that needs Meridian light) arrives with the Sunken Meridian.
+
 Glyph values (taught in the Verdant Archive, server only): ☾ 0, ◈ 1, ≈ 2, ☉ 3, ⌘ 4, ✶ 5, △ 6. Nodes: 0 Observatory,
 1 Verdant, 2 Meridian, 3 Pelagic, 4–5 empty, 6 Null Cathedral (registration revoked). From the Observatory
 (origin 0) the Cathedral needs 2R + S ≡ 6 (mod 7), e.g. ☉/☾.
@@ -143,7 +153,7 @@ Glyph values (taught in the Verdant Archive, server only): ☾ 0, ◈ 1, ≈ 2, 
 ## Build order
 1. Shared scene engine, with Nightingale ported onto it. **Done.**
 2. Atlas added to `GAMES` as `staging`; router and tests; Act I playable with placeholder art. **Done.**
-3. One PR per Age.
+3. One PR per Age. Verdant Archive **done**; Sunken Meridian and Pelagic Library next.
 4. Null Cathedral, endings, leaderboard and case records.
 5. Art pass.
 6. Playtests, using the stuck-puzzle analytics to tune timing and hints.

@@ -131,6 +131,8 @@ export function AtlasDocView({ doc }: { doc: AtlasDoc }) {
           <p className="mt-2 border-t border-dashed border-stone-400 pt-2 text-xs italic text-stone-600">{doc.torn}</p>
         </div>
       );
+    case "roots":
+      return <RootLadder caption={doc.caption} pots={doc.pots} grafts={doc.grafts} rows={doc.rows} door={doc.door} />;
     case "glyph":
       return (
         <figure className="flex flex-col items-center rounded-xl border border-[#2c4a55] bg-[#071017] py-4">
@@ -141,6 +143,43 @@ export function AtlasDocView({ doc }: { doc: AtlasDoc }) {
         </figure>
       );
   }
+}
+
+/** The Verdant roots as a ladder: seven roots straight down, grafts joining neighbours, the little door below one. */
+function RootLadder({ caption, pots, grafts, rows, door }: { caption: string; pots: GlyphId[]; grafts: [number, number][]; rows: number; door: number }) {
+  const t = useT();
+  const x = (c: number) => 24 + c * 42;
+  const y = (r: number) => 52 + r * 26 + 13;
+  const bottom = 52 + rows * 26;
+  return (
+    <figure className="rounded-xl border border-[#3c5a2f] bg-[#0d150b] p-3">
+      <svg viewBox={`0 0 300 ${bottom + 46}`} className="mx-auto w-full max-w-[320px]" role="img" aria-label={t("atlas.roots.aria")}>
+        {pots.map((p, c) => (
+          <g key={p}>
+            <rect x={x(c) - 15} y={6} width={30} height={30} rx={5} fill="#6b4a2b" />
+            <text x={x(c)} y={28} textAnchor="middle" fontSize="17" fill="#f4e7b5">
+              {glyphChar(p)}
+            </text>
+            <line x1={x(c)} y1={36} x2={x(c)} y2={bottom} stroke="#a07a4c" strokeWidth="4" strokeLinecap="round" />
+          </g>
+        ))}
+        {grafts.map(([r, l], i) => (
+          <line key={i} x1={x(l)} y1={y(r)} x2={x(l + 1)} y2={y(r)} stroke="#a07a4c" strokeWidth="4" strokeLinecap="round" />
+        ))}
+        {pots.map((p, c) =>
+          c === door ? (
+            <g key={p}>
+              <rect x={x(c) - 14} y={bottom + 4} width={28} height={36} rx={3} fill="#3b2a18" stroke="#d8b56a" strokeWidth="2" />
+              <circle cx={x(c) + 7} cy={bottom + 23} r={2} fill="#d8b56a" />
+            </g>
+          ) : (
+            <ellipse key={p} cx={x(c)} cy={bottom + 8} rx={10} ry={5} fill="#2a2016" />
+          ),
+        )}
+      </svg>
+      <figcaption className="mt-2 text-center text-xs text-[#b8d4a4]">{caption}</figcaption>
+    </figure>
+  );
 }
 
 /** The three Waterworks valves: tap one to turn it open or shut. */

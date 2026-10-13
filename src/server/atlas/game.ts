@@ -15,7 +15,14 @@ export const atlasGame = defineSceneGame<AtlasScene, AtlasSceneAction, AtlasScen
   isAction: (body) => typeof body.type === "string" && ACTIONS.has(body.type as AtlasSceneAction["type"]),
   apply: applyAction,
   // Padlock guesses and gate dials are rate-limited and logged as attempts.
-  guessedLock: (action) => (action.type === "unlock" ? String(action.lock) : action.type === "dial" ? "gate" : null),
+  guessedLock: (action) =>
+    action.type === "unlock"
+      ? String(action.lock)
+      : action.type === "dial"
+        ? "gate"
+        : action.type === "operate" && action.target === "roots" && String(action.op).startsWith("water:")
+          ? "roots"
+          : null,
   lockPuzzleId: (lock) => `atlas-${lock}`,
   tooManyMessage: (loc, s) => atlasT(loc)("msg.tooMany", { s }),
   ending: () => null,
