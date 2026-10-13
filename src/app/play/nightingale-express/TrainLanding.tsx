@@ -10,10 +10,17 @@ import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { AVATAR_COLORS } from "@/app/r/[code]/RoomClient";
 import { Leaderboard } from "@/components/site/Leaderboard";
 
-/** Staging landing page for The Nightingale Express: start a room (admins only). English only for now. */
-export function TrainLanding() {
+/**
+ * Staging landing page for a physical-room game (The Nightingale Express by default): start a room (admins
+ * only). English only for now.
+ */
+export function TrainLanding({
+  gameId = TRAIN_GAME_ID,
+  startKey = "train.landing.board",
+  startingKey = "train.landing.boarding",
+}: { gameId?: string; startKey?: string; startingKey?: string } = {}) {
   const router = useRouter();
-  const game = getGame(TRAIN_GAME_ID)!;
+  const game = getGame(gameId)!;
   const me = useMe();
   const t = useT();
   const [name, setName] = useState("");
@@ -36,7 +43,7 @@ export function TrainLanding() {
     const res = await fetch("/api/rooms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ gameId: TRAIN_GAME_ID, displayName, color, replaceExisting }),
+      body: JSON.stringify({ gameId, displayName, color, replaceExisting }),
     });
     const data = (await res.json().catch(() => ({}))) as { code?: string; error?: string; replaceRequired?: boolean; openRooms?: { code: string }[] };
     if (res.status === 409 && data.replaceRequired) {
@@ -73,7 +80,7 @@ export function TrainLanding() {
           <p className="mt-2 font-serif italic text-noir-ink-dim">{gameText(t, game, "tagline")}</p>
         </header>
         <p className="font-serif leading-relaxed text-noir-ink-dim">{gameText(t, game, "blurb")}</p>
-        <ContinueRooms me={me} gameId={TRAIN_GAME_ID} />
+        <ContinueRooms me={me} gameId={gameId} />
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -108,12 +115,12 @@ export function TrainLanding() {
           </fieldset>
           {err && <p className="text-sm text-noir-ink-dim">{err}</p>}
           <button type="submit" disabled={busy} className="min-h-12 rounded-lg bg-noir-brass font-semibold text-noir-bg disabled:opacity-60">
-            {busy ? t("train.landing.boarding") : t("train.landing.board")}
+            {busy ? t(startingKey) : t(startKey)}
           </button>
           <p className="text-xs text-noir-ink-faint">{t("train.landing.invite")}</p>
         </form>
-        {me && <MyCases me={me} gameId={TRAIN_GAME_ID} />}
-        <Leaderboard gameId={TRAIN_GAME_ID} />
+        {me && <MyCases me={me} gameId={gameId} />}
+        <Leaderboard gameId={gameId} />
       </div>
     </main>
   );

@@ -12,6 +12,8 @@ export interface SceneResult<S> {
   attempt?: { lock: string; input: string; correct: boolean };
   /** The game just ended: the room is finished. */
   finished?: boolean;
+  /** Extra fields for the acting player's response only (e.g. where a gate just took them). */
+  reply?: Record<string, unknown>;
 }
 
 export interface SceneDtoOpts {

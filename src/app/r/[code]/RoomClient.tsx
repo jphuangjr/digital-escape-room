@@ -10,6 +10,8 @@ import { CHAT_MESSAGE_EVENT, CHAT_POLL_EVENT } from "@/lib/client/chat";
 import { GameShell } from "@/components/shell/GameShell";
 import { TrainShell } from "@/components/train/TrainShell";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
+import { AtlasShell } from "@/components/atlas/AtlasShell";
+import { ATLAS_GAME_ID } from "@/lib/atlas/types";
 import { CompassMark } from "@/components/shell/icons";
 import { FormattedMessage } from "react-intl";
 import { LanguageSwitcher, useT } from "@/i18n/client";
@@ -58,7 +60,7 @@ export function RoomClient({ code, gameId = "ada-voss" }: { code: string; gameId
 
   return (
     <div className="min-h-[100dvh] bg-[#0b0a08] text-stone-200">
-      {phase.kind === "loading" && <Splash text={t(gameId === TRAIN_GAME_ID ? "train.room.boarding" : "site.room.booting")} />}
+      {phase.kind === "loading" && <Splash text={t(gameId === TRAIN_GAME_ID ? "train.room.boarding" : gameId === ATLAS_GAME_ID ? "atlas.loading" : "site.room.booting")} />}
       {phase.kind === "notfound" && <NotFound />}
       {phase.kind === "error" && (
         <Splash text={phase.status ? t("site.room.serverError", { status: phase.status }) : t("site.room.networkError")}>
@@ -102,6 +104,7 @@ function LiveRoom({ code, state, load }: { code: string; state: RoomState; load:
   );
   useRoomChannel(code, onEvent);
   if (state.gameId === TRAIN_GAME_ID && state.scene) return <TrainShell code={code} state={state} refresh={load} />;
+  if (state.gameId === ATLAS_GAME_ID && state.scene) return <AtlasShell code={code} state={state} refresh={load} />;
   return <GameShell code={code} state={state} refresh={load} />;
 }
 
