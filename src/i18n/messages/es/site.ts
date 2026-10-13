@@ -61,6 +61,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.account.signOut": "Cerrar sesión",
   "site.account.nudge": "Inicia sesión para conservar tus casos y tiempos, y continuar en cualquier dispositivo.",
   "site.account.signIn": "Iniciar sesión",
+  "site.continue.title": "Retoma tu partida",
   "site.cases.heading": "Mis casos",
   "site.cases.roomMeta":
     "{title} · {count, plural, one {# jugador} other {# jugadores}}{host, select, true { · anfitrión} other {}} · {status, select, playing {en curso} voting {votando} finished {terminado} other {{status}}}",

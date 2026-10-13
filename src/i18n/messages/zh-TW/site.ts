@@ -61,6 +61,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.account.signOut": "登出",
   "site.account.nudge": "登入即可保存你的案件與紀錄，並在任何裝置上接續遊玩。",
   "site.account.signIn": "登入",
+  "site.continue.title": "繼續之前的遊戲",
   "site.cases.heading": "我的案件",
   "site.cases.roomMeta":
     "{title} · {count, plural, other {# 位玩家}}{host, select, true { · 房主} other {}} · {status, select, playing {進行中} voting {投票中} finished {已結束} other {{status}}}",

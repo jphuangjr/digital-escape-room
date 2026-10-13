@@ -61,6 +61,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.account.signOut": "로그아웃",
   "site.account.nudge": "로그인하면 사건 기록과 시간이 저장되고, 어느 기기에서든 이어서 할 수 있어요.",
   "site.account.signIn": "로그인",
+  "site.continue.title": "이어서 하기",
   "site.cases.heading": "내 사건",
   "site.cases.roomMeta":
     "{title} · {count, plural, other {플레이어 #명}}{host, select, true { · 방장} other {}} · {status, select, playing {진행 중} voting {투표 중} finished {종료} other {{status}}}",

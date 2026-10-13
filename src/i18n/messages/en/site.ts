@@ -64,6 +64,7 @@ const messages = {
   "site.account.signOut": "Sign out",
   "site.account.nudge": "Sign in to keep your cases and times, and pick up on any device.",
   "site.account.signIn": "Sign in",
+  "site.continue.title": "Pick up where you left off",
   "site.cases.heading": "My cases",
   "site.cases.roomMeta":
     "{title} · {count, plural, one {# player} other {# players}}{host, select, true { · host} other {}} · {status, select, playing {in progress} voting {voting} finished {finished} other {{status}}}",

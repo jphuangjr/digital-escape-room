@@ -61,6 +61,7 @@ const messages: Record<keyof typeof en, string> = {
   "site.account.signOut": "ログアウト",
   "site.account.nudge": "ログインすると、事件とクリアタイムが保存され、どの端末からでも続きを遊べます。",
   "site.account.signIn": "ログイン",
+  "site.continue.title": "続きから遊ぶ",
   "site.cases.heading": "マイ事件",
   "site.cases.roomMeta":
     "{title} · {count, plural, other {プレイヤー #人}}{host, select, true { · ホスト} other {}} · {status, select, playing {進行中} voting {投票中} finished {終了} other {{status}}}",
