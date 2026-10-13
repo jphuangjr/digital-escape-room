@@ -18,22 +18,27 @@ describe("Compartment 12B", () => {
     const { scene, results } = run([
       { type: "take", item: "pouch" },
       { type: "operate", target: "coat", op: "search" },
+      { type: "take", item: "latchkey" },
+      { type: "operate", target: "teacup", op: "empty" },
       { type: "take", item: "washstand-key" },
       { type: "unlock", lock: "suitcase", input: "247" },
       { type: "take", item: "screwdriver" },
+      { type: "operate", target: "suitcase", op: "lining" },
       { type: "take", item: "telegram-left" },
       { type: "use", item: "washstand-key", target: "washstand" },
       { type: "operate", target: "washstand", op: "hot" },
       { type: "use", item: "screwdriver", target: "vent" },
-      { type: "take", item: "telegram-right" },
+      { type: "take", item: "telegram-blank" },
       { type: "take", item: "cufflink" },
+      { type: "operate", target: "lamp", op: "toggle" },
+      { type: "item", item: "telegram-blank", op: "warm" },
       { type: "combine", items: ["telegram-left", "telegram-right"] },
       { type: "use", item: "screwdriver", target: "door" },
-      { type: "unlock", lock: "door", input: "4196" },
+      { type: "unlock", lock: "door", input: "4796" },
     ]);
     expect(results.every((r) => r.ok)).toBe(true);
     expect(scene.flags).toContain("door.open");
-    expect(scene.inventory.sort()).toEqual(["cufflink", "pouch", "screwdriver", "telegram"]);
+    expect(scene.inventory.sort()).toEqual(["cufflink", "latchkey", "pouch", "screwdriver", "telegram"]);
     expect(sceneDTO(scene).log.map((l) => l.text)).toContain("Sam opened the compartment door");
   });
 
@@ -45,11 +50,13 @@ describe("Compartment 12B", () => {
     expect(sceneDTO(scene).closeups["under-berth"]?.takes).toEqual([]);
   });
 
-  it("records wrong padlock guesses without changing anything", () => {
+  it("records wrong padlock guesses, counting them towards a jam but opening nothing", () => {
     const r = applyAction(initialScene(), { type: "unlock", lock: "suitcase", input: "284" }, who);
-    expect(r).toMatchObject({ ok: false, changed: false, attempt: { lock: "suitcase", input: "284", correct: false } });
+    expect(r).toMatchObject({ ok: false, attempt: { lock: "suitcase", input: "284", correct: false } });
+    expect(r.scene.flags).toEqual([]);
+    expect(r.scene.jams?.suitcase).toMatchObject({ wrong: 1 });
     // The door dial can't be tried until the service plate is off.
-    expect(applyAction(initialScene(), { type: "unlock", lock: "door", input: "4196" }, who).ok).toBe(false);
+    expect(applyAction(initialScene(), { type: "unlock", lock: "door", input: "4796" }, who).ok).toBe(false);
   });
 
   it("doesn't use what you don't hold", () => {
@@ -59,12 +66,12 @@ describe("Compartment 12B", () => {
 
   it("never sends a lock code or the mirror message before it's earned", () => {
     const fresh = JSON.stringify(sceneDTO(initialScene()));
-    expect(fresh).not.toContain("4196");
+    expect(fresh).not.toContain("4796");
     expect(fresh).not.toContain("247");
     expect(fresh).not.toContain("LOOK UP");
     expect(fresh).not.toContain("PLATFORM NUMBERS");
     const { scene } = run([
-      { type: "operate", target: "coat", op: "search" },
+      { type: "operate", target: "teacup", op: "empty" },
       { type: "take", item: "washstand-key" },
       { type: "use", item: "washstand-key", target: "washstand" },
       { type: "operate", target: "washstand", op: "hot" },
@@ -73,21 +80,69 @@ describe("Compartment 12B", () => {
   });
 });
 
+describe("what makes it harder", () => {
+  it("rejects the decoys: the summer time, the old platform, your own key and Table 5", () => {
+    expect(applyAction(initialScene(), { type: "unlock", lock: "suitcase", input: "158" }, who).ok).toBe(false);
+    const { scene } = run(ROOM_1.slice(0, -1));
+    expect(applyAction(scene, { type: "unlock", lock: "door", input: "4196" }, who).ok).toBe(false);
+    const coat = run([{ type: "operate", target: "coat", op: "search" }, { type: "take", item: "latchkey" }]).scene;
+    const r = applyAction(coat, { type: "use", item: "latchkey", target: "washstand" }, who);
+    expect(r.ok).toBe(false);
+    expect(r.message).toContain("your own front door");
+    const dining = run(ROOM_1).scene;
+    expect(applyAction(dining, { type: "unlock", lock: "cashbox", input: "♥♠♣♦" }, who).ok).toBe(false);
+  });
+
+  it("hides things in layers: the teacup, the false bottom and the invisible ink", () => {
+    expect(applyAction(initialScene(), { type: "take", item: "washstand-key" }, who).ok).toBe(false);
+    const open = run([{ type: "unlock", lock: "suitcase", input: "247" }]).scene;
+    expect(applyAction(open, { type: "take", item: "telegram-left" }, who).ok).toBe(false);
+    expect(sceneDTO(open).closeups.suitcase?.actions.map((a) => a.op)).toEqual(["lining"]);
+    const vent = run(ROOM_1.slice(0, ROOM_1.findIndex((a) => a.type === "operate" && a.target === "lamp"))).scene;
+    const dark = applyAction(vent, { type: "item", item: "telegram-blank", op: "warm" }, who);
+    expect(dark.ok).toBe(false);
+    expect(sceneDTO(vent).inventory.map((i) => i.id)).not.toContain("telegram-right");
+    const lit = applyAction(applyAction(vent, { type: "operate", target: "lamp", op: "toggle" }, who).scene, { type: "item", item: "telegram-blank", op: "warm" }, who);
+    expect(lit.scene.inventory).toContain("telegram-right");
+  });
+
+  it("jams a lock for a minute after three wrong guesses in a row", () => {
+    const t0 = new Date("2026-01-01T00:00:00Z");
+    let s = initialScene();
+    for (const input of ["111", "222", "333"]) s = applyAction(s, { type: "unlock", lock: "suitcase", input }, who, undefined, t0).scene;
+    expect(sceneDTO(s, { now: t0 }).closeups.suitcase?.lock?.jammedUntil).toBeTruthy();
+    const jammed = applyAction(s, { type: "unlock", lock: "suitcase", input: "247" }, who, undefined, new Date(t0.getTime() + 30_000));
+    expect(jammed.ok).toBe(false);
+    expect(jammed.attempt).toBeUndefined();
+    const later = applyAction(s, { type: "unlock", lock: "suitcase", input: "247" }, who, undefined, new Date(t0.getTime() + 61_000));
+    expect(later.ok).toBe(true);
+    // Two wrong, then right, resets the count.
+    let r = initialScene();
+    for (const input of ["111", "222"]) r = applyAction(r, { type: "unlock", lock: "suitcase", input }, who, undefined, t0).scene;
+    expect(r.jams?.suitcase).toMatchObject({ wrong: 2, until: null });
+  });
+});
+
 const ROOM_1: SceneAction[] = [
   { type: "take", item: "pouch" },
   { type: "operate", target: "coat", op: "search" },
+  { type: "take", item: "latchkey" },
+  { type: "operate", target: "teacup", op: "empty" },
   { type: "take", item: "washstand-key" },
   { type: "unlock", lock: "suitcase", input: "247" },
   { type: "take", item: "screwdriver" },
+  { type: "operate", target: "suitcase", op: "lining" },
   { type: "take", item: "telegram-left" },
   { type: "use", item: "washstand-key", target: "washstand" },
   { type: "operate", target: "washstand", op: "hot" },
   { type: "use", item: "screwdriver", target: "vent" },
-  { type: "take", item: "telegram-right" },
+  { type: "take", item: "telegram-blank" },
   { type: "take", item: "cufflink" },
+  { type: "operate", target: "lamp", op: "toggle" },
+  { type: "item", item: "telegram-blank", op: "warm" },
   { type: "combine", items: ["telegram-left", "telegram-right"] },
   { type: "use", item: "screwdriver", target: "door" },
-  { type: "unlock", lock: "door", input: "4196" },
+  { type: "unlock", lock: "door", input: "4796" },
 ];
 const DINING: SceneAction[] = [
   { type: "take", item: "scorecard" },

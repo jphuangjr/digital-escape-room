@@ -55,7 +55,14 @@ export interface TrainScene {
   /** The accusation, once the bell is rung. */
   vote: { votes: Record<string, Suspect>; tie: Suspect[] | null } | null;
   ending: { accused: Suspect; at: string; counts: Record<Suspect, number>; everyClue: boolean } | null;
+  /** Wrong guesses in a row on each lock, and when a jammed lock frees up again. */
+  jams?: Partial<Record<LockId, { wrong: number; until: string | null }>>;
 }
+
+/** Wrong guesses in a row before a lock jams, and for how long. */
+export const JAM_AFTER = 3;
+export const JAM_SEC = 60;
+const LOCK_IDS: LockId[] = ["suitcase", "door", "cashbox"];
 
 const HOTSPOTS: HotspotId[] = [
   "window",
@@ -85,6 +92,7 @@ const HOTSPOTS: HotspotId[] = [
   "records",
   "stole",
   "dining-window",
+  "bar-card",
   "plaque",
   "heater",
   "hatbox",
@@ -105,8 +113,10 @@ const HOTSPOTS: HotspotId[] = [
 const ITEM_IDS: ItemId[] = [
   "pouch",
   "washstand-key",
+  "latchkey",
   "screwdriver",
   "telegram-left",
+  "telegram-blank",
   "telegram-right",
   "telegram",
   "cufflink",
@@ -145,6 +155,12 @@ export function parseScene(raw: unknown): TrainScene {
     hints: Array.isArray(s.hints) ? s.hints : [],
     vote,
     ending: s.ending && isSuspect(s.ending.accused) ? s.ending : null,
+    jams: Object.fromEntries(
+      LOCK_IDS.flatMap((l) => {
+        const j = s.jams?.[l];
+        return j && typeof j.wrong === "number" ? [[l, { wrong: j.wrong, until: typeof j.until === "string" ? j.until : null }]] : [];
+      }),
+    ),
   };
 }
 
@@ -158,6 +174,7 @@ function itemDTO(id: ItemId, held: boolean, has: (f: string) => boolean, T: TT):
     ...(evidence ? { evidence } : {}),
     ...(reading ? { reading } : {}),
     ...(held && id === "powder" && !peeled ? { actions: [{ op: "peel", label: T("item.powder.peel") }] } : {}),
+    ...(held && id === "telegram-blank" ? { actions: [{ op: "warm", label: T("item.telegram-blank.warm") }] } : {}),
   };
 }
 
@@ -169,11 +186,23 @@ function takeablesAt(scene: TrainScene, at: HotspotId): ItemId[] {
   });
 }
 
-function lockAt(h: HotspotId, has: (f: string) => boolean, T: TT): CloseupDTO["lock"] {
-  if (h === "suitcase" && !has("suitcase.open")) return { id: "suitcase", kind: "digits", length: 3, label: T("lock.suitcase") };
-  if (h === "door" && has("panel.open") && !has("door.open")) return { id: "door", kind: "digits", length: 4, label: T("lock.door") };
-  if (h === "cashbox" && !has("cashbox.open")) return { id: "cashbox", kind: "symbols", length: 4, label: T("lock.cashbox") };
-  return undefined;
+/** When a jammed lock frees up, or null if it isn't jammed now. */
+function jammedUntil(scene: TrainScene, lock: LockId, now: Date): string | null {
+  const until = scene.jams?.[lock]?.until;
+  return until && new Date(until) > now ? until : null;
+}
+
+function lockAt(h: HotspotId, has: (f: string) => boolean, T: TT, scene: TrainScene, now: Date): CloseupDTO["lock"] {
+  const lock: CloseupDTO["lock"] =
+    h === "suitcase" && !has("suitcase.open")
+      ? { id: "suitcase", kind: "digits", length: 3, label: T("lock.suitcase") }
+      : h === "door" && has("panel.open") && !has("door.open")
+        ? { id: "door", kind: "digits", length: 4, label: T("lock.door") }
+        : h === "cashbox" && !has("cashbox.open")
+          ? { id: "cashbox", kind: "symbols", length: 4, label: T("lock.cashbox") }
+          : undefined;
+  const until = lock && jammedUntil(scene, lock.id, now);
+  return lock && until ? { ...lock, jammedUntil: until } : lock;
 }
 
 /** The first puzzle the team hasn't done yet (what Teodor would help with). */
@@ -220,7 +249,7 @@ export function sceneDTO(scene: TrainScene, opts: { startedAt?: Date; now?: Date
     const c = closeupText(h, has, T);
     // Once taken, the scorecard is read from the inventory instead.
     const doc = h === "bridge" && scene.found.includes("scorecard") ? undefined : c.doc;
-    const lock = lockAt(h, has, T);
+    const lock = lockAt(h, has, T, scene, opts.now ?? new Date());
     closeups[h] = { ...c, doc, takes: takeablesAt(scene, h).map((id) => itemDTO(id, false, has, T)), ...(lock ? { lock } : {}) };
   }
   const hints: HintNote[] = scene.hints.map((h) => ({
@@ -295,6 +324,7 @@ export function applyAction(
     log: [...prev.log],
     hints: [...prev.hints],
     vote: prev.vote ? { votes: { ...prev.vote.votes }, tie: prev.vote.tie } : null,
+    jams: { ...prev.jams },
   };
   const has = (f: string) => scene.flags.includes(f);
   const set = (f: string) => {
@@ -357,6 +387,16 @@ export function applyAction(
         set("coat.searched");
         return ok("msg.coat");
       }
+      if (target === "teacup" && op === "empty" && !has("teacup.emptied")) {
+        set("teacup.emptied");
+        log("log.teacup");
+        return ok("msg.teacup");
+      }
+      if (target === "suitcase" && op === "lining" && has("suitcase.open") && !has("suitcase.lining")) {
+        set("suitcase.lining");
+        log("log.lining");
+        return ok("msg.lining");
+      }
       if (target === "pillow" && op === "lift" && !has("pillow.lifted")) {
         set("pillow.lifted");
         return ok();
@@ -404,6 +444,7 @@ export function applyAction(
         log("log.washstand");
         return ok("msg.washstand");
       }
+      if (item === "latchkey" && target === "washstand" && !has("washstand.open")) return no("msg.latchkey");
       if (item === "screwdriver" && target === "vent" && !has("vent.open")) {
         set("vent.open");
         log("log.vent");
@@ -438,6 +479,13 @@ export function applyAction(
         log("log.peel");
         return ok("msg.peel");
       }
+      if (action.item === "telegram-blank" && action.op === "warm") {
+        if (!has("lamp.on")) return no("msg.lampOff");
+        scene.inventory = scene.inventory.map((i) => (i === "telegram-blank" ? "telegram-right" : i));
+        scene.found.push("telegram-right");
+        log("log.warm");
+        return ok("msg.warm");
+      }
       return no("msg.nothing");
     }
 
@@ -470,9 +518,19 @@ export function applyAction(
       if (!reachable) return no("msg.noLock");
       const length = Array.from(LOCK_CODES[lock]).length;
       if (Array.from(input).length !== length) return no("msg.wheels", { n: length });
+      const jammed = jammedUntil(prev, lock, now);
+      if (jammed) return no("msg.jammed", { s: Math.ceil((new Date(jammed).getTime() - now.getTime()) / 1000) });
       const correct = input === LOCK_CODES[lock];
       const attempt = { lock, input, correct };
-      if (!correct) return { scene: prev, changed: false, ok: false, message: T("msg.wrong"), attempt };
+      if (!correct) {
+        // Three wrong in a row jams the wheels for a minute.
+        const wrong = (prev.jams?.[lock]?.wrong ?? 0) + 1;
+        const jams = wrong >= JAM_AFTER;
+        scene.jams = { ...scene.jams, [lock]: { wrong: jams ? 0 : wrong, until: jams ? new Date(now.getTime() + JAM_SEC * 1000).toISOString() : null } };
+        if (jams) log("log.jammed");
+        return { scene, changed: true, ok: false, message: jams ? T("msg.jamsNow", { s: JAM_SEC }) : T("msg.wrong"), attempt };
+      }
+      scene.jams = { ...scene.jams, [lock]: { wrong: 0, until: null } };
       if (lock === "suitcase") {
         set("suitcase.open");
         log("log.suitcase");

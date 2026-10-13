@@ -149,7 +149,8 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
         setShake(true);
         setTimeout(() => setShake(false), 500);
       }
-      if (data.ok) void refresh();
+      // A wrong guess can jam the lock, so refresh then too.
+      if (data.ok || action.type === "unlock") void refresh();
       return data;
     },
     [busy, code, refresh, toast, t],
@@ -480,6 +481,7 @@ function CloseupSheet({
           length={c.lock.length}
           label={c.lock.label}
           faces={c.lock.kind === "symbols" ? SUIT_SYMBOLS : undefined}
+          jammedUntil={c.lock.jammedUntil}
           busy={busy}
           shake={shake}
           onTry={(input) => void act({ type: "unlock", lock: c.lock!.id, input })}

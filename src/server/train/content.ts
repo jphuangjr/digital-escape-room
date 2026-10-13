@@ -8,7 +8,7 @@ import type { TT, TrainTextKey } from "./text";
  * Design doc: "The Nightingale Express — design doc" (Claude Docs).
  */
 
-export const LOCK_CODES: Record<LockId, string> = { suitcase: "247", door: "4196", cashbox: "♦♠♣♥" };
+export const LOCK_CODES: Record<LockId, string> = { suitcase: "247", door: "4796", cashbox: "♦♠♣♥" };
 
 /** Items that are evidence for the finale. */
 export const EVIDENCE: ItemId[] = ["pouch", "cufflink", "scorecard", "powder", "bank-notice", "star"];
@@ -26,8 +26,9 @@ const READINGS: Partial<Record<ItemId, { title: TrainTextKey; lines: (T: TT) => 
 const half = (line: string) => Math.ceil(line.length / 2);
 const lines = (T: TT, key: TrainTextKey) => T(key).split("\n");
 
-const TRICKS = ["3", "1", "5", "2"]; // ♠ ♥ ♦ ♣
-const scoreRows = (T: TT) => lines(T, "score.suits").map((suit, i) => [suit, TRICKS[i]]);
+const TRICKS = ["3", "1", "5", "2"]; // ♠ ♥ ♦ ♣ at Table 3, the Countess's table
+const TRICKS_5 = ["4", "6", "1", "2"]; // Table 5: a decoy
+const scoreRows = (T: TT, tricks = TRICKS) => lines(T, "score.suits").map((suit, i) => [suit, tricks[i]]);
 
 /** The words for an item, in the viewer's language. `held` adds what's written on it. */
 export function itemText(id: ItemId, T: TT, opts: { held: boolean; peeled: boolean }) {
@@ -51,10 +52,11 @@ export function itemText(id: ItemId, T: TT, opts: { held: boolean; peeled: boole
 /** Where each item lies, and the flags that must be set before it can be seen and taken. */
 export const ITEM_PLACES: Partial<Record<ItemId, { at: HotspotId; needs: string[] }>> = {
   pouch: { at: "under-berth", needs: [] },
-  "washstand-key": { at: "coat", needs: ["coat.searched"] },
+  latchkey: { at: "coat", needs: ["coat.searched"] },
+  "washstand-key": { at: "teacup", needs: ["teacup.emptied"] },
   screwdriver: { at: "suitcase", needs: ["suitcase.open"] },
-  "telegram-left": { at: "suitcase", needs: ["suitcase.open"] },
-  "telegram-right": { at: "vent", needs: ["vent.open"] },
+  "telegram-left": { at: "suitcase", needs: ["suitcase.open", "suitcase.lining"] },
+  "telegram-blank": { at: "vent", needs: ["vent.open"] },
   cufflink: { at: "vent", needs: ["vent.open"] },
   scorecard: { at: "bridge", needs: [] },
   keyring: { at: "cashbox", needs: ["cashbox.open"] },
@@ -64,8 +66,9 @@ export const ITEM_PLACES: Partial<Record<ItemId, { at: HotspotId; needs: string[
   star: { at: "dumbwaiter", needs: ["dumbwaiter.raised"] },
 };
 
-/** Times and platforms never change between languages; only the station names do. */
-const TIMES = ["23:00", "23:52", "01:30", "02:47", "04:15", "06:00"];
+/** Times and platforms never change between languages; only the station names do. Winter service runs tonight. */
+const SUMMER = ["22:30", "23:20", "00:55", "01:58", "03:40", "05:20"];
+const WINTER = ["23:00", "23:52", "01:30", "02:47", "04:15", "06:00"];
 const PLATFORMS = ["2", "8", "4", "1", "9", "6"];
 
 type Has = (flag: string) => boolean;
@@ -78,7 +81,6 @@ export function closeupText(id: HotspotId, has: Has, T: TT): Closeup {
   const simple = (): Closeup => ({ title: c("title"), lines: L("text"), actions: [] });
   switch (id) {
     case "window":
-    case "teacup":
     case "under-berth":
     case "upper-berth":
     case "towel":
@@ -117,7 +119,8 @@ export function closeupText(id: HotspotId, has: Has, T: TT): Closeup {
           headline: T("news.headline"),
           column: lines(T, "news.column"),
           timetableTitle: T("tt.title"),
-          timetable: [lines(T, "tt.head"), ...lines(T, "tt.stops").map((name, i) => [name, TIMES[i], PLATFORMS[i]])],
+          timetable: [lines(T, "tt.head"), ...lines(T, "tt.stops").map((name, i) => [name, SUMMER[i], WINTER[i], PLATFORMS[i]])],
+          notes: [T("tt.note"), T("tt.stopPress")],
         },
         actions: [],
       };
@@ -128,12 +131,16 @@ export function closeupText(id: HotspotId, has: Has, T: TT): Closeup {
       return has("coat.searched")
         ? { title: c("title"), lines: L("searched"), actions: [] }
         : { title: c("title"), lines: L("text"), actions: [{ op: "search", label: c("search") }] };
+    case "teacup":
+      return has("teacup.emptied")
+        ? { title: c("title"), lines: L("emptied"), actions: [] }
+        : { title: c("title"), lines: L("text"), actions: [{ op: "empty", label: c("empty") }] };
     case "suitcase":
       return {
         title: c("title"),
-        lines: has("suitcase.open") ? L("open") : L("text"),
+        lines: !has("suitcase.open") ? L("text") : has("suitcase.lining") ? L("lined") : L("open"),
         doc: { kind: "tag", lines: lines(T, "tag.lines") },
-        actions: [],
+        actions: has("suitcase.open") && !has("suitcase.lining") ? [{ op: "lining", label: c("lining") }] : [],
       };
     case "pillow":
       return has("pillow.lifted")
@@ -167,6 +174,13 @@ export function closeupText(id: HotspotId, has: Has, T: TT): Closeup {
         title: c("title"),
         lines: L("text"),
         doc: { kind: "scorecard", title: T("score.title"), rows: [lines(T, "score.head"), ...scoreRows(T)], note: T("score.note") },
+        actions: [],
+      };
+    case "bar-card":
+      return {
+        title: c("title"),
+        lines: L("text"),
+        doc: { kind: "scorecard", title: T("score5.title"), rows: [lines(T, "score.head"), ...scoreRows(T, TRICKS_5)], note: T("score5.note") },
         actions: [],
       };
     case "menu":

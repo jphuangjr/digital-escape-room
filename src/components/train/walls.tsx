@@ -55,6 +55,7 @@ export const HOTSPOTS: Record<WallId, Hotspot[]> = {
     { id: "bottles", label: "Bottles", x: 30, y: 46, w: 240, h: 110 },
     { id: "cashbox", label: "Cash box", x: 56, y: 172, w: 80, h: 52 },
     { id: "bell", label: "Service bell", x: 206, y: 186, w: 50, h: 38 },
+    { id: "bar-card", label: "Scorecard", x: 232, y: 124, w: 38, h: 38 },
     { id: "shaker", label: "Cocktail shaker", x: 146, y: 182, w: 48, h: 42 },
     { id: "stools", label: "Bar stools", x: 40, y: 318, w: 220, h: 40 },
   ],
@@ -212,7 +213,8 @@ function Sconce({ x }: { x: number }) {
   );
 }
 
-function WindowWall() {
+function WindowWall({ flags }: { flags: string[] }) {
+  const emptied = flags.includes("teacup.emptied");
   return (
     <Room>
       <Sconce x={32} />
@@ -283,7 +285,15 @@ function WindowWall() {
       <ellipse cx="199" cy="236" rx="18" ry="4" fill={C.cream} stroke="#b8ad92" />
       <path d="M187 222 H211 L207 235 H191 Z" fill={C.cream} stroke="#b8ad92" />
       <path d="M211 225 q7 1 2 8" fill="none" stroke="#b8ad92" strokeWidth="2" />
-      <ellipse cx="199" cy="222" rx="12" ry="2.5" fill="#6b4a2a" />
+      {emptied ? (
+        <g>
+          <ellipse cx="199" cy="222" rx="12" ry="2.5" fill="#efe6d2" stroke="#b8ad92" />
+          <path d="M193 222 q6 3 12 0" stroke="#5a3b20" strokeWidth="1" fill="none" />
+          <ellipse cx="199" cy="236" rx="14" ry="2.5" fill="#6b4a2a" opacity="0.85" />
+        </g>
+      ) : (
+        <ellipse cx="199" cy="222" rx="12" ry="2.5" fill="#6b4a2a" />
+      )}
       {/* heater grille */}
       <rect x="78" y="296" width="144" height="42" rx="4" fill={C.walnutDark} stroke="url(#nx-brass)" strokeWidth="1.5" />
       <g stroke={C.brass} strokeWidth="1" opacity="0.7">
@@ -303,6 +313,7 @@ function DoorWall({ flags }: { flags: string[] }) {
   const panel = flags.includes("panel.open");
   const suitcaseOpen = flags.includes("suitcase.open");
   const searched = flags.includes("coat.searched");
+  const lining = flags.includes("suitcase.lining");
   return (
     <Room>
       {/* luggage rack */}
@@ -332,6 +343,7 @@ function DoorWall({ flags }: { flags: string[] }) {
           <rect x="170" y="20" width="98" height="24" rx="3" fill="#7b4f2c" stroke={C.ink} />
           <rect x="178" y="22" width="40" height="10" rx="2" fill="#c98b9a" />
           <rect x="222" y="22" width="34" height="9" rx="2" fill="#5a3b20" stroke={C.brass} strokeWidth="0.8" />
+          {lining && <rect x="146" y="20" width="22" height="26" rx="2" fill="#6a4426" stroke={C.ink} transform="rotate(-12 157 33)" />}
         </g>
       ) : (
         <g>
@@ -664,6 +676,12 @@ function BarWall({ flags }: { flags: string[] }) {
       <text x="150" y="152" textAnchor="middle" fontSize="8" fill={C.brass} fontFamily="Georgia, serif" letterSpacing="3">
         THE NIGHTINGALE
       </text>
+      {/* Table 5's scorecard, tucked into the corner of the mirror */}
+      <g transform="rotate(8 251 143)">
+        <rect x="240" y="128" width="22" height="28" rx="1" fill="#fffaf0" stroke="#9a8f78" strokeWidth="0.6" />
+        <path d="M243 134 H259 M243 139 H257 M243 144 H259 M243 149 H255" stroke="#9a8f78" strokeWidth="0.8" />
+        <rect x="248" y="125" width="6" height="5" fill="url(#nx-brass)" />
+      </g>
       {/* counter */}
       <rect x="18" y="222" width="264" height="14" rx="3" fill="#7a3a1e" stroke={C.ink} />
       <rect x="24" y="236" width="252" height="90" fill="#4a2414" stroke={C.ink} />
@@ -675,7 +693,7 @@ function BarWall({ flags }: { flags: string[] }) {
       <path d="M22 220 Q22 210 38 210 Q54 210 54 220 Z" fill="url(#nx-brass)" opacity="0.9" />
       <ellipse cx="32" cy="209" rx="6" ry="4.5" fill="#e8c93a" />
       <ellipse cx="43" cy="208" rx="6" ry="4.5" fill="#f0d54a" />
-      {[258, 272].map((x) => (
+      {[262, 276].map((x) => (
         <g key={x}>
           <path d={`M${x - 6} 204 Q${x} 212 ${x + 6} 204 Z`} fill="#f2e4b0" opacity="0.55" stroke="#b8ad92" strokeWidth="0.6" />
           <path d={`M${x} 209 V220 M${x - 4} 221 H${x + 4}`} stroke="#b8ad92" strokeWidth="1" />
@@ -971,7 +989,7 @@ export function WallArt({
   const t = useT();
   return (
     <svg viewBox="0 0 300 400" className="h-full w-full" role="img" aria-label={t("train.wallAria", { wall: t(`train.wall.${wall}`) })}>
-      {wall === "window" && <WindowWall />}
+      {wall === "window" && <WindowWall flags={flags} />}
       {wall === "door" && <DoorWall flags={flags} />}
       {wall === "berths" && <BerthWall flags={flags} pouchHere={pouchHere} />}
       {wall === "washstand" && <WashstandWall flags={flags} mirrorLetters={mirrorLetters} />}
