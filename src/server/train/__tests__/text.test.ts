@@ -12,7 +12,7 @@ describe.each(LOCALES)("train text (%s)", (loc) => {
   const stops = lines("tt.stops");
 
   it("keeps the line counts the puzzles rely on", () => {
-    expect(lines("tt.head")).toHaveLength(3);
+    expect(lines("tt.head")).toHaveLength(4);
     expect(stops).toHaveLength(6);
     expect(lines("score.head")).toHaveLength(2);
     expect(lines("telegram.lines")).toHaveLength(5);
@@ -28,8 +28,13 @@ describe.each(LOCALES)("train text (%s)", (loc) => {
 
   it("keeps the door code and stops in the last door hint", () => {
     const h = T("hint.door.3").toLowerCase();
-    expect(h.replace(/\D/g, "")).toContain("4196");
+    expect(h.replace(/\D/g, "")).toContain("4796");
     for (const s of stops.slice(2, 5)) expect(h).toContain(s.trim().toLowerCase());
+  });
+
+  it("names Halden the timetable's way in the stop press, with platform 7", () => {
+    expect(T("tt.stopPress")).toContain(stops[3].trim());
+    expect(T("tt.stopPress")).toContain("7");
   });
 
   it("quotes the mirror's words in the mirror hint", () => {

@@ -45,6 +45,7 @@ export type HotspotId =
   | "records"
   | "stole"
   | "dining-window"
+  | "bar-card"
   // things to look at that have nothing to do with the case
   | "plaque"
   | "heater"
@@ -67,7 +68,9 @@ export type ItemId =
   | "pouch"
   | "washstand-key"
   | "screwdriver"
+  | "latchkey"
   | "telegram-left"
+  | "telegram-blank"
   | "telegram-right"
   | "telegram"
   | "cufflink"
@@ -103,7 +106,7 @@ export interface CloseupAction {
 
 /** A styled read-out in a close-up: a newspaper page, a luggage tag, a fogged mirror. */
 export type CloseupDoc =
-  | { kind: "newspaper"; masthead: string; date: string; headline: string; column: string[]; timetableTitle: string; timetable: string[][] }
+  | { kind: "newspaper"; masthead: string; date: string; headline: string; column: string[]; timetableTitle: string; timetable: string[][]; notes: string[] }
   | { kind: "tag"; lines: string[] }
   | { kind: "note"; lines: string[] }
   | { kind: "mirror"; fogged: boolean; letters?: string }
@@ -119,7 +122,7 @@ export interface CloseupDTO {
   /** Items lying here that can be picked up. */
   takes: ItemDTO[];
   /** A padlock on this object, if it's still locked and reachable. */
-  lock?: { id: LockId; kind: "digits" | "symbols"; length: number; label: string };
+  lock?: { id: LockId; kind: "digits" | "symbols"; length: number; label: string; jammedUntil?: string };
 }
 
 export interface SceneLogEntry {

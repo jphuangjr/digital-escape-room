@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useT } from "@/i18n/client";
 import type { CloseupDoc, ItemDTO, ItemId } from "@/lib/train/types";
 
@@ -20,6 +20,19 @@ export function ItemIcon({ id, className = "h-10 w-10" }: { id: ItemId; classNam
           <circle cx="13" cy="20" r="6" fill="none" stroke="#c9a227" strokeWidth="3" />
           <path d="M19 20 H33 M28 20 V25 M32 20 V24" stroke="#c9a227" strokeWidth="3" />
           <rect x="22" y="6" width="12" height="7" rx="1" fill="#efe6d2" transform="rotate(12 28 9)" />
+        </g>
+      )}
+      {id === "latchkey" && (
+        <g>
+          <path d="M6 10 q6 -4 8 4" stroke="#b8ad92" strokeWidth="1.2" fill="none" />
+          <circle cx="13" cy="20" r="6" fill="none" stroke="#6b6f74" strokeWidth="3.5" />
+          <path d="M19 20 H34 M29 20 V26 M33 20 V25" stroke="#6b6f74" strokeWidth="3.5" />
+        </g>
+      )}
+      {id === "telegram-blank" && (
+        <g>
+          <path d="M6 8 H34 V36 H6 Z" fill="#f3e9c6" stroke="#b8a46a" />
+          <path d="M6 22 H34" stroke="#d8cba0" strokeWidth="1" strokeDasharray="2 2" />
         </g>
       )}
       {id === "screwdriver" && (
@@ -172,6 +185,11 @@ export function CloseupDocView({ doc }: { doc: CloseupDoc }) {
                 ))}
               </tbody>
             </table>
+            {doc.notes.map((n, i) => (
+              <p key={i} className={`mt-3 text-xs leading-snug ${i === doc.notes.length - 1 ? "border border-stone-700 p-2 font-bold" : "italic text-stone-600"}`}>
+                {n}
+              </p>
+            ))}
           </>
         )}
       </div>
@@ -263,7 +281,9 @@ export function LockDial({
   shake,
   onTry,
   faces,
+  jammedUntil,
 }: {
+  jammedUntil?: string;
   length: number;
   label: string;
   busy: boolean;
@@ -275,6 +295,13 @@ export function LockDial({
   const t = useT();
   const wheel = faces ?? ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
   const [digits, setDigits] = useState<number[]>(() => Array.from({ length }, () => 0));
+  const [now, setNow] = useState(() => Date.now());
+  const jammedFor = jammedUntil ? Math.ceil((new Date(jammedUntil).getTime() - now) / 1000) : 0;
+  useEffect(() => {
+    if (!jammedUntil) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [jammedUntil]);
   const bump = (i: number, d: number) => setDigits((ds) => ds.map((v, j) => (j === i ? (v + d + wheel.length) % wheel.length : v)));
   return (
     <div className="rounded-xl border border-[#c9a227]/50 bg-[#1b120b] p-4">
@@ -309,11 +336,11 @@ export function LockDial({
       </div>
       <button
         type="button"
-        disabled={busy}
+        disabled={busy || jammedFor > 0}
         onClick={() => onTry(digits.map((v) => wheel[v]).join(""))}
         className="mt-4 min-h-11 w-full rounded-md bg-[#c9a227] font-semibold text-[#1b120b] active:bg-[#ecd27a] disabled:opacity-60"
       >
-        {busy ? t("train.lock.trying") : t("train.lock.try")}
+        {jammedFor > 0 ? t("train.lock.jammed", { s: jammedFor }) : busy ? t("train.lock.trying") : t("train.lock.try")}
       </button>
     </div>
   );
