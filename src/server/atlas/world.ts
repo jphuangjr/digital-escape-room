@@ -28,6 +28,7 @@ export const PLACE_NEEDS: Record<LocationId, Cond> = {
   chamber: { all: ["water.drained"] },
   verdant: { all: ["reached.verdant"] },
   meridian: { all: ["reached.meridian"] },
+  sanctum: { all: ["reached.meridian", "meridian.lit"] },
   pelagic: { all: ["reached.pelagic"] },
 };
 
@@ -51,7 +52,8 @@ export type DocDef =
   | { kind: "starchart"; title: AtlasTextKey }
   | { kind: "ledger"; title: AtlasTextKey; torn: AtlasTextKey }
   | { kind: "glyph"; caption: AtlasTextKey; glyph: GlyphId }
-  | { kind: "roots"; caption: AtlasTextKey };
+  | { kind: "roots"; caption: AtlasTextKey }
+  | { kind: "mirrordial"; caption: AtlasTextKey; hour: number };
 
 /** Clock positions on the star chart. The Lantern (a ring of six) is at 4 and the Key (three in a line) at 7. */
 export const STAR_CHART: ChartStar[] = [
@@ -103,6 +105,51 @@ export function rootEnd(col: number, grafts: [number, number][] = ROOTS.grafts, 
 
 /** The pot whose root reaches the door. */
 export const ROOTS_ANSWER: GlyphId = ROOTS.pots.find((_, i) => rootEnd(i) === ROOTS.door)!;
+
+/**
+ * The Meridian's mirror plaza: a 5×5 floor. Sunlight enters on row 0 from the west heading east; a "/" mirror
+ * turns east→north, north→east, west→south, south→west; "\" turns east→south, south→east, west→north,
+ * north→west; pillars stop the light. The sun door is below the bottom row in column `door`. Every mirror starts
+ * as "/"; exactly one setting of the five lands the light on the door (checked in the tests).
+ */
+export const PLAZA = {
+  w: 5,
+  h: 5,
+  mirrors: [
+    [1, 0],
+    [1, 4],
+    [2, 4],
+    [2, 2],
+    [3, 2],
+  ] as [number, number][],
+  pillars: [
+    [0, 4],
+    [2, 1],
+  ] as [number, number][],
+  door: 3,
+};
+
+/** The cells the light crosses for a setting (`back[i]`: mirror i leans "\"), and whether it reaches the door. */
+export function traceBeam(back: boolean[], plaza = PLAZA): { path: [number, number][]; lit: boolean } {
+  const step: Record<string, [number, number]> = { E: [1, 0], W: [-1, 0], N: [0, -1], S: [0, 1] };
+  const slash: Record<string, string> = { E: "N", N: "E", W: "S", S: "W" };
+  const backslash: Record<string, string> = { E: "S", S: "E", W: "N", N: "W" };
+  let [x, y, d] = [-1, 0, "E"];
+  const path: [number, number][] = [];
+  for (let i = 0; i < 4 * plaza.w * plaza.h; i++) {
+    x += step[d][0];
+    y += step[d][1];
+    if (x < 0 || y < 0 || x >= plaza.w || y >= plaza.h) return { path, lit: y === plaza.h && x === plaza.door };
+    if (plaza.pillars.some(([px, py]) => px === x && py === y)) return { path, lit: false };
+    path.push([x, y]);
+    const m = plaza.mirrors.findIndex(([mx, my]) => mx === x && my === y);
+    if (m >= 0) d = (back[m] ? backslash : slash)[d];
+  }
+  return { path, lit: false };
+}
+
+/** The hour the buried sundial's shadow really falls on (the great mirror shows it reversed, at 8). */
+export const DIAL_HOUR = 4;
 
 const ageHome: ActionDef[] = [{ op: "go:chamber", label: "c.age.home" }];
 
@@ -162,6 +209,25 @@ export const HOTSPOTS: Record<HotspotId, HotspotDef> = {
   // The water actions (one per pot) are added in ../scene.ts while the team holds the can.
   roots: { title: "c.roots.title", text: [{ key: "c.roots.text" }], doc: { doc: { kind: "roots", caption: "c.roots.caption" } } },
   "root-door": { title: "c.root-door.title", text: [{ when: { all: ["verdant.door.open"] }, key: "c.root-door.open" }, { key: "c.root-door.text" }] },
+  mirrors: {
+    title: "c.mirrors.title",
+    text: [{ when: { all: ["meridian.lit"] }, key: "c.mirrors.lit" }, { key: "c.mirrors.text" }],
+  },
+  "sun-door": {
+    title: "c.sun-door.title",
+    text: [{ when: { all: ["meridian.lit"] }, key: "c.sun-door.lit" }, { key: "c.sun-door.text" }],
+    actions: [{ op: "go:sanctum", label: "c.sun-door.go", when: { all: ["meridian.lit"] } }],
+  },
+  vault: { title: "c.vault.title", text: [{ when: { all: ["meridian.vault.lit"] }, key: "c.vault.lit" }, { key: "c.vault.text" }] },
+  "great-mirror": {
+    title: "c.great-mirror.title",
+    text: [{ key: "c.great-mirror.text" }],
+    doc: { doc: { kind: "mirrordial", caption: "c.great-mirror.caption", hour: DIAL_HOUR } },
+    actions: [{ op: "go:meridian", label: "c.sanctum-home.go" }],
+  },
+  tablet: { title: "c.tablet.title", text: [{ key: "c.tablet.text" }], doc: { doc: { kind: "plaque", key: "c.tablet.plaque" } } },
+  chest: { title: "c.chest.title", text: [{ when: { all: ["meridian.chest.open"] }, key: "c.chest.open" }, { key: "c.chest.text" }] },
+  altar: { title: "c.altar.title", text: [{ key: "c.altar.text" }] },
   "pelagic-gate": { title: "c.pelagic-gate.title", text: [{ key: "c.pelagic-gate.text" }], actions: ageHome },
 };
 
@@ -173,6 +239,13 @@ export const ITEM_PLACES: Record<ItemId, { at: HotspotId; when: Cond }> = {
   can: { at: "cabinet", when: { all: ["verdant.index.open"] } },
   "seal-leaf": { at: "root-door", when: { all: ["verdant.door.open"] } },
   "memory-verdant": { at: "root-door", when: { all: ["verdant.door.open"] } },
+  // The Verdant lens is for the Meridian's vault: the optional secret that crosses between the two Ages.
+  "sun-lens": { at: "verdant-gate", when: {} },
+  "hand-mirror": { at: "altar", when: {} },
+  "engineer-note": { at: "chest", when: { all: ["meridian.chest.open"] } },
+  "seal-sun": { at: "chest", when: { all: ["meridian.chest.open"] } },
+  "memory-meridian": { at: "chest", when: { all: ["meridian.chest.open"] } },
+  "star-map": { at: "vault", when: { all: ["meridian.vault.lit"] } },
 };
 
 /** Using an item on a hotspot. */
@@ -188,6 +261,7 @@ export interface UseDef {
 export const USES: UseDef[] = [
   { item: "token", target: "stair-door", when: { none: ["stairs.open"] }, sets: ["stairs.open"], consumes: true, message: "msg.stairs", log: "log.stairs" },
   { item: "gear", target: "engine", when: { none: ["engine.geared"] }, sets: ["engine.geared"], consumes: true, message: "msg.gear", log: "log.gear" },
+  { item: "sun-lens", target: "vault", when: { none: ["meridian.vault.lit"] }, sets: ["meridian.vault.lit"], consumes: true, message: "msg.vault", log: "log.vault" },
 ];
 
 /** A lock: where it is, when it can be tried, and what it opens. Codes never leave the server. */
@@ -238,6 +312,18 @@ export const LOCKS: Record<LockId, LockDef> = {
     message: "msg.index",
     log: "log.index",
   },
+  // The hour the shadow really falls on; 08 is where the mirror shows it, 06 is how IV reads in a mirror.
+  dial: {
+    at: "chest",
+    kind: "digits",
+    length: 2,
+    label: "lock.dial",
+    when: { none: ["meridian.chest.open"] },
+    answers: [String(DIAL_HOUR).padStart(2, "0")],
+    sets: ["meridian.chest.open"],
+    message: "msg.dial",
+    log: "log.dial",
+  },
 };
 
 /**
@@ -252,6 +338,8 @@ export const HINT_PUZZLES: { id: string; place: LocationId; solved: Cond }[] = [
   { id: "gate", place: "chamber", solved: { all: ["crossed"] } },
   { id: "index", place: "verdant", solved: { all: ["verdant.index.open"] } },
   { id: "roots", place: "verdant", solved: { all: ["verdant.door.open"] } },
+  { id: "mirrors", place: "meridian", solved: { all: ["meridian.lit"] } },
+  { id: "dial", place: "sanctum", solved: { all: ["meridian.chest.open"] } },
 ];
 export const HINT_COOLDOWN_SEC = 60;
 
@@ -272,6 +360,8 @@ export function docFor(def: DocDef, T: (k: AtlasTextKey, v?: Record<string, stri
       };
     case "glyph":
       return { kind: "glyph", caption: T(def.caption), glyph: def.glyph };
+    case "mirrordial":
+      return { kind: "mirrordial", caption: T(def.caption), hour: def.hour };
     case "roots":
       return { kind: "roots", caption: T(def.caption), pots: ROOTS.pots, grafts: ROOTS.grafts, rows: ROOTS.rows, door: ROOTS.door };
   }

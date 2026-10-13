@@ -33,7 +33,7 @@ import {
 import type { SceneResult } from "../scene/registry";
 import { GATE_ORIGIN, GLYPH_VALUE, traverse } from "./router";
 import { atlasLines, atlasT, type AT, type AtlasTextKey } from "./text";
-import { docFor, HINT_COOLDOWN_SEC, HINT_PUZZLES, holds, HOTSPOTS, hotspotPlace, ITEM_PLACES, LOCKS, PLACE_NEEDS, ROOTS_ANSWER, USES } from "./world";
+import { docFor, HINT_COOLDOWN_SEC, HINT_PUZZLES, holds, HOTSPOTS, hotspotPlace, ITEM_PLACES, LOCKS, PLACE_NEEDS, PLAZA, ROOTS_ANSWER, traceBeam, USES } from "./world";
 
 /** A case-log line as stored: no words, so each viewer reads it in their own language. */
 interface StoredLog extends StoredLogBase {
@@ -45,7 +45,7 @@ interface StoredLog extends StoredLogBase {
 
 /** Locks that jam: the two padlocks and the gate (three misroutes in a row). */
 type JamId = LockId | "gate" | "roots";
-const JAM_IDS: JamId[] = ["clock", "engine", "index", "gate", "roots"];
+const JAM_IDS: JamId[] = ["clock", "engine", "index", "dial", "gate", "roots"];
 
 /** What an Atlas room stores in Room.scene. Shared by everyone in the room. */
 export interface AtlasScene {
@@ -91,17 +91,25 @@ const hasIn = (scene: AtlasScene) => (f: string) => scene.flags.includes(f);
 const reachable = (scene: AtlasScene, place: LocationId) => holds(PLACE_NEEDS[place], hasIn(scene));
 
 /** Long text on an item, shown once it's held. The numeral card is the team's permanent record of the glyphs. */
-function readingFor(id: ItemId, T: AT): AtlasItemDTO["reading"] {
+function readingFor(id: ItemId, T: AT, mirror: boolean): AtlasItemDTO["reading"] {
   if (id === "numerals") {
     const byValue = [...GLYPHS].sort((a, b) => GLYPH_VALUE[a.id] - GLYPH_VALUE[b.id]);
     return { title: T("item.numerals.title"), lines: byValue.map((g) => `${g.char} = ${GLYPH_VALUE[g.id]}`) };
   }
   if (id === "memory-verdant") return { title: T("item.memory-verdant.title"), lines: atlasLines(T, "item.memory-verdant.lines") };
+  if (id === "memory-meridian") return { title: T("item.memory-meridian.title"), lines: atlasLines(T, "item.memory-meridian.lines") };
+  // Mirror writing: each line runs backwards until the team has the hand mirror to read it in.
+  if (id === "engineer-note") {
+    const lines = atlasLines(T, "item.engineer-note.lines");
+    return mirror
+      ? { title: T("item.engineer-note.title"), lines: [...lines, "", T("item.engineer-note.mirrorHint")] }
+      : { title: Array.from(T("item.engineer-note.title")).reverse().join(""), lines: lines.map((l) => Array.from(l).reverse().join("")) };
+  }
   return undefined;
 }
 
-function itemDTO(id: ItemId, T: AT, held = false): AtlasItemDTO {
-  const reading = held ? readingFor(id, T) : undefined;
+function itemDTO(id: ItemId, T: AT, held = false, mirror = false): AtlasItemDTO {
+  const reading = held ? readingFor(id, T, mirror) : undefined;
   return { id, name: T(`item.${id}.name`), description: T(`item.${id}.desc`), ...(reading ? { reading } : {}) };
 }
 
@@ -140,6 +148,20 @@ function closeupDTO(h: HotspotId, scene: AtlasScene, T: AT, now: Date): AtlasClo
     c.gate = { powered: has("engine.on"), ...(until ? { jammedUntil: until } : {}) };
   }
   // With the can in hand, each pot can be watered until the right one opens the little door.
+  if (h === "mirrors") {
+    const back = PLAZA.mirrors.map((_, i) => has(`mirror.${i}`));
+    const beam = traceBeam(back);
+    c.mirrors = {
+      w: PLAZA.w,
+      h: PLAZA.h,
+      mirrors: PLAZA.mirrors.map(([x, y], i) => ({ x, y, back: back[i] })),
+      pillars: PLAZA.pillars,
+      door: PLAZA.door,
+      path: beam.path,
+      lit: has("meridian.lit"),
+    };
+    if (!has("meridian.lit")) c.lines.push(T("c.mirrors.tap"));
+  }
   if (h === "roots" && scene.inventory.includes("can") && !has("verdant.door.open")) {
     c.actions.push(...GLYPHS.map((g) => ({ op: `water:${g.id}`, label: T("c.roots.water", { glyph: g.char }) })));
   }
@@ -181,7 +203,7 @@ export function sceneDTO(scene: AtlasScene, opts: { startedAt?: Date; now?: Date
   }));
   return {
     flags: scene.flags,
-    inventory: scene.inventory.map((id) => itemDTO(id, T, true)),
+    inventory: scene.inventory.map((id) => itemDTO(id, T, true, scene.inventory.includes("hand-mirror"))),
     closeups,
     log,
     hints,
@@ -274,6 +296,7 @@ export function applyAction(
       if (!isHotspot(target) || !canReach(target)) return no("msg.cantReach");
       if (target === "valves" && (VALVES as string[]).includes(op)) return turnValve(op as ValveId);
       if (target === "roots" && op.startsWith("water:")) return waterPot(op.slice(6));
+      if (target === "mirrors" && op.startsWith("mirror:")) return tiltMirror(Number(op.slice(7)));
       return no("msg.nothing");
     }
 
@@ -311,6 +334,19 @@ export function applyAction(
     }
   }
   return no("msg.nothing");
+
+  /** The Meridian plaza: tilt one mirror. When the light lands on the sun door, the door opens for good. */
+  function tiltMirror(i: number): AtlasResult {
+    if (!Number.isInteger(i) || i < 0 || i >= PLAZA.mirrors.length) return no("msg.nothing");
+    if (has("meridian.lit")) return no("msg.mirrorsDone");
+    const flag = `mirror.${i}`;
+    if (has(flag)) clear((f) => f === flag);
+    else set(flag);
+    if (!traceBeam(PLAZA.mirrors.map((_, m) => has(`mirror.${m}`))).lit) return ok("msg.mirror");
+    set("meridian.lit");
+    log("log.lit");
+    return ok("msg.lit");
+  }
 
   /**
    * The Verdant roots: water one pot. The pot whose root (followed down through every graft) reaches the

@@ -55,6 +55,19 @@ export const SPOTS: Record<WallId, Spot[]> = {
     { id: "root-door", icon: "🚪", x: 100, y: 250, w: 100, h: 110 },
   ],
   "meridian-arrival": [{ id: "meridian-gate", icon: "☀", x: 60, y: 100, w: 180, h: 200 }],
+  "meridian-plaza": [
+    { id: "mirrors", icon: "🪞", x: 30, y: 60, w: 240, h: 160 },
+    { id: "sun-door", icon: "🌞", x: 160, y: 240, w: 110, h: 130 },
+    { id: "vault", icon: "🕳", x: 30, y: 250, w: 100, h: 100 },
+  ],
+  "sanctum-mirror": [
+    { id: "great-mirror", icon: "🪞", x: 70, y: 50, w: 160, h: 220 },
+    { id: "tablet", icon: "🪨", x: 90, y: 290, w: 120, h: 80 },
+  ],
+  "sanctum-study": [
+    { id: "chest", icon: "🧰", x: 40, y: 200, w: 120, h: 120 },
+    { id: "altar", icon: "🛐", x: 180, y: 160, w: 90, h: 120 },
+  ],
   "pelagic-arrival": [{ id: "pelagic-gate", icon: "🌊", x: 60, y: 100, w: 180, h: 200 }],
 };
 
@@ -65,5 +78,6 @@ export const PLACE_TINT: Record<string, string> = {
   chamber: "from-[#1d1a2b] to-[#0d0b16]",
   verdant: "from-[#13261a] to-[#08140c]",
   meridian: "from-[#2b2213] to-[#16100a]",
+  sanctum: "from-[#2b1d10] to-[#120a05]",
   pelagic: "from-[#0f1c2e] to-[#070d18]",
 };
