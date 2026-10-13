@@ -121,6 +121,8 @@ model CaseRecord {
   ending      String? // filled in once the vote resolves
   wasHost     Boolean
   playerCount Int
+  /// Badges the team earned in this case: "compass", "envelope" (Ada), "everyclue" (the train)
+  badges      String[] @default([])
   createdAt   DateTime @default(now())
 
   @@unique([userId, roomRef])
