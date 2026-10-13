@@ -12,14 +12,17 @@ export const FRAGMENT_TAGS: FragmentTag[] = ["name", "year", "id", "cipher", "ad
 function TagChips({
   value,
   onChange,
+  tags,
 }: {
   value: FragmentTag | null;
   onChange: (t: FragmentTag | null) => void;
+  tags: FragmentTag[];
 }) {
   const t = useT();
+  if (tags.length === 0) return null;
   return (
     <div className="flex flex-wrap gap-2" role="group" aria-label={t("apps.notes.tagGroup")}>
-      {FRAGMENT_TAGS.map((tag) => {
+      {tags.map((tag) => {
         const active = value === tag;
         return (
           <button
@@ -52,7 +55,8 @@ function TagBadge({ tag }: { tag: FragmentTag | null }) {
   );
 }
 
-export function NotesApp({ ctx }: { ctx: GameCtx }) {
+/** `tags`: the fragment tags offered when writing a note (Ada's case-file tags by default; none hides them). */
+export function NotesApp({ ctx, tags = FRAGMENT_TAGS }: { ctx: GameCtx; tags?: FragmentTag[] }) {
   const t = useT();
   const rel = useRelativeTime();
   const { state } = ctx;
@@ -156,7 +160,7 @@ export function NotesApp({ ctx }: { ctx: GameCtx }) {
             maxLength={2000}
             className="w-full resize-y rounded-lg border border-zinc-700 bg-zinc-900 p-3 text-base text-zinc-100 placeholder:text-zinc-500 focus:border-amber-500 focus:outline-none"
           />
-          <TagChips value={tag} onChange={setTag} />
+          <TagChips value={tag} onChange={setTag} tags={tags} />
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs text-zinc-500">{t("apps.notes.privateHint")}</span>
             <button className={btnPrimary} disabled={!body.trim() || busy === "create"} onClick={create}>
@@ -198,7 +202,7 @@ export function NotesApp({ ctx }: { ctx: GameCtx }) {
                       maxLength={2000}
                       className="w-full resize-y rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-base focus:border-amber-500 focus:outline-none"
                     />
-                    <TagChips value={editing.tag} onChange={(tag) => setEditing({ ...editing, tag })} />
+                    <TagChips value={editing.tag} onChange={(tag) => setEditing({ ...editing, tag })} tags={tags} />
                     <div className="flex gap-2">
                       <button className={btnPrimary} onClick={saveEdit} disabled={busy === `edit-${n.id}`}>
                         {t("apps.notes.save")}

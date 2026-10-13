@@ -11,6 +11,7 @@ import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
 import { Tour, type TourStep } from "@/components/shell/Tour";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
+import { NotebookSheet } from "@/components/scene/NotebookSheet";
 import { useT } from "@/i18n/client";
 import { Leaderboard } from "@/components/site/Leaderboard";
 import { CorridorArt, HOTSPOTS, WallArt } from "./walls";
@@ -45,6 +46,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   const [place, setPlace] = useState<TrainRoomId>("12b");
   const [wallIdxBy, setWallIdxBy] = useState<Record<"12b" | "dining", number>>({ "12b": 0, dining: 0 });
   const [notesOpen, setNotesOpen] = useState(false);
+  const [notebookOpen, setNotebookOpen] = useState(false);
   const [intro, setIntro] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [showSpots, setShowSpots] = useState(false);
@@ -208,6 +210,14 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               {place === "corridor" ? t("train.room.corridor") : t("train.title", { room: roomName, wall: t(`train.wall.${wall}`) })}
             </p>
           </div>
+          <button
+            type="button"
+            onClick={() => setNotebookOpen(true)}
+            aria-label={t("shell.app.notes")}
+            className="flex h-10 w-10 items-center justify-center rounded-md text-[#ecd27a] active:bg-[#3d2615]"
+          >
+            📝
+          </button>
           <button
             type="button"
             onClick={() => setNotesOpen(true)}
@@ -419,6 +429,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             }}
           />
         )}
+        {notebookOpen && <NotebookSheet ctx={ctx} onClose={() => setNotebookOpen(false)} closeLabel={t("train.close")} />}
         {notesOpen && <NotesSheet scene={scene} busy={busy} onClose={() => setNotesOpen(false)} onRing={() => void act({ type: "hint" })} />}
         {scene.vote && !scene.ending && <VotePanel state={state} scene={scene} busy={busy} act={act} />}
         {scene.ending && <EndingPanel scene={scene} code={code} />}
@@ -464,7 +475,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             }}
           />
         )}
-        <Toasts items={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} placement={closeup || itemOpen || roomOpen ? "top" : "bottom"} />
+        <Toasts items={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} placement={closeup || itemOpen || roomOpen || notebookOpen ? "top" : "bottom"} />
       </div>
     </GameContext.Provider>
   );
