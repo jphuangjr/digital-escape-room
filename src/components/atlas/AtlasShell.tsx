@@ -17,6 +17,7 @@ import { WallArt, type WallState } from "./art";
 import { AtlasItemIcon } from "./items";
 import { SPOTS } from "./walls";
 import { AtlasNotebook, useDockedNotes, useSeenClues } from "./notebook";
+import { isLetter, LetterCard, lettersHeld } from "./story";
 
 /**
  * The room screen for The Atlas of Silent Worlds (staging): one illustrated wall at a time, tap to look closer, a shared inventory, the Atlas of places reached. Where each player stands is their own;
@@ -138,10 +139,29 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
     },
     [setPlace],
   );
+  // ---------- the Cartographers' letters ----------
+  // Whoever picks one up reads it at once; everyone else is told and can open it.
+  const [letterOpen, setLetterOpen] = useState<ItemId | null>(null);
+  const tookLetter = useRef<ItemId | null>(null);
+  const knownLetters = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    const held = scene.inventory.filter((i) => isLetter(i.id)).map((i) => i.id);
+    if (knownLetters.current) {
+      for (const id of held) {
+        if (knownLetters.current.has(id)) continue;
+        if (tookLetter.current === id) setLetterOpen(id);
+        else toast(t("atlas.story.found"), "success", { label: t("atlas.story.read"), onClick: () => setLetterOpen(id) });
+      }
+    }
+    knownLetters.current = new Set(held);
+  }, [scene.inventory, toast, t]);
+
   const act = useCallback(
     async (action: AtlasSceneAction) => {
       if (busy) return null;
       setBusy(true);
+      // Flagged before sending: the room's live update can arrive before this response does.
+      if (action.type === "take" && isLetter(action.item)) tookLetter.current = action.item;
       const res = await apiFetch<AtlasActionResponse>(code, "/scene", { method: "POST", body: action });
       setBusy(false);
       const data = res.data;
@@ -309,6 +329,13 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
           </Sheet>
         )}
         {notesOpen && <NotesSheet scene={scene} here={here} busy={busy} onClose={() => setNotesOpen(false)} onAsk={() => void act({ type: "hint", where: here })} />}
+        {letterOpen && scene.inventory.some((i) => i.id === letterOpen && i.reading) && (
+          <LetterCard
+            letter={scene.inventory.find((i) => i.id === letterOpen)!}
+            held={lettersHeld(scene.inventory).length}
+            onClose={() => setLetterOpen(null)}
+          />
+        )}
         {placesOpen && <PlacesSheet scene={scene} here={here} onClose={() => setPlacesOpen(false)} onGo={go} />}
         {scene.vote && !scene.ending && <VotePanel state={state} scene={scene} busy={busy} act={act} />}
         {scene.ending && <EndingPanel scene={scene} code={code} />}
