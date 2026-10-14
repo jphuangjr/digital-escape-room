@@ -44,7 +44,7 @@ const en = {
   "item.engineer-note.log": "the engineer's note",
   "item.engineer-note.title": "Ring notes, E. Halloran",
   "item.engineer-note.lines":
-    "For whoever keeps the gates after me.{N}Each gate has its own number: the Observatory's is nothing. Start from it.{N}The outer ring is geared double: every glyph you turn it to counts twice.{N}The inner ring counts once.{N}Add them up and count round the seven sockets, and you have where the gate will open.{N}— E. Halloran, engineer",
+    "For whoever keeps the gates after me.\nEach gate has its own number: the Observatory's is nothing. Start from it.\nThe outer ring is geared double: every glyph you turn it to counts twice.\nThe inner ring counts once.\nAdd them up and count round the seven sockets, and you have where the gate will open.\n— E. Halloran, engineer",
   "item.engineer-note.mirrorHint": "(Held up to the hand mirror, it reads the right way round.)",
   "item.seal-sun.name": "Seal of the Sun",
   "item.seal-sun.desc": "A heavy disc of yellow stone, carved with a sunburst. Round and flat, about the size of a socket.",
@@ -54,7 +54,7 @@ const en = {
   "item.memory-meridian.log": "a sun-bleached letter",
   "item.memory-meridian.title": "From Corin Ashe, cartographer",
   "item.memory-meridian.lines":
-    "Ilse writes that the network is folding the worlds together. She is wrong, and I have told her so.{N}Every place we have joined was one place once. The sand here and the soil in her glasshouse are the same soil. The tide in the Library is the tide that drowned this city. We are not folding anything: we are mending a map that was torn long before us.{N}The Meridian's sun has not moved in a year. Ilse calls that a warning. I call it a clock that has finally found the right time.{N}— C. A.",
+    "Ilse writes that the network is folding the worlds together. She is wrong, and I have told her so.\nEvery place we have joined was one place once. The sand here and the soil in her glasshouse are the same soil. The tide in the Library is the tide that drowned this city. We are not folding anything: we are mending a map that was torn long before us.\nThe Meridian's sun has not moved in a year. Ilse calls that a warning. I call it a clock that has finally found the right time.\n— C. A.",
   "item.star-map.name": "The first map",
   "item.star-map.desc": "A sheet of beaten gold from the sunken vault, engraved with every Age, joined by lines to the Observatory and to nothing else.",
   "item.star-map.log": "the first map",
