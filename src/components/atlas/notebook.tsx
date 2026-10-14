@@ -8,6 +8,7 @@ import { NotesApp } from "@/components/apps/NotesApp";
 import { useT } from "@/i18n/client";
 import { AtlasDocView } from "./parts";
 import { AtlasItemIcon } from "./items";
+import { isLetter, LETTERS, lettersHeld, LetterView } from "./story";
 
 /**
  * The player's notebook for The Atlas of Silent Worlds: "Clues", which keeps everything they've read (each close-up
@@ -97,10 +98,14 @@ function Clues({ scene, seen, current }: { scene: AtlasSceneDTO; seen: HotspotId
       const c = scene.closeups[h];
       return c && (c.doc || c.lines.length > 0) ? [{ id: h, place: placeOf(h), c }] : [];
     });
-  const readable = scene.inventory.filter((i) => i.reading);
-  const places = scene.places.filter((p) => clues.some((c) => c.place === p.id));
+  // The story first: the Cartographers' letters, and Corin's last page once it's been read.
+  const letters = lettersHeld(scene.inventory);
+  const lectern = clues.find((c) => c.id === "lectern");
+  const placeClues = clues.filter((c) => c.id !== "lectern");
+  const readable = scene.inventory.filter((i) => i.reading && !isLetter(i.id));
+  const places = scene.places.filter((p) => placeClues.some((c) => c.place === p.id));
 
-  if (clues.length === 0 && readable.length === 0) return <p className="px-4 py-4 text-sm text-stone-400">{t("atlas.notebook.empty")}</p>;
+  if (clues.length === 0 && readable.length === 0 && letters.length === 0) return <p className="px-4 py-4 text-sm text-stone-400">{t("atlas.notebook.empty")}</p>;
   const row = (key: string, title: React.ReactNode, body: React.ReactNode) => (
     <li key={key} className="rounded-lg border border-[#1f3640] bg-[#0b161b]">
       <button
@@ -119,6 +124,38 @@ function Clues({ scene, seen, current }: { scene: AtlasSceneDTO; seen: HotspotId
   );
   return (
     <div className="h-full space-y-3 overflow-y-auto px-3 pb-3 pt-2">
+      {(letters.length > 0 || lectern) && (
+        <section>
+          <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-[#d8b56a]">
+            {t("atlas.notebook.story", { n: letters.length, total: LETTERS.length })}
+          </h3>
+          <ul className="space-y-1.5">
+            {letters.map((l) =>
+              row(
+                `letter:${l.id}`,
+                <span className="flex items-center gap-2">
+                  <AtlasItemIcon id={l.id} className="h-6 w-6 shrink-0" />
+                  {l.reading!.title}
+                </span>,
+                <LetterView letter={l} />,
+              ),
+            )}
+            {lectern &&
+              row(
+                "lectern",
+                lectern.c.title,
+                <>
+                  {lectern.c.lines.map((line, i) => (
+                    <p key={i} className="text-[14px] leading-relaxed text-stone-300">
+                      {line}
+                    </p>
+                  ))}
+                  {lectern.c.doc && <AtlasDocView doc={lectern.c.doc} />}
+                </>,
+              )}
+          </ul>
+        </section>
+      )}
       {readable.length > 0 && (
         <section>
           <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("atlas.notebook.things")}</h3>
@@ -140,7 +177,7 @@ function Clues({ scene, seen, current }: { scene: AtlasSceneDTO; seen: HotspotId
         <section key={p.id}>
           <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{p.name}</h3>
           <ul className="space-y-1.5">
-            {clues
+            {placeClues
               .filter((c) => c.place === p.id)
               .map(({ id, c }) =>
                 row(
