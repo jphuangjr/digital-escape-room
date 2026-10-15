@@ -192,7 +192,7 @@ Glyph values (taught in the Verdant Archive, server only): ☾ 0, ◈ 1, ≈ 2, 
 2. Atlas added to `GAMES` as `staging`; router and tests; Act I playable with placeholder art. **Done.**
 3. One PR per Age. Verdant Archive, Sunken Meridian and Pelagic Library **done**.
 4. Null Cathedral, endings, leaderboard and case records. **Done.**
-5. Art pass. **Done** (`src/components/atlas/art.tsx`: every wall drawn in SVG and reacting to the room's state; `items.tsx`: every item drawn).
+5. Art pass. **Done** (`src/components/atlas/art/`: every wall drawn in SVG, one module per place on a shared kit of light, texture and ambient motion, reacting to the room's state; `items.tsx`: every item drawn; `sound.ts`: a Web Audio soundscape per place).
 6. Playtests, using the stuck-puzzle analytics to tune timing and hints. **Instrumented**: every scene action
    records story flags reached (with minutes from the room's start), lock guesses, hints and the ending; admins
    see the funnel, where unfinished rooms gave up, hint-heavy puzzles and lock accuracy under Admin → Playtest

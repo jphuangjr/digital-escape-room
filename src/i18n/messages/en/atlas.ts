@@ -93,6 +93,8 @@ const messages = {
   "atlas.useHere": "Use something here",
   "atlas.useTip": "To use a thing, open what you want to use it on and pick it there.",
   "atlas.close": "Close",
+  "atlas.mute": "Turn sound off",
+  "atlas.unmute": "Turn sound on",
   "atlas.notebook.title": "Notebook",
   "atlas.notebook.toggle": "Notes",
   "atlas.notebook.clues": "Clues",

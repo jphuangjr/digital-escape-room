@@ -272,6 +272,83 @@ button {
   to { opacity: 0; transform: scale(2.6); visibility: hidden; pointer-events: none; }
 }
 
+/* ---------- The Atlas of Silent Worlds (src/components/atlas/art) ----------
+   Ambient life on the walls. Durations and delays are set per element; the reduced-motion rule above stills them. */
+.at-mote { animation: at-mote 14s ease-in-out infinite; transform-box: fill-box; }
+@keyframes at-mote {
+  0%, 100% { transform: translate(0, 0); opacity: 0.2; }
+  25% { transform: translate(5px, -7px); opacity: 0.9; }
+  50% { transform: translate(-3px, -12px); opacity: 0.5; }
+  75% { transform: translate(-6px, -4px); opacity: 0.85; }
+}
+.at-rain { animation: at-rain 1.2s linear infinite; }
+@keyframes at-rain {
+  from { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 0.6; }
+  to { transform: translate(-6px, var(--fall, 120px)); opacity: 0; }
+}
+.at-bubble { animation: at-bubble 8s ease-in infinite; transform-box: fill-box; }
+@keyframes at-bubble {
+  from { transform: translate(0, 0); opacity: 0; }
+  10% { opacity: 0.8; }
+  50% { transform: translate(3px, calc(var(--rise, -120px) / 2)); }
+  to { transform: translate(-2px, var(--rise, -120px)); opacity: 0; }
+}
+.at-sand { animation: at-sand 6s linear infinite; }
+@keyframes at-sand {
+  from { transform: translateX(-40px); opacity: 0; }
+  20%, 80% { opacity: 0.55; }
+  to { transform: translateX(60px); opacity: 0; }
+}
+.at-flicker { animation: at-flicker 3.2s ease-in-out infinite; }
+@keyframes at-flicker {
+  0%, 100% { opacity: 0.9; }
+  20% { opacity: 1; }
+  35% { opacity: 0.75; }
+  55% { opacity: 0.95; }
+  70% { opacity: 0.82; }
+}
+.at-flame { animation: at-flame 1.6s ease-in-out infinite; }
+@keyframes at-flame {
+  0%, 100% { transform: scale(1, 1) skewX(0deg); }
+  30% { transform: scale(0.94, 1.08) skewX(-3deg); }
+  60% { transform: scale(1.05, 0.95) skewX(2deg); }
+}
+.at-breathe { animation: at-breathe 7s ease-in-out infinite; }
+@keyframes at-breathe {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+.at-shimmer { animation: at-shimmer 5s ease-in-out infinite; }
+@keyframes at-shimmer {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(6px); }
+}
+.at-spin { animation: at-spin 30s linear infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes at-spin { to { transform: rotate(360deg); } }
+.at-sway { animation: at-sway 6s ease-in-out infinite; transform-box: fill-box; transform-origin: bottom center; }
+@keyframes at-sway {
+  0%, 100% { transform: rotate(-1.5deg); }
+  50% { transform: rotate(1.5deg); }
+}
+/* A wall fades in when you turn to it or arrive; a place's name drifts in and out on arrival. */
+.at-enter { animation: at-enter 0.45s ease-out both; }
+@keyframes at-enter {
+  from { opacity: 0; filter: brightness(0.6); }
+  to { opacity: 1; filter: none; }
+}
+.at-arrive { animation: at-arrive 2.6s ease-in-out both; }
+@keyframes at-arrive {
+  0% { opacity: 0; transform: translateY(-6px); }
+  18%, 75% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+.at-pulse { animation: at-pulse 3.6s ease-in-out infinite; }
+@keyframes at-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
 /* ---------- The Nightingale Express (src/components/train) ---------- */
 .nx-rain path {
   animation: nx-rain 0.9s linear infinite;
