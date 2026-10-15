@@ -63,7 +63,7 @@ export const GAMES: GameInfo[] = [
     duration: "90–120 min",
     difficulty: "Hard",
     tone: "Atmospheric mystery",
-    status: "staging",
+    status: "live",
     href: "/play/atlas-silent-worlds",
   },
 ];

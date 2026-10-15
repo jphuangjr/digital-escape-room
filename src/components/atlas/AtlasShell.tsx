@@ -21,8 +21,8 @@ import { isLetter, LetterCard, lettersHeld } from "./story";
 import { AtlasAmbience, setSoundPreferred, soundPreferred } from "./sound";
 
 /**
- * The room screen for The Atlas of Silent Worlds (staging): one illustrated wall at a time, tap to look closer, a shared inventory, the Atlas of places reached. Where each player stands is their own;
- * everything found or opened is shared with the room. English only while in staging.
+ * The room screen for The Atlas of Silent Worlds: one illustrated wall at a time, tap to look closer, a shared inventory, the Atlas of places reached. Where each player stands is their own;
+ * everything found or opened is shared with the room. English only until it is translated.
  */
 
 const PRESENCE_MS = 15_000;

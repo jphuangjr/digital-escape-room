@@ -14,7 +14,7 @@ premise, same portal rule, cut down to about two hours of play.
 | Players | Solo or up to 8 |
 | Duration | 90–120 min |
 | Difficulty | Hard |
-| Status | `staging` until playtested |
+| Status | `live` (released from staging 2026-10-15; English only until step 7) |
 
 ## Decisions
 - Built on the **shared scene engine** extracted from The Nightingale Express (walls, hotspots, close-ups, shared
