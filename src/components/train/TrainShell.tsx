@@ -46,6 +46,19 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   const [place, setPlace] = useState<TrainRoomId>("12b");
   const [wallIdxBy, setWallIdxBy] = useState<Record<"12b" | "dining", number>>({ "12b": 0, dining: 0 });
   const [notesOpen, setNotesOpen] = useState(false);
+  // The things tray opens from its tab; a dot on the tab says something new arrived while it was shut.
+  const [itemsOpen, setItemsOpenRaw] = useState(false);
+  const [newItems, setNewItems] = useState(false);
+  const setItemsOpen = (open: boolean) => {
+    setItemsOpenRaw(open);
+    if (open) setNewItems(false);
+  };
+  const heldCount = scene.inventory.length;
+  const itemCount = useRef<number | null>(null);
+  useEffect(() => {
+    if (itemCount.current !== null && heldCount > itemCount.current && !itemsOpen) setNewItems(true);
+    itemCount.current = heldCount;
+  }, [heldCount, itemsOpen]);
   const [notebookOpen, setNotebookOpen] = useState(false);
   const [intro, setIntro] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
@@ -212,45 +225,12 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
           </div>
           <button
             type="button"
-            onClick={() => setNotebookOpen(true)}
-            aria-label={t("shell.app.notes")}
-            className="flex h-10 w-10 items-center justify-center rounded-md text-[#ecd27a] active:bg-[#3d2615]"
-          >
-            📝
-          </button>
-          <button
-            type="button"
-            onClick={() => setNotesOpen(true)}
-            aria-label={t("train.hintsAria")}
-            data-tour="nx-hints"
-            className="relative flex h-10 w-10 items-center justify-center rounded-md text-[#ecd27a] active:bg-[#3d2615]"
-          >
-            🛎
-            {scene.nextHint && !scene.nextHint.readyAt && scene.hints.length === 0 && (
-              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#ecd27a]" aria-hidden />
-            )}
-          </button>
-          <button
-            type="button"
             onClick={toggleSound}
             aria-pressed={soundOn}
             aria-label={soundOn ? t("train.mute") : t("train.unmute")}
             className="flex h-10 w-10 items-center justify-center rounded-md text-[#ecd27a] active:bg-[#3d2615]"
           >
             {soundOn ? "🔊" : "🔇"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setRoomOpen(true)}
-            data-tour="nx-room"
-            className="relative flex h-10 items-center gap-1.5 rounded-md border border-[#c9a227]/50 px-3 text-sm text-[#ecd27a] active:bg-[#3d2615]"
-          >
-            {t("train.roomButton", { count: state.players.filter((p) => p.online).length })}
-            {chat.unread > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-bold text-white">
-                {chat.unread}
-              </span>
-            )}
           </button>
         </header>
 
@@ -364,24 +344,58 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
           )}
         </main>
 
-        {/* inventory */}
-        <footer data-tour="nx-things" className="shrink-0 border-t border-[#3d2615] bg-[#1b120b] px-2 pt-1.5" style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}>
-          <p className="px-1 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("train.things")}</p>
-          <div className="flex min-h-16 gap-1.5 overflow-x-auto py-1">
-            {scene.inventory.length === 0 && <p className="self-center px-1 text-sm text-stone-500">{t("train.thingsEmpty")}</p>}
-            {scene.inventory.map((it) => (
-              <button
-                key={it.id}
-                type="button"
-                onClick={() => setItemOpen(it.id)}
-                className="relative flex w-16 shrink-0 flex-col items-center rounded-lg border border-[#3d2615] bg-[#24160c] px-1 py-1 active:border-[#c9a227]"
-              >
-                <ItemIcon id={it.id} className="h-9 w-9" />
-                <span className="mt-0.5 line-clamp-1 text-[10px] text-stone-300">{it.name}</span>
-                {it.evidence && <span className="absolute right-0.5 top-0.5 text-[10px]" aria-label={t("train.evidence")}>🔍</span>}
-              </button>
-            ))}
-          </div>
+        {/* the tab bar, with the team's things in a tray above it */}
+        <footer className="shrink-0 border-t border-[#3d2615] bg-[#1b120b]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+          {itemsOpen && (
+            <div id="nx-items" className="at-tray border-b border-[#3d2615] px-2 pt-1.5">
+              <p className="px-1 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("train.things")}</p>
+              <div className="flex min-h-16 gap-1.5 overflow-x-auto py-1">
+                {scene.inventory.length === 0 && <p className="self-center px-1 text-sm text-stone-500">{t("train.thingsEmpty")}</p>}
+                {scene.inventory.map((it) => (
+                  <button
+                    key={it.id}
+                    type="button"
+                    onClick={() => setItemOpen(it.id)}
+                    className="relative flex w-16 shrink-0 flex-col items-center rounded-lg border border-[#3d2615] bg-[#24160c] px-1 py-1 active:border-[#c9a227]"
+                  >
+                    <ItemIcon id={it.id} className="h-9 w-9" />
+                    <span className="mt-0.5 line-clamp-1 text-[10px] text-stone-300">{it.name}</span>
+                    {it.evidence && <span className="absolute right-0.5 top-0.5 text-[10px]" aria-label={t("train.evidence")}>🔍</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          <nav className="grid grid-cols-4" aria-label={t("train.tab.aria")}>
+            <TabButton
+              icon="🧳"
+              label={t("train.tab.items")}
+              tour="nx-things"
+              active={itemsOpen}
+              aria-expanded={itemsOpen}
+              aria-controls="nx-items"
+              onClick={() => setItemsOpen(!itemsOpen)}
+              badge={scene.inventory.length > 0 ? String(scene.inventory.length) : undefined}
+              dot={newItems}
+            />
+            <TabButton icon="📝" label={t("train.tab.notes")} onClick={() => setNotebookOpen(true)} />
+            <TabButton
+              icon="🛎"
+              label={t("train.tab.hints")}
+              tour="nx-hints"
+              aria-label={t("train.hintsAria")}
+              onClick={() => setNotesOpen(true)}
+              dot={Boolean(scene.nextHint && !scene.nextHint.readyAt && scene.hints.length === 0)}
+            />
+            <TabButton
+              icon="👥"
+              label={t("train.roomButton", { count: state.players.filter((p) => p.online).length })}
+              tour="nx-room"
+              onClick={() => setRoomOpen(true)}
+              badge={chat.unread > 0 ? String(chat.unread) : undefined}
+              alert={chat.unread > 0}
+            />
+          </nav>
         </footer>
 
         {closeup && (
@@ -836,5 +850,55 @@ function IntroCard({ onClose }: { onClose: () => void }) {
         </button>
       </div>
     </div>
+  );
+}
+
+/** One tab in the bottom bar: an icon over a short label, with an optional count and a "something new" dot. */
+function TabButton({
+  icon,
+  label,
+  onClick,
+  active,
+  badge,
+  dot,
+  alert,
+  tour,
+  ...aria
+}: {
+  icon: string;
+  label: string;
+  onClick: () => void;
+  active?: boolean;
+  badge?: string;
+  dot?: boolean;
+  alert?: boolean;
+  /** The guided tour's name for this control. */
+  tour?: string;
+  "aria-label"?: string;
+  "aria-expanded"?: boolean;
+  "aria-controls"?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      data-tour={tour}
+      {...aria}
+      className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 active:bg-[#3d2615] ${active ? "bg-[#24160c] text-[#ecd27a]" : "text-stone-300"}`}
+    >
+      {active && <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-[#c9a227]" aria-hidden />}
+      <span className="relative text-lg leading-none" aria-hidden>
+        {icon}
+        {badge && (
+          <span
+            className={`absolute -right-3 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold ${alert ? "bg-red-600 text-white" : "bg-[#c9a227] text-[#1b120b]"}`}
+          >
+            {badge}
+          </span>
+        )}
+        {dot && <span className={`absolute -top-0.5 h-2 w-2 rounded-full bg-[#ecd27a] ${badge ? "-left-1.5" : "-right-1.5"}`} />}
+      </span>
+      <span className="max-w-full truncate text-[11px] leading-tight">{label}</span>
+    </button>
   );
 }
