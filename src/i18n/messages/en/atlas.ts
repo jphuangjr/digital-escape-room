@@ -1,5 +1,5 @@
-// The Atlas of Silent Worlds (staging): interface strings. Story text comes from the server
-// (src/server/atlas/text). Other languages reuse these until the game leaves staging.
+// The Atlas of Silent Worlds: interface strings. Story text comes from the server
+// (src/server/atlas/text). Other languages reuse these until it is translated.
 const messages = {
   "atlas.loading": "The sound of water wakes you…",
   "atlas.title": "{place} · {wall}",

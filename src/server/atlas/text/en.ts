@@ -1,5 +1,5 @@
-// Every word players read in The Atlas of Silent Worlds that comes from the server. English only while the
-// game is in staging; other languages fall back to these. Keys are referenced from ../world.ts.
+// Every word players read in The Atlas of Silent Worlds that comes from the server. English only for now;
+// other languages fall back to these. Keys are referenced from ../world.ts.
 const en = {
   // ---------- places ----------
   "place.observatory": "The Observatory",
