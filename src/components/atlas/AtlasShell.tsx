@@ -18,6 +18,7 @@ import { AtlasItemIcon } from "./items";
 import { SPOTS } from "./walls";
 import { AtlasNotebook, useDockedNotes, useSeenClues } from "./notebook";
 import { isLetter, LetterCard, lettersHeld } from "./story";
+import { AtlasAmbience, setSoundPreferred, soundPreferred } from "./sound";
 
 /**
  * The room screen for The Atlas of Silent Worlds (staging): one illustrated wall at a time, tap to look closer, a shared inventory, the Atlas of places reached. Where each player stands is their own;
@@ -84,6 +85,43 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
   const wallIdx = (wallIdxBy[here] ?? 0) % walls.length;
   const wall = walls[wallIdx];
   const placeName = scene.places.find((p) => p.id === here)?.name ?? "";
+
+  // ---------- sound: one soundscape per place, started on the first tap ----------
+  const ambience = useRef<AtlasAmbience | null>(null);
+  const [soundOn, setSoundOn] = useState(true);
+  useEffect(() => {
+    setSoundOn(soundPreferred());
+    ambience.current = new AtlasAmbience();
+    const first = () => {
+      if (soundPreferred()) ambience.current?.start();
+    };
+    window.addEventListener("pointerdown", first, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", first);
+      ambience.current?.stop();
+    };
+  }, []);
+  useEffect(() => ambience.current?.setPlace(here), [here]);
+  const toggleSound = () => {
+    const next = !soundOn;
+    setSoundOn(next);
+    setSoundPreferred(next);
+    if (next) ambience.current?.start();
+    else ambience.current?.stop();
+  };
+
+  // ---------- arriving somewhere: the place's name, briefly ----------
+  const [arrival, setArrival] = useState<string | null>(null);
+  const lastPlace = useRef<LocationId | null>(null);
+  useEffect(() => {
+    if (lastPlace.current && lastPlace.current !== here) {
+      setArrival(placeName);
+      const id = setTimeout(() => setArrival(null), 2600);
+      lastPlace.current = here;
+      return () => clearTimeout(id);
+    }
+    lastPlace.current = here;
+  }, [here, placeName]);
 
   const toast = useCallback<GameCtx["toast"]>((msg, tone = "info", action) => {
     const id = ++toastId.current;
@@ -207,6 +245,15 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
           <p className="min-w-0 flex-1 truncate font-serif text-base text-[#f4e7b5]">{t("atlas.title", { place: placeName, wall: t(`atlas.wall.${wall}`) })}</p>
           <button
             type="button"
+            onClick={toggleSound}
+            aria-pressed={soundOn}
+            aria-label={soundOn ? t("atlas.mute") : t("atlas.unmute")}
+            className="flex h-10 w-9 items-center justify-center rounded-md text-sm active:bg-[#1f3640]"
+          >
+            {soundOn ? "🔊" : "🔇"}
+          </button>
+          <button
+            type="button"
             onClick={() => setNotebookOpen(true)}
             aria-label={t("atlas.notebook.title")}
             className="flex h-10 w-10 items-center justify-center rounded-md active:bg-[#1f3640]"
@@ -254,7 +301,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
             if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - s.y) * 1.5) turn(dx < 0 ? 1 : -1);
           }}
         >
-          <div className="relative aspect-[3/4] h-full max-h-full max-w-full">
+          <div key={`${here}:${wall}`} className="at-enter relative aspect-[3/4] h-full max-h-full max-w-full">
             <WallArt
               wall={wall}
               state={wallState}
@@ -295,6 +342,11 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
                 ))}
               </div>
             </>
+          )}
+          {arrival && (
+            <div className="at-arrive pointer-events-none absolute inset-x-0 top-6 flex justify-center" aria-hidden>
+              <p className="rounded-full bg-black/55 px-5 py-2 font-serif text-xl tracking-wide text-[#f4e7b5] shadow-lg">{arrival}</p>
+            </div>
           )}
         </main>
 

@@ -331,6 +331,18 @@ button {
   0%, 100% { transform: rotate(-1.5deg); }
   50% { transform: rotate(1.5deg); }
 }
+/* A wall fades in when you turn to it or arrive; a place's name drifts in and out on arrival. */
+.at-enter { animation: at-enter 0.45s ease-out both; }
+@keyframes at-enter {
+  from { opacity: 0; filter: brightness(0.6); }
+  to { opacity: 1; filter: none; }
+}
+.at-arrive { animation: at-arrive 2.6s ease-in-out both; }
+@keyframes at-arrive {
+  0% { opacity: 0; transform: translateY(-6px); }
+  18%, 75% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
 .at-pulse { animation: at-pulse 3.6s ease-in-out infinite; }
 @keyframes at-pulse {
   0%, 100% { opacity: 0.55; }
