@@ -39,6 +39,19 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
   const [itemOpen, setItemOpen] = useState<ItemId | null>(null);
   const [notesOpen, setNotesOpen] = useState(false);
   const [notebookOpen, setNotebookOpen] = useState(false);
+  // The items tray opens from its tab; a dot on the tab says something new arrived while it was shut.
+  const [itemsOpen, setItemsOpenRaw] = useState(false);
+  const [newItems, setNewItems] = useState(false);
+  const setItemsOpen = (open: boolean) => {
+    setItemsOpenRaw(open);
+    if (open) setNewItems(false);
+  };
+  const itemCount = useRef<number | null>(null);
+  const heldCount = scene.inventory.length;
+  useEffect(() => {
+    if (itemCount.current !== null && heldCount > itemCount.current && !itemsOpen) setNewItems(true);
+    itemCount.current = heldCount;
+  }, [heldCount, itemsOpen]);
   const [notesDocked, setNotesDocked] = useDockedNotes();
   const { seen, mark: markSeen } = useSeenClues(code);
   // Everything this player reads goes into their notebook's Clues.
@@ -252,42 +265,6 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
           >
             {soundOn ? "🔊" : "🔇"}
           </button>
-          <button
-            type="button"
-            onClick={() => setNotebookOpen(true)}
-            aria-label={t("atlas.notebook.title")}
-            className="flex h-10 w-10 items-center justify-center rounded-md active:bg-[#1f3640]"
-          >
-            📝
-          </button>
-          <button
-            type="button"
-            onClick={() => setNotesOpen(true)}
-            aria-label={t("atlas.notesAria")}
-            className="relative flex h-10 w-10 items-center justify-center rounded-md active:bg-[#1f3640]"
-          >
-            📜
-            {nextHint && !nextHint.readyAt && scene.hints.length === 0 && <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#f4e7b5]" aria-hidden />}
-          </button>
-          <button
-            type="button"
-            onClick={() => setPlacesOpen(true)}
-            className="flex h-10 items-center rounded-md border border-[#9fd3c7]/40 px-2.5 text-sm text-[#9fd3c7] active:bg-[#1f3640]"
-          >
-            {t("atlas.places")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setRoomOpen(true)}
-            className="relative flex h-10 items-center rounded-md border border-[#d8b56a]/50 px-2.5 text-sm text-[#f4e7b5] active:bg-[#1f3640]"
-          >
-            {t("atlas.roomButton", { count: state.players.filter((p) => p.online).length })}
-            {chat.unread > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-bold text-white">
-                {chat.unread}
-              </span>
-            )}
-          </button>
         </header>
 
         <main
@@ -350,14 +327,46 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
           )}
         </main>
 
-        <footer className="shrink-0 border-t border-[#1f3640] bg-[#0b161b] px-2 pt-1.5" style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}>
-          <p className="px-1 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("atlas.things")}</p>
-          <div className="flex min-h-16 gap-1.5 overflow-x-auto py-1">
-            {scene.inventory.length === 0 && <p className="self-center px-1 text-sm text-stone-500">{t("atlas.thingsEmpty")}</p>}
-            {scene.inventory.map((it) => (
-              <ItemTile key={it.id} item={it} onClick={() => setItemOpen(it.id)} />
-            ))}
-          </div>
+        <footer className="shrink-0 border-t border-[#1f3640] bg-[#0b161b]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+          {itemsOpen && (
+            <div id="atlas-items" className="at-tray border-b border-[#1f3640] px-2 pt-1.5">
+              <p className="px-1 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("atlas.things")}</p>
+              <div className="flex min-h-16 gap-1.5 overflow-x-auto py-1">
+                {scene.inventory.length === 0 && <p className="self-center px-1 text-sm text-stone-500">{t("atlas.thingsEmpty")}</p>}
+                {scene.inventory.map((it) => (
+                  <ItemTile key={it.id} item={it} onClick={() => setItemOpen(it.id)} />
+                ))}
+              </div>
+            </div>
+          )}
+          <nav className="grid grid-cols-5" aria-label={t("atlas.tab.aria")}>
+            <TabButton
+              icon="🎒"
+              label={t("atlas.tab.items")}
+              active={itemsOpen}
+              aria-expanded={itemsOpen}
+              aria-controls="atlas-items"
+              onClick={() => setItemsOpen(!itemsOpen)}
+              badge={scene.inventory.length > 0 ? String(scene.inventory.length) : undefined}
+              dot={newItems}
+            />
+            <TabButton icon="📝" label={t("atlas.tab.notebook")} onClick={() => setNotebookOpen(true)} />
+            <TabButton
+              icon="📜"
+              label={t("atlas.tab.hints")}
+              aria-label={t("atlas.notesAria")}
+              onClick={() => setNotesOpen(true)}
+              dot={Boolean(nextHint && !nextHint.readyAt && scene.hints.length === 0)}
+            />
+            <TabButton icon="🧭" label={t("atlas.places")} onClick={() => setPlacesOpen(true)} />
+            <TabButton
+              icon="👥"
+              label={t("atlas.roomButton", { count: state.players.filter((p) => p.online).length })}
+              onClick={() => setRoomOpen(true)}
+              badge={chat.unread > 0 ? String(chat.unread) : undefined}
+              alert={chat.unread > 0}
+            />
+          </nav>
         </footer>
 
         {closeup && (
@@ -405,6 +414,53 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
         <Toasts items={toasts} onDismiss={(id) => setToasts((ts) => ts.filter((x) => x.id !== id))} placement={closeup || itemOpen || roomOpen || notebookOpen ? "top" : "bottom"} />
       </div>
     </GameContext.Provider>
+  );
+}
+
+/** One tab in the bottom bar: an icon over a short label, with an optional count and a "something new" dot. */
+function TabButton({
+  icon,
+  label,
+  onClick,
+  active,
+  badge,
+  dot,
+  alert,
+  ...aria
+}: {
+  icon: string;
+  label: string;
+  onClick: () => void;
+  active?: boolean;
+  badge?: string;
+  dot?: boolean;
+  alert?: boolean;
+  "aria-label"?: string;
+  "aria-expanded"?: boolean;
+  "aria-controls"?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      {...aria}
+      className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 active:bg-[#1f3640] ${active ? "bg-[#0f2129] text-[#f4e7b5]" : "text-stone-300"}`}
+    >
+      {active && <span className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-[#d8b56a]" aria-hidden />}
+      <span className="relative text-lg leading-none" aria-hidden>
+        {icon}
+        {badge && (
+          <span
+            className={`absolute -right-3 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold ${alert ? "bg-red-600 text-white" : "bg-[#d8b56a] text-[#14110a]"}`}
+          >
+            {badge}
+          </span>
+        )}
+        {dot && !badge && <span className="absolute -right-1.5 -top-0.5 h-2 w-2 rounded-full bg-[#f4e7b5]" />}
+        {dot && badge && <span className="absolute -left-1.5 -top-0.5 h-2 w-2 rounded-full bg-[#f4e7b5]" />}
+      </span>
+      <span className="max-w-full truncate text-[11px] leading-tight">{label}</span>
+    </button>
   );
 }
 
