@@ -343,6 +343,12 @@ button {
   18%, 75% { opacity: 1; transform: none; }
   100% { opacity: 0; }
 }
+/* The items tray slides up from the tab bar. */
+.at-tray { animation: at-tray 0.2s ease-out both; }
+@keyframes at-tray {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
 .at-pulse { animation: at-pulse 3.6s ease-in-out infinite; }
 @keyframes at-pulse {
   0%, 100% { opacity: 0.55; }
