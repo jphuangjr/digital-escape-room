@@ -118,6 +118,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
       ambience.current?.stop();
     };
   }, []);
+  useEffect(() => ambience.current?.setPlace(place), [place]);
   const toggleSound = () => {
     const next = !soundOn;
     setSoundOn(next);
