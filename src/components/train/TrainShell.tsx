@@ -11,12 +11,12 @@ import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
 import { Tour, type TourStep } from "@/components/shell/Tour";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
-import { NotebookSheet } from "@/components/scene/NotebookSheet";
 import { useT } from "@/i18n/client";
 import { Leaderboard } from "@/components/site/Leaderboard";
 import { CorridorArt, WallArt } from "./walls";
 import { CloseupDocView, ItemIcon, ItemReading, LockDial } from "./parts";
 import { setSoundPreferred, soundPreferred, TrainAmbience } from "./sound";
+import { TrainNotebook, useDockedNotes, useSeenClues } from "./notebook";
 
 /**
  * The room screen for The Nightingale Express (staging): one illustrated wall at a time, tap to look
@@ -69,6 +69,12 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
     return () => clearTimeout(id);
   }, [showSpots]);
   const [closeup, setCloseup] = useState<HotspotId | null>(null);
+  // The notebook: everything this player reads goes into its Clues; it can stay docked beside close-ups.
+  const [notesDocked, setNotesDocked] = useDockedNotes();
+  const { seen, mark: markSeen } = useSeenClues(code);
+  useEffect(() => {
+    if (closeup) markSeen(closeup);
+  }, [closeup, markSeen]);
   const [itemOpen, setItemOpen] = useState<ItemId | null>(null);
   const [busy, setBusy] = useState(false);
   const [shake, setShake] = useState(false);
@@ -123,6 +129,18 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   // ---------- presence ----------
   const view = place === "corridor" ? "train:corridor" : `train:${wall}`;
   const roomName = t(place === "dining" ? "train.room.dining" : "train.room.12b");
+  // Moving between carriages: the new one's name, briefly.
+  const [arrival, setArrival] = useState<string | null>(null);
+  const lastPlace = useRef<TrainRoomId | null>(null);
+  useEffect(() => {
+    if (lastPlace.current && lastPlace.current !== place) {
+      setArrival(t(`train.room.${place}`));
+      const id = setTimeout(() => setArrival(null), 2600);
+      lastPlace.current = place;
+      return () => clearTimeout(id);
+    }
+    lastPlace.current = place;
+  }, [place, t]);
   const viewRef = useRef(view);
   useEffect(() => {
     viewRef.current = view;
@@ -246,7 +264,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - s.y) * 1.5) turn(dx < 0 ? 1 : -1);
           }}
         >
-          <div className="relative aspect-[3/4] h-full max-h-full max-w-full" data-tour="nx-wall">
+          <div key={place === "corridor" ? "corridor" : `${place}:${wall}`} className="at-enter relative aspect-[3/4] h-full max-h-full max-w-full" data-tour="nx-wall">
             {place === "corridor" ? (
               <CorridorArt onDining={() => setPlace("dining")} />
             ) : (
@@ -342,6 +360,11 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               </div>
             </>
           )}
+          {arrival && (
+            <div className="at-arrive pointer-events-none absolute inset-x-0 top-6 flex justify-center" aria-hidden>
+              <p className="rounded-full bg-black/60 px-5 py-2 font-serif text-xl tracking-wide text-[#ecd27a] shadow-lg">{arrival}</p>
+            </div>
+          )}
         </main>
 
         {/* the tab bar, with the team's things in a tray above it */}
@@ -410,6 +433,9 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               setCloseup(null);
               setPlace("corridor");
             }}
+            notes={notesDocked ? <TrainNotebook ctx={ctx} scene={scene} seen={seen} current={closeup} /> : null}
+            notesOn={notesDocked}
+            onNotes={() => setNotesDocked(!notesDocked)}
           />
         )}
         {itemOpen && (
@@ -425,7 +451,11 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             }}
           />
         )}
-        {notebookOpen && <NotebookSheet ctx={ctx} onClose={() => setNotebookOpen(false)} closeLabel={t("train.close")} />}
+        {notebookOpen && (
+          <Sheet title={t("train.notebook.title")} onClose={() => setNotebookOpen(false)} tall bare>
+            <TrainNotebook ctx={ctx} scene={scene} seen={seen} />
+          </Sheet>
+        )}
         {notesOpen && <NotesSheet scene={scene} busy={busy} onClose={() => setNotesOpen(false)} onRing={() => void act({ type: "hint" })} />}
         {scene.vote && !scene.ending && <VotePanel state={state} scene={scene} busy={busy} act={act} />}
         {scene.ending && <EndingPanel scene={scene} code={code} />}
@@ -477,28 +507,66 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   );
 }
 
-function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+/**
+ * A bottom sheet. `side` docks a second panel (the notebook) under it on phones and beside it on wider screens, so
+ * a clue can stay in view while a lock is worked.
+ */
+function Sheet({
+  title,
+  onClose,
+  children,
+  side,
+  headerExtra,
+  tall,
+  bare,
+}: {
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+  side?: React.ReactNode;
+  headerExtra?: React.ReactNode;
+  /** Full height even when the content is short (the notebook). */
+  tall?: boolean;
+  /** No padding or scrolling of its own: the child manages both. */
+  bare?: boolean;
+}) {
   const t = useT();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+  const panel = (
+    <div
+      className={`relative flex min-h-0 w-full flex-col overflow-hidden bg-[#1b120b] ${side ? "flex-1 md:w-auto" : `max-w-md rounded-t-2xl border-t border-[#c9a227]/40 ${tall ? "h-[86dvh]" : "max-h-[86dvh]"}`}`}
+      style={side ? undefined : { paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+    >
+      <div className="flex items-center gap-2 px-4 pt-3">
+        <h2 className="min-w-0 flex-1 font-serif text-xl text-[#ecd27a]">{title}</h2>
+        {headerExtra}
+        <button onClick={onClose} aria-label={t("train.close")} className="flex h-10 w-10 items-center justify-center rounded-md text-stone-400 active:bg-[#3d2615]">
+          <CloseIcon className="h-5 w-5" />
+        </button>
+      </div>
+      <div className={bare ? "min-h-0 flex-1" : "min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-2 pt-2"}>{children}</div>
+    </div>
+  );
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={title}>
       <button aria-label={t("train.close")} className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div
-        className="relative flex max-h-[86dvh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border-t border-[#c9a227]/40 bg-[#1b120b]"
-        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
-      >
-        <div className="flex items-center gap-2 px-4 pt-3">
-          <h2 className="min-w-0 flex-1 font-serif text-xl text-[#ecd27a]">{title}</h2>
-          <button onClick={onClose} aria-label={t("train.close")} className="flex h-10 w-10 items-center justify-center rounded-md text-stone-400 active:bg-[#3d2615]">
-            <CloseIcon className="h-5 w-5" />
-          </button>
+      {side ? (
+        <div
+          className="relative flex h-[94dvh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border-t border-[#c9a227]/40 bg-[#1b120b] md:h-[86dvh] md:max-w-4xl md:flex-row"
+          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        >
+          {panel}
+          <aside aria-label={t("train.notebook.title")} className="flex h-[42%] min-h-0 shrink-0 flex-col border-t border-[#c9a227]/50 bg-[#120c07] md:h-auto md:w-[44%] md:border-l md:border-t-0">
+            {side}
+          </aside>
         </div>
-        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-2 pt-2">{children}</div>
-      </div>
+      ) : (
+        <div className="relative flex w-full justify-center">{panel}</div>
+      )}
     </div>
   );
 }
@@ -511,6 +579,9 @@ function CloseupSheet({
   onClose,
   act,
   goCorridor,
+  notes,
+  notesOn,
+  onNotes,
 }: {
   id: HotspotId;
   scene: SceneDTO;
@@ -519,12 +590,31 @@ function CloseupSheet({
   onClose: () => void;
   act: (a: SceneAction) => Promise<SceneActionResponse | null>;
   goCorridor: () => void;
+  /** The docked notebook, when it's on. */
+  notes: React.ReactNode;
+  notesOn: boolean;
+  onNotes: () => void;
 }) {
   const t = useT();
   const c = scene.closeups[id];
   if (!c) return null;
   return (
-    <Sheet title={c.title} onClose={onClose}>
+    <Sheet
+      title={c.title}
+      onClose={onClose}
+      side={notes}
+      headerExtra={
+        <button
+          type="button"
+          onClick={onNotes}
+          aria-pressed={notesOn}
+          className={`flex h-10 items-center gap-1 rounded-md border px-2.5 text-sm ${notesOn ? "border-[#c9a227] bg-[#3d2615] text-[#ecd27a]" : "border-[#c9a227]/40 text-[#e9d9a6]"} active:bg-[#3d2615]`}
+        >
+          <span aria-hidden>📝</span>
+          {t("train.notebook.toggle")}
+        </button>
+      }
+    >
       {c.doc && <CloseupDocView doc={c.doc} />}
       {c.lines.map((l, i) => (
         <p key={i} className="text-[15px] leading-relaxed text-stone-200">
