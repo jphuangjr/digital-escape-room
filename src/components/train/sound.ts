@@ -1,8 +1,11 @@
 "use client";
 
+import type { TrainRoomId } from "@/lib/train/types";
+
 /**
  * Ambient sound for the train: rain on the window and the wheels over the rail joints, generated
- * with Web Audio (no audio files). Browsers only allow sound after a tap, so `start()` is called from
+ * with Web Audio (no audio files), mixed for where the player stands: the wheels louder in the corridor
+ * (nearer the bogies, with a draught at the windows), the rain muffled and a murmur of diners in the dining car. Browsers only allow sound after a tap, so `start()` is called from
  * a user gesture; the player's mute choice is remembered per device.
  */
 
@@ -40,6 +43,10 @@ export class TrainAmbience {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private clack: ReturnType<typeof setInterval> | null = null;
+  private clink: ReturnType<typeof setTimeout> | null = null;
+  private place: TrainRoomId = "12b";
+  /** The layers each carriage mixes differently. */
+  private mix: { rumble: GainNode; rain: GainNode; clack: GainNode; draught: GainNode; murmur: GainNode } | null = null;
 
   get running() {
     return this.ctx !== null;
@@ -67,6 +74,8 @@ export class TrainAmbience {
     const rumbleGain = ctx.createGain();
     rumbleGain.gain.value = 0.55;
     rumble.connect(rumbleLp).connect(rumbleGain).connect(master);
+    const clackBus = ctx.createGain();
+    clackBus.connect(master);
     rumble.start();
 
     // Rain against the glass.
@@ -95,7 +104,7 @@ export class TrainAmbience {
       g.gain.setValueAtTime(0, at);
       g.gain.linearRampToValueAtTime(level, at + 0.005);
       g.gain.exponentialRampToValueAtTime(0.001, at + 0.11);
-      src.connect(bp).connect(g).connect(master);
+      src.connect(bp).connect(g).connect(clackBus);
       src.start(at);
       src.stop(at + 0.13);
     };
@@ -106,11 +115,105 @@ export class TrainAmbience {
     };
     bar();
     this.clack = setInterval(bar, 1150);
+
+    // A draught whistling past the corridor windows.
+    const draught = ctx.createBufferSource();
+    draught.buffer = noiseBuffer(ctx, 3);
+    draught.loop = true;
+    const draughtBp = ctx.createBiquadFilter();
+    draughtBp.type = "bandpass";
+    draughtBp.frequency.value = 900;
+    draughtBp.Q.value = 2.5;
+    const draughtLfo = ctx.createOscillator();
+    draughtLfo.frequency.value = 0.08;
+    const draughtDepth = ctx.createGain();
+    draughtDepth.gain.value = 300;
+    draughtLfo.connect(draughtDepth).connect(draughtBp.frequency);
+    draughtLfo.start();
+    const draughtGain = ctx.createGain();
+    draughtGain.gain.value = 0;
+    draught.connect(draughtBp).connect(draughtGain).connect(master);
+    draught.start();
+
+    // The dining car's low murmur of voices.
+    const murmur = ctx.createBufferSource();
+    murmur.buffer = noiseBuffer(ctx, 4, true);
+    murmur.loop = true;
+    const murmurBp = ctx.createBiquadFilter();
+    murmurBp.type = "bandpass";
+    murmurBp.frequency.value = 420;
+    murmurBp.Q.value = 1.4;
+    const murmurLfo = ctx.createOscillator();
+    murmurLfo.frequency.value = 0.35;
+    const murmurDepth = ctx.createGain();
+    murmurDepth.gain.value = 120;
+    murmurLfo.connect(murmurDepth).connect(murmurBp.frequency);
+    murmurLfo.start();
+    const murmurGain = ctx.createGain();
+    murmurGain.gain.value = 0;
+    murmur.connect(murmurBp).connect(murmurGain).connect(master);
+    murmur.start();
+
+    this.mix = { rumble: rumbleGain, rain: rainGain, clack: clackBus, draught: draughtGain, murmur: murmurGain };
+    this.applyMix(true);
+    this.scheduleClink();
+  }
+
+  /** Mix for where the player is standing (kept and applied on start when sound is off). */
+  setPlace(place: TrainRoomId) {
+    this.place = place;
+    this.applyMix(false);
+  }
+
+  private applyMix(now: boolean) {
+    const ctx = this.ctx;
+    if (!ctx || !this.mix) return;
+    const levels: Record<TrainRoomId, { rumble: number; rain: number; clack: number; draught: number; murmur: number }> = {
+      "12b": { rumble: 0.55, rain: 0.06, clack: 1, draught: 0, murmur: 0 },
+      corridor: { rumble: 0.7, rain: 0.045, clack: 1.45, draught: 0.05, murmur: 0 },
+      dining: { rumble: 0.42, rain: 0.03, clack: 0.65, draught: 0, murmur: 0.09 },
+    };
+    const target = levels[this.place];
+    const at = ctx.currentTime;
+    for (const k of Object.keys(target) as (keyof typeof target)[]) {
+      const g = this.mix[k].gain;
+      g.cancelScheduledValues(at);
+      if (now) g.setValueAtTime(target[k], at);
+      else {
+        g.setValueAtTime(g.value, at);
+        g.linearRampToValueAtTime(target[k], at + 1.5);
+      }
+    }
+  }
+
+  /** Now and then in the dining car, glass or cutlery clinks. */
+  private scheduleClink() {
+    this.clink = setTimeout(() => {
+      const ctx = this.ctx;
+      if (!ctx || !this.master) return;
+      if (this.place === "dining") {
+        const at = ctx.currentTime + 0.02;
+        const o = ctx.createOscillator();
+        o.type = "sine";
+        o.frequency.value = 2600 + Math.random() * 2200;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0, at);
+        g.gain.linearRampToValueAtTime(0.025, at + 0.004);
+        g.gain.exponentialRampToValueAtTime(0.0005, at + 0.35);
+        o.connect(g).connect(this.master);
+        o.start(at);
+        o.stop(at + 0.4);
+      }
+      this.scheduleClink();
+    }, 2500 + Math.random() * 6000);
   }
 
   stop() {
     if (this.clack) clearInterval(this.clack);
     this.clack = null;
+    if (this.clink) clearTimeout(this.clink);
+    this.clink = null;
+    this.mix = null;
     const ctx = this.ctx;
     this.ctx = null;
     this.master = null;
