@@ -14,7 +14,7 @@ premise, same portal rule, cut down to about two hours of play.
 | Players | Solo or up to 8 |
 | Duration | 90–120 min |
 | Difficulty | Hard |
-| Status | `live` (released from staging 2026-10-15; English only until step 7) |
+| Status | `live` (released from staging 2026-10-15), in all six languages |
 
 ## Decisions
 - Built on the **shared scene engine** extracted from The Nightingale Express (walls, hotspots, close-ups, shared
@@ -197,4 +197,4 @@ Glyph values (taught in the Verdant Archive, server only): ☾ 0, ◈ 1, ≈ 2, 
    records story flags reached (with minutes from the room's start), lock guesses, hints and the ending; admins
    see the funnel, where unfinished rooms gave up, hint-heavy puzzles and lock accuracy under Admin → Playtest
    (`/api/admin/playtest?game=…`, `src/server/playtest.ts`). Tune from that once a few teams have played.
-7. The five other languages, once the English text stops changing.
+7. The five other languages. **Done** (Spanish, Japanese, Korean, Traditional Chinese, Brazilian Portuguese: `src/server/atlas/text/<locale>.ts` for the story, `src/i18n/messages/<locale>/atlas.ts` for the interface; `__tests__/text.test.ts` keeps every language's placeholders, line breaks and glyph answers in step with English).

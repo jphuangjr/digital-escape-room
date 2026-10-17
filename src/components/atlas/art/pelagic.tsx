@@ -491,6 +491,9 @@ export function PelagicAirlock({ s }: { s: WallState }) {
 
 export function ArchiveHall({ s }: { s: WallState }) {
   const etching = useT()("atlas.art.glassEtching");
+  // Fit the etching to the pane (about 104 wide) in any language: CJK characters are about a full em, others about 0.6.
+  const ems = Array.from(etching).reduce((n, c) => n + (/[\u2e80-\u9fff\uac00-\ud7af\u3000-\u30ff]/.test(c) ? 1 : 0.6), 0);
+  const etchSize = Math.min(12, 104 / Math.max(ems, 1));
   const read = s.flags.includes("pelagic.glass.read");
   return (
     <>
@@ -583,7 +586,7 @@ export function ArchiveHall({ s }: { s: WallState }) {
         <Kelp x={166} y={322} h={46} lean={-1} color="#2f6a44" delay={-2.5} />
         <Kelp x={262} y={322} h={80} lean={-1} color="#245a3a" delay={-4} />
       </g>
-      <text x="210" y="230" textAnchor="middle" fontSize="12" fill="#e9fffa" opacity="0.4" transform="translate(420 0) scale(-1 1)">
+      <text x="210" y="230" textAnchor="middle" fontSize={etchSize} fill="#e9fffa" opacity="0.4" transform="translate(420 0) scale(-1 1)">
         {etching}
       </text>
       {read && <rect x="196" y="290" width="40" height="18" fill="#2a1a10" stroke={BRASS} />}
