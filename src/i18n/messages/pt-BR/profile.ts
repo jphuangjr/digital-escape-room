@@ -63,15 +63,14 @@ const messages: Record<keyof typeof en, string> = {
   "profile.ach.nx-thief.how": "Descubra o verdadeiro ladrão do Expresso Nightingale.",
   "profile.ach.nx-every-clue.name": "Todas as pistas",
   "profile.ach.nx-every-clue.how": "Encontre as seis provas antes de tocar o sino.",
-  // The Atlas is in staging, English only for now.
-  "profile.ach.atlas-escaped.name": "Worlds decided",
-  "profile.ach.atlas-escaped.how": "Reach the Atlas Core and decide the fate of the Silent Worlds.",
-  "profile.ach.atlas-secrets.name": "Every secret",
-  "profile.ach.atlas-secrets.how": "Find all three cross-Age secrets in The Atlas of Silent Worlds.",
-  "profile.ach.atlas-reroute.name": "The third way",
-  "profile.ach.atlas-reroute.how": "Reroute every gate to the Observatory: the ending only the secrets unlock.",
-  "profile.ach.atlas-every-ending.name": "Every road",
-  "profile.ach.atlas-every-ending.how": "Restore, Sever and Reroute: see all three of the Atlas's endings.",
+  "profile.ach.atlas-escaped.name": "Mundos decididos",
+  "profile.ach.atlas-escaped.how": "Chegue ao Núcleo do Atlas e decida o destino dos Mundos Silenciosos.",
+  "profile.ach.atlas-secrets.name": "Todos os segredos",
+  "profile.ach.atlas-secrets.how": "Encontre os três segredos que ligam as Eras no Atlas dos Mundos Silenciosos.",
+  "profile.ach.atlas-reroute.name": "O terceiro caminho",
+  "profile.ach.atlas-reroute.how": "Redirecione todos os portais para o Observatório: o final que só os segredos desbloqueiam.",
+  "profile.ach.atlas-every-ending.name": "Todos os caminhos",
+  "profile.ach.atlas-every-ending.how": "Restaurar, Romper e Redirecionar: veja os três finais do Atlas.",
 };
 
 export default messages;
