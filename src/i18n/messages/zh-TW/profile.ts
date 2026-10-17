@@ -63,15 +63,14 @@ const messages: Record<keyof typeof en, string> = {
   "profile.ach.nx-thief.how": "在夜鶯號快車上指認出真正的竊賊。",
   "profile.ach.nx-every-clue.name": "鉅細靡遺",
   "profile.ach.nx-every-clue.how": "在按鈴前找齊全部六項證據。",
-  // The Atlas is in staging, English only for now.
-  "profile.ach.atlas-escaped.name": "Worlds decided",
-  "profile.ach.atlas-escaped.how": "Reach the Atlas Core and decide the fate of the Silent Worlds.",
-  "profile.ach.atlas-secrets.name": "Every secret",
-  "profile.ach.atlas-secrets.how": "Find all three cross-Age secrets in The Atlas of Silent Worlds.",
-  "profile.ach.atlas-reroute.name": "The third way",
-  "profile.ach.atlas-reroute.how": "Reroute every gate to the Observatory: the ending only the secrets unlock.",
-  "profile.ach.atlas-every-ending.name": "Every road",
-  "profile.ach.atlas-every-ending.how": "Restore, Sever and Reroute: see all three of the Atlas's endings.",
+  "profile.ach.atlas-escaped.name": "諸界已定",
+  "profile.ach.atlas-escaped.how": "抵達地圖集核心，決定寂靜諸界的命運。",
+  "profile.ach.atlas-secrets.name": "祕密無遺",
+  "profile.ach.atlas-secrets.how": "在寂靜諸界地圖集中，找出全部三個跨紀元的祕密。",
+  "profile.ach.atlas-reroute.name": "第三條路",
+  "profile.ach.atlas-reroute.how": "讓每座界門都改道通往天文台：唯有祕密才能解鎖的結局。",
+  "profile.ach.atlas-every-ending.name": "條條道路",
+  "profile.ach.atlas-every-ending.how": "修復、斬斷、改道：看遍地圖集的全部三種結局。",
 };
 
 export default messages;

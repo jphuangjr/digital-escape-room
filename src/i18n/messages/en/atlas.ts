@@ -1,6 +1,15 @@
-// The Atlas of Silent Worlds: interface strings. Story text comes from the server
-// (src/server/atlas/text). Other languages reuse these until it is translated.
+// The Atlas of Silent Worlds: interface strings. Story text comes from the server (src/server/atlas/text).
 const messages = {
+  // The directory card (src/lib/games.ts reads these by id).
+  "site.game.atlas-silent-worlds.title": "The Atlas of Silent Worlds",
+  "site.game.atlas-silent-worlds.tagline": "The doors beneath the Observatory lead somewhere else.",
+  "site.game.atlas-silent-worlds.blurb": "You wake in a deserted observatory on an unmapped island. Beneath it, ancient doorways called Thresholds open onto other worlds, and someone fragmented the network on purpose. Learn the rule that governs the gates, and decide what to do with what you find.",
+  "site.game.atlas-silent-worlds.players": "Solo or up to 8",
+  "site.game.atlas-silent-worlds.duration": "90–120 min",
+  "site.game.atlas-silent-worlds.difficulty": "Hard",
+  "site.game.atlas-silent-worlds.tone": "Atmospheric mystery",
+  // Etched on the archive hall's glass wall, drawn mirror-reversed; c.glass.read and msg.glass (server text) quote it.
+  "atlas.art.glassEtching": "PULL THE THIRD TILE",
   "atlas.loading": "The sound of water wakes you…",
   "atlas.title": "{place} · {wall}",
   "atlas.wall.telescope": "Telescope",

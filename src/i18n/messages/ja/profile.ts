@@ -63,15 +63,14 @@ const messages: Record<keyof typeof en, string> = {
   "profile.ach.nx-thief.how": "ナイチンゲール急行の真犯人を指名してください。",
   "profile.ach.nx-every-clue.name": "証拠コンプリート",
   "profile.ach.nx-every-clue.how": "ベルを鳴らす前に6つの証拠をすべて見つけてください。",
-  // The Atlas is in staging, English only for now.
-  "profile.ach.atlas-escaped.name": "Worlds decided",
-  "profile.ach.atlas-escaped.how": "Reach the Atlas Core and decide the fate of the Silent Worlds.",
-  "profile.ach.atlas-secrets.name": "Every secret",
-  "profile.ach.atlas-secrets.how": "Find all three cross-Age secrets in The Atlas of Silent Worlds.",
-  "profile.ach.atlas-reroute.name": "The third way",
-  "profile.ach.atlas-reroute.how": "Reroute every gate to the Observatory: the ending only the secrets unlock.",
-  "profile.ach.atlas-every-ending.name": "Every road",
-  "profile.ach.atlas-every-ending.how": "Restore, Sever and Reroute: see all three of the Atlas's endings.",
+  "profile.ach.atlas-escaped.name": "世界の行く末",
+  "profile.ach.atlas-escaped.how": "アトラスの核にたどり着き、沈黙の世界の運命を決めてください。",
+  "profile.ach.atlas-secrets.name": "すべての秘密",
+  "profile.ach.atlas-secrets.how": "『沈黙の世界のアトラス』で、異界をまたぐ三つの秘密をすべて見つけてください。",
+  "profile.ach.atlas-reroute.name": "第三の道",
+  "profile.ach.atlas-reroute.how": "すべての門を天文台へ結び直してください。秘密を集めた者だけが開ける結末です。",
+  "profile.ach.atlas-every-ending.name": "すべての道",
+  "profile.ach.atlas-every-ending.how": "復元、断絶、再編。アトラスの三つのエンディングをすべて見てください。",
 };
 
 export default messages;

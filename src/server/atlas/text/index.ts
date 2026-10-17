@@ -1,12 +1,16 @@
 import "server-only";
 import type { Locale } from "@/i18n/config";
 import en from "./en";
+import es from "./es";
+import ja from "./ja";
+import ko from "./ko";
+import ptBR from "./pt-BR";
+import zhTW from "./zh-TW";
 
 export type AtlasTextKey = keyof typeof en;
-export type AtlasText = Partial<Record<AtlasTextKey, string>>;
+export type AtlasText = Record<AtlasTextKey, string>;
 
-/** Translations arrive once the English text settles (docs/ATLAS.md, build order); until then, English. */
-const TEXT: Partial<Record<Locale, AtlasText>> = { en };
+const TEXT: Record<Locale, AtlasText> = { en, ko, "zh-TW": zhTW, es, ja, "pt-BR": ptBR };
 
 /** `T(key, values)`: a story string in the player's language (English if missing). */
 export function atlasT(loc: Locale) {

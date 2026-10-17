@@ -63,15 +63,14 @@ const messages: Record<keyof typeof en, string> = {
   "profile.ach.nx-thief.how": "나이팅게일 익스프레스의 진짜 도둑을 지목하세요.",
   "profile.ach.nx-every-clue.name": "단서 완전 수집",
   "profile.ach.nx-every-clue.how": "벨을 울리기 전에 증거 여섯 개를 모두 찾으세요.",
-  // The Atlas is in staging, English only for now.
-  "profile.ach.atlas-escaped.name": "Worlds decided",
-  "profile.ach.atlas-escaped.how": "Reach the Atlas Core and decide the fate of the Silent Worlds.",
-  "profile.ach.atlas-secrets.name": "Every secret",
-  "profile.ach.atlas-secrets.how": "Find all three cross-Age secrets in The Atlas of Silent Worlds.",
-  "profile.ach.atlas-reroute.name": "The third way",
-  "profile.ach.atlas-reroute.how": "Reroute every gate to the Observatory: the ending only the secrets unlock.",
-  "profile.ach.atlas-every-ending.name": "Every road",
-  "profile.ach.atlas-every-ending.how": "Restore, Sever and Reroute: see all three of the Atlas's endings.",
+  "profile.ach.atlas-escaped.name": "세계의 운명",
+  "profile.ach.atlas-escaped.how": "아틀라스 코어에 이르러 침묵하는 세계들의 운명을 결정하세요.",
+  "profile.ach.atlas-secrets.name": "모든 비밀",
+  "profile.ach.atlas-secrets.how": "침묵하는 세계의 아틀라스에서 시대를 넘나드는 비밀 세 가지를 모두 찾으세요.",
+  "profile.ach.atlas-reroute.name": "세 번째 길",
+  "profile.ach.atlas-reroute.how": "모든 관문을 천문대로 재편하세요. 비밀을 모두 찾아야만 열리는 엔딩이에요.",
+  "profile.ach.atlas-every-ending.name": "모든 갈림길",
+  "profile.ach.atlas-every-ending.how": "복원, 단절, 재편. 아틀라스의 엔딩 세 가지를 모두 보세요.",
 };
 
 export default messages;
