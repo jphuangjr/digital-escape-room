@@ -1,3 +1,4 @@
+import { useT } from "@/i18n/client";
 import type { ReactNode } from "react";
 import { BRASS, BRASS_DK, BRASS_HI, Bubbles, Caustics, Dust, FloorShade, Glint, GlyphRing, Grain, LightPool, Mottle, Shadow, Vignette, seeded, type WallState } from "./common";
 // ---------------------------------------------------------------- the Pelagic Library
@@ -489,6 +490,7 @@ export function PelagicAirlock({ s }: { s: WallState }) {
 }
 
 export function ArchiveHall({ s }: { s: WallState }) {
+  const etching = useT()("atlas.art.glassEtching");
   const read = s.flags.includes("pelagic.glass.read");
   return (
     <>
@@ -582,7 +584,7 @@ export function ArchiveHall({ s }: { s: WallState }) {
         <Kelp x={262} y={322} h={80} lean={-1} color="#245a3a" delay={-4} />
       </g>
       <text x="210" y="230" textAnchor="middle" fontSize="12" fill="#e9fffa" opacity="0.4" transform="translate(420 0) scale(-1 1)">
-        PULL THE THIRD TILE
+        {etching}
       </text>
       {read && <rect x="196" y="290" width="40" height="18" fill="#2a1a10" stroke={BRASS} />}
       <rect x="150" y="150" width="120" height="170" fill="none" stroke="#7a8a8c" strokeWidth="4" />
