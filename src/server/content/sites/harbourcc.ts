@@ -125,6 +125,10 @@ function course(x: X): SitePage {
   });
 }
 
+/** 2⁰ to 2⁷ for the lesson's table (8 bits, as real computers use). */
+const SUPERSCRIPT = ["⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷"];
+const POWER_ROWS: string[][] = SUPERSCRIPT.map((sup, n) => [`2${sup}`, n === 0 ? "1" : Array(n).fill("2").join(" × "), String(2 ** n)]);
+
 const SHEET_ROWS: string[][] = Array.from({ length: 26 }, (_, i) => [
   String.fromCharCode(65 + i),
   String(i + 1),
@@ -147,16 +151,71 @@ function lesson(x: X, progress: RoomProgress): SitePage {
         "pt-BR": "Computadores só têm dois dedos: um interruptor está desligado (0) ou ligado (1). Então, em vez de contar de dez em dez, eles contam de dois em dois.",
       }),
     },
+    { type: "heading", level: 2, text: x({ en: "How binary works", ko: "이진법은 어떻게 작동할까", "zh-TW": "二進位怎麼運作", es: "Cómo funciona el binario", ja: "2進数のしくみ", "pt-BR": "Como o binário funciona" }) },
+    {
+      type: "paragraph",
+      text: x({
+        en: "You already know place values from ordinary numbers. In 345, the 5 means 5 ones, the 4 means 4 tens and the 3 means 3 hundreds. Each place is worth ten times the place to its right: 1, 10, 100, 1,000. Written as powers of ten, that's 10⁰, 10¹, 10², 10³.",
+        ko: "자릿값은 평소에 쓰는 숫자에서 이미 알고 있어요. 345에서 5는 일이 5개, 4는 십이 4개, 3은 백이 3개라는 뜻이죠. 각 자리는 바로 오른쪽 자리의 10배입니다: 1, 10, 100, 1,000. 10의 거듭제곱으로 쓰면 10⁰, 10¹, 10², 10³이에요.",
+        "zh-TW": "位值你其實早就懂了，平常用的數字就是這樣。在 345 裡，5 代表 5 個一，4 代表 4 個十，3 代表 3 個百。每一位都是右邊那一位的十倍：1、10、100、1,000。寫成 10 的次方，就是 10⁰、10¹、10²、10³。",
+        es: "Ya conoces los valores posicionales de los números de siempre. En 345, el 5 significa 5 unidades, el 4 significa 4 decenas y el 3 significa 3 centenas. Cada posición vale diez veces la de su derecha: 1, 10, 100, 1000. Escrito como potencias de diez: 10⁰, 10¹, 10², 10³.",
+        ja: "位の値は、ふだん使っている数でもうおなじみです。345 なら、5 は「1が5つ」、4 は「10が4つ」、3 は「100が3つ」という意味です。どの位も、すぐ右の位の10倍の値になっています：1、10、100、1,000。10の累乗で書くと 10⁰、10¹、10²、10³ です。",
+        "pt-BR": "Você já conhece valores posicionais dos números do dia a dia. Em 345, o 5 significa 5 unidades, o 4 significa 4 dezenas e o 3 significa 3 centenas. Cada posição vale dez vezes a posição à sua direita: 1, 10, 100, 1.000. Em potências de dez: 10⁰, 10¹, 10², 10³.",
+      }),
+    },
+    {
+      type: "paragraph",
+      text: x({
+        en: "Binary works exactly the same way, except each place is worth two times the place to its right. Reading from the right, the places are 2⁰, 2¹, 2², 2³, 2⁴, and so on: 1, 2, 4, 8, 16. Any number to the power of 0 is 1, so the rightmost place is always the ones.",
+        ko: "이진법도 똑같이 작동해요. 다만 각 자리가 바로 오른쪽 자리의 2배라는 점만 다릅니다. 오른쪽부터 읽으면 자리는 2⁰, 2¹, 2², 2³, 2⁴… 즉 1, 2, 4, 8, 16이에요. 어떤 수든 0제곱은 1이므로, 맨 오른쪽 자리는 언제나 일의 자리입니다.",
+        "zh-TW": "二進位的道理完全一樣，只是每一位是右邊那一位的兩倍。從右邊讀起，各位依序是 2⁰、2¹、2²、2³、2⁴……也就是 1、2、4、8、16。任何數的 0 次方都是 1，所以最右邊那一位永遠是個位。",
+        es: "El binario funciona exactamente igual, salvo que cada posición vale dos veces la de su derecha. Leyendo desde la derecha, las posiciones son 2⁰, 2¹, 2², 2³, 2⁴, etcétera: 1, 2, 4, 8, 16. Cualquier número elevado a 0 es 1, así que la posición de más a la derecha siempre son las unidades.",
+        ja: "2進数もまったく同じしくみです。違うのは、どの位もすぐ右の位の2倍になっていることだけ。右から読むと、位は 2⁰、2¹、2²、2³、2⁴…つまり 1、2、4、8、16 です。どんな数も0乗は1なので、いちばん右の位はいつも「1の位」です。",
+        "pt-BR": "O binário funciona exatamente do mesmo jeito, só que cada posição vale duas vezes a posição à sua direita. Lendo da direita, as posições são 2⁰, 2¹, 2², 2³, 2⁴ e assim por diante: 1, 2, 4, 8, 16. Qualquer número elevado a 0 é 1, então a posição mais à direita é sempre a das unidades.",
+      }),
+    },
+    {
+      type: "table",
+      caption: x({ en: "Powers of two", ko: "2의 거듭제곱", "zh-TW": "2 的次方", es: "Potencias de dos", ja: "2の累乗", "pt-BR": "Potências de dois" }),
+      columns: [
+        x({ en: "Power", ko: "거듭제곱", "zh-TW": "次方", es: "Potencia", ja: "累乗", "pt-BR": "Potência" }),
+        x({ en: "Multiplied out", ko: "풀어 쓰면", "zh-TW": "展開", es: "Desarrollada", ja: "かけ算で書くと", "pt-BR": "Por extenso" }),
+        x({ en: "Value", ko: "값", "zh-TW": "值", es: "Valor", ja: "値", "pt-BR": "Valor" }),
+      ],
+      rows: POWER_ROWS,
+    },
+    {
+      type: "paragraph",
+      text: x({
+        en: "Each place holds a 0 (off) or a 1 (on). To read a binary number, add up the values of the places that hold a 1. For example, 1011 is 8 + 0 + 2 + 1 = 11. With five places, the biggest number you can make is 11111 = 16 + 8 + 4 + 2 + 1 = 31, which is plenty for 26 letters.",
+        ko: "각 자리에는 0(꺼짐)이나 1(켜짐)이 들어갑니다. 이진수를 읽으려면 1이 들어 있는 자리의 값을 모두 더하세요. 예를 들어 1011은 8 + 0 + 2 + 1 = 11이에요. 다섯 자리로 만들 수 있는 가장 큰 수는 11111 = 16 + 8 + 4 + 2 + 1 = 31이라서, 26글자를 담기에 충분합니다.",
+        "zh-TW": "每一位放的是 0（關）或 1（開）。要讀一個二進位數，就把放著 1 的那些位的值加起來。例如 1011 是 8 + 0 + 2 + 1 = 11。用五位能組出的最大數是 11111 = 16 + 8 + 4 + 2 + 1 = 31，裝下 26 個字母綽綽有餘。",
+        es: "Cada posición contiene un 0 (apagado) o un 1 (encendido). Para leer un número binario, suma los valores de las posiciones que tienen un 1. Por ejemplo, 1011 es 8 + 0 + 2 + 1 = 11. Con cinco posiciones, el número más grande que puedes formar es 11111 = 16 + 8 + 4 + 2 + 1 = 31, de sobra para 26 letras.",
+        ja: "どの位にも 0（オフ）か 1（オン）が入ります。2進数を読むには、1 が入っている位の値を足すだけ。たとえば 1011 は 8 + 0 + 2 + 1 = 11 です。5桁で作れるいちばん大きな数は 11111 = 16 + 8 + 4 + 2 + 1 = 31 なので、26文字には十分です。",
+        "pt-BR": "Cada posição guarda um 0 (desligado) ou um 1 (ligado). Para ler um número binário, some os valores das posições que têm 1. Por exemplo, 1011 é 8 + 0 + 2 + 1 = 11. Com cinco posições, o maior número que dá para formar é 11111 = 16 + 8 + 4 + 2 + 1 = 31, mais do que suficiente para 26 letras.",
+      }),
+    },
+    {
+      type: "paragraph",
+      text: x({
+        en: "Counting up works like a car's odometer that only has the digits 0 and 1: 0, 1, 10, 11, 100, 101, 110, 111, 1000. When a place is already 1 and you add one more, it rolls back to 0 and carries 1 to the place on its left.",
+        ko: "숫자를 하나씩 늘려 가는 건 0과 1만 있는 자동차 주행 거리계 같아요: 0, 1, 10, 11, 100, 101, 110, 111, 1000. 이미 1인 자리에 하나를 더하면 그 자리는 0으로 돌아가고, 왼쪽 자리로 1을 올립니다.",
+        "zh-TW": "往上數就像一個只有 0 和 1 的汽車里程表：0、1、10、11、100、101、110、111、1000。某一位已經是 1 時再加一，它就會歸 0，並往左邊那一位進 1。",
+        es: "Contar hacia arriba funciona como el cuentakilómetros de un coche que solo tuviera los dígitos 0 y 1: 0, 1, 10, 11, 100, 101, 110, 111, 1000. Cuando una posición ya es 1 y sumas uno más, vuelve a 0 y se lleva 1 a la posición de su izquierda.",
+        ja: "数を数え上げていくのは、0 と 1 しかない車の走行距離計のようなものです：0、1、10、11、100、101、110、111、1000。すでに 1 の位にもう1を足すと、その位は 0 に戻り、左の位へ 1 繰り上がります。",
+        "pt-BR": "Contar para cima funciona como o hodômetro de um carro que só tivesse os dígitos 0 e 1: 0, 1, 10, 11, 100, 101, 110, 111, 1000. Quando uma posição já é 1 e você soma mais um, ela volta a 0 e leva 1 para a posição à esquerda.",
+      }),
+    },
     { type: "heading", level: 2, text: x({ en: "Place values", ko: "자릿값", "zh-TW": "位值", es: "Valores posicionales", ja: "位の値", "pt-BR": "Valores posicionais" }) },
     {
       type: "paragraph",
       text: x({
-        en: "In our class code every letter is five switches. From left to right the switches are worth 16, 8, 4, 2 and 1. Add up the values of the switches that are on. That number is the letter: A is 1, B is 2, all the way to Z at 26.",
-        ko: "우리 수업 암호에서는 글자 하나가 스위치 다섯 개입니다. 왼쪽부터 각 스위치의 값은 16, 8, 4, 2, 1입니다. 켜진 스위치의 값을 모두 더하세요. 그 숫자가 곧 글자입니다. A는 1, B는 2, 그렇게 Z는 26까지 갑니다.",
-        "zh-TW": "在我們的課堂密碼裡，每個字母由五個開關組成。由左到右，各開關的值分別是 16, 8, 4, 2, 1。把開著的開關的值加起來，那個數字就是字母：A 是 1，B 是 2，一路到 Z 是 26。",
-        es: "En nuestro código de clase, cada letra son cinco interruptores. De izquierda a derecha, los interruptores valen 16, 8, 4, 2 y 1. Suma los valores de los interruptores encendidos. Ese número es la letra: la A es 1, la B es 2, y así hasta la Z, que es 26.",
-        ja: "このクラスの暗号では、1文字がスイッチ5個でできています。左から順に、スイッチの値は 16, 8, 4, 2, 1 です。オンになっているスイッチの値を足しましょう。その数が文字を表します。A が 1、B が 2、と続いて Z が 26 です。",
-        "pt-BR": "No código da nossa turma, cada letra são cinco interruptores. Da esquerda para a direita, os interruptores valem 16, 8, 4, 2 e 1. Some os valores dos interruptores ligados. Esse número é a letra: A é 1, B é 2, e assim por diante até o Z, que é 26.",
+        en: "In our class code every letter is five switches. From left to right the switches are worth 16, 8, 4, 2 and 1 (2⁴ down to 2⁰). Add up the values of the switches that are on. That number is the letter: A is 1, B is 2, all the way to Z at 26.",
+        ko: "우리 수업 암호에서는 글자 하나가 스위치 다섯 개입니다. 왼쪽부터 각 스위치의 값은 16, 8, 4, 2, 1입니다(2⁴부터 2⁰까지). 켜진 스위치의 값을 모두 더하세요. 그 숫자가 곧 글자입니다. A는 1, B는 2, 그렇게 Z는 26까지 갑니다.",
+        "zh-TW": "在我們的課堂密碼裡，每個字母由五個開關組成。由左到右，各開關的值分別是 16, 8, 4, 2, 1（也就是 2⁴ 到 2⁰）。把開著的開關的值加起來，那個數字就是字母：A 是 1，B 是 2，一路到 Z 是 26。",
+        es: "En nuestro código de clase, cada letra son cinco interruptores. De izquierda a derecha, los interruptores valen 16, 8, 4, 2 y 1 (de 2⁴ a 2⁰). Suma los valores de los interruptores encendidos. Ese número es la letra: la A es 1, la B es 2, y así hasta la Z, que es 26.",
+        ja: "このクラスの暗号では、1文字がスイッチ5個でできています。左から順に、スイッチの値は 16, 8, 4, 2, 1 です（2⁴ から 2⁰ まで）。オンになっているスイッチの値を足しましょう。その数が文字を表します。A が 1、B が 2、と続いて Z が 26 です。",
+        "pt-BR": "No código da nossa turma, cada letra são cinco interruptores. Da esquerda para a direita, os interruptores valem 16, 8, 4, 2 e 1 (de 2⁴ a 2⁰). Some os valores dos interruptores ligados. Esse número é a letra: A é 1, B é 2, e assim por diante até o Z, que é 26.",
       }),
     },
     {

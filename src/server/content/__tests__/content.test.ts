@@ -204,11 +204,15 @@ describe("sites & gating", () => {
 
   it("binary lesson: sheet, quiz, and never shows the admin password", () => {
     const lesson = resolveSite("harbourcc.edu/cs110/binary", fresh())!;
-    const sheet = lesson.blocks.find((b) => b.type === "table");
+    const sheet = lesson.blocks.find((b) => b.type === "table" && b.rows[0]?.[0] === "A");
     expect(sheet && sheet.type === "table" && sheet.rows.length).toBe(26);
     expect(sheet && sheet.type === "table" && sheet.rows[7]).toEqual(["H", "8", "01000"]);
     const quiz = lesson.blocks.find((b) => b.type === "form" && b.form === "binary-quiz");
     expect(quiz && quiz.type === "form" && quiz.prompt).toBe("01000 00101 01100 01100 01111");
+    // How binary works: the powers of two behind the 16, 8, 4, 2, 1 switches.
+    const powers = lesson.blocks.find((b) => b.type === "table" && b.rows[0]?.[0] === "2⁰");
+    expect(powers && powers.type === "table" && powers.rows.map((r) => r[2])).toEqual(["1", "2", "4", "8", "16", "32", "64", "128"]);
+    expect(powers && powers.type === "table" && powers.rows[4]).toEqual(["2⁴", "2 × 2 × 2 × 2", "16"]);
     for (const p of ["", "/cs110", "/cs110/binary"]) {
       expect(JSON.stringify(resolveSite(`harbourcc.edu${p}`, fresh())).toLowerCase()).not.toContain("lantern");
     }
