@@ -69,7 +69,7 @@ describe("Japanese Meridian and Harbour CC pages", () => {
 
   it("binary lesson keeps the 26-row sheet and the quiz prompt", () => {
     const lesson = ja("harbourcc.edu/cs110/binary");
-    const sheet = lesson.blocks.find((b) => b.type === "table");
+    const sheet = lesson.blocks.find((b) => b.type === "table" && b.rows[0]?.[0] === "A");
     expect(sheet && sheet.type === "table" && sheet.rows.length).toBe(26);
     expect(sheet && sheet.type === "table" && sheet.rows[7]).toEqual(["H", "8", "01000"]);
     expect(sheet && sheet.type === "table" && sheet.columns.join(" ")).toMatch(/文字/);

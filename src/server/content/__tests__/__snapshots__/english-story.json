@@ -182,11 +182,83 @@
     {
      "type": "heading",
      "level": 2,
+     "text": "How binary works"
+    },
+    {
+     "type": "paragraph",
+     "text": "You already know place values from ordinary numbers. In 345, the 5 means 5 ones, the 4 means 4 tens and the 3 means 3 hundreds. Each place is worth ten times the place to its right: 1, 10, 100, 1,000. Written as powers of ten, that's 10⁰, 10¹, 10², 10³."
+    },
+    {
+     "type": "paragraph",
+     "text": "Binary works exactly the same way, except each place is worth two times the place to its right. Reading from the right, the places are 2⁰, 2¹, 2², 2³, 2⁴, and so on: 1, 2, 4, 8, 16. Any number to the power of 0 is 1, so the rightmost place is always the ones."
+    },
+    {
+     "type": "table",
+     "caption": "Powers of two",
+     "columns": [
+      "Power",
+      "Multiplied out",
+      "Value"
+     ],
+     "rows": [
+      [
+       "2⁰",
+       "1",
+       "1"
+      ],
+      [
+       "2¹",
+       "2",
+       "2"
+      ],
+      [
+       "2²",
+       "2 × 2",
+       "4"
+      ],
+      [
+       "2³",
+       "2 × 2 × 2",
+       "8"
+      ],
+      [
+       "2⁴",
+       "2 × 2 × 2 × 2",
+       "16"
+      ],
+      [
+       "2⁵",
+       "2 × 2 × 2 × 2 × 2",
+       "32"
+      ],
+      [
+       "2⁶",
+       "2 × 2 × 2 × 2 × 2 × 2",
+       "64"
+      ],
+      [
+       "2⁷",
+       "2 × 2 × 2 × 2 × 2 × 2 × 2",
+       "128"
+      ]
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "Each place holds a 0 (off) or a 1 (on). To read a binary number, add up the values of the places that hold a 1. For example, 1011 is 8 + 0 + 2 + 1 = 11. With five places, the biggest number you can make is 11111 = 16 + 8 + 4 + 2 + 1 = 31, which is plenty for 26 letters."
+    },
+    {
+     "type": "paragraph",
+     "text": "Counting up works like a car's odometer that only has the digits 0 and 1: 0, 1, 10, 11, 100, 101, 110, 111, 1000. When a place is already 1 and you add one more, it rolls back to 0 and carries 1 to the place on its left."
+    },
+    {
+     "type": "heading",
+     "level": 2,
      "text": "Place values"
     },
     {
      "type": "paragraph",
-     "text": "In our class code every letter is five switches. From left to right the switches are worth 16, 8, 4, 2 and 1. Add up the values of the switches that are on. That number is the letter: A is 1, B is 2, all the way to Z at 26."
+     "text": "In our class code every letter is five switches. From left to right the switches are worth 16, 8, 4, 2 and 1 (2⁴ down to 2⁰). Add up the values of the switches that are on. That number is the letter: A is 1, B is 2, all the way to Z at 26."
     },
     {
      "type": "paragraph",
@@ -369,7 +441,7 @@
      "text": "Harbour Community College · Evening Studies · Doors open 6pm, coffee is not guaranteed."
     }
    ],
-   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Week 3: Binary</title>\n    <link rel=\"stylesheet\" href=\"/static/harbourcc.css\" />\n  </head>\n  <body class=\"theme-harbourcc\">\n    <!-- yes, real computers use 8 bits and a different table. this is a class, not a job. — W.O. -->\n    <main>\n      <nav>\n        <ul>\n          <li><a href=\"https://harbourcc.edu\">Home</a></li>\n          <li><a href=\"https://harbourcc.edu/cs110\">CS 110</a></li>\n          <li><a href=\"https://harbourcc.edu/cs110/binary\">Week 3: Binary</a></li>\n        </ul>\n      </nav>\n      <h1>Week 3: Binary</h1>\n      <p>Computers only have two fingers: a switch is either off (0) or on (1). So instead of counting in tens, they count in twos.</p>\n      <h2>Place values</h2>\n      <p>In our class code every letter is five switches. From left to right the switches are worth 16, 8, 4, 2 and 1. Add up the values of the switches that are on. That number is the letter: A is 1, B is 2, all the way to Z at 26.</p>\n      <p>Worked example: 01000. Only the 8 switch is on, so it's 8, and the 8th letter is H. Another: 10011 is 16 + 2 + 1 = 19, which is S.</p>\n      <h2>Try it</h2>\n      <p>Tap the switches to turn them on and off.</p>\n      <div class=\"bit-widget\" data-bits=\"5\"><!-- interactive: tap a switch to flip it --></div>\n      <h2>Decoding sheet</h2>\n      <table>\n        <caption>Class code: one letter, five bits</caption>\n        <tr><th>Letter</th><th>Number</th><th>Binary</th></tr>\n        <tr><td>A</td><td>1</td><td>00001</td></tr>\n        <tr><td>B</td><td>2</td><td>00010</td></tr>\n        <tr><td>C</td><td>3</td><td>00011</td></tr>\n        <tr><td>D</td><td>4</td><td>00100</td></tr>\n        <tr><td>E</td><td>5</td><td>00101</td></tr>\n        <tr><td>F</td><td>6</td><td>00110</td></tr>\n        <tr><td>G</td><td>7</td><td>00111</td></tr>\n        <tr><td>H</td><td>8</td><td>01000</td></tr>\n        <tr><td>I</td><td>9</td><td>01001</td></tr>\n        <tr><td>J</td><td>10</td><td>01010</td></tr>\n        <tr><td>K</td><td>11</td><td>01011</td></tr>\n        <tr><td>L</td><td>12</td><td>01100</td></tr>\n        <tr><td>M</td><td>13</td><td>01101</td></tr>\n        <tr><td>N</td><td>14</td><td>01110</td></tr>\n        <tr><td>O</td><td>15</td><td>01111</td></tr>\n        <tr><td>P</td><td>16</td><td>10000</td></tr>\n        <tr><td>Q</td><td>17</td><td>10001</td></tr>\n        <tr><td>R</td><td>18</td><td>10010</td></tr>\n        <tr><td>S</td><td>19</td><td>10011</td></tr>\n        <tr><td>T</td><td>20</td><td>10100</td></tr>\n        <tr><td>U</td><td>21</td><td>10101</td></tr>\n        <tr><td>V</td><td>22</td><td>10110</td></tr>\n        <tr><td>W</td><td>23</td><td>10111</td></tr>\n        <tr><td>X</td><td>24</td><td>11000</td></tr>\n        <tr><td>Y</td><td>25</td><td>11001</td></tr>\n        <tr><td>Z</td><td>26</td><td>11010</td></tr>\n      </table>\n      <h2>Practice quiz</h2>\n      <p>Decode this word with the sheet, then type it in. Pass and the class Binary translator installs on your machine.</p>\n      <form method=\"post\" action=\"/submit\" data-form=\"binary-quiz\">\n        <label>01000 00101 01100 01100 01111</label>\n        <input name=\"answer\" autocomplete=\"off\" />\n        <button type=\"submit\">Submit</button>\n      </form>\n      <footer>Harbour Community College · Evening Studies · Doors open 6pm, coffee is not guaranteed.</footer>\n    </main>\n  </body>\n</html>"
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Week 3: Binary</title>\n    <link rel=\"stylesheet\" href=\"/static/harbourcc.css\" />\n  </head>\n  <body class=\"theme-harbourcc\">\n    <!-- yes, real computers use 8 bits and a different table. this is a class, not a job. — W.O. -->\n    <main>\n      <nav>\n        <ul>\n          <li><a href=\"https://harbourcc.edu\">Home</a></li>\n          <li><a href=\"https://harbourcc.edu/cs110\">CS 110</a></li>\n          <li><a href=\"https://harbourcc.edu/cs110/binary\">Week 3: Binary</a></li>\n        </ul>\n      </nav>\n      <h1>Week 3: Binary</h1>\n      <p>Computers only have two fingers: a switch is either off (0) or on (1). So instead of counting in tens, they count in twos.</p>\n      <h2>How binary works</h2>\n      <p>You already know place values from ordinary numbers. In 345, the 5 means 5 ones, the 4 means 4 tens and the 3 means 3 hundreds. Each place is worth ten times the place to its right: 1, 10, 100, 1,000. Written as powers of ten, that's 10⁰, 10¹, 10², 10³.</p>\n      <p>Binary works exactly the same way, except each place is worth two times the place to its right. Reading from the right, the places are 2⁰, 2¹, 2², 2³, 2⁴, and so on: 1, 2, 4, 8, 16. Any number to the power of 0 is 1, so the rightmost place is always the ones.</p>\n      <table>\n        <caption>Powers of two</caption>\n        <tr><th>Power</th><th>Multiplied out</th><th>Value</th></tr>\n        <tr><td>2⁰</td><td>1</td><td>1</td></tr>\n        <tr><td>2¹</td><td>2</td><td>2</td></tr>\n        <tr><td>2²</td><td>2 × 2</td><td>4</td></tr>\n        <tr><td>2³</td><td>2 × 2 × 2</td><td>8</td></tr>\n        <tr><td>2⁴</td><td>2 × 2 × 2 × 2</td><td>16</td></tr>\n        <tr><td>2⁵</td><td>2 × 2 × 2 × 2 × 2</td><td>32</td></tr>\n        <tr><td>2⁶</td><td>2 × 2 × 2 × 2 × 2 × 2</td><td>64</td></tr>\n        <tr><td>2⁷</td><td>2 × 2 × 2 × 2 × 2 × 2 × 2</td><td>128</td></tr>\n      </table>\n      <p>Each place holds a 0 (off) or a 1 (on). To read a binary number, add up the values of the places that hold a 1. For example, 1011 is 8 + 0 + 2 + 1 = 11. With five places, the biggest number you can make is 11111 = 16 + 8 + 4 + 2 + 1 = 31, which is plenty for 26 letters.</p>\n      <p>Counting up works like a car's odometer that only has the digits 0 and 1: 0, 1, 10, 11, 100, 101, 110, 111, 1000. When a place is already 1 and you add one more, it rolls back to 0 and carries 1 to the place on its left.</p>\n      <h2>Place values</h2>\n      <p>In our class code every letter is five switches. From left to right the switches are worth 16, 8, 4, 2 and 1 (2⁴ down to 2⁰). Add up the values of the switches that are on. That number is the letter: A is 1, B is 2, all the way to Z at 26.</p>\n      <p>Worked example: 01000. Only the 8 switch is on, so it's 8, and the 8th letter is H. Another: 10011 is 16 + 2 + 1 = 19, which is S.</p>\n      <h2>Try it</h2>\n      <p>Tap the switches to turn them on and off.</p>\n      <div class=\"bit-widget\" data-bits=\"5\"><!-- interactive: tap a switch to flip it --></div>\n      <h2>Decoding sheet</h2>\n      <table>\n        <caption>Class code: one letter, five bits</caption>\n        <tr><th>Letter</th><th>Number</th><th>Binary</th></tr>\n        <tr><td>A</td><td>1</td><td>00001</td></tr>\n        <tr><td>B</td><td>2</td><td>00010</td></tr>\n        <tr><td>C</td><td>3</td><td>00011</td></tr>\n        <tr><td>D</td><td>4</td><td>00100</td></tr>\n        <tr><td>E</td><td>5</td><td>00101</td></tr>\n        <tr><td>F</td><td>6</td><td>00110</td></tr>\n        <tr><td>G</td><td>7</td><td>00111</td></tr>\n        <tr><td>H</td><td>8</td><td>01000</td></tr>\n        <tr><td>I</td><td>9</td><td>01001</td></tr>\n        <tr><td>J</td><td>10</td><td>01010</td></tr>\n        <tr><td>K</td><td>11</td><td>01011</td></tr>\n        <tr><td>L</td><td>12</td><td>01100</td></tr>\n        <tr><td>M</td><td>13</td><td>01101</td></tr>\n        <tr><td>N</td><td>14</td><td>01110</td></tr>\n        <tr><td>O</td><td>15</td><td>01111</td></tr>\n        <tr><td>P</td><td>16</td><td>10000</td></tr>\n        <tr><td>Q</td><td>17</td><td>10001</td></tr>\n        <tr><td>R</td><td>18</td><td>10010</td></tr>\n        <tr><td>S</td><td>19</td><td>10011</td></tr>\n        <tr><td>T</td><td>20</td><td>10100</td></tr>\n        <tr><td>U</td><td>21</td><td>10101</td></tr>\n        <tr><td>V</td><td>22</td><td>10110</td></tr>\n        <tr><td>W</td><td>23</td><td>10111</td></tr>\n        <tr><td>X</td><td>24</td><td>11000</td></tr>\n        <tr><td>Y</td><td>25</td><td>11001</td></tr>\n        <tr><td>Z</td><td>26</td><td>11010</td></tr>\n      </table>\n      <h2>Practice quiz</h2>\n      <p>Decode this word with the sheet, then type it in. Pass and the class Binary translator installs on your machine.</p>\n      <form method=\"post\" action=\"/submit\" data-form=\"binary-quiz\">\n        <label>01000 00101 01100 01100 01111</label>\n        <input name=\"answer\" autocomplete=\"off\" />\n        <button type=\"submit\">Submit</button>\n      </form>\n      <footer>Harbour Community College · Evening Studies · Doors open 6pm, coffee is not guaranteed.</footer>\n    </main>\n  </body>\n</html>"
   },
   "harbourmail.com": {
    "address": "harbourmail.com",
@@ -1666,11 +1738,83 @@
     {
      "type": "heading",
      "level": 2,
+     "text": "How binary works"
+    },
+    {
+     "type": "paragraph",
+     "text": "You already know place values from ordinary numbers. In 345, the 5 means 5 ones, the 4 means 4 tens and the 3 means 3 hundreds. Each place is worth ten times the place to its right: 1, 10, 100, 1,000. Written as powers of ten, that's 10⁰, 10¹, 10², 10³."
+    },
+    {
+     "type": "paragraph",
+     "text": "Binary works exactly the same way, except each place is worth two times the place to its right. Reading from the right, the places are 2⁰, 2¹, 2², 2³, 2⁴, and so on: 1, 2, 4, 8, 16. Any number to the power of 0 is 1, so the rightmost place is always the ones."
+    },
+    {
+     "type": "table",
+     "caption": "Powers of two",
+     "columns": [
+      "Power",
+      "Multiplied out",
+      "Value"
+     ],
+     "rows": [
+      [
+       "2⁰",
+       "1",
+       "1"
+      ],
+      [
+       "2¹",
+       "2",
+       "2"
+      ],
+      [
+       "2²",
+       "2 × 2",
+       "4"
+      ],
+      [
+       "2³",
+       "2 × 2 × 2",
+       "8"
+      ],
+      [
+       "2⁴",
+       "2 × 2 × 2 × 2",
+       "16"
+      ],
+      [
+       "2⁵",
+       "2 × 2 × 2 × 2 × 2",
+       "32"
+      ],
+      [
+       "2⁶",
+       "2 × 2 × 2 × 2 × 2 × 2",
+       "64"
+      ],
+      [
+       "2⁷",
+       "2 × 2 × 2 × 2 × 2 × 2 × 2",
+       "128"
+      ]
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "Each place holds a 0 (off) or a 1 (on). To read a binary number, add up the values of the places that hold a 1. For example, 1011 is 8 + 0 + 2 + 1 = 11. With five places, the biggest number you can make is 11111 = 16 + 8 + 4 + 2 + 1 = 31, which is plenty for 26 letters."
+    },
+    {
+     "type": "paragraph",
+     "text": "Counting up works like a car's odometer that only has the digits 0 and 1: 0, 1, 10, 11, 100, 101, 110, 111, 1000. When a place is already 1 and you add one more, it rolls back to 0 and carries 1 to the place on its left."
+    },
+    {
+     "type": "heading",
+     "level": 2,
      "text": "Place values"
     },
     {
      "type": "paragraph",
-     "text": "In our class code every letter is five switches. From left to right the switches are worth 16, 8, 4, 2 and 1. Add up the values of the switches that are on. That number is the letter: A is 1, B is 2, all the way to Z at 26."
+     "text": "In our class code every letter is five switches. From left to right the switches are worth 16, 8, 4, 2 and 1 (2⁴ down to 2⁰). Add up the values of the switches that are on. That number is the letter: A is 1, B is 2, all the way to Z at 26."
     },
     {
      "type": "paragraph",
@@ -1854,7 +1998,7 @@
      "text": "Harbour Community College · Evening Studies · Doors open 6pm, coffee is not guaranteed."
     }
    ],
-   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Week 3: Binary</title>\n    <link rel=\"stylesheet\" href=\"/static/harbourcc.css\" />\n  </head>\n  <body class=\"theme-harbourcc\">\n    <!-- yes, real computers use 8 bits and a different table. this is a class, not a job. — W.O. -->\n    <main>\n      <nav>\n        <ul>\n          <li><a href=\"https://harbourcc.edu\">Home</a></li>\n          <li><a href=\"https://harbourcc.edu/cs110\">CS 110</a></li>\n          <li><a href=\"https://harbourcc.edu/cs110/binary\">Week 3: Binary</a></li>\n        </ul>\n      </nav>\n      <h1>Week 3: Binary</h1>\n      <p>Computers only have two fingers: a switch is either off (0) or on (1). So instead of counting in tens, they count in twos.</p>\n      <h2>Place values</h2>\n      <p>In our class code every letter is five switches. From left to right the switches are worth 16, 8, 4, 2 and 1. Add up the values of the switches that are on. That number is the letter: A is 1, B is 2, all the way to Z at 26.</p>\n      <p>Worked example: 01000. Only the 8 switch is on, so it's 8, and the 8th letter is H. Another: 10011 is 16 + 2 + 1 = 19, which is S.</p>\n      <h2>Try it</h2>\n      <p>Tap the switches to turn them on and off.</p>\n      <div class=\"bit-widget\" data-bits=\"5\"><!-- interactive: tap a switch to flip it --></div>\n      <h2>Decoding sheet</h2>\n      <table>\n        <caption>Class code: one letter, five bits</caption>\n        <tr><th>Letter</th><th>Number</th><th>Binary</th></tr>\n        <tr><td>A</td><td>1</td><td>00001</td></tr>\n        <tr><td>B</td><td>2</td><td>00010</td></tr>\n        <tr><td>C</td><td>3</td><td>00011</td></tr>\n        <tr><td>D</td><td>4</td><td>00100</td></tr>\n        <tr><td>E</td><td>5</td><td>00101</td></tr>\n        <tr><td>F</td><td>6</td><td>00110</td></tr>\n        <tr><td>G</td><td>7</td><td>00111</td></tr>\n        <tr><td>H</td><td>8</td><td>01000</td></tr>\n        <tr><td>I</td><td>9</td><td>01001</td></tr>\n        <tr><td>J</td><td>10</td><td>01010</td></tr>\n        <tr><td>K</td><td>11</td><td>01011</td></tr>\n        <tr><td>L</td><td>12</td><td>01100</td></tr>\n        <tr><td>M</td><td>13</td><td>01101</td></tr>\n        <tr><td>N</td><td>14</td><td>01110</td></tr>\n        <tr><td>O</td><td>15</td><td>01111</td></tr>\n        <tr><td>P</td><td>16</td><td>10000</td></tr>\n        <tr><td>Q</td><td>17</td><td>10001</td></tr>\n        <tr><td>R</td><td>18</td><td>10010</td></tr>\n        <tr><td>S</td><td>19</td><td>10011</td></tr>\n        <tr><td>T</td><td>20</td><td>10100</td></tr>\n        <tr><td>U</td><td>21</td><td>10101</td></tr>\n        <tr><td>V</td><td>22</td><td>10110</td></tr>\n        <tr><td>W</td><td>23</td><td>10111</td></tr>\n        <tr><td>X</td><td>24</td><td>11000</td></tr>\n        <tr><td>Y</td><td>25</td><td>11001</td></tr>\n        <tr><td>Z</td><td>26</td><td>11010</td></tr>\n      </table>\n      <h2>Practice quiz</h2>\n      <div class=\"notice notice-success\">Quiz passed. The class Binary translator is installed in your Decoder.</div>\n      <form method=\"post\" action=\"/submit\" data-form=\"binary-quiz\">\n        <label>01000 00101 01100 01100 01111</label>\n        <input name=\"answer\" autocomplete=\"off\" />\n        <button type=\"submit\">Submit</button>\n      </form>\n      <footer>Harbour Community College · Evening Studies · Doors open 6pm, coffee is not guaranteed.</footer>\n    </main>\n  </body>\n</html>"
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Week 3: Binary</title>\n    <link rel=\"stylesheet\" href=\"/static/harbourcc.css\" />\n  </head>\n  <body class=\"theme-harbourcc\">\n    <!-- yes, real computers use 8 bits and a different table. this is a class, not a job. — W.O. -->\n    <main>\n      <nav>\n        <ul>\n          <li><a href=\"https://harbourcc.edu\">Home</a></li>\n          <li><a href=\"https://harbourcc.edu/cs110\">CS 110</a></li>\n          <li><a href=\"https://harbourcc.edu/cs110/binary\">Week 3: Binary</a></li>\n        </ul>\n      </nav>\n      <h1>Week 3: Binary</h1>\n      <p>Computers only have two fingers: a switch is either off (0) or on (1). So instead of counting in tens, they count in twos.</p>\n      <h2>How binary works</h2>\n      <p>You already know place values from ordinary numbers. In 345, the 5 means 5 ones, the 4 means 4 tens and the 3 means 3 hundreds. Each place is worth ten times the place to its right: 1, 10, 100, 1,000. Written as powers of ten, that's 10⁰, 10¹, 10², 10³.</p>\n      <p>Binary works exactly the same way, except each place is worth two times the place to its right. Reading from the right, the places are 2⁰, 2¹, 2², 2³, 2⁴, and so on: 1, 2, 4, 8, 16. Any number to the power of 0 is 1, so the rightmost place is always the ones.</p>\n      <table>\n        <caption>Powers of two</caption>\n        <tr><th>Power</th><th>Multiplied out</th><th>Value</th></tr>\n        <tr><td>2⁰</td><td>1</td><td>1</td></tr>\n        <tr><td>2¹</td><td>2</td><td>2</td></tr>\n        <tr><td>2²</td><td>2 × 2</td><td>4</td></tr>\n        <tr><td>2³</td><td>2 × 2 × 2</td><td>8</td></tr>\n        <tr><td>2⁴</td><td>2 × 2 × 2 × 2</td><td>16</td></tr>\n        <tr><td>2⁵</td><td>2 × 2 × 2 × 2 × 2</td><td>32</td></tr>\n        <tr><td>2⁶</td><td>2 × 2 × 2 × 2 × 2 × 2</td><td>64</td></tr>\n        <tr><td>2⁷</td><td>2 × 2 × 2 × 2 × 2 × 2 × 2</td><td>128</td></tr>\n      </table>\n      <p>Each place holds a 0 (off) or a 1 (on). To read a binary number, add up the values of the places that hold a 1. For example, 1011 is 8 + 0 + 2 + 1 = 11. With five places, the biggest number you can make is 11111 = 16 + 8 + 4 + 2 + 1 = 31, which is plenty for 26 letters.</p>\n      <p>Counting up works like a car's odometer that only has the digits 0 and 1: 0, 1, 10, 11, 100, 101, 110, 111, 1000. When a place is already 1 and you add one more, it rolls back to 0 and carries 1 to the place on its left.</p>\n      <h2>Place values</h2>\n      <p>In our class code every letter is five switches. From left to right the switches are worth 16, 8, 4, 2 and 1 (2⁴ down to 2⁰). Add up the values of the switches that are on. That number is the letter: A is 1, B is 2, all the way to Z at 26.</p>\n      <p>Worked example: 01000. Only the 8 switch is on, so it's 8, and the 8th letter is H. Another: 10011 is 16 + 2 + 1 = 19, which is S.</p>\n      <h2>Try it</h2>\n      <p>Tap the switches to turn them on and off.</p>\n      <div class=\"bit-widget\" data-bits=\"5\"><!-- interactive: tap a switch to flip it --></div>\n      <h2>Decoding sheet</h2>\n      <table>\n        <caption>Class code: one letter, five bits</caption>\n        <tr><th>Letter</th><th>Number</th><th>Binary</th></tr>\n        <tr><td>A</td><td>1</td><td>00001</td></tr>\n        <tr><td>B</td><td>2</td><td>00010</td></tr>\n        <tr><td>C</td><td>3</td><td>00011</td></tr>\n        <tr><td>D</td><td>4</td><td>00100</td></tr>\n        <tr><td>E</td><td>5</td><td>00101</td></tr>\n        <tr><td>F</td><td>6</td><td>00110</td></tr>\n        <tr><td>G</td><td>7</td><td>00111</td></tr>\n        <tr><td>H</td><td>8</td><td>01000</td></tr>\n        <tr><td>I</td><td>9</td><td>01001</td></tr>\n        <tr><td>J</td><td>10</td><td>01010</td></tr>\n        <tr><td>K</td><td>11</td><td>01011</td></tr>\n        <tr><td>L</td><td>12</td><td>01100</td></tr>\n        <tr><td>M</td><td>13</td><td>01101</td></tr>\n        <tr><td>N</td><td>14</td><td>01110</td></tr>\n        <tr><td>O</td><td>15</td><td>01111</td></tr>\n        <tr><td>P</td><td>16</td><td>10000</td></tr>\n        <tr><td>Q</td><td>17</td><td>10001</td></tr>\n        <tr><td>R</td><td>18</td><td>10010</td></tr>\n        <tr><td>S</td><td>19</td><td>10011</td></tr>\n        <tr><td>T</td><td>20</td><td>10100</td></tr>\n        <tr><td>U</td><td>21</td><td>10101</td></tr>\n        <tr><td>V</td><td>22</td><td>10110</td></tr>\n        <tr><td>W</td><td>23</td><td>10111</td></tr>\n        <tr><td>X</td><td>24</td><td>11000</td></tr>\n        <tr><td>Y</td><td>25</td><td>11001</td></tr>\n        <tr><td>Z</td><td>26</td><td>11010</td></tr>\n      </table>\n      <h2>Practice quiz</h2>\n      <div class=\"notice notice-success\">Quiz passed. The class Binary translator is installed in your Decoder.</div>\n      <form method=\"post\" action=\"/submit\" data-form=\"binary-quiz\">\n        <label>01000 00101 01100 01100 01111</label>\n        <input name=\"answer\" autocomplete=\"off\" />\n        <button type=\"submit\">Submit</button>\n      </form>\n      <footer>Harbour Community College · Evening Studies · Doors open 6pm, coffee is not guaranteed.</footer>\n    </main>\n  </body>\n</html>"
   },
   "harbourmail.com": {
    "address": "harbourmail.com",
