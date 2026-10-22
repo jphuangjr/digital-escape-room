@@ -123,6 +123,12 @@ const messages: Record<keyof typeof en, string> = {
   "site.room.optionalSignIn": "選填：登入即可保存你的進度與紀錄，並從任何裝置重新加入。",
   "site.room.signInGoogle": "使用 Google 登入",
   "site.room.signedInAs": "已登入為 {name}，你將以此身分加入。",
+  "site.install.title": "像 App 一樣玩",
+  "site.install.body": "把 Escape Escape 加入主畫面：以全螢幕開啟，案件一點就到。",
+  "site.install.iosBefore": "點一下工具列中的 ",
+  "site.install.iosAfter": "，再選「加入主畫面」。之後會像 App 一樣全螢幕開啟。",
+  "site.install.button": "安裝",
+  "site.install.dismiss": "稍後再說",
 };
 
 export default messages;

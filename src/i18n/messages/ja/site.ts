@@ -123,6 +123,12 @@ const messages: Record<keyof typeof en, string> = {
   "site.room.optionalSignIn": "任意：ログインすると進行状況とタイムが保存され、どの端末からでも再参加できます。",
   "site.room.signInGoogle": "Googleでログイン",
   "site.room.signedInAs": "{name} としてログイン中です。このアカウントで参加します。",
+  "site.install.title": "アプリのように遊ぼう",
+  "site.install.body": "Escape Escape をホーム画面に追加すると、全画面で開き、事件にすぐ戻れます。",
+  "site.install.iosBefore": "ツールバーの ",
+  "site.install.iosAfter": " をタップして「ホーム画面に追加」を選んでください。アプリのように全画面で開きます。",
+  "site.install.button": "インストール",
+  "site.install.dismiss": "あとで",
 };
 
 export default messages;
