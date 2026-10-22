@@ -123,6 +123,12 @@ const messages: Record<keyof typeof en, string> = {
   "site.room.optionalSignIn": "선택 사항: 로그인하면 진행 상황과 기록이 저장되고, 어느 기기에서든 다시 참가할 수 있어요.",
   "site.room.signInGoogle": "Google로 로그인",
   "site.room.signedInAs": "{name} 계정으로 로그인되어 있어요. 이 계정으로 참가해요.",
+  "site.install.title": "앱처럼 즐겨요",
+  "site.install.body": "Escape Escape를 홈 화면에 추가하면 전체 화면으로 열리고, 사건에 바로 들어갈 수 있어요.",
+  "site.install.iosBefore": "툴바의 ",
+  "site.install.iosAfter": " 버튼을 누른 다음 “홈 화면에 추가”를 선택하세요. 앱처럼 전체 화면으로 열려요.",
+  "site.install.button": "설치",
+  "site.install.dismiss": "나중에",
 };
 
 export default messages;

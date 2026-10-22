@@ -123,6 +123,12 @@ const messages: Record<keyof typeof en, string> = {
   "site.room.optionalSignIn": "Opcional: conserva tu progreso y tus tiempos, y vuelve a entrar desde cualquier dispositivo.",
   "site.room.signInGoogle": "Iniciar sesión con Google",
   "site.room.signedInAs": "Sesión iniciada como {name}. Entrarás con tu cuenta.",
+  "site.install.title": "Juega como en una app",
+  "site.install.body": "Agrega Escape Escape a tu pantalla de inicio: se abre en pantalla completa y tus casos quedan a un toque.",
+  "site.install.iosBefore": "Toca ",
+  "site.install.iosAfter": " en la barra y luego «Agregar a inicio». Se abrirá en pantalla completa, como una app.",
+  "site.install.button": "Instalar",
+  "site.install.dismiss": "Ahora no",
 };
 
 export default messages;

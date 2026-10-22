@@ -130,6 +130,13 @@ const messages = {
   "site.room.optionalSignIn": "Optional: keep your progress and times, and rejoin from any device.",
   "site.room.signInGoogle": "Sign in with Google",
   "site.room.signedInAs": "Signed in as {name}. You'll join as yourself.",
+  // Phone install banner (src/components/site/InstallBanner.tsx)
+  "site.install.title": "Play it like an app",
+  "site.install.body": "Add Escape Escape to your home screen: it opens full screen, and your cases are one tap away.",
+  "site.install.iosBefore": "Tap ",
+  "site.install.iosAfter": " in the toolbar, then “Add to Home Screen”. It opens full screen, like an app.",
+  "site.install.button": "Install",
+  "site.install.dismiss": "Not now",
 } as const;
 
 export default messages;
