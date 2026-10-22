@@ -209,6 +209,8 @@ const messages: Record<keyof typeof en, string> = {
   "atlas.tour.room.body": "친구를 초대하고, 대화하고, 일행이 시도한 코드를 모두 확인하세요.",
   "atlas.tour.invite.title": "일행 부르기",
   "atlas.tour.invite.body": "링크나 QR 코드를 공유하세요. 모두가 같은 섬을 탐험하고 누가 찾은 것이든 전부 볼 수 있어요. 각자 다른 곳에 있어도 괜찮아요.",
+  "atlas.tour.chat.title": "채팅",
+  "atlas.tour.chat.body": "서로 다른 곳에 있어도 여기서 일행과 대화할 수 있어요. 방 버튼에 빨간 배지가 뜨면 새 메시지가 온 거예요.",
   "atlas.tour.attempts.title": "시도한 모든 코드",
   "atlas.tour.attempts.body": "틀린 답은 여기에 기록돼서 같은 걸 두 번 시도하지 않아요. 연속 세 번 틀리면 자물쇠가 1분 동안 잠겨요.",
   "atlas.tour.end.title": "문 너머를 찾아서",

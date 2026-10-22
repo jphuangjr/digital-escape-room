@@ -161,6 +161,8 @@ const messages: Record<keyof typeof en, string> = {
   "train.tour.room.body": "友達を招待したり、チャットしたり、チームが試したコードをすべて確認したりできます。",
   "train.tour.invite.title": "仲間を呼ぶ",
   "train.tour.invite.body": "リンクかQRコードを共有しましょう。全員が同じ個室と、誰かが見つけたものをすべて見られます。",
+  "train.tour.chat.title": "チャット",
+  "train.tour.chat.body": "ここでチームと話せます。「ルーム」に赤いバッジが付いたら、誰かがメッセージを送った合図です。",
   "train.tour.attempts.title": "試したコード一覧",
   "train.tour.attempts.body": "間違えたコードはここに記録されるので、同じものを二度試さずに済みます。三回続けて間違えると、錠前が一分間動かなくなります。",
   "train.tour.end.title": "脱出口を探す",

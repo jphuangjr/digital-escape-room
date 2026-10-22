@@ -209,6 +209,8 @@ const messages: Record<keyof typeof en, string> = {
   "atlas.tour.room.body": "友達を招待したり、チャットしたり、チームが試したコードをすべて確認したりできます。",
   "atlas.tour.invite.title": "仲間を呼ぶ",
   "atlas.tour.invite.body": "リンクかQRコードを共有しましょう。全員が同じ島を探索し、誰かが見つけたものをすべて見られます。それぞれ別の場所にいても大丈夫です。",
+  "atlas.tour.chat.title": "チャット",
+  "atlas.tour.chat.body": "別々の場所にいても、ここでチームと話せます。「ルーム」に赤いバッジが付いたら、誰かがメッセージを送った合図です。",
   "atlas.tour.attempts.title": "試したコード一覧",
   "atlas.tour.attempts.body": "間違えたコードはここに記録されるので、同じものを二度試さずに済みます。三回続けて間違えると、錠前が一分間動かなくなります。",
   "atlas.tour.end.title": "扉の行き先を探せ",

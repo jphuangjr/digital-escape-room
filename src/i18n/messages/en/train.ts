@@ -161,6 +161,8 @@ const messages = {
   "train.tour.room.body": "Invite friends, chat, and see every code your team has tried.",
   "train.tour.invite.title": "Bring your team",
   "train.tour.invite.body": "Share the link or the QR code. Everyone sees the same compartment and everything anyone finds.",
+  "train.tour.chat.title": "Chat",
+  "train.tour.chat.body": "Talk to your team here. A red badge on Room means someone sent a message.",
   "train.tour.attempts.title": "Every code tried",
   "train.tour.attempts.body": "Wrong guesses are logged here so nobody tries the same one twice. Three wrong in a row jams a lock for a minute.",
   "train.tour.end.title": "Find a way out",

@@ -161,6 +161,8 @@ const messages: Record<keyof typeof en, string> = {
   "train.tour.room.body": "Convide amigos, converse e veja todos os códigos que seu time já tentou.",
   "train.tour.invite.title": "Chame seu time",
   "train.tour.invite.body": "Compartilhe o link ou o QR code. Todo mundo vê a mesma cabine e tudo o que qualquer pessoa encontrar.",
+  "train.tour.chat.title": "Chat",
+  "train.tour.chat.body": "Converse com seu time aqui. Um indicador vermelho em Sala quer dizer que alguém mandou uma mensagem.",
   "train.tour.attempts.title": "Todos os códigos",
   "train.tour.attempts.body": "Os palpites errados ficam registrados aqui para ninguém tentar o mesmo duas vezes. Três erros seguidos travam uma fechadura por um minuto.",
   "train.tour.end.title": "Encontre a saída",

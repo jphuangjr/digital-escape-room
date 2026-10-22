@@ -209,6 +209,8 @@ const messages = {
   "atlas.tour.room.body": "Invite friends, chat, and see every code your team has tried.",
   "atlas.tour.invite.title": "Bring your team",
   "atlas.tour.invite.body": "Share the link or the QR code. Everyone explores the same island and sees everything anyone finds, though each of you can stand somewhere different.",
+  "atlas.tour.chat.title": "Chat",
+  "atlas.tour.chat.body": "Talk to your team here, even when you're standing in different places. A red badge on Room means someone sent a message.",
   "atlas.tour.attempts.title": "Every code tried",
   "atlas.tour.attempts.body": "Wrong guesses are logged here so nobody tries the same one twice. Three wrong in a row jams a lock for a minute.",
   "atlas.tour.end.title": "Find where the doors lead",

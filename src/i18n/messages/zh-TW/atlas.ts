@@ -209,6 +209,8 @@ const messages: Record<keyof typeof en, string> = {
   "atlas.tour.room.body": "邀請朋友、聊天，並查看隊伍試過的每組密碼。",
   "atlas.tour.invite.title": "找隊友來",
   "atlas.tour.invite.body": "分享連結或 QR 碼。大家探索同一座島，也看得到任何人找到的所有東西，但每個人可以待在不同的地方。",
+  "atlas.tour.chat.title": "聊天",
+  "atlas.tour.chat.body": "就算大家待在不同地點，也能在這裡跟隊友聊天。「房間」上出現紅色標記，就表示有人傳了訊息。",
   "atlas.tour.attempts.title": "試過的密碼",
   "atlas.tour.attempts.body": "猜錯的密碼都會記在這裡，免得有人重複嘗試。連續錯三次，鎖會卡住一分鐘。",
   "atlas.tour.end.title": "找出門通往何方",

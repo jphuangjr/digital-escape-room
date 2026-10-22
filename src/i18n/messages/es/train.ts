@@ -161,6 +161,8 @@ const messages: Record<keyof typeof en, string> = {
   "train.tour.room.body": "Invita a tus amigos, chatea y mira todos los códigos que ha probado tu equipo.",
   "train.tour.invite.title": "Trae a tu equipo",
   "train.tour.invite.body": "Comparte el enlace o el código QR. Todos ven el mismo compartimento y todo lo que cualquiera encuentra.",
+  "train.tour.chat.title": "Chat",
+  "train.tour.chat.body": "Habla con tu equipo aquí. Un indicador rojo en Sala significa que alguien envió un mensaje.",
   "train.tour.attempts.title": "Todos los códigos",
   "train.tour.attempts.body": "Los intentos fallidos quedan registrados aquí para que nadie repita el mismo. Tres fallos seguidos bloquean una cerradura durante un minuto.",
   "train.tour.end.title": "Encuentra la salida",
