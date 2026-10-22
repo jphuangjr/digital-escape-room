@@ -37,6 +37,7 @@ const TRAIN_TOUR: TourStep[] = [
   { id: "teodor", target: "nx-hints", sheet: null },
   { id: "room", target: "nx-room", sheet: null },
   { id: "invite", target: "invite", sheet: "people" },
+  { id: "chat", target: "tab-chat", sheet: "people" },
   { id: "attempts", target: "tab-attempts", sheet: "people" },
   { id: "end", sheet: null },
 ];

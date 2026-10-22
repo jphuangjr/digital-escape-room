@@ -161,6 +161,8 @@ const messages: Record<keyof typeof en, string> = {
   "train.tour.room.body": "친구를 초대하고, 대화하고, 일행이 시도한 코드를 모두 확인하세요.",
   "train.tour.invite.title": "일행 부르기",
   "train.tour.invite.body": "링크나 QR 코드를 공유하세요. 모두가 같은 객실과 누가 찾은 물건이든 전부 볼 수 있어요.",
+  "train.tour.chat.title": "채팅",
+  "train.tour.chat.body": "여기서 일행과 대화하세요. 방 버튼에 빨간 배지가 뜨면 새 메시지가 온 거예요.",
   "train.tour.attempts.title": "시도한 모든 코드",
   "train.tour.attempts.body": "틀린 답은 여기에 기록돼서 같은 걸 두 번 시도하지 않아요. 연속 세 번 틀리면 자물쇠가 1분 동안 잠겨요.",
   "train.tour.end.title": "탈출구 찾기",

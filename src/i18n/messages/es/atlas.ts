@@ -209,6 +209,8 @@ const messages: Record<keyof typeof en, string> = {
   "atlas.tour.room.body": "Invita a tus amigos, chatea y mira todos los códigos que ha probado tu equipo.",
   "atlas.tour.invite.title": "Trae a tu equipo",
   "atlas.tour.invite.body": "Comparte el enlace o el código QR. Todos exploran la misma isla y ven todo lo que cualquiera encuentra, aunque cada uno puede estar en un lugar distinto.",
+  "atlas.tour.chat.title": "Chat",
+  "atlas.tour.chat.body": "Habla con tu equipo aquí, aunque estén en lugares distintos. Un indicador rojo en Sala significa que alguien envió un mensaje.",
   "atlas.tour.attempts.title": "Todos los códigos",
   "atlas.tour.attempts.body": "Los intentos fallidos quedan registrados aquí para que nadie repita el mismo. Tres fallos seguidos bloquean una cerradura durante un minuto.",
   "atlas.tour.end.title": "Descubre adónde llevan las puertas",

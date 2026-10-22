@@ -161,6 +161,8 @@ const messages: Record<keyof typeof en, string> = {
   "train.tour.room.body": "邀請朋友、聊天，並查看隊伍試過的每組密碼。",
   "train.tour.invite.title": "找隊友來",
   "train.tour.invite.body": "分享連結或 QR 碼。每個人都會看到同一個包廂，以及任何人找到的所有東西。",
+  "train.tour.chat.title": "聊天",
+  "train.tour.chat.body": "在這裡跟隊友聊天。「房間」上出現紅色標記，就表示有人傳了訊息。",
   "train.tour.attempts.title": "試過的密碼",
   "train.tour.attempts.body": "猜錯的密碼都會記在這裡，免得有人重複嘗試。連續錯三次，鎖會卡住一分鐘。",
   "train.tour.end.title": "找到出路",
