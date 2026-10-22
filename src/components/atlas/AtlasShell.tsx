@@ -7,6 +7,7 @@ import { GLYPHS, LOCATIONS, WALLS } from "@/lib/atlas/types";
 import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
 import { useChat } from "@/lib/client/chat";
 import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
+import { Tour, type TourStep } from "@/components/shell/Tour";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
 import { LockDial } from "@/components/train/parts";
@@ -28,6 +29,22 @@ import { AtlasAmbience, setSoundPreferred, soundPreferred } from "./sound";
 const PRESENCE_MS = 15_000;
 const TABS: RoomTab[] = ["people", "chat", "attempts"];
 const INTRO_KEY = "atlas_intro_done";
+const TOUR_DONE_KEY = "atlas_tour_done_v1";
+
+/** The first-time tour of the Atlas: each step spotlights a real control (its data-tour name). */
+const ATLAS_TOUR: TourStep[] = [
+  { id: "wall", target: "at-wall", sheet: null },
+  { id: "turn", target: "at-turn", sheet: null },
+  { id: "spots", target: "at-spots", sheet: null },
+  { id: "items", target: "at-items", sheet: null },
+  { id: "notebook", target: "at-notebook", sheet: null },
+  { id: "hints", target: "at-hints", sheet: null },
+  { id: "places", target: "at-places", sheet: null },
+  { id: "room", target: "at-room", sheet: null },
+  { id: "invite", target: "invite", sheet: "people" },
+  { id: "attempts", target: "tab-attempts", sheet: "people" },
+  { id: "end", sheet: null },
+];
 
 export function AtlasShell({ code, state, refresh }: { code: string; state: RoomState; refresh: () => Promise<void> }) {
   const scene = state.scene as AtlasSceneDTO;
@@ -66,6 +83,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
   }, [showSpots]);
   const [placesOpen, setPlacesOpen] = useState(false);
   const [intro, setIntro] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [shake, setShake] = useState(false);
   const [roomOpen, setRoomOpen] = useState(false);
@@ -90,6 +108,8 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
       const saved = localStorage.getItem(placeKey) as LocationId | null;
       if (saved && (LOCATIONS as string[]).includes(saved)) setPlaceRaw(saved);
       if (localStorage.getItem(INTRO_KEY) !== "1") setIntro(true);
+      // Players who saw the intro before the tour existed get the tour once, after a moment.
+      else if (localStorage.getItem(TOUR_DONE_KEY) !== "1") window.setTimeout(() => setTourOpen(true), 900);
     } catch {}
   }, [placeKey]);
   // Never stand somewhere the team can't reach (e.g. a stale saved place).
@@ -278,7 +298,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
             if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - s.y) * 1.5) turn(dx < 0 ? 1 : -1);
           }}
         >
-          <div key={`${here}:${wall}`} className="at-enter relative aspect-[3/4] h-full max-h-full max-w-full">
+          <div key={`${here}:${wall}`} className="at-enter relative aspect-[3/4] h-full max-h-full max-w-full" data-tour="at-wall">
             <WallArt
               wall={wall}
               state={wallState}
@@ -302,13 +322,14 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
               <button type="button" aria-label={t("atlas.turnLeft")} onClick={() => turn(-1)} className="absolute left-1 top-1/2 flex h-14 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-black/40 text-2xl text-[#f4e7b5] active:bg-black/60">
                 ‹
               </button>
-              <button type="button" aria-label={t("atlas.turnRight")} onClick={() => turn(1)} className="absolute right-1 top-1/2 flex h-14 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-black/40 text-2xl text-[#f4e7b5] active:bg-black/60">
+              <button type="button" aria-label={t("atlas.turnRight")} onClick={() => turn(1)} data-tour="at-turn" className="absolute right-1 top-1/2 flex h-14 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-black/40 text-2xl text-[#f4e7b5] active:bg-black/60">
                 ›
               </button>
               <button
                 type="button"
                 onClick={() => setShowSpots(true)}
                 aria-label={t("atlas.showSpots")}
+                data-tour="at-spots"
                 className="absolute bottom-1 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-base active:bg-black/70"
               >
                 👁
@@ -342,6 +363,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
           <nav className="grid grid-cols-5" aria-label={t("atlas.tab.aria")}>
             <TabButton
               icon="🎒"
+              tour="at-items"
               label={t("atlas.tab.items")}
               active={itemsOpen}
               aria-expanded={itemsOpen}
@@ -350,17 +372,19 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
               badge={scene.inventory.length > 0 ? String(scene.inventory.length) : undefined}
               dot={newItems}
             />
-            <TabButton icon="📝" label={t("atlas.tab.notebook")} onClick={() => setNotebookOpen(true)} />
+            <TabButton icon="📝" tour="at-notebook" label={t("atlas.tab.notebook")} onClick={() => setNotebookOpen(true)} />
             <TabButton
               icon="📜"
+              tour="at-hints"
               label={t("atlas.tab.hints")}
               aria-label={t("atlas.notesAria")}
               onClick={() => setNotesOpen(true)}
               dot={Boolean(nextHint && !nextHint.readyAt && scene.hints.length === 0)}
             />
-            <TabButton icon="🧭" label={t("atlas.places")} onClick={() => setPlacesOpen(true)} />
+            <TabButton icon="🧭" tour="at-places" label={t("atlas.places")} onClick={() => setPlacesOpen(true)} />
             <TabButton
               icon="👥"
+              tour="at-room"
               label={t("atlas.roomButton", { count: state.players.filter((p) => p.online).length })}
               onClick={() => setRoomOpen(true)}
               badge={chat.unread > 0 ? String(chat.unread) : undefined}
@@ -406,11 +430,41 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
               setIntro(false);
               try {
                 localStorage.setItem(INTRO_KEY, "1");
+                if (localStorage.getItem(TOUR_DONE_KEY) !== "1") setTourOpen(true);
               } catch {}
             }}
           />
         )}
-        <RoomSheet ctx={ctx} open={roomOpen} onClose={() => setRoomOpen(false)} tab={roomTab} setTab={setRoomTab} chat={chat} tabs={TABS} />
+        <RoomSheet
+          ctx={ctx}
+          open={roomOpen}
+          onClose={() => setRoomOpen(false)}
+          tab={roomTab}
+          setTab={setRoomTab}
+          chat={chat}
+          tabs={TABS}
+          onTour={() => {
+            setRoomOpen(false);
+            setTourOpen(true);
+          }}
+        />
+        {tourOpen && (
+          <Tour
+            steps={ATLAS_TOUR}
+            prefix="atlas.tour"
+            doneKey="atlas.tour.done"
+            showSheet={(tab) => {
+              if (tab) setRoomTab(tab);
+              setRoomOpen(tab !== null);
+            }}
+            onClose={() => {
+              setTourOpen(false);
+              try {
+                localStorage.setItem(TOUR_DONE_KEY, "1");
+              } catch {}
+            }}
+          />
+        )}
         <Toasts items={toasts} onDismiss={(id) => setToasts((ts) => ts.filter((x) => x.id !== id))} placement={closeup || itemOpen || roomOpen || notebookOpen ? "top" : "bottom"} />
       </div>
     </GameContext.Provider>
@@ -426,6 +480,7 @@ function TabButton({
   badge,
   dot,
   alert,
+  tour,
   ...aria
 }: {
   icon: string;
@@ -435,6 +490,8 @@ function TabButton({
   badge?: string;
   dot?: boolean;
   alert?: boolean;
+  /** The guided tour's name for this control. */
+  tour?: string;
   "aria-label"?: string;
   "aria-expanded"?: boolean;
   "aria-controls"?: string;
@@ -444,6 +501,7 @@ function TabButton({
       type="button"
       onClick={onClick}
       {...aria}
+      data-tour={tour}
       className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 active:bg-[#1f3640] ${active ? "bg-[#0f2129] text-[#f4e7b5]" : "text-stone-300"}`}
     >
       {active && <span className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-[#d8b56a]" aria-hidden />}
