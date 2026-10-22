@@ -83,6 +83,10 @@ const messages: Record<keyof typeof en, string> = {
   "admin.qr.linkLabel": "enlace para canjear",
   "admin.qr.copyLink": "Copiar enlace",
   "admin.qr.done": "Listo",
+  "admin.games.tester": "Llaves de tester",
+  "admin.form.testerHelp": "Las llaves de tester desbloquean todos los juegos, incluidos los de staging, mientras la llave esté activa. Si la desactivas o vence, sus testers pierden el acceso.",
+  "admin.confirm.turnOffTester": "¿Desactivar {code}? {count, plural, one {El tester que la usa pierde} other {Los # testers que la usan pierden}} el acceso a todos los juegos.",
+  "admin.code.status.testerOn": "Canjeada, acceso activo",
 };
 
 export default messages;

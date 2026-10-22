@@ -3,7 +3,7 @@ import { error, isResponse, json } from "@/server/http";
 import { requireAdmin } from "@/server/admin";
 import { getT } from "@/i18n/server";
 
-/** DELETE → turn a code off. It stops working; purchases already made with it stay (they're permanent). */
+/** DELETE → turn a code off. It stops working; purchases already made with it stay (they're permanent). A tester key's access ends. */
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const admin = await requireAdmin();
   if (isResponse(admin)) return admin;

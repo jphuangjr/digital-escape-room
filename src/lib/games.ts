@@ -68,9 +68,12 @@ export const GAMES: GameInfo[] = [
   },
 ];
 
-/** Games a viewer may see and host: everything that isn't in staging, plus staging for admins. */
-export function visibleGames(isAdmin: boolean): GameInfo[] {
-  return GAMES.filter((g) => g.status !== "staging" || isAdmin);
+/** A purchase code's gameId for a tester key: every game, staging included, while the key is on. */
+export const ALL_GAMES = "all";
+
+/** Games a viewer may see and host: everything that isn't in staging, plus staging for admins and testers. */
+export function visibleGames(seesStaging: boolean): GameInfo[] {
+  return GAMES.filter((g) => g.status !== "staging" || seesStaging);
 }
 
 export function getGame(gameId: string): GameInfo | undefined {

@@ -65,6 +65,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.decode.nothingYet": "Todavía no hay nada que descifrar.",
   "api.attempt.solved.maraReset": "Contraseña temporal enviada al contacto de recuperación.",
   "api.attempt.solved.maraLogin": "Sesión iniciada en el HarbourMail de Mara.",
+  "api.redeem.allGames": "Todos los escape rooms",
 };
 
 export default messages;

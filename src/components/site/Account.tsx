@@ -74,6 +74,11 @@ export function AccountBar({ me, callbackUrl = "/", fallbackColor = "#c9a227" }:
                 <a href="/profile" className="min-h-11 shrink-0 content-center px-2 text-sm font-semibold text-noir-brass underline">
                   {t("profile.link")}
                 </a>
+                {me!.isTester && !me!.isAdmin && (
+                  <span className="shrink-0 rounded border border-noir-brass/60 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-noir-brass">
+                    {t("site.account.tester")}
+                  </span>
+                )}
                 {me!.isAdmin && (
                   <a href="/admin" className="min-h-11 shrink-0 content-center px-2 text-sm font-semibold text-noir-brass underline">
                     {t("site.account.admin")}

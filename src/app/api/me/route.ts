@@ -4,7 +4,7 @@ import { json } from "@/server/http";
 import { cookies } from "next/headers";
 import { getSessionUser, googleEnabled } from "@/server/auth";
 import { cookieName, ROOM_TTL_MS } from "@/server/session";
-import { isAdmin, ownedGameIds } from "@/server/purchases";
+import { isAdmin, isTester, ownedGameIds } from "@/server/purchases";
 
 /**
  * The signed-in user (if any), the unfinished rooms they're still in, and their finished cases with times.
@@ -20,8 +20,9 @@ export async function GET() {
     .slice(0, 40);
   const mine = [...(user ? [{ userId: user.id }] : []), ...(tokens.length ? [{ token: { in: tokens } }] : [])];
 
-  const [ownedGames, players, cases] = await Promise.all([
+  const [ownedGames, tester, players, cases] = await Promise.all([
     user ? ownedGameIds(user) : Promise.resolve([] as string[]),
+    isTester(user),
     mine.length
       ? db.player.findMany({
           // A finished room is a case now (listed under cases), not something to rejoin.
@@ -37,6 +38,7 @@ export async function GET() {
   return json<MeResponse>({
     googleEnabled,
     isAdmin: user ? isAdmin(user) : false,
+    isTester: tester,
     ownedGames,
     user: user ? { name: user.name, email: user.email, image: user.image } : null,
     activeRooms: players.map((p) => ({

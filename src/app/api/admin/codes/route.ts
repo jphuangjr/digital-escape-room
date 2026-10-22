@@ -4,7 +4,7 @@ import { db } from "@/server/db";
 import { error, isResponse, json, readBody } from "@/server/http";
 import { requireAdmin } from "@/server/admin";
 import { formatCode, generateCodes } from "@/server/purchases";
-import { getGame } from "@/lib/games";
+import { ALL_GAMES, getGame } from "@/lib/games";
 import { getT } from "@/i18n/server";
 
 const WITH_REDEMPTIONS = {
@@ -41,7 +41,7 @@ export async function GET(req: Request) {
   if (isResponse(admin)) return admin;
   const t = await getT();
   const gameId = new URL(req.url).searchParams.get("gameId") ?? "";
-  if (!getGame(gameId)) return error(400, t("api.common.unknownGame"));
+  if (gameId !== ALL_GAMES && !getGame(gameId)) return error(400, t("api.common.unknownGame"));
   const rows = await db.purchaseCode.findMany({
     where: { gameId },
     include: WITH_REDEMPTIONS,
@@ -52,7 +52,7 @@ export async function GET(req: Request) {
 }
 
 /**
- * POST {gameId, kind: "single"|"group", count?, maxUses?, expiresInDays?, note?}
+ * POST {gameId (a game, or ALL_GAMES for tester keys), kind: "single"|"group", count?, maxUses?, expiresInDays?, note?}
  * - single: `count` (1–50) codes, one account each.
  * - group: one shareable code; `maxUses` 2–10000 or null for unlimited; once per account.
  */
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
   const t = await getT();
   const body = await readBody(req);
   const gameId = typeof body?.gameId === "string" ? body.gameId : "";
-  if (!getGame(gameId)) return error(400, t("api.common.unknownGame"));
+  if (gameId !== ALL_GAMES && !getGame(gameId)) return error(400, t("api.common.unknownGame"));
   const note = typeof body?.note === "string" && body.note.trim() ? body.note.trim().slice(0, 120) : null;
 
   const days = body?.expiresInDays == null ? null : Number(body.expiresInDays);

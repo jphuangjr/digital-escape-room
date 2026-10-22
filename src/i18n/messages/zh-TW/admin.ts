@@ -82,6 +82,10 @@ const messages: Record<keyof typeof en, string> = {
   "admin.qr.linkLabel": "領取連結",
   "admin.qr.copyLink": "複製連結",
   "admin.qr.done": "完成",
+  "admin.games.tester": "測試金鑰",
+  "admin.form.testerHelp": "測試金鑰在有效期間會解鎖所有遊戲（包含 staging）。停用或過期後，測試員的權限也會一併結束。",
+  "admin.confirm.turnOffTester": "要停用 {code} 嗎？使用它的 {count, plural, other {# 位測試員}}將失去所有遊戲的權限。",
+  "admin.code.status.testerOn": "已領取，權限有效",
 };
 
 export default messages;

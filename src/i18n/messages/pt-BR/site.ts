@@ -129,6 +129,11 @@ const messages: Record<keyof typeof en, string> = {
   "site.install.iosAfter": " na barra e depois em “Adicionar à Tela de Início”. Ele abre em tela cheia, como um app.",
   "site.install.button": "Instalar",
   "site.install.dismiss": "Agora não",
+  "site.redeemBox.tester": "Chave de testador aceita: todos os jogos estão liberados na sua conta.",
+  "site.redeem.testerTitle": "Acesso de testador ativado",
+  "site.redeem.testerBody": "Enquanto esta chave estiver ativa, todas as salas de fuga, inclusive as que ainda não saíram, estão liberadas na sua conta ({account}).",
+  "site.redeem.testerBrowse": "Ver os casos →",
+  "site.account.tester": "Testador",
 };
 
 export default messages;

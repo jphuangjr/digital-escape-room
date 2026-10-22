@@ -137,6 +137,12 @@ const messages = {
   "site.install.iosAfter": " in the toolbar, then “Add to Home Screen”. It opens full screen, like an app.",
   "site.install.button": "Install",
   "site.install.dismiss": "Not now",
+  // Tester keys (src/server/purchases.ts isTester)
+  "site.redeemBox.tester": "Tester key accepted: every game is unlocked on your account.",
+  "site.redeem.testerTitle": "Tester access on",
+  "site.redeem.testerBody": "Every escape room, including ones that aren't out yet, is unlocked on your account ({account}) for as long as this key stays on.",
+  "site.redeem.testerBrowse": "Browse the cases →",
+  "site.account.tester": "Tester",
 } as const;
 
 export default messages;

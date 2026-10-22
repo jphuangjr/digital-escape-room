@@ -129,6 +129,11 @@ const messages: Record<keyof typeof en, string> = {
   "site.install.iosAfter": " 버튼을 누른 다음 “홈 화면에 추가”를 선택하세요. 앱처럼 전체 화면으로 열려요.",
   "site.install.button": "설치",
   "site.install.dismiss": "나중에",
+  "site.redeemBox.tester": "테스터 키가 확인됐어요. 계정에서 모든 게임이 열렸어요.",
+  "site.redeem.testerTitle": "테스터 권한이 켜졌어요",
+  "site.redeem.testerBody": "이 키가 켜져 있는 동안 계정({account})에서 아직 공개되지 않은 방을 포함해 모든 방탈출이 열려 있어요.",
+  "site.redeem.testerBrowse": "사건 둘러보기 →",
+  "site.account.tester": "테스터",
 };
 
 export default messages;

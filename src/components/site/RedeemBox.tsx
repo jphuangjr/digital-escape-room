@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { useT } from "@/i18n/client";
-import { localGameTitle } from "@/lib/games";
+import { ALL_GAMES, GAMES, localGameTitle } from "@/lib/games";
 
 /**
  * Enter a purchase code to unlock hosting a game. Not a <form>, so it can sit inside another form.
@@ -30,9 +30,14 @@ export function RedeemBox({ gameTitle, onRedeemed }: { gameTitle: string; onRede
         setMsg({ tone: "error", text: data.error ?? t("site.redeemBox.failed") });
         return;
       }
+      setCode("");
+      if (data.gameId === ALL_GAMES) {
+        setMsg({ tone: "ok", text: t("site.redeemBox.tester") });
+        for (const g of GAMES) onRedeemed(g.id);
+        return;
+      }
       const title = localGameTitle(t, data.gameId);
       setMsg({ tone: "ok", text: t(data.alreadyOwned ? "site.redeemBox.alreadyOwned" : "site.redeemBox.unlocked", { title }) });
-      setCode("");
       onRedeemed(data.gameId);
     } catch {
       setMsg({ tone: "error", text: t("site.error.network") });

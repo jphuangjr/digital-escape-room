@@ -64,6 +64,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.decode.nothingYet": "目前還沒有可解碼的內容。",
   "api.attempt.solved.maraReset": "臨時密碼已寄到備援聯絡人信箱。",
   "api.attempt.solved.maraLogin": "已登入瑪拉的 HarbourMail。",
+  "api.redeem.allGames": "所有密室逃脫",
 };
 
 export default messages;

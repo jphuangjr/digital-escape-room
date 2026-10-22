@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useIntl } from "react-intl";
 import type { AdminCodeDTO } from "@/lib/types";
-import { GAMES } from "@/lib/games";
+import { ALL_GAMES, GAMES } from "@/lib/games";
 import { ATLAS_GAME_ID } from "@/lib/atlas/types";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import type { PlaytestReport } from "@/server/playtest";
@@ -289,7 +289,9 @@ function CodesPanel() {
 
   async function turnOff(c: AdminCodeDTO) {
     const warning =
-      c.useCount > 0
+      gameId === ALL_GAMES && c.useCount > 0
+        ? t("admin.confirm.turnOffTester", { code: c.code, count: c.useCount })
+        : c.useCount > 0
         ? t("admin.confirm.turnOffClaimed", { code: c.code, count: c.useCount })
         : t("admin.confirm.turnOff", { code: c.code });
     if (!confirm(warning)) return;
@@ -308,9 +310,11 @@ function CodesPanel() {
     }
   }
 
-  const active = (codes ?? []).filter((c) => c.status === "active");
-  const done = (codes ?? []).filter((c) => c.status !== "active");
-  const activeSingles = active.filter((c) => c.maxUses === 1);
+  // A fully claimed tester key still grants access, so it stays here where it can be turned off.
+  const isOn = (c: AdminCodeDTO) => c.status === "active" || (gameId === ALL_GAMES && c.status === "used");
+  const active = (codes ?? []).filter(isOn);
+  const done = (codes ?? []).filter((c) => !isOn(c));
+  const activeSingles = active.filter((c) => c.status === "active" && c.maxUses === 1);
   const chip = (on: boolean) =>
     `min-h-11 rounded-lg border px-3 text-sm ${on ? "border-noir-brass bg-noir-brass text-noir-bg" : "border-noir-line text-noir-ink-dim"}`;
 
@@ -334,10 +338,23 @@ function CodesPanel() {
             {g.status === "soon" ? ` ${t("admin.games.soon")}` : ""}
           </button>
         ))}
+        <button
+          role="tab"
+          aria-selected={gameId === ALL_GAMES}
+          onClick={() => {
+            setGameId(ALL_GAMES);
+            setFresh(new Set());
+            setMsg(null);
+          }}
+          className={`shrink-0 ${chip(gameId === ALL_GAMES)}`}
+        >
+          {t("admin.games.tester")}
+        </button>
       </div>
 
       <form onSubmit={generate} className="flex flex-col gap-4 rounded-xl border border-noir-line bg-noir-bg-2 p-4">
         <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-noir-ink-faint">{t("admin.form.heading")}</h2>
+        {gameId === ALL_GAMES && <p className="text-sm text-noir-ink-dim">{t("admin.form.testerHelp")}</p>}
 
         <div role="radiogroup" aria-label={t("admin.form.kindAria")} className="grid grid-cols-2 gap-2">
           <button type="button" role="radio" aria-checked={kind === "single"} onClick={() => setKind("single")} className={chip(kind === "single")}>
@@ -482,9 +499,11 @@ function CodeRow({
   const t = useT();
   const intl = useIntl();
   const live = c.status === "active";
+  // A tester key with no claims left still grants access to whoever claimed it.
+  const testerOn = c.gameId === ALL_GAMES && c.status === "used";
   const meta = [
     usesLabel(c, t),
-    statusLabel(c.status, t),
+    testerOn ? t("admin.code.status.testerOn") : statusLabel(c.status, t),
     c.expiresAt
       ? t(new Date(c.expiresAt).getTime() > Date.now() ? "admin.code.expiresOn" : "admin.code.expiredOn", {
           date: intl.formatDate(c.expiresAt),
@@ -500,7 +519,7 @@ function CodeRow({
     >
       <div className="flex flex-wrap items-center gap-2">
         <button type="button" onClick={onQr} className="min-w-0 flex-1 text-left" aria-label={t("admin.code.showQrAria", { code: c.code })}>
-          <span className={`block font-mono tracking-wider ${live ? "text-noir-ink" : "text-noir-ink-dim line-through decoration-noir-ink-faint"}`}>
+          <span className={`block font-mono tracking-wider ${live || testerOn ? "text-noir-ink" : "text-noir-ink-dim line-through decoration-noir-ink-faint"}`}>
             {c.code}
           </span>
           <span className="block text-xs text-noir-ink-faint">{meta.join(" · ")}</span>
@@ -513,12 +532,12 @@ function CodeRow({
             <button onClick={() => onCopy(c.code, c.code)} className="min-h-11 px-2 text-sm text-noir-brass underline">
               {t("common.copy")}
             </button>
-            {onTurnOff && (
-              <button onClick={onTurnOff} className="min-h-11 px-2 text-sm text-noir-ink-faint underline">
-                {t("admin.code.turnOff")}
-              </button>
-            )}
           </>
+        )}
+        {onTurnOff && (
+          <button onClick={onTurnOff} className="min-h-11 px-2 text-sm text-noir-ink-faint underline">
+            {t("admin.code.turnOff")}
+          </button>
         )}
       </div>
       {c.redemptions.length > 0 && (
