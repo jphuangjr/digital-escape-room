@@ -82,6 +82,10 @@ const messages: Record<keyof typeof en, string> = {
   "admin.qr.linkLabel": "등록 링크",
   "admin.qr.copyLink": "링크 복사",
   "admin.qr.done": "완료",
+  "admin.games.tester": "테스터 키",
+  "admin.form.testerHelp": "테스터 키는 키가 켜져 있는 동안 스테이징을 포함한 모든 게임을 열어 줘요. 키를 끄거나 만료되면 테스터 권한도 끝나요.",
+  "admin.confirm.turnOffTester": "{code} 키를 사용 중지할까요? 이 키를 쓰는 테스터 {count, plural, other {#명}}은 모든 게임에 접근할 수 없게 돼요.",
+  "admin.code.status.testerOn": "등록됨, 권한 유지 중",
 };
 
 export default messages;

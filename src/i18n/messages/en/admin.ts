@@ -81,6 +81,10 @@ const messages = {
   "admin.qr.linkLabel": "claim link",
   "admin.qr.copyLink": "Copy link",
   "admin.qr.done": "Done",
+  "admin.games.tester": "Tester keys",
+  "admin.form.testerHelp": "Tester keys unlock every game, staging included, for as long as the key is on. Turning a key off or letting it expire ends its testers' access.",
+  "admin.confirm.turnOffTester": "Turn off {code}? {count, plural, one {The tester using it loses} other {The # testers using it lose}} access to every game.",
+  "admin.code.status.testerOn": "Claimed, access on",
 } as const;
 
 export default messages;

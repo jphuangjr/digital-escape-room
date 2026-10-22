@@ -1,7 +1,7 @@
 import "server-only";
 import { randomInt } from "node:crypto";
 import type { User } from "@prisma/client";
-import { GAMES, getGame } from "@/lib/games";
+import { ALL_GAMES, GAMES, getGame } from "@/lib/games";
 import { db } from "./db";
 import { formatCode, generateCodeBody, normalizeCodeInput, parseAdminEmails } from "./codes";
 
@@ -10,16 +10,32 @@ export function isAdmin(user: Pick<User, "email"> | null): boolean {
   return parseAdminEmails(process.env.ACCOUNT_ADMIN).has(user.email.toLowerCase());
 }
 
-/** Game ids this user may host. Admins may host everything. */
+/**
+ * Holds a tester key that's still on: not turned off and not past its end date. Unlike a game code,
+ * a tester key's access isn't permanent; turning the key off (or its expiry) ends it.
+ */
+export async function isTester(user: Pick<User, "id"> | null): Promise<boolean> {
+  if (!user) return false;
+  const live = { gameId: ALL_GAMES, revokedAt: null, OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] };
+  return Boolean(await db.codeRedemption.findFirst({ where: { userId: user.id, code: live }, select: { id: true } }));
+}
+
+/** Admins and testers see (and may host) staging games. */
+export async function seesStaging(user: User | null): Promise<boolean> {
+  return isAdmin(user) || isTester(user);
+}
+
+/** Game ids this user may host. Admins and testers may host everything. */
 export async function ownedGameIds(user: User): Promise<string[]> {
-  if (isAdmin(user)) return GAMES.map((g) => g.id);
+  if (isAdmin(user) || (await isTester(user))) return GAMES.map((g) => g.id);
   const rows = await db.gamePurchase.findMany({ where: { userId: user.id }, select: { gameId: true } });
   return rows.map((r) => r.gameId);
 }
 
 export async function ownsGame(user: User, gameId: string): Promise<boolean> {
   if (isAdmin(user)) return true;
-  return Boolean(await db.gamePurchase.findUnique({ where: { userId_gameId: { userId: user.id, gameId } } }));
+  if (await db.gamePurchase.findUnique({ where: { userId_gameId: { userId: user.id, gameId } } })) return true;
+  return isTester(user);
 }
 
 export interface CodeOptions {
@@ -29,7 +45,7 @@ export interface CodeOptions {
   expiresAt: Date | null;
 }
 
-/** Create `count` codes for a game. Retries on the (astronomically unlikely) unique collision. */
+/** Create `count` codes for a game (or tester keys, with `ALL_GAMES`). Retries on the (astronomically unlikely) unique collision. */
 export async function generateCodes(admin: User, gameId: string, count: number, opts: CodeOptions) {
   const created = [];
   for (let i = 0; i < count; i++) {
@@ -75,21 +91,25 @@ class CodeFull extends Error {}
  * Redeem a code for the signed-in user. Each account can use a given code once; single-use codes
  * allow one account in total, group codes up to `maxUses` (or unlimited). A purchase is permanent.
  * If the user already owns the game, the code isn't used, so it stays available for someone else.
+ * A tester key (`ALL_GAMES`) buys nothing: access lasts only while the key is on (see `isTester`).
  */
 export async function redeemCode(user: User, raw: unknown): Promise<RedeemResult> {
   const body = normalizeCodeInput(raw);
   if (!body) return { ok: false, status: 400, messageId: "api.redeem.badFormat" };
   const code = await db.purchaseCode.findUnique({ where: { code: body } });
-  if (!code || !getGame(code.gameId)) return { ok: false, status: 404, messageId: "api.redeem.invalid" };
+  const tester = code?.gameId === ALL_GAMES;
+  if (!code || (!tester && !getGame(code.gameId))) return { ok: false, status: 404, messageId: "api.redeem.invalid" };
 
   const mine = await db.codeRedemption.findUnique({ where: { codeId_userId: { codeId: code.id, userId: user.id } } });
-  if (mine) return { ok: true, gameId: code.gameId, alreadyOwned: true };
+  // A purchase outlives its code; tester access doesn't, so a tester re-entering a dead key hears why.
+  if (mine && !tester) return { ok: true, gameId: code.gameId, alreadyOwned: true };
   if (code.revokedAt) return { ok: false, status: 410, messageId: "api.redeem.revoked" };
   if (code.expiresAt && code.expiresAt.getTime() <= Date.now()) return { ok: false, status: 410, messageId: "api.redeem.expired" };
+  if (mine) return { ok: true, gameId: code.gameId, alreadyOwned: true };
   if (code.maxUses !== null && code.useCount >= code.maxUses) {
     return { ok: false, status: 409, messageId: code.maxUses === 1 ? "api.redeem.used" : "api.redeem.noUsesLeft" };
   }
-  if (await ownsGame(user, code.gameId)) return { ok: true, gameId: code.gameId, alreadyOwned: true };
+  if (!tester && (await ownsGame(user, code.gameId))) return { ok: true, gameId: code.gameId, alreadyOwned: true };
 
   try {
     await db.$transaction(async (tx) => {
@@ -102,6 +122,7 @@ export async function redeemCode(user: User, raw: unknown): Promise<RedeemResult
           AND ("expiresAt" IS NULL OR "expiresAt" > NOW())
           AND ("maxUses" IS NULL OR "useCount" < "maxUses")`;
       if (claimed !== 1) throw new CodeFull();
+      if (tester) return;
       await tx.gamePurchase.upsert({
         where: { userId_gameId: { userId: user.id, gameId: code.gameId } },
         create: { userId: user.id, gameId: code.gameId, source: "code", sourceRef: code.id },

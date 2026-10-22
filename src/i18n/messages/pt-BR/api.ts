@@ -65,6 +65,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.decode.nothingYet": "Ainda não há nada para decifrar.",
   "api.attempt.solved.maraReset": "Senha temporária enviada ao contato de recuperação.",
   "api.attempt.solved.maraLogin": "Você entrou no HarbourMail da Mara.",
+  "api.redeem.allGames": "Todas as salas de fuga",
 };
 
 export default messages;

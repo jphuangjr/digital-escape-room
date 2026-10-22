@@ -83,6 +83,10 @@ const messages: Record<keyof typeof en, string> = {
   "admin.qr.linkLabel": "link de resgate",
   "admin.qr.copyLink": "Copiar link",
   "admin.qr.done": "Pronto",
+  "admin.games.tester": "Chaves de testador",
+  "admin.form.testerHelp": "Chaves de testador liberam todos os jogos, inclusive os de staging, enquanto a chave estiver ativa. Desativar a chave ou deixá-la expirar encerra o acesso dos testadores.",
+  "admin.confirm.turnOffTester": "Desativar {code}? {count, plural, one {O testador que a usa perde} other {Os # testadores que a usam perdem}} o acesso a todos os jogos.",
+  "admin.code.status.testerOn": "Resgatada, acesso ativo",
 };
 
 export default messages;

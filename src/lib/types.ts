@@ -194,6 +194,7 @@ export interface AttemptResponse {
 export interface MeResponse {
   googleEnabled: boolean; // false when the server has no OAuth credentials configured
   isAdmin: boolean; // email listed in ACCOUNT_ADMIN
+  isTester: boolean; // holds a tester key that is still on (every game, staging included)
   ownedGames: string[]; // game ids this user may host (all of them for admins)
   user: { name: string | null; email: string | null; image: string | null } | null;
   activeRooms: { code: string; gameId: string; status: RoomStatus; isHost: boolean; playerCount: number; createdAt: string }[];

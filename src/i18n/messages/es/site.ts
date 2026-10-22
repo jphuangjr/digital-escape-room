@@ -129,6 +129,11 @@ const messages: Record<keyof typeof en, string> = {
   "site.install.iosAfter": " en la barra y luego «Agregar a inicio». Se abrirá en pantalla completa, como una app.",
   "site.install.button": "Instalar",
   "site.install.dismiss": "Ahora no",
+  "site.redeemBox.tester": "Llave de tester aceptada: todos los juegos están desbloqueados en tu cuenta.",
+  "site.redeem.testerTitle": "Acceso de tester activado",
+  "site.redeem.testerBody": "Mientras esta llave siga activa, todos los escape rooms, incluso los que aún no salen, están desbloqueados en tu cuenta ({account}).",
+  "site.redeem.testerBrowse": "Ver los casos →",
+  "site.account.tester": "Tester",
 };
 
 export default messages;

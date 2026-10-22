@@ -82,6 +82,10 @@ const messages: Record<keyof typeof en, string> = {
   "admin.qr.linkLabel": "受け取りリンク",
   "admin.qr.copyLink": "リンクをコピー",
   "admin.qr.done": "完了",
+  "admin.games.tester": "テスターキー",
+  "admin.form.testerHelp": "テスターキーは有効な間、ステージングを含むすべてのゲームを解放します。無効にするか期限が切れると、テスターの権限も終わります。",
+  "admin.confirm.turnOffTester": "{code} を無効にしますか？このキーを使っている{count, plural, other {#人}}のテスターは、すべてのゲームにアクセスできなくなります。",
+  "admin.code.status.testerOn": "受け取り済み・権限有効",
 };
 
 export default messages;

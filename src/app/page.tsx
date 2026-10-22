@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SITE_NAME, gameText, visibleGames, type GameInfo, type Translate } from "@/lib/games";
 import { getSessionUser } from "@/server/auth";
-import { isAdmin } from "@/server/purchases";
+import { seesStaging } from "@/server/purchases";
 import { Compass } from "@/components/site/Compass";
 import { LanguageSwitcher } from "@/i18n/client";
 import { getT } from "@/i18n/server";
@@ -56,7 +56,7 @@ function GameCard({ game, t }: { game: GameInfo; t: Translate }) {
 
 export default async function Directory() {
   const t = await getT();
-  const games = visibleGames(isAdmin(await getSessionUser().catch(() => null)));
+  const games = visibleGames(await seesStaging(await getSessionUser().catch(() => null)));
   return (
     <main className="noir-vignette min-h-dvh pt-safe pb-safe px-safe">
       <VaultIntro />

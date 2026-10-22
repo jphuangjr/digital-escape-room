@@ -64,6 +64,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.decode.nothingYet": "아직 해독할 내용이 없어요.",
   "api.attempt.solved.maraReset": "복구 연락처로 임시 비밀번호를 보냈습니다.",
   "api.attempt.solved.maraLogin": "마라의 HarbourMail에 로그인했습니다.",
+  "api.redeem.allGames": "모든 방탈출",
 };
 
 export default messages;

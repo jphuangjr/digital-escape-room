@@ -129,6 +129,11 @@ const messages: Record<keyof typeof en, string> = {
   "site.install.iosAfter": "，再選「加入主畫面」。之後會像 App 一樣全螢幕開啟。",
   "site.install.button": "安裝",
   "site.install.dismiss": "稍後再說",
+  "site.redeemBox.tester": "測試金鑰已啟用：你的帳號已解鎖所有遊戲。",
+  "site.redeem.testerTitle": "已開啟測試權限",
+  "site.redeem.testerBody": "只要這把金鑰仍有效，你的帳號（{account}）就能玩所有密室逃脫，包括尚未推出的。",
+  "site.redeem.testerBrowse": "瀏覽案件 →",
+  "site.account.tester": "測試員",
 };
 
 export default messages;

@@ -5,7 +5,7 @@ import { error, json, readBody, translateLogicError } from "@/server/http";
 import { initialProgress, validateColor, validateDisplayName } from "@/server/logic";
 import { newPlayerToken, newRoomCode, openRoomsHostedBy, setPlayerCookie, sweepExpiredRooms } from "@/server/session";
 import { publish } from "@/server/realtime";
-import { isAdmin, ownsGame } from "@/server/purchases";
+import { ownsGame, seesStaging } from "@/server/purchases";
 import { getGame } from "@/lib/games";
 import { track } from "@/server/analytics";
 import { getSessionUser, googleEnabled } from "@/server/auth";
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
   const gameId = typeof body.gameId === "string" ? body.gameId : "ada-voss";
   const game = getGame(gameId);
   // Staging games are hosted by admins only (and need Google sign-in to know who's an admin).
-  if (!game || game.status === "soon" || (game.status === "staging" && !isAdmin(user))) {
+  if (!game || game.status === "soon" || (game.status === "staging" && !(await seesStaging(user)))) {
     return error(400, t("api.common.unknownGame"));
   }
   // Hosting a game requires owning it (joining a friend's room is free).

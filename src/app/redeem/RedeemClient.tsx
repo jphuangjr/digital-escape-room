@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { getGame, gameText } from "@/lib/games";
+import { ALL_GAMES, getGame, gameText } from "@/lib/games";
 import { useT } from "@/i18n/client";
 import { GoogleButton, useMe } from "@/components/site/Account";
 import { Compass } from "@/components/site/Compass";
@@ -51,6 +51,19 @@ export function RedeemClient() {
     );
   } else if (!result) {
     body = <p className="text-noir-ink-faint">{t("site.redeem.claiming", { code })}</p>;
+  } else if (result.ok && result.gameId === ALL_GAMES) {
+    body = (
+      <>
+        <p className="font-serif text-2xl text-noir-ink">{t("site.redeem.testerTitle")}</p>
+        <p className="text-noir-ink-dim">{t("site.redeem.testerBody", { account: me.user.email ?? me.user.name ?? "" })}</p>
+        <Link
+          href="/"
+          className="flex min-h-12 items-center justify-center rounded-lg bg-noir-brass font-semibold text-noir-bg active:bg-noir-brass-hi"
+        >
+          {t("site.redeem.testerBrowse")}
+        </Link>
+      </>
+    );
   } else if (result.ok) {
     const game = getGame(result.gameId);
     const title = game ? gameText(t, game, "title") : result.title;

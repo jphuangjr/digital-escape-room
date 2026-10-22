@@ -63,6 +63,7 @@ const messages = {
   "api.decode.nothingYet": "Nothing to decode yet.",
   "api.attempt.solved.maraReset": "Temporary password sent to the recovery contact.",
   "api.attempt.solved.maraLogin": "Signed in to Mara's HarbourMail.",
+  "api.redeem.allGames": "Every escape room",
 } as const;
 
 export default messages;

@@ -129,6 +129,11 @@ const messages: Record<keyof typeof en, string> = {
   "site.install.iosAfter": " をタップして「ホーム画面に追加」を選んでください。アプリのように全画面で開きます。",
   "site.install.button": "インストール",
   "site.install.dismiss": "あとで",
+  "site.redeemBox.tester": "テスターキーを確認しました。アカウントですべてのゲームが解放されました。",
+  "site.redeem.testerTitle": "テスター権限が有効になりました",
+  "site.redeem.testerBody": "このキーが有効な間、まだ公開されていないものも含め、すべての脱出ゲームがアカウント（{account}）で遊べます。",
+  "site.redeem.testerBrowse": "事件を見る →",
+  "site.account.tester": "テスター",
 };
 
 export default messages;
