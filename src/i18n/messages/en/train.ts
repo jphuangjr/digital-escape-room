@@ -105,7 +105,6 @@ const messages = {
   "train.lock.wheel": "Wheel {n}",
   "train.lock.try": "Try the lock",
   "train.lock.trying": "Trying…",
-  "train.lock.jammed": "Jammed · {s}s",
   "train.notes.title": "Teodor's notes",
   "train.notes.intro": "Stuck? Ring for the night porter. Each ring brings a clearer note, and everyone in your party sees it.",
   "train.notes.tier": "{title} · note {tier} of 3",

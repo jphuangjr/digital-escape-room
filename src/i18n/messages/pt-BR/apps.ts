@@ -55,13 +55,11 @@ const messages: Record<keyof typeof en, string> = {
   "apps.email.unread": "Não lida",
 
   // Files
-  "apps.files.tooManyAttempts": "Tentativas demais.",
   "apps.files.unreachable": "Não foi possível conectar ao servidor. Tente de novo.",
   "apps.files.folderUnlocked": "Pasta desbloqueada",
   "apps.files.wrongPin": "PIN incorreto.",
   "apps.files.enterPin": "Digite o PIN de 4 dígitos",
   "apps.files.pinProgress": "{count} de 4 dígitos digitados",
-  "apps.files.lockedOut": "Bloqueado. Tente de novo em {s} s",
   "apps.files.checking": "Verificando…",
   "apps.files.pinClear": "Limpar",
   "apps.files.pinDelete": "Apagar",

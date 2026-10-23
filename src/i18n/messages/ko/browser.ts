@@ -40,17 +40,14 @@ const messages: Record<keyof typeof en, string> = {
   "browser.redacted.revealed": "드러난 내용: {text}",
 
   // In-site forms: game-system feedback only (site labels stay English)
-  "browser.form.cooling": "시도 횟수가 너무 많아요. 잠시 기다려 주세요.",
   "browser.form.connectionError": "연결 오류가 발생했어요. 다시 시도해 주세요.",
   "browser.form.accepted": "통과했어요.",
   "browser.form.correct": "정답이에요!",
   "browser.form.rejected": "틀렸어요. 다시 생각해 보세요.",
-  "browser.form.retryIn": "{s}초 후 다시 시도할 수 있어요.",
   "browser.form.decreaseShift": "이동 값 줄이기",
   "browser.form.increaseShift": "이동 값 늘리기",
   "browser.form.shiftSolved": "✓ 방 전체에 목록이 해독됐어요.",
   "browser.form.lockNote": "주의: 틀린 키를 넣으면 모두의 시스템이 1분 동안 잠겨요. 먼저 풀어 보세요.",
-  "browser.form.locked": "잠김 · {s}초",
   "browser.form.binaryPassed": "✓ 통과했어요. 해독기를 열고 이진수 탭을 확인해 보세요.",
 };
 

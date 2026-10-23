@@ -1,6 +1,7 @@
 "use client";
 
 import type { LocationId } from "@/lib/atlas/types";
+import { playLockCue, type LockCue } from "@/components/shell/lockSound";
 
 /**
  * Ambient sound for The Atlas of Silent Worlds: one soundscape per place, generated with Web Audio (no audio files)
@@ -93,6 +94,11 @@ export class AtlasAmbience {
     this.ctx = null;
     this.master = null;
     if (ctx) void ctx.close().catch(() => {});
+  }
+
+  /** A lock's thunk or click, over the soundscape (silent while sound is off). */
+  cue(cue: LockCue) {
+    if (this.ctx && this.master) playLockCue(this.ctx, this.master, cue);
   }
 
   /** Crossfade to the soundscape of a place (kept and applied on start when sound is off). */

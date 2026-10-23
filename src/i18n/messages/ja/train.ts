@@ -105,7 +105,6 @@ const messages: Record<keyof typeof en, string> = {
   "train.lock.wheel": "ダイヤル{n}",
   "train.lock.try": "錠を試す",
   "train.lock.trying": "試しています…",
-  "train.lock.jammed": "動かない · {s}秒",
   "train.notes.title": "テオドールの書き付け",
   "train.notes.intro": "行き詰まりましたか？夜間ポーターを呼びましょう。呼ぶたびに少しずつわかりやすい書き付けが届き、一行の全員が読めます。",
   "train.notes.tier": "{title} · 書き付け {tier} / 3",

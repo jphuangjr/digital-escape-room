@@ -55,13 +55,11 @@ const messages: Record<keyof typeof en, string> = {
   "apps.email.unread": "읽지 않음",
 
   // Files
-  "apps.files.tooManyAttempts": "시도 횟수가 너무 많아요.",
   "apps.files.unreachable": "서버에 연결하지 못했어요. 다시 시도해 주세요.",
   "apps.files.folderUnlocked": "폴더 잠금이 풀렸어요",
   "apps.files.wrongPin": "PIN이 틀렸어요.",
   "apps.files.enterPin": "4자리 PIN을 입력하세요",
   "apps.files.pinProgress": "4자리 중 {count}자리 입력됨",
-  "apps.files.lockedOut": "잠겼어요. {s}초 후 다시 시도하세요",
   "apps.files.checking": "확인 중…",
   "apps.files.pinClear": "지우기",
   "apps.files.pinDelete": "삭제",
