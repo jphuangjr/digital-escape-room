@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { QrCode } from "@/components/site/QrCode";
+import { GameTips } from "@/components/site/RoomLoader";
 import type { GameCtx } from "@/lib/client/game";
 import { AttemptLog } from "@/components/apps/AttemptLog";
 import { CaseLog } from "@/components/apps/CaseLog";
@@ -190,6 +191,13 @@ export function RoomSheet({
                 </li>
               ))}
               </ul>
+              {/* alone in the room: a nudge to invite, and a tip while the team gathers */}
+              {state.players.filter((p) => p.online).length <= 1 && (
+                <div className="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+                  <p className="text-xs text-stone-400">{t("wait.tips.gathering")}</p>
+                  <GameTips gameId={state.gameId} className="mt-1.5 min-h-[2.75rem] font-serif italic text-stone-300" />
+                </div>
+              )}
               <InviteQr code={ctx.code} />
               <div className="mt-3 flex justify-center">
                 <LanguageSwitcher tone="shell" />
