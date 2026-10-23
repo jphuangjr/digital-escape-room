@@ -26,8 +26,8 @@ export interface GameCtx {
   openAddress: (address: string) => void;
   /** presence, e.g. "app:notes" or "browser:thedrift.blog" */
   setView: (view: string) => void;
-  /** "solve": a lock opened or a puzzle solved, shown to the whole room with a brass flourish. */
-  toast: (msg: string, tone?: "info" | "success" | "error" | "solve", action?: ToastAction) => void;
+  /** "solve": a lock opened or a puzzle solved, shown to the whole room with a brass flourish; "chapter": the team moved on. */
+  toast: (msg: string, tone?: "info" | "success" | "error" | "solve" | "chapter", action?: ToastAction) => void;
 }
 
 export const GameContext = createContext<GameCtx | null>(null);

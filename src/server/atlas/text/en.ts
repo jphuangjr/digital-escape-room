@@ -440,6 +440,13 @@ const en = {
   "hint.core.1": "Read Corin's page on the lectern. When the room is ready, call it to decide at the Core.",
   "hint.core.2": "If you found all three secrets (the first map, the tide chart and the night bloom), the Core can reroute the Ages first: each Age gate's number plus twice its outer ring plus its inner ring must come round to 0.",
   "hint.core.3": "Verdant (gate 1): outer ☉, inner ☾. Meridian (gate 2): outer ≈, inner ◈. Pelagic (gate 3): outer ≈, inner ☾.",
+
+  // ---------- chapters (the progress line; a name is only sent once the team reaches it) ----------
+  "chapter.observatory": "The Observatory",
+  "chapter.threshold": "The Threshold",
+  "chapter.ages": "The Silent Ages",
+  "chapter.cathedral": "The Null Cathedral",
+  "chapter.choice": "The choice",
 };
 
 export default en;

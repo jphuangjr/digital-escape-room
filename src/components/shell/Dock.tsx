@@ -1,14 +1,16 @@
 "use client";
 
 import { useT } from "@/i18n/client";
-import type { AppId } from "@/lib/types";
+import type { AppId, PlayerPublic } from "@/lib/types";
 import { APP_META, APP_ORDER, LockIcon, PeopleIcon } from "./icons";
+import { PresenceAvatars } from "./Presence";
 
 export function Dock({
   active,
   isUnlocked,
   badges,
   glowing,
+  people = {},
   onOpen,
   onRoom,
   onlineCount,
@@ -19,6 +21,8 @@ export function Dock({
   badges: Partial<Record<AppId, number>>;
   /** Apps that just unlocked or got something new: their icon glows once. */
   glowing?: Set<AppId>;
+  /** Teammates per app they have open: small avatars on its icon. */
+  people?: Partial<Record<AppId, PlayerPublic[]>>;
   onOpen: (a: AppId) => void;
   onRoom: () => void;
   onlineCount: number;
@@ -61,6 +65,7 @@ export function Dock({
                       {badge}
                     </span>
                   )}
+                  <PresenceAvatars players={people[app] ?? []} size="sm" ring="#0c0a09" className="absolute -left-3 -top-1.5" />
                 </span>
                 <span className="text-[10px] tracking-wide">{label}</span>
                 {on && <span aria-hidden className="mt-0.5 h-0.5 w-5 rounded bg-amber-400" />}

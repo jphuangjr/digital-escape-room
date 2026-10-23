@@ -3,6 +3,7 @@ import type { SceneAction, SceneDTO } from "@/lib/train/types";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { defineSceneGame } from "../scene/registry";
 import { EVIDENCE, itemText, THIEF } from "./content";
+import { trainChapter } from "./chapters";
 import { applyAction, parseScene, sceneDTO, type TrainScene } from "./scene";
 import { trainT } from "./text";
 
@@ -20,6 +21,7 @@ export const trainGame = defineSceneGame<TrainScene, SceneAction, SceneDTO>({
   tooManyMessage: (loc, s) => trainT(loc)("msg.tooMany", { s }),
   ending: (scene) => scene.ending && { ending: scene.ending.accused, solved: scene.ending.accused === THIEF, hintsUsed: scene.hints.length },
   progress: (scene) => ({ flags: scene.flags, hints: scene.hints }),
+  chapter: trainChapter,
   badges: (scene) => (scene.ending?.everyClue ? ["everyclue"] : []),
   // A train case is solved only by naming the thief.
   solvedEnding: (ending) => ending === THIEF,

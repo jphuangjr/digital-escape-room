@@ -21,12 +21,22 @@ const messages: Record<keyof typeof en, string> = {
   "shell.status.laptop": "Notebook da Ada",
   "shell.status.phase": "{status, select, voting {Votação em andamento} finished {Caso encerrado} other {Investigação aberta}}",
   "shell.status.roomAria": "Detalhes da sala, {online} on-line",
+  "shell.status.soundOff": "Desligar o som do notebook",
+  "shell.status.soundOn": "Ligar o som do notebook",
   "shell.status.unreadAria": "{count, plural, one {# mensagem não lida} other {# mensagens não lidas}}",
   "shell.toast.decoderLocked": "O Decodificador está bloqueado. Continue investigando os sites.",
   "shell.toast.decoderUnlocked": "Decodificador desbloqueado! Procure no seu dock.",
   "shell.toast.open": "Abrir",
   "shell.toast.reply": "Responder",
   "shell.toast.newEmail": "{kind, select, voicemail {Nova mensagem de voz: {subject}} other {Novo e-mail: {subject}}}",
+  "shell.chapter.aria": "Capítulo {n} de {total}: {name}. Ver o progresso",
+  "shell.chapter.title": "Progresso",
+  "shell.chapter.of": "Capítulo {n} de {total}",
+  "shell.chapter.new": "Novo capítulo: {name}",
+  "shell.chapter.now": "Agora",
+  "shell.chapter.ahead": "Por descobrir",
+  "shell.chapter.close": "Fechar",
+  "shell.chapter.note": "Os próximos capítulos só ganham nome quando o grupo chegar até eles.",
 };
 
 export default messages;

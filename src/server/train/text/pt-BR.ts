@@ -337,6 +337,13 @@ const text: Record<keyof typeof en, string> = {
   "end.osei.text": "O Dr. Osei admite ter escrito a receita e é detido para interrogatório na fronteira. Os advogados da Condessa fazem o resto.\nNa primavera, a Estrela de Varga consta como perdida, o seguro já pagou e as dívidas do patrimônio Varga foram quitadas discretamente.",
   "end.lindqvist.title": "Muito, muito a suspeita errada",
   "end.lindqvist.text": "A Sra. Lindqvist fica indignada, depois encantada: é a coisa mais emocionante que já lhe aconteceu, e ela conta tudo à polícia da fronteira, duas vezes.\nNa confusão, a Condessa Varga desce do trem com uma bolsa bem leve. A Estrela nunca mais é vista.",
+
+  // ---------- chapters (the progress line; a name is only sent once the team reaches it) ----------
+  "chapter.compartment": "Cabine 12B",
+  "chapter.telegram": "O telegrama",
+  "chapter.dining": "O vagão-restaurante",
+  "chapter.cashbox": "O cofre do caixa",
+  "chapter.accusation": "A acusação",
 };
 
 export default text;

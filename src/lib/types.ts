@@ -111,6 +111,16 @@ export interface EndingDTO {
   maraEpilogue: string | null; // present when the team got into Mara's HarbourMail (Easter egg)
 }
 
+/**
+ * How far along the team is, without spoilers: chapter `index` (1-based) of `total`, and the names of the chapters
+ * reached so far, oldest first. Later chapters are never named.
+ */
+export interface ChapterDTO {
+  index: number;
+  total: number;
+  reached: string[];
+}
+
 export interface RoomState {
   code: string;
   gameId: string;
@@ -127,6 +137,8 @@ export interface RoomState {
   emails: EmailDTO[]; // base emails + voicemails unlocked by hints/progress
   vote: VoteState | null;
   ending: EndingDTO | null;
+  /** The team's chapter, worked out on the server from the room's state. */
+  chapter: ChapterDTO;
   /** Physical-room games only: the shared scene (narrow by gameId). */
   scene?: import("@/lib/train/types").SceneDTO | import("@/lib/atlas/types").AtlasSceneDTO;
 }

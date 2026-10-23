@@ -20,6 +20,7 @@ const messages = {
   "browser.error.unreachable": "<addr>{address}</addr>’s server IP address could not be found.",
   "browser.error.timeout": "<addr>{address}</addr> took too long to respond.",
   "browser.newTab.title": "New Tab",
+  "browser.newTab.team": "Your team is on",
 
   // View Source
   "browser.source.dialog": "Page source",

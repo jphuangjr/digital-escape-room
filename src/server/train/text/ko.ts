@@ -337,6 +337,13 @@ const text: Record<keyof typeof en, string> = {
   "end.osei.text": "오세이 박사는 처방전을 써 준 사실을 인정하고, 국경에서 조사를 받기 위해 붙들린다. 나머지는 백작부인의 변호사들이 알아서 처리한다.\n봄이 올 무렵 바르가의 별은 분실물로 처리되고, 보험금이 지급되고, 바르가 가문 영지의 빚은 조용히 청산된다.",
   "end.lindqvist.title": "한참 엉뚱한 용의자",
   "end.lindqvist.text": "린드크비스트 부인은 노발대발하다가, 이내 신이 난다. 평생 겪어 본 일 중 가장 짜릿한 사건이었으니까. 그녀는 국경 경찰에게 자초지종을 두 번이나 들려준다.\n그 소동을 틈타, 바르가 백작부인은 아주 가벼운 핸드백을 들고 열차에서 내린다. 별은 두 번 다시 모습을 드러내지 않는다.",
+
+  // ---------- chapters (the progress line; a name is only sent once the team reaches it) ----------
+  "chapter.compartment": "12B 객실",
+  "chapter.telegram": "전보",
+  "chapter.dining": "식당차",
+  "chapter.cashbox": "금고",
+  "chapter.accusation": "범인 지목",
 };
 
 export default text;

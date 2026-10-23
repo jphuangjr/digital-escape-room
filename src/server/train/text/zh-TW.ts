@@ -337,6 +337,13 @@ const text: Record<keyof typeof en, string> = {
   "end.osei.text": "歐塞醫師承認那張處方出自自己之手，在邊境被留置問話。剩下的事，伯爵夫人的律師全都處理好了。\n到了春天，瓦爾加之星被登記為遺失，保險金已經理賠，瓦爾加家族產業的債務也悄悄還清了。",
   "end.lindqvist.title": "錯得離譜的嫌疑人",
   "end.lindqvist.text": "林奎斯特太太先是勃然大怒，接著又樂不可支：這是她這輩子遇過最刺激的事。她把來龍去脈對邊境警察講了一遍，又講了一遍。\n一片混亂之中，瓦爾加伯爵夫人提著一只輕飄飄的手提包走下了火車。從此再也沒有人見過瓦爾加之星。",
+
+  // ---------- chapters (the progress line; a name is only sent once the team reaches it) ----------
+  "chapter.compartment": "12B 號包廂",
+  "chapter.telegram": "電報",
+  "chapter.dining": "餐車",
+  "chapter.cashbox": "錢箱",
+  "chapter.accusation": "指認竊賊",
 };
 
 export default text;

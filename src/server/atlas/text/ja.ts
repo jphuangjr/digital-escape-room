@@ -440,6 +440,13 @@ const text: Record<keyof typeof en, string> = {
   "hint.core.1": "書見台のコリンのページを読んでください。ルームの準備ができたら、核のところで決断を求めてください。",
   "hint.core.2": "三つの秘密（最初の地図、潮汐図、夜咲きの花）をすべて見つけていれば、決断の前に、核で異界の経路を組み替えられます。各異界の門の番号に、外環の二倍と内環を足して、ぐるりと0に戻るようにしてください。",
   "hint.core.3": "緑蔭（門1）：外環 ☉、内環 ☾。子午線（門2）：外環 ≈、内環 ◈。蒼海（門3）：外環 ≈、内環 ☾。",
+
+  // ---------- chapters (the progress line; a name is only sent once the team reaches it) ----------
+  "chapter.observatory": "天文台",
+  "chapter.threshold": "境界門",
+  "chapter.ages": "沈黙の異界",
+  "chapter.cathedral": "虚ろの大聖堂",
+  "chapter.choice": "決断",
 };
 
 export default text;

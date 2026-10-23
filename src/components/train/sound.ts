@@ -1,46 +1,19 @@
 "use client";
 
 import type { TrainRoomId } from "@/lib/train/types";
-import { playLockCue, type LockCue } from "@/components/shell/lockSound";
+import { noiseBuffer, noteSound, type Ambience } from "@/components/shell/gameSound";
 
 /**
- * Ambient sound for the train: rain on the window and the wheels over the rail joints, generated
- * with Web Audio (no audio files), mixed for where the player stands: the wheels louder in the corridor
- * (nearer the bogies, with a draught at the windows), the rain muffled and a murmur of diners in the dining car. Browsers only allow sound after a tap, so `start()` is called from
- * a user gesture; the player's mute choice is remembered per device.
+ * Ambient sound for the train: the carriage's soft hum, rain on the window and the wheels over the rail joints,
+ * generated with Web Audio (no audio files), mixed for where the player stands: the wheels louder in the corridor
+ * (nearer the bogies, with a draught at the windows), the rain muffled and a murmur of diners in the dining car.
+ * It plays through the shared game sound (shell/gameSound.ts), which starts it after a tap and owns the switch.
  */
 
+/** The player's sound switch on this device ("on" / "off"); sound is on unless turned off. */
 export const SOUND_PREF_KEY = "nx_sound";
 
-export function soundPreferred(): boolean {
-  try {
-    return localStorage.getItem(SOUND_PREF_KEY) !== "off";
-  } catch {
-    return true;
-  }
-}
-
-export function setSoundPreferred(on: boolean) {
-  try {
-    localStorage.setItem(SOUND_PREF_KEY, on ? "on" : "off");
-  } catch {}
-}
-
-function noiseBuffer(ctx: AudioContext, seconds: number, brown = false): AudioBuffer {
-  const buf = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate);
-  const data = buf.getChannelData(0);
-  let last = 0;
-  for (let i = 0; i < data.length; i++) {
-    const white = Math.random() * 2 - 1;
-    if (brown) {
-      last = (last + 0.02 * white) / 1.02;
-      data[i] = last * 3.5;
-    } else data[i] = white;
-  }
-  return buf;
-}
-
-export class TrainAmbience {
+export class TrainAmbience implements Ambience {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private clack: ReturnType<typeof setInterval> | null = null;
@@ -49,21 +22,33 @@ export class TrainAmbience {
   /** The layers each carriage mixes differently. */
   private mix: { rumble: GainNode; rain: GainNode; clack: GainNode; draught: GainNode; murmur: GainNode } | null = null;
 
-  get running() {
-    return this.ctx !== null;
-  }
-
-  start() {
+  start(ctx: AudioContext, out: AudioNode) {
     if (this.ctx) return;
-    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AC) return;
-    const ctx = new AC();
     this.ctx = ctx;
     const master = ctx.createGain();
-    master.gain.value = 0;
-    master.gain.linearRampToValueAtTime(0.9, ctx.currentTime + 2);
-    master.connect(ctx.destination);
+    master.gain.value = 0.9;
+    master.connect(out);
     this.master = master;
+
+    // The carriage's own hum: a low electrical drone with a slow sway.
+    const hum = ctx.createGain();
+    hum.gain.value = 0.022;
+    const sway = ctx.createOscillator();
+    sway.frequency.value = 0.15;
+    const swayDepth = ctx.createGain();
+    swayDepth.gain.value = 0.007;
+    sway.connect(swayDepth).connect(hum.gain);
+    sway.start();
+    for (const [f, type, level] of [[50, "sine", 1], [100, "sine", 0.45], [150, "triangle", 0.12]] as const) {
+      const o = ctx.createOscillator();
+      o.type = type;
+      o.frequency.value = f;
+      const g = ctx.createGain();
+      g.gain.value = level;
+      o.connect(g).connect(hum);
+      o.start();
+    }
+    hum.connect(master);
 
     // Low rumble of the carriage.
     const rumble = ctx.createBufferSource();
@@ -110,6 +95,9 @@ export class TrainAmbience {
       src.stop(at + 0.13);
     };
     const bar = () => {
+      // Nothing piles up while the sound is paused (the tab hidden).
+      if (ctx.state !== "running") return;
+      noteSound("ambience:clack");
       const t = ctx.currentTime + 0.05;
       knock(t, 0.5);
       knock(t + 0.16, 0.4);
@@ -161,8 +149,8 @@ export class TrainAmbience {
   }
 
   /** Mix for where the player is standing (kept and applied on start when sound is off). */
-  setPlace(place: TrainRoomId) {
-    this.place = place;
+  setPlace(place: string) {
+    this.place = place as TrainRoomId;
     this.applyMix(false);
   }
 
@@ -187,17 +175,12 @@ export class TrainAmbience {
     }
   }
 
-  /** A lock's thunk or click, over the ambience (silent while sound is off). */
-  cue(cue: LockCue) {
-    if (this.ctx && this.master) playLockCue(this.ctx, this.master, cue);
-  }
-
   /** Now and then in the dining car, glass or cutlery clinks. */
   private scheduleClink() {
     this.clink = setTimeout(() => {
       const ctx = this.ctx;
       if (!ctx || !this.master) return;
-      if (this.place === "dining") {
+      if (this.place === "dining" && ctx.state === "running") {
         const at = ctx.currentTime + 0.02;
         const o = ctx.createOscillator();
         o.type = "sine";
@@ -220,9 +203,7 @@ export class TrainAmbience {
     if (this.clink) clearTimeout(this.clink);
     this.clink = null;
     this.mix = null;
-    const ctx = this.ctx;
     this.ctx = null;
     this.master = null;
-    if (ctx) void ctx.close().catch(() => {});
   }
 }

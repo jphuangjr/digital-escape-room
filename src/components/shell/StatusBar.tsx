@@ -5,7 +5,8 @@ import { useIntl } from "react-intl";
 import { useT } from "@/i18n/client";
 import type { AppId } from "@/lib/types";
 import type { GameCtx } from "@/lib/client/game";
-import { CompassMark, HomeIcon, PeopleIcon } from "./icons";
+import { ChapterLine } from "./ChapterLine";
+import { CompassMark, HomeIcon, PeopleIcon, SpeakerIcon } from "./icons";
 
 function useClock() {
   const [now, setNow] = useState<Date | null>(null);
@@ -23,12 +24,16 @@ export function StatusBar({
   onRoom,
   onHome,
   chatUnread = 0,
+  soundOn,
+  onSound,
 }: {
   ctx: GameCtx;
   active: AppId | null;
   onRoom: () => void;
   onHome: () => void;
   chatUnread?: number;
+  soundOn: boolean;
+  onSound: () => void;
 }) {
   const now = useClock();
   const t = useT();
@@ -63,6 +68,16 @@ export function StatusBar({
         <span className="hidden font-mono text-xs text-stone-500 sm:inline">
           {ctx.code}
         </span>
+        <ChapterLine chapter={ctx.state.chapter} toast={ctx.toast} theme="ada" />
+        <button
+          type="button"
+          onClick={onSound}
+          aria-pressed={soundOn}
+          aria-label={soundOn ? t("shell.status.soundOff") : t("shell.status.soundOn")}
+          className={`flex h-11 w-11 items-center justify-center rounded-md active:bg-stone-900 ${soundOn ? "text-amber-400" : "text-stone-500"}`}
+        >
+          <SpeakerIcon on={soundOn} className="h-5 w-5" />
+        </button>
         <button
           data-tour="room"
           onClick={onRoom}

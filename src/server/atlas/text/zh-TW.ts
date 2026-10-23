@@ -440,6 +440,13 @@ const text: Record<keyof typeof en, string> = {
   "hint.core.1": "去看讀經台上柯林留下的那一頁。全房間準備好之後，就到核心前召集大家做決定。",
   "hint.core.2": "如果你們找齊了三個祕密（最初的地圖、潮汐圖和夜曇），核心可以先替各紀元改道：每座紀元界門的編號，加上兩倍的外環，再加上內環，繞一圈後必須回到 0。",
   "hint.core.3": "蒼翠書庫（界門 1）：外環 ☉，內環 ☾。子午城（界門 2）：外環 ≈，內環 ◈。汪洋圖書館（界門 3）：外環 ≈，內環 ☾。",
+
+  // ---------- chapters (the progress line; a name is only sent once the team reaches it) ----------
+  "chapter.observatory": "天文台",
+  "chapter.threshold": "界門",
+  "chapter.ages": "沉默的紀元",
+  "chapter.cathedral": "虛空大教堂",
+  "chapter.choice": "抉擇",
 };
 
 export default text;

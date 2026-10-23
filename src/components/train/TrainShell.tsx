@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { RoomState } from "@/lib/types";
+import type { PlayerPublic, RoomState } from "@/lib/types";
 import type { HotspotId, ItemDTO, ItemId, SceneAction, SceneActionResponse, SceneDTO, Suspect, TrainRoomId, WallId } from "@/lib/train/types";
 import { SUIT_SYMBOLS, SUSPECTS, TRAIN_GAME_ID, WALLS_12B, WALLS_DINING } from "@/lib/train/types";
 import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
@@ -9,15 +9,19 @@ import { useChat } from "@/lib/client/chat";
 import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
 import { Tour, type TourStep } from "@/components/shell/Tour";
 import { SolveGlow, useArrivals, useSolveMoments } from "@/components/shell/SolveMoments";
+import { ChapterLine } from "@/components/shell/ChapterLine";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
+import { LookingToo, PresenceAvatars, PresenceDots, teammates, usePresence, within } from "@/components/shell/Presence";
 import { useLockPulse, useOpenHold, type LockPulse } from "@/components/shell/lockFeel";
+import { SceneStage, useSheetZoom, useTapOrigin, ZoomSheet } from "@/components/shell/sceneMotion";
 import { useT } from "@/i18n/client";
 import { Leaderboard } from "@/components/site/Leaderboard";
 import { ResultReveal, type RevealTheme } from "@/components/site/ResultReveal";
 import { CorridorArt, WallArt } from "./walls";
 import { CloseupDocView, ItemIcon, ItemReading, LockDial } from "./parts";
-import { setSoundPreferred, soundPreferred, TrainAmbience } from "./sound";
+import { SOUND_PREF_KEY, TrainAmbience } from "./sound";
+import { useGameSound } from "@/components/shell/useGameSound";
 import { TrainNotebook, useDockedNotes, useSeenClues } from "./notebook";
 
 /**
@@ -26,7 +30,6 @@ import { TrainNotebook, useDockedNotes, useSeenClues } from "./notebook";
  * Every player reads the story in their own language (see src/server/train/text).
  */
 
-const PRESENCE_MS = 15_000;
 const TABS: RoomTab[] = ["people", "chat", "attempts"];
 const TOUR_DONE_KEY = "nx_tour_done_v1";
 
@@ -105,30 +108,11 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), action ? 7000 : 3800);
   }, []);
 
-  // ---------- sound ----------
-  const ambience = useRef<TrainAmbience | null>(null);
-  const [soundOn, setSoundOn] = useState(true);
-  useEffect(() => {
-    setSoundOn(soundPreferred());
-    ambience.current = new TrainAmbience();
-    // Browsers only allow audio after a gesture: start on the first tap if sound is on.
-    const first = () => {
-      if (soundPreferred()) ambience.current?.start();
-    };
-    window.addEventListener("pointerdown", first, { once: true });
-    return () => {
-      window.removeEventListener("pointerdown", first);
-      ambience.current?.stop();
-    };
-  }, []);
-  useEffect(() => ambience.current?.setPlace(place), [place]);
-  const toggleSound = () => {
-    const next = !soundOn;
-    setSoundOn(next);
-    setSoundPreferred(next);
-    if (next) ambience.current?.start();
-    else ambience.current?.stop();
-  };
+  // ---------- sound: the carriage's ambience and the UI's small sounds, started on the first tap ----------
+  const { on: soundOn, toggle: toggleSound, sound } = useGameSound(
+    { prefKey: SOUND_PREF_KEY, defaultOn: true, ambience: () => new TrainAmbience() },
+    { place, open: closeup, turn: `${place}:${wall}`, sheet: roomOpen },
+  );
 
   // ---------- presence ----------
   const view = place === "corridor" ? "train:corridor" : `train:${wall}`;
@@ -145,15 +129,8 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
     }
     lastPlace.current = place;
   }, [place, t]);
-  const viewRef = useRef(view);
-  useEffect(() => {
-    viewRef.current = view;
-    void apiFetch(code, "/presence", { method: "POST", body: { view } });
-  }, [code, view]);
-  useEffect(() => {
-    const id = setInterval(() => void apiFetch(code, "/presence", { method: "POST", body: { view: viewRef.current } }), PRESENCE_MS);
-    return () => clearInterval(id);
-  }, [code]);
+  // The wall, plus the close-up when one is open: teammates see you on the wall either way.
+  usePresence(code, closeup ? `${view}/${closeup}` : view);
 
   // ---------- teammates' finds ----------
   const knownLog = useRef<Set<string> | null>(null);
@@ -167,7 +144,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
     knownLog.current = new Set(scene.log.map((e) => e.id));
   }, [scene.log, state.me.id, toast]);
   // Locks and puzzles: a moment for the whole room, the solver included.
-  const solveFlash = useSolveMoments(scene.log.filter((e) => e.solve), toast, { sound: soundOn });
+  const solveFlash = useSolveMoments(scene.log.filter((e) => e.solve), toast);
   const arrived = useArrivals(scene.inventory.map((i) => i.id));
 
   // ---------- chat toasts ----------
@@ -205,13 +182,14 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
       if (data.message) toast(data.message, data.ok ? "success" : "info");
       if (action.type === "unlock") {
         fireLock(data.ok ? "open" : "wrong");
-        ambience.current?.cue(data.ok ? "open" : "thunk");
+        sound.current?.lock(data.ok ? "open" : "thunk");
       }
+      if (action.type === "take" && data.ok) sound.current?.play("take");
       // A wrong guess can jam the lock, so refresh then too.
       if (data.ok || action.type === "unlock") void refresh();
       return data;
     },
-    [busy, code, refresh, toast, t, fireLock],
+    [busy, code, refresh, toast, t, fireLock, sound],
   );
 
   const ctx: GameCtx = useMemo(
@@ -230,13 +208,19 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
 
   // ---------- swipe between walls ----------
   const swipe = useRef<{ x: number; y: number } | null>(null);
-  const turn = (d: number) => {
+  // Which way the last turn went, so the next wall pans in from that side; and the spot a close-up grows from.
+  const [turnDir, setTurnDir] = useState<1 | -1>(1);
+  const tapOrigin = useTapOrigin();
+  const turn = (d: 1 | -1) => {
     if (place === "corridor") return;
+    setTurnDir(d);
     setWallIdxBy((m) => ({ ...m, [place]: (m[place] + d + walls.length) % walls.length }));
   };
   const pouchHere = Boolean(scene.closeups["under-berth"]?.takes.length);
   const scorecardHere = Boolean(scene.closeups.bridge?.takes.length);
-  const here = state.players.filter((p) => p.online && p.id !== state.me.id && p.currentView === view);
+  const here = teammates(state.players, state.me.id, within(view));
+  const onWall = (w: WallId) => teammates(state.players, state.me.id, within(`train:${w}`));
+  const inCar = (ws: readonly WallId[]) => teammates(state.players, state.me.id, (v) => ws.some((w) => within(`train:${w}`)(v)));
 
   return (
     <GameContext.Provider value={ctx}>
@@ -248,6 +232,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               {place === "corridor" ? t("train.room.corridor") : t("train.title", { room: roomName, wall: t(`train.wall.${wall}`) })}
             </p>
           </div>
+          <ChapterLine chapter={state.chapter} toast={toast} theme="train" />
           <button
             type="button"
             onClick={toggleSound}
@@ -271,7 +256,8 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - s.y) * 1.5) turn(dx < 0 ? 1 : -1);
           }}
         >
-          <div key={place === "corridor" ? "corridor" : `${place}:${wall}`} className="at-enter relative aspect-[3/4] h-full max-h-full max-w-full" data-tour="nx-wall">
+          <SceneStage id={place === "corridor" ? "corridor" : `${place}:${wall}`} group={place} dir={turnDir} origin={tapOrigin}>
+          <div className="relative aspect-[3/4] h-full max-h-full max-w-full" data-tour="nx-wall">
             {place === "corridor" ? (
               <CorridorArt onDining={() => setPlace("dining")} />
             ) : (
@@ -285,21 +271,14 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
                 onTap={setCloseup}
               />
             )}
-            {here.length > 0 && (
-              <div className="absolute right-2 top-2 flex -space-x-1.5" aria-label={t("train.lookingHere", { names: here.map((p) => p.displayName).join(", ") })}>
-                {here.map((p) => (
-                  <span
-                    key={p.id}
-                    title={p.displayName}
-                    className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#120c07] text-xs font-bold text-black"
-                    style={{ backgroundColor: p.color }}
-                  >
-                    {p.displayName.charAt(0).toUpperCase()}
-                  </span>
-                ))}
-              </div>
-            )}
+            <PresenceAvatars
+              players={here}
+              ring="#120c07"
+              label={t("train.lookingHere", { names: here.map((p) => p.displayName).join(", ") })}
+              className="absolute right-2 top-2"
+            />
           </div>
+          </SceneStage>
 
           {place !== "corridor" ? (
             <>
@@ -340,7 +319,11 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               </button>
               <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5" aria-hidden>
                 {walls.map((w, i) => (
-                  <span key={w} className={`h-1.5 w-1.5 rounded-full ${i === wallIdx ? "bg-[#ecd27a]" : "bg-stone-600"}`} />
+                  <span key={w} className="relative flex justify-center">
+                    <span className={`h-1.5 w-1.5 rounded-full ${i === wallIdx ? "bg-[#ecd27a]" : "bg-stone-600"}`} />
+                    {/* a teammate on another wall of this carriage: their colour just above its pip */}
+                    {i !== wallIdx && <PresenceDots players={onWall(w)} className="absolute bottom-2.5" />}
+                  </span>
                 ))}
               </div>
             </>
@@ -352,16 +335,18 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
                   <button
                     type="button"
                     onClick={() => setPlace("12b")}
-                    className="min-h-11 flex-1 rounded-md border border-[#c9a227]/50 bg-black/40 px-2 py-1 text-sm leading-tight text-[#ecd27a] active:bg-[#3d2615]"
+                    className="relative min-h-11 flex-1 rounded-md border border-[#c9a227]/50 bg-black/40 px-2 py-1 text-sm leading-tight text-[#ecd27a] active:bg-[#3d2615]"
                   >
                     {t("train.corridor.back")}
+                    <PresenceAvatars players={inCar(WALLS_12B)} size="sm" ring="#1b120b" className="absolute -right-1 -top-2" />
                   </button>
                   <button
                     type="button"
                     onClick={() => setPlace("dining")}
-                    className="min-h-11 flex-[1.3] rounded-md bg-[#c9a227] px-2 py-1 text-sm font-semibold leading-tight text-[#1b120b] active:bg-[#ecd27a]"
+                    className="relative min-h-11 flex-[1.3] rounded-md bg-[#c9a227] px-2 py-1 text-sm font-semibold leading-tight text-[#1b120b] active:bg-[#ecd27a]"
                   >
                     {t("train.corridor.dining")}
+                    <PresenceAvatars players={inCar(WALLS_DINING)} size="sm" ring="#1b120b" className="absolute -right-1 -top-2" />
                   </button>
                 </div>
               </div>
@@ -429,23 +414,28 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
           </nav>
         </footer>
 
-        {closeup && (
-          <CloseupSheet
-            id={closeup}
-            scene={scene}
-            busy={busy}
-            pulse={lockPulse}
-            onClose={() => setCloseup(null)}
-            act={act}
-            goCorridor={() => {
-              setCloseup(null);
-              setPlace("corridor");
-            }}
-            notes={notesDocked ? <TrainNotebook ctx={ctx} scene={scene} seen={seen} current={closeup} /> : null}
-            notesOn={notesDocked}
-            onNotes={() => setNotesDocked(!notesDocked)}
-          />
-        )}
+        <ZoomSheet
+          value={closeup}
+          origin={tapOrigin}
+          render={(closeup) => (
+            <CloseupSheet
+              id={closeup}
+              scene={scene}
+              busy={busy}
+              pulse={lockPulse}
+              onClose={() => setCloseup(null)}
+              act={act}
+              goCorridor={() => {
+                setCloseup(null);
+                setPlace("corridor");
+              }}
+              notes={notesDocked ? <TrainNotebook ctx={ctx} scene={scene} seen={seen} current={closeup} /> : null}
+              notesOn={notesDocked}
+              onNotes={() => setNotesDocked(!notesDocked)}
+              alsoHere={teammates(state.players, state.me.id, (v) => v === `${view}/${closeup}`)}
+            />
+          )}
+        />
         {itemOpen && (
           <ItemSheet
             item={scene.inventory.find((i) => i.id === itemOpen) ?? null}
@@ -540,6 +530,7 @@ function Sheet({
   bare?: boolean;
 }) {
   const t = useT();
+  const zoom = useSheetZoom();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -547,6 +538,7 @@ function Sheet({
   }, [onClose]);
   const panel = (
     <div
+      ref={side ? undefined : zoom?.panel}
       className={`relative flex min-h-0 w-full flex-col overflow-hidden bg-[#1b120b] ${side ? "flex-1 md:w-auto" : `max-w-md rounded-t-2xl border-t border-[#c9a227]/40 ${tall ? "h-[86dvh]" : "max-h-[86dvh]"}`}`}
       style={side ? undefined : { paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
     >
@@ -561,10 +553,11 @@ function Sheet({
     </div>
   );
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={title}>
-      <button aria-label={t("train.close")} className="absolute inset-0 bg-black/60" onClick={onClose} />
+    <div ref={zoom?.root} className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={title}>
+      <button ref={zoom?.backdrop} aria-label={t("train.close")} className="absolute inset-0 bg-black/60" onClick={onClose} />
       {side ? (
         <div
+          ref={zoom?.panel}
           className="relative flex h-[94dvh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border-t border-[#c9a227]/40 bg-[#1b120b] md:h-[86dvh] md:max-w-4xl md:flex-row"
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         >
@@ -591,6 +584,7 @@ function CloseupSheet({
   notes,
   notesOn,
   onNotes,
+  alsoHere,
 }: {
   id: HotspotId;
   scene: SceneDTO;
@@ -603,6 +597,8 @@ function CloseupSheet({
   notes: React.ReactNode;
   notesOn: boolean;
   onNotes: () => void;
+  /** Teammates with this same close-up open. */
+  alsoHere: PlayerPublic[];
 }) {
   const t = useT();
   // An opened lock stays up, glowing, for a moment before the close-up shows what's inside.
@@ -626,6 +622,7 @@ function CloseupSheet({
         </button>
       }
     >
+      <LookingToo players={alsoHere} ring="#1b120b" className="text-[#e9d9a6]" />
       {c.doc && <CloseupDocView doc={c.doc} />}
       {c.lines.map((l, i) => (
         <p key={i} className="text-[15px] leading-relaxed text-stone-200">

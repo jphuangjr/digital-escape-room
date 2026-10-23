@@ -27,8 +27,14 @@ function describeView(view: string | null, t: ReturnType<typeof useT>): string {
   if (view === "desktop") return t("room.view.desktop");
   // The Nightingale Express: "train:door", "train:corridor".
   if (view.startsWith("train:")) {
-    const w = view.slice(6);
+    // A close-up adds "/<hotspot>": say only the wall.
+    const w = view.slice(6).split("/")[0];
     return w === "corridor" ? t("train.view.corridor") : t("train.view.wall", { wall: t(`train.wall.${w}`) });
+  }
+  // The Atlas: "atlas:<place>:<wall>", maybe with "/<hotspot>": name the wall.
+  if (view.startsWith("atlas:")) {
+    const w = view.split("/")[0].split(":")[2];
+    if (w) return t(`atlas.wall.${w}`);
   }
   return view;
 }

@@ -440,6 +440,13 @@ const text: Record<keyof typeof en, string> = {
   "hint.core.1": "Lee la página de Corin en el atril. Cuando la sala esté lista, convócala en el Núcleo para decidir.",
   "hint.core.2": "Si encontraste los tres secretos (el primer mapa, la carta de mareas y la flor de noche), el Núcleo puede antes redirigir las Eras: el número de la puerta de cada Era, más dos veces su anillo exterior, más su anillo interior, tiene que dar la vuelta hasta el 0.",
   "hint.core.3": "Verdeante (puerta 1): exterior ☉, interior ☾. Meridiano (puerta 2): exterior ≈, interior ◈. Pelágica (puerta 3): exterior ≈, interior ☾.",
+
+  // ---------- chapters (the progress line; a name is only sent once the team reaches it) ----------
+  "chapter.observatory": "El Observatorio",
+  "chapter.threshold": "El Umbral",
+  "chapter.ages": "Las Eras silenciosas",
+  "chapter.cathedral": "La Catedral Nula",
+  "chapter.choice": "La decisión",
 };
 
 export default text;

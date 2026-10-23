@@ -440,6 +440,13 @@ const text: Record<keyof typeof en, string> = {
   "hint.core.1": "독서대에 놓인 코린의 글을 읽어 보세요. 일행이 준비되면 코어에서 일행을 불러 결정하세요.",
   "hint.core.2": "비밀 세 가지(최초의 지도, 조류도, 밤의 꽃)를 모두 찾았다면, 그 전에 코어로 시대들을 재편할 수 있어요. 시대의 관문마다 그 번호에 바깥 고리의 두 배와 안쪽 고리를 더해, 한 바퀴 돌아 0이 되어야 해요.",
   "hint.core.3": "신록(1번 관문): 바깥 ☉, 안쪽 ☾. 자오선(2번 관문): 바깥 ≈, 안쪽 ◈. 대양(3번 관문): 바깥 ≈, 안쪽 ☾.",
+
+  // ---------- chapters (the progress line; a name is only sent once the team reaches it) ----------
+  "chapter.observatory": "천문대",
+  "chapter.threshold": "문턱",
+  "chapter.ages": "고요한 시대들",
+  "chapter.cathedral": "공허의 대성당",
+  "chapter.choice": "선택",
 };
 
 export default text;
