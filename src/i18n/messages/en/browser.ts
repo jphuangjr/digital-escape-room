@@ -38,17 +38,14 @@ const messages = {
   "browser.redacted.revealed": "Revealed: {text}",
 
   // In-site forms: game-system feedback only (site labels stay English)
-  "browser.form.cooling": "Too many attempts. The system is cooling down.",
   "browser.form.connectionError": "Connection error. Try again.",
   "browser.form.accepted": "Accepted.",
   "browser.form.correct": "Correct!",
   "browser.form.rejected": "Rejected. That's not it.",
-  "browser.form.retryIn": "Retry in {s}s.",
   "browser.form.decreaseShift": "Decrease shift",
   "browser.form.increaseShift": "Increase shift",
   "browser.form.shiftSolved": "✓ Listings decoded for the whole room.",
   "browser.form.lockNote": "Careful: a wrong key locks the system for everyone for 1 minute. Work it out first.",
-  "browser.form.locked": "Locked · {s}s",
   "browser.form.binaryPassed": "✓ Passed. Open the Decoder and look for the Binary tab.",
 } as const;
 

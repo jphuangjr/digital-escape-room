@@ -5,7 +5,9 @@ import { useLocale, useT } from "@/i18n/client";
 import { pick, type Locale, type Tr } from "@/i18n/config";
 import type { GameCtx } from "@/lib/client/game";
 import type { AttemptResponse } from "@/lib/types";
-import { CompassBadge, btnGhost, useNow } from "./shared";
+import { CompassBadge, btnGhost } from "./shared";
+import { GuessesLeft, JamBanner, LOCK_THEMES, LockBadge, lockFrameClass, useLockFeedback, useOpenHold } from "@/components/shell/lockFeel";
+import { useAttemptLock } from "@/components/shell/useAttemptLock";
 
 interface FileItem {
   name: string;
@@ -349,15 +351,16 @@ const resolveFile = (f: LocalFile, loc: Locale): FileItem => ({ name: f.name, bo
 
 const PIN_LEN = 4;
 
-function PinPad({ ctx }: { ctx: GameCtx }) {
+function PinPad({ ctx, opening }: { ctx: GameCtx; opening: boolean }) {
   const t = useT();
+  const theme = LOCK_THEMES.laptop;
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [retryUntil, setRetryUntil] = useState<number | null>(null);
-  const [shake, setShake] = useState(false);
-  const now = useNow(500);
-  const waiting = retryUntil !== null && retryUntil > now;
+  const lock = useAttemptLock(ctx.state.attempts, "bonus-pin");
+  const fb = useLockFeedback({ pulse: lock.pulse, jammedUntil: lock.jammedUntil, opening });
+  const open = fb.phase === "open";
+  const waiting = fb.jammed;
 
   const submit = useCallback(
     async (value: string) => {
@@ -370,9 +373,8 @@ function PinPad({ ctx }: { ctx: GameCtx }) {
       setBusy(false);
       const d = res.data;
       if (res.status === 429 || d?.rateLimited) {
-        const sec = d?.retryAfterSec ?? 60;
-        setRetryUntil(Date.now() + sec * 1000);
-        setError(d?.message ?? t("apps.files.tooManyAttempts"));
+        lock.retryAfter(d?.retryAfterSec ?? 60);
+        lock.fire("wrong");
         setPin("");
         return;
       }
@@ -382,20 +384,22 @@ function PinPad({ ctx }: { ctx: GameCtx }) {
         return;
       }
       if (d.correct) {
+        lock.fire("open");
         ctx.toast(t("apps.files.folderUnlocked"), "success");
+        // The folder opens once the room's state says so; FilesApp holds the pad up while it glows.
         await ctx.refresh();
       } else {
         setError(d.message ?? t("apps.files.wrongPin"));
-        setShake(true);
-        setTimeout(() => setShake(false), 400);
+        lock.fire("wrong");
         setPin("");
+        void ctx.refresh();
       }
     },
-    [ctx, t],
+    [ctx, t, lock],
   );
 
   function press(d: string) {
-    if (busy || waiting) return;
+    if (busy || waiting || open) return;
     setError(null);
     if (pin.length >= PIN_LEN) return;
     const next = pin + d;
@@ -406,34 +410,31 @@ function PinPad({ ctx }: { ctx: GameCtx }) {
   const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "clear", "0", "del"];
 
   return (
-    <div className="mx-auto flex w-full max-w-xs flex-col items-center gap-5 py-6">
+    <div className={`mx-auto flex w-full max-w-xs flex-col items-center gap-5 rounded-2xl px-2 py-6 ${lockFrameClass(theme, fb.phase)}`}>
       <div className="text-center">
-        <div className="mb-1 text-3xl" aria-hidden>
-          🔒
-        </div>
+        <LockBadge open={open} theme={theme} className="mx-auto mb-1 h-8 w-8" />
         <h3 className="text-base font-semibold text-zinc-100">Ada&apos;s Personal</h3>
         <p className="text-xs text-zinc-500">{t("apps.files.enterPin")}</p>
       </div>
-      <div className={`flex gap-4 ${shake ? "animate-pulse" : ""}`} aria-label={t("apps.files.pinProgress", { count: pin.length })}>
+      <div className="flex gap-4" aria-label={t("apps.files.pinProgress", { count: open ? PIN_LEN : pin.length })}>
         {Array.from({ length: PIN_LEN }).map((_, i) => (
           <span
             key={i}
-            className={`h-4 w-4 rounded-full border-2 ${
-              i < pin.length ? "border-amber-400 bg-amber-400" : "border-zinc-600"
-            } ${error && !waiting ? "border-red-500" : ""}`}
+            className={`h-4 w-4 rounded-full border-2 transition-colors ${
+              open ? "border-amber-300 bg-amber-300" : fb.phase === "wrong" ? "border-red-500" : i < pin.length ? "border-amber-400 bg-amber-400" : "border-zinc-600"
+            }`}
           />
         ))}
       </div>
-      <div className="min-h-5 text-center text-sm" aria-live="polite">
+      <div className="w-full text-center text-sm" aria-live="polite">
         {waiting ? (
-          <span className="text-amber-300">
-            {t("apps.files.lockedOut", { s: Math.ceil(((retryUntil ?? 0) - now) / 1000) })}
-          </span>
+          <JamBanner sec={fb.jamSec} theme={theme} />
         ) : busy ? (
           <span className="text-zinc-400">{t("apps.files.checking")}</span>
         ) : error ? (
           <span className="text-red-400">{error}</span>
         ) : null}
+        {!waiting && <GuessesLeft left={lock.left} theme={theme} className="mt-1" />}
       </div>
       <div className="grid w-full grid-cols-3 gap-3">
         {keys.map((k) => {
@@ -443,13 +444,13 @@ function PinPad({ ctx }: { ctx: GameCtx }) {
               key={k}
               type="button"
               aria-label={k === "del" ? t("apps.files.pinDelete") : undefined}
-              disabled={busy || waiting || (!isDigit && pin.length === 0)}
+              disabled={busy || waiting || open || (!isDigit && pin.length === 0)}
               onClick={() => {
                 if (isDigit) press(k);
                 else if (k === "del") setPin((p) => p.slice(0, -1));
                 else setPin("");
               }}
-              className={`flex h-16 items-center justify-center rounded-2xl border text-2xl font-semibold disabled:opacity-40 ${
+              className={`lk-key flex h-16 items-center justify-center rounded-2xl border text-2xl font-semibold ${open ? "" : "disabled:opacity-40"} ${
                 isDigit
                   ? "border-zinc-700 bg-zinc-900 text-zinc-100 active:bg-zinc-800"
                   : "border-transparent text-sm uppercase tracking-wider text-zinc-400 active:bg-zinc-900"
@@ -464,19 +465,21 @@ function PinPad({ ctx }: { ctx: GameCtx }) {
   );
 }
 
-function SecurityQuestion({ ctx }: { ctx: GameCtx }) {
+function SecurityQuestion({ ctx, opening }: { ctx: GameCtx; opening: boolean }) {
   const t = useT();
+  const theme = LOCK_THEMES.laptop;
   const [answer, setAnswer] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [retryUntil, setRetryUntil] = useState<number | null>(null);
-  const now = useNow(500);
-  const waiting = retryUntil !== null && retryUntil > now;
+  const lock = useAttemptLock(ctx.state.attempts, "tools-folder");
+  const fb = useLockFeedback({ pulse: lock.pulse, jammedUntil: lock.jammedUntil, opening });
+  const open = fb.phase === "open";
+  const waiting = fb.jammed;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const value = answer.trim();
-    if (!value || busy || waiting) return;
+    if (!value || busy || waiting || open) return;
     setBusy(true);
     setError(null);
     const res = await ctx.api<AttemptResponse>("/attempt", {
@@ -486,8 +489,8 @@ function SecurityQuestion({ ctx }: { ctx: GameCtx }) {
     setBusy(false);
     const d = res.data;
     if (res.status === 429 || d?.rateLimited) {
-      setRetryUntil(Date.now() + (d?.retryAfterSec ?? 60) * 1000);
-      setError(d?.message ?? t("apps.files.tooManyAttempts"));
+      lock.retryAfter(d?.retryAfterSec ?? 60);
+      lock.fire("wrong");
       return;
     }
     if (!d) {
@@ -495,19 +498,20 @@ function SecurityQuestion({ ctx }: { ctx: GameCtx }) {
       return;
     }
     if (d.correct) {
+      lock.fire("open");
       ctx.toast(t("apps.files.folderUnlocked"), "success");
       await ctx.refresh();
     } else {
       setError(d.message ?? t("apps.files.wrongAnswer"));
+      lock.fire("wrong");
+      void ctx.refresh();
     }
   }
 
   return (
-    <form onSubmit={submit} className="mx-auto flex w-full max-w-xs flex-col gap-4 py-6">
+    <form onSubmit={submit} className={`mx-auto flex w-full max-w-xs flex-col gap-4 rounded-2xl px-2 py-6 ${lockFrameClass(theme, fb.phase)}`}>
       <div className="text-center">
-        <div className="mb-1 text-3xl" aria-hidden>
-          🔒
-        </div>
+        <LockBadge open={open} theme={theme} className="mx-auto mb-1 h-8 w-8" />
         <h3 className="text-base font-semibold text-zinc-100">Ada&apos;s Tools</h3>
         <p className="mt-3 text-xs uppercase tracking-widest text-zinc-500">{t("apps.files.securityQuestion")}</p>
         <p className="mt-1 font-serif text-lg text-zinc-100">{t("apps.files.weatherQuestion")}</p>
@@ -520,24 +524,22 @@ function SecurityQuestion({ ctx }: { ctx: GameCtx }) {
         autoCorrect="off"
         spellCheck={false}
         enterKeyHint="go"
+        disabled={waiting || open}
         aria-label={t("apps.files.answerAria")}
-        className="min-h-12 rounded-lg border border-zinc-700 bg-zinc-900 px-3 text-zinc-100 placeholder:text-zinc-600"
+        className={`min-h-12 rounded-lg border bg-zinc-900 px-3 text-zinc-100 transition-colors placeholder:text-zinc-600 disabled:opacity-60 ${
+          fb.phase === "wrong" ? "border-red-500" : open ? "border-amber-300" : "border-zinc-700"
+        }`}
       />
       <button
         type="submit"
-        disabled={busy || waiting || !answer.trim()}
-        className="min-h-12 rounded-lg bg-amber-400 font-semibold text-zinc-950 disabled:opacity-50"
+        disabled={busy || waiting || open || !answer.trim()}
+        className={`lk-key min-h-12 rounded-lg bg-amber-400 font-semibold text-zinc-950 ${open ? "" : "disabled:opacity-50"}`}
       >
-        {busy ? t("apps.files.checking") : t("apps.files.unlock")}
+        {open ? `✓ ${t("shell.lock.opened")}` : busy ? t("apps.files.checking") : t("apps.files.unlock")}
       </button>
-      <div className="min-h-5 text-center text-sm" aria-live="polite">
-        {waiting ? (
-          <span className="text-amber-300">
-            {t("apps.files.lockedOut", { s: Math.ceil(((retryUntil ?? 0) - now) / 1000) })}
-          </span>
-        ) : error ? (
-          <span className="text-red-400">{error}</span>
-        ) : null}
+      <div className="text-center text-sm" aria-live="polite">
+        {waiting ? <JamBanner sec={fb.jamSec} theme={theme} /> : error ? <span className="text-red-400">{error}</span> : null}
+        {!waiting && <GuessesLeft left={lock.left} theme={theme} className="mt-1" />}
       </div>
     </form>
   );
@@ -557,6 +559,9 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
   const toolsUnlocked = state.progress.solved.includes("tools-folder");
   const hasCompass = state.progress.badges.includes("compass");
   const [view, setView] = useState<View>({ kind: "root" });
+  // A folder that just opened keeps its lock on screen a moment, glowing, before its files show.
+  const pinHold = useOpenHold(null, view.kind, unlocked ? null : "bonus-pin");
+  const toolsHold = useOpenHold(null, view.kind, toolsUnlocked ? null : "tools-folder");
   // Cached per language, so switching language mid-game refetches Ada's files in the new one.
   const [personalCache, setPersonalCache] = useState<{ locale: string; files: FileItem[] } | null>(null);
   const personal = personalCache?.locale === locale ? personalCache.files : null;
@@ -631,8 +636,8 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
       <div className="flex h-full min-h-0 flex-col bg-zinc-950 text-zinc-100">
         {header("~/Ada's Personal/Ada's Tools", () => setView({ kind: "personal" }))}
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          {!toolsUnlocked ? (
-            <SecurityQuestion ctx={ctx} />
+          {!toolsUnlocked || toolsHold.opening ? (
+            <SecurityQuestion ctx={ctx} opening={toolsHold.opening} />
           ) : (
             <ul className="divide-y divide-zinc-900">
               {row("🧭", t("apps.files.decoderName"), t("apps.files.decoderSub"), () => ctx.openApp("decoder"))}
@@ -651,8 +656,8 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
       <div className="flex h-full min-h-0 flex-col bg-zinc-950 text-zinc-100">
         {header("~/Ada's Personal", () => setView({ kind: "root" }))}
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          {!unlocked ? (
-            <PinPad ctx={ctx} />
+          {!unlocked || pinHold.opening ? (
+            <PinPad ctx={ctx} opening={pinHold.opening} />
           ) : loading || !personal ? (
             <p className="p-10 text-center text-sm text-zinc-500">{t("apps.files.opening")}</p>
           ) : (

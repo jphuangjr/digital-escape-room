@@ -141,29 +141,8 @@ export function hostOf(address: string): string {
 
 // ---------- Rate limiting ----------
 
-export const ATTEMPT_LIMIT = 5;
-export const ATTEMPT_WINDOW_MS = 60_000;
-
-/**
- * Given timestamps of recent attempts (any order) for one room+puzzle, decide whether a new attempt
- * is allowed. retryAfterSec is when the oldest attempt in the window falls out of it.
- */
-export function rateLimitDecision(
-  recent: Date[],
-  now: Date,
-  limit = ATTEMPT_LIMIT,
-  windowMs = ATTEMPT_WINDOW_MS,
-): { limited: boolean; retryAfterSec: number } {
-  const inWindow = recent
-    .map((d) => d.getTime())
-    .filter((t) => now.getTime() - t < windowMs)
-    .sort((a, b) => b - a); // newest first
-  if (inWindow.length < limit) return { limited: false, retryAfterSec: 0 };
-  // The attempt that must expire before we drop below the limit.
-  const pivot = inWindow[limit - 1];
-  const retryAfterSec = Math.max(1, Math.ceil((pivot + windowMs - now.getTime()) / 1000));
-  return { limited: true, retryAfterSec };
-}
+// Shared with the client (lock countdowns), so it lives in lib/rules.
+export { ATTEMPT_LIMIT, ATTEMPT_WINDOW_MS, rateLimitDecision } from "@/lib/rules";
 
 // ---------- Hints ----------
 

@@ -1,6 +1,7 @@
 "use client";
 
 import type { TrainRoomId } from "@/lib/train/types";
+import { playLockCue, type LockCue } from "@/components/shell/lockSound";
 
 /**
  * Ambient sound for the train: rain on the window and the wheels over the rail joints, generated
@@ -184,6 +185,11 @@ export class TrainAmbience {
         g.linearRampToValueAtTime(target[k], at + 1.5);
       }
     }
+  }
+
+  /** A lock's thunk or click, over the ambience (silent while sound is off). */
+  cue(cue: LockCue) {
+    if (this.ctx && this.master) playLockCue(this.ctx, this.master, cue);
   }
 
   /** Now and then in the dining car, glass or cutlery clinks. */
