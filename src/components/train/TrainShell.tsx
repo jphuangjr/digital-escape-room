@@ -11,6 +11,7 @@ import { Tour, type TourStep } from "@/components/shell/Tour";
 import { SolveGlow, useArrivals, useSolveMoments } from "@/components/shell/SolveMoments";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
+import { useLockPulse, useOpenHold, type LockPulse } from "@/components/shell/lockFeel";
 import { useT } from "@/i18n/client";
 import { Leaderboard } from "@/components/site/Leaderboard";
 import { ResultReveal, type RevealTheme } from "@/components/site/ResultReveal";
@@ -79,7 +80,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   }, [closeup, markSeen]);
   const [itemOpen, setItemOpen] = useState<ItemId | null>(null);
   const [busy, setBusy] = useState(false);
-  const [shake, setShake] = useState(false);
+  const [lockPulse, fireLock] = useLockPulse();
   const [roomOpen, setRoomOpen] = useState(false);
   const [roomTab, setRoomTab] = useState<RoomTab>("people");
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -202,15 +203,15 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
         return null;
       }
       if (data.message) toast(data.message, data.ok ? "success" : "info");
-      if (!data.ok && action.type === "unlock") {
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
+      if (action.type === "unlock") {
+        fireLock(data.ok ? "open" : "wrong");
+        ambience.current?.cue(data.ok ? "open" : "thunk");
       }
       // A wrong guess can jam the lock, so refresh then too.
       if (data.ok || action.type === "unlock") void refresh();
       return data;
     },
-    [busy, code, refresh, toast, t],
+    [busy, code, refresh, toast, t, fireLock],
   );
 
   const ctx: GameCtx = useMemo(
@@ -433,7 +434,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             id={closeup}
             scene={scene}
             busy={busy}
-            shake={shake}
+            pulse={lockPulse}
             onClose={() => setCloseup(null)}
             act={act}
             goCorridor={() => {
@@ -583,7 +584,7 @@ function CloseupSheet({
   id,
   scene,
   busy,
-  shake,
+  pulse,
   onClose,
   act,
   goCorridor,
@@ -594,7 +595,7 @@ function CloseupSheet({
   id: HotspotId;
   scene: SceneDTO;
   busy: boolean;
-  shake: boolean;
+  pulse: LockPulse;
   onClose: () => void;
   act: (a: SceneAction) => Promise<SceneActionResponse | null>;
   goCorridor: () => void;
@@ -604,7 +605,9 @@ function CloseupSheet({
   onNotes: () => void;
 }) {
   const t = useT();
-  const c = scene.closeups[id];
+  // An opened lock stays up, glowing, for a moment before the close-up shows what's inside.
+  const live = scene.closeups[id];
+  const { value: c, opening } = useOpenHold(live, id, live?.lock?.id);
   if (!c) return null;
   return (
     <Sheet
@@ -655,8 +658,10 @@ function CloseupSheet({
           label={c.lock.label}
           faces={c.lock.kind === "symbols" ? SUIT_SYMBOLS : undefined}
           jammedUntil={c.lock.jammedUntil}
+          left={c.lock.left}
           busy={busy}
-          shake={shake}
+          pulse={pulse}
+          opening={opening}
           onTry={(input) => void act({ type: "unlock", lock: c.lock!.id, input })}
         />
       )}

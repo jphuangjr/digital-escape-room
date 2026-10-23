@@ -1,20 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { AtlasDoc, ChartStar, GlyphId, MirrorGridDTO, ValveId } from "@/lib/atlas/types";
 import { GLYPHS, glyphChar, VALVES } from "@/lib/atlas/types";
 import { useT } from "@/i18n/client";
+import { LOCK_THEMES, lockFrameClass, LockStatus, useLockFeedback, type LockPulse } from "@/components/shell/lockFeel";
 
-/** Seconds left until an ISO time, ticking. */
-export function useSecondsUntil(iso: string | undefined | null): number {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!iso) return;
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [iso]);
-  return iso ? Math.max(0, Math.ceil((new Date(iso).getTime() - now) / 1000)) : 0;
-}
+export { useSecondsUntil } from "@/components/shell/lockFeel";
 
 /** Where a pattern's stars sit around its centre, in chart units. */
 function starPoints(s: ChartStar): [number, number][] {
@@ -335,7 +327,7 @@ export function ValvePanel({ valves, busy, onTurn }: { valves: Record<ValveId, b
 }
 
 /** One gate ring: seven glyph buttons, one chosen. */
-export function RingPicker({ label, value, onChange }: { label: string; value: GlyphId; onChange: (g: GlyphId) => void }) {
+export function RingPicker({ label, value, onChange, disabled = false }: { label: string; value: GlyphId; onChange: (g: GlyphId) => void; disabled?: boolean }) {
   const t = useT();
   return (
     <fieldset>
@@ -347,8 +339,9 @@ export function RingPicker({ label, value, onChange }: { label: string; value: G
             type="button"
             aria-pressed={value === g.id}
             aria-label={t("atlas.gate.pick", { ring: label, glyph: g.char })}
+            disabled={disabled}
             onClick={() => onChange(g.id)}
-            className={`flex h-11 items-center justify-center rounded-md border text-xl ${
+            className={`lk-key flex h-11 items-center justify-center rounded-md border text-xl disabled:opacity-50 ${
               value === g.id ? "border-[#f4e7b5] bg-[#3a3320] text-[#f4e7b5]" : "border-[#2c4a55] bg-[#0b1a1f] text-stone-300"
             }`}
           >
@@ -364,29 +357,35 @@ export function RingPicker({ label, value, onChange }: { label: string; value: G
 export function GatePanel({
   powered,
   jammedUntil,
+  left,
   busy,
+  pulse,
   onPull,
 }: {
   powered: boolean;
   jammedUntil?: string;
+  left?: number;
   busy: boolean;
+  pulse: LockPulse;
   onPull: (outer: GlyphId, inner: GlyphId) => void;
 }) {
   const t = useT();
   const [outer, setOuter] = useState<GlyphId>(GLYPHS[0].id);
   const [inner, setInner] = useState<GlyphId>(GLYPHS[0].id);
-  const wait = useSecondsUntil(jammedUntil);
+  const fb = useLockFeedback({ pulse, jammedUntil });
+  const theme = LOCK_THEMES.atlas;
   return (
-    <div className={`space-y-3 rounded-xl border p-3 ${powered ? "border-[#9fd3c7]/60 bg-[#0d2228]" : "border-[#2c4a55] bg-[#0b1418] opacity-80"}`}>
-      <RingPicker label={t("atlas.gate.outer")} value={outer} onChange={setOuter} />
-      <RingPicker label={t("atlas.gate.inner")} value={inner} onChange={setInner} />
+    <div className={`space-y-3 rounded-xl border p-3 ${powered ? "border-[#9fd3c7]/60 bg-[#0d2228]" : "border-[#2c4a55] bg-[#0b1418] opacity-80"} ${lockFrameClass(theme, fb.phase)}`}>
+      <RingPicker label={t("atlas.gate.outer")} value={outer} onChange={setOuter} disabled={fb.jammed} />
+      <RingPicker label={t("atlas.gate.inner")} value={inner} onChange={setInner} disabled={fb.jammed} />
+      <LockStatus jamSec={fb.jamSec} left={fb.phase === "open" ? undefined : left} theme={theme} />
       <button
         type="button"
-        disabled={busy || wait > 0}
+        disabled={busy || fb.jammed || fb.phase === "open"}
         onClick={() => onPull(outer, inner)}
-        className="min-h-12 w-full rounded-lg bg-[#d8b56a] font-semibold text-[#14110a] active:bg-[#f4e7b5] disabled:opacity-60"
+        className={`lk-key min-h-12 w-full rounded-lg font-semibold text-[#14110a] active:bg-[#f4e7b5] ${fb.phase === "open" ? "bg-[#f4e7b5]" : "bg-[#d8b56a] disabled:opacity-60"}`}
       >
-        {wait > 0 ? t("atlas.gate.jammed", { s: wait }) : powered ? t("atlas.gate.lever") : `${t("atlas.gate.lever")} · ${t("atlas.gate.unpowered")}`}
+        {fb.phase === "open" ? `✓ ${t("shell.lock.opened")}` : powered ? t("atlas.gate.lever") : `${t("atlas.gate.lever")} · ${t("atlas.gate.unpowered")}`}
       </button>
     </div>
   );

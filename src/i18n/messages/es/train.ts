@@ -105,7 +105,6 @@ const messages: Record<keyof typeof en, string> = {
   "train.lock.wheel": "Rueda {n}",
   "train.lock.try": "Probar la cerradura",
   "train.lock.trying": "Probando…",
-  "train.lock.jammed": "Atascada · {s}s",
   "train.notes.title": "Las notas de Teodor",
   "train.notes.intro": "¿Atascado? Llama al mozo de noche. Cada llamada trae una nota más clara, y todo tu grupo la ve.",
   "train.notes.tier": "{title} · nota {tier} de 3",

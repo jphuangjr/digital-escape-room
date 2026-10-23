@@ -40,17 +40,14 @@ const messages: Record<keyof typeof en, string> = {
   "browser.redacted.revealed": "表示された内容：{text}",
 
   // In-site forms: game-system feedback only (site labels stay English)
-  "browser.form.cooling": "試行回数が多すぎます。しばらくお待ちください。",
   "browser.form.connectionError": "接続エラーです。もう一度お試しください。",
   "browser.form.accepted": "承認されました。",
   "browser.form.correct": "正解です！",
   "browser.form.rejected": "却下されました。違います。",
-  "browser.form.retryIn": "{s}秒後に再試行できます。",
   "browser.form.decreaseShift": "シフトを減らす",
   "browser.form.increaseShift": "シフトを増やす",
   "browser.form.shiftSolved": "✓ ルーム全員に掲載内容を解読しました。",
   "browser.form.lockNote": "注意：キーを間違えると、全員のシステムが1分間ロックされます。先に解いてから入力しよう。",
-  "browser.form.locked": "ロック中 · {s}秒",
   "browser.form.binaryPassed": "✓ 合格です。デコーダーを開いて「2進数」タブを確認してください。",
 };
 

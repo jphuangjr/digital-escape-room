@@ -105,7 +105,6 @@ const messages: Record<keyof typeof en, string> = {
   "train.lock.wheel": "第 {n} 輪",
   "train.lock.try": "試著開鎖",
   "train.lock.trying": "嘗試中……",
-  "train.lock.jammed": "卡住了・{s} 秒",
   "train.notes.title": "泰奧多爾的紙條",
   "train.notes.intro": "卡關了嗎？按鈴找夜間服務員吧。每按一次鈴，就會送來一張更清楚的紙條，同行的每個人都看得到。",
   "train.notes.tier": "{title}・第 {tier} 張，共 3 張",

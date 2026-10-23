@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocale, useT } from "@/i18n/client";
 import { pick } from "@/i18n/config";
 import type { AttemptResponse, PuzzleId, SiteFormId } from "@/lib/types";
-import { lockoutRemainingSec, WRONG_ANSWER_LOCKOUT_MS } from "@/lib/rules";
-import { useNow } from "@/components/apps/shared";
+import { LOCK_THEMES, LockStatus, lockFrameClass, OPEN_HOLD_MS, useLockFeedback } from "@/components/shell/lockFeel";
+import { useAttemptLock } from "@/components/shell/useAttemptLock";
 import type { RenderEnv } from "./SiteRenderer";
 
 /** In-site (story) labels: `const x = useStory(); x({ en, ko })`. */
@@ -20,35 +20,20 @@ function useAttempt(env: RenderEnv, puzzleId: PuzzleId) {
   const tr = useT();
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<Feedback>(null);
-  const [retryUntil, setRetryUntil] = useState<number | null>(null);
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    if (!retryUntil) return;
-    const id = setInterval(() => {
-      const n = Date.now();
-      setNow(n);
-      if (n >= retryUntil) {
-        setRetryUntil(null);
-        setFeedback(null);
-      }
-    }, 500);
-    return () => clearInterval(id);
-  }, [retryUntil]);
-
-  const retryLeft = retryUntil ? Math.max(0, Math.ceil((retryUntil - now) / 1000)) : 0;
+  // The room-wide limit and lockouts come from the shared attempt log, so every phone shows the same jam.
+  const lock = useAttemptLock(ctx.state.attempts, puzzleId);
+  const fb = useLockFeedback({ pulse: lock.pulse, jammedUntil: lock.jammedUntil });
+  const retryLeft = fb.jamSec;
 
   async function submit(input: string) {
-    if (busy || retryLeft > 0) return;
+    if (busy || retryLeft > 0 || fb.phase === "open") return;
     setBusy(true);
     setFeedback(null);
     const res = await ctx.api<AttemptResponse>("/attempt", { method: "POST", body: { puzzleId, input } });
     setBusy(false);
     if (res.status === 429 || res.data?.rateLimited) {
-      const sec = res.data?.retryAfterSec ?? 30;
-      setNow(Date.now());
-      setRetryUntil(Date.now() + sec * 1000);
-      setFeedback({ tone: "info", text: res.data?.message ?? tr("browser.form.cooling") });
+      lock.retryAfter(res.data?.retryAfterSec ?? 30);
+      lock.fire("wrong");
       return;
     }
     if (!res.ok || !res.data) {
@@ -57,31 +42,45 @@ function useAttempt(env: RenderEnv, puzzleId: PuzzleId) {
     }
     if (res.data.correct) {
       setFeedback({ tone: "success", text: res.data.message ?? tr("browser.form.accepted") });
+      lock.fire("open");
       ctx.toast(res.data.message ?? tr("browser.form.correct"), "success");
-      await ctx.refresh();
+      // Let the form glow open for a moment before the page moves on.
+      await Promise.all([ctx.refresh(), new Promise((r) => setTimeout(r, OPEN_HOLD_MS))]);
       env.onSolved();
     } else {
       setFeedback({ tone: "error", text: res.data.message ?? tr("browser.form.rejected") });
-      if (res.data.retryAfterSec) {
-        setNow(Date.now());
-        setRetryUntil(Date.now() + res.data.retryAfterSec * 1000);
-      }
+      lock.fire("wrong");
+      if (res.data.retryAfterSec) lock.retryAfter(res.data.retryAfterSec);
+      void ctx.refresh();
     }
   }
 
-  return { busy, feedback, retryLeft, submit, solved: ctx.state.progress.solved.includes(puzzleId) };
+  return {
+    busy,
+    feedback,
+    retryLeft,
+    left: lock.left,
+    open: fb.phase === "open",
+    frame: lockFrameClass(LOCK_THEMES.site, fb.phase),
+    submit,
+    solved: ctx.state.progress.solved.includes(puzzleId),
+  };
 }
 
-function FeedbackLine({ feedback, retryLeft }: { feedback: Feedback; retryLeft: number }) {
-  const tr = useT();
-  if (!feedback && !retryLeft) return null;
+/** The form's result line, then the jam banner or how many tries are left. */
+function FeedbackLine({ a }: { a: Pick<ReturnType<typeof useAttempt>, "feedback" | "retryLeft" | "left"> }) {
+  const { feedback, retryLeft, left } = a;
   const color =
     feedback?.tone === "success" ? "text-emerald-500" : feedback?.tone === "error" ? "text-red-500" : "opacity-80";
   return (
-    <p role="status" className={`text-sm font-semibold ${color}`}>
-      {feedback?.text}
-      {retryLeft > 0 && ` ${tr("browser.form.retryIn", { s: retryLeft })}`}
-    </p>
+    <>
+      {feedback && (
+        <p role="status" className={`text-sm font-semibold ${color}`}>
+          {feedback.text}
+        </p>
+      )}
+      <LockStatus jamSec={retryLeft} left={left} theme={LOCK_THEMES.site} />
+    </>
   );
 }
 
@@ -112,20 +111,15 @@ export function SiteForm({
 
 function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
   const x = useStory();
-  const { t, ctx } = env;
+  const { t } = env;
   const tr = useT();
+  // The lock is room-wide (useAttemptLock reads the shared attempt log), so teammates' phones lock too.
   const a = useAttempt(env, "shift-key");
   const [n, setN] = useState(1);
   const wrap = (v: number) => ((v % 26) + 26) % 26;
-  // The lock is room-wide: count down from the latest wrong key in the shared attempt log,
-  // so teammates' phones lock too, not just the phone that guessed.
-  const now = useNow(500);
-  const lastWrong = ctx.state.attempts.find((at) => at.puzzleId === "shift-key" && !at.correct)?.createdAt;
-  const roomLock = lockoutRemainingSec(lastWrong, now, WRONG_ANSWER_LOCKOUT_MS["shift-key"] ?? 0);
-  const lockLeft = Math.max(roomLock, a.retryLeft);
 
   return (
-    <section className={`${t.card} space-y-3`}>
+    <section className={`${t.card} space-y-3 ${a.frame}`}>
       <p className="font-semibold">{prompt}</p>
       {a.solved ? (
         <p className="text-sm font-semibold text-emerald-600">{tr("browser.form.shiftSolved")}</p>
@@ -137,7 +131,7 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
           type="button"
           onClick={() => setN((v) => wrap(v - 1))}
           aria-label={tr("browser.form.decreaseShift")}
-          className={`h-14 w-14 text-3xl font-bold ${t.buttonGhost}`}
+          className={`lk-key h-14 w-14 text-3xl font-bold ${t.buttonGhost}`}
         >
           −
         </button>
@@ -148,7 +142,7 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
           type="button"
           onClick={() => setN((v) => wrap(v + 1))}
           aria-label={tr("browser.form.increaseShift")}
-          className={`h-14 w-14 text-3xl font-bold ${t.buttonGhost}`}
+          className={`lk-key h-14 w-14 text-3xl font-bold ${t.buttonGhost}`}
         >
           +
         </button>
@@ -157,17 +151,15 @@ function ShiftKeyForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
         <button
           type="button"
           onClick={() => a.submit(String(n))}
-          disabled={a.busy || lockLeft > 0}
-          className={`min-h-11 px-5 font-semibold ${t.button} disabled:opacity-60`}
+          disabled={a.busy || a.open || a.retryLeft > 0}
+          className={`lk-key min-h-11 px-5 font-semibold ${t.button} disabled:opacity-60`}
         >
           {a.busy
             ? x({ en: "Checking…", ko: "확인 중…", "zh-TW": "確認中…", es: "Comprobando…", ja: "確認中…", "pt-BR": "Verificando…" })
-            : lockLeft > 0
-              ? tr("browser.form.locked", { s: lockLeft })
-              : x({ en: "Apply key", ko: "키 적용", "zh-TW": "套用金鑰", es: "Aplicar clave", ja: "キーを適用", "pt-BR": "Aplicar chave" })}
+            : x({ en: "Apply key", ko: "키 적용", "zh-TW": "套用金鑰", es: "Aplicar clave", ja: "キーを適用", "pt-BR": "Aplicar chave" })}
         </button>
       </div>
-      <FeedbackLine feedback={a.feedback} retryLeft={0} />
+      <FeedbackLine a={a} />
     </section>
   );
 }
@@ -181,7 +173,7 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
   const [show, setShow] = useState(false);
   return (
     <form
-      className={`${t.card} mx-auto max-w-sm space-y-3`}
+      className={`${t.card} mx-auto max-w-sm space-y-3 ${a.frame}`}
       onSubmit={(e) => {
         e.preventDefault();
         void a.submit(`${user.trim()}:${pass}`);
@@ -222,12 +214,12 @@ function LoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
       </label>
       <button
         type="submit"
-        disabled={a.busy || a.retryLeft > 0 || !user.trim() || !pass}
-        className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
+        disabled={a.busy || a.open || a.retryLeft > 0 || !user.trim() || !pass}
+        className={`lk-key min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
       >
         {a.busy ? x({ en: "Signing in…", ko: "로그인 중…", "zh-TW": "登入中…", es: "Iniciando sesión…", ja: "ログイン中…", "pt-BR": "Entrando…" }) : x({ en: "Sign in", ko: "로그인", "zh-TW": "登入", es: "Iniciar sesión", ja: "ログイン", "pt-BR": "Entrar" })}
       </button>
-      <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
+      <FeedbackLine a={a} />
     </form>
   );
 }
@@ -239,7 +231,7 @@ function FinalPhraseForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
   const [v, setV] = useState("");
   return (
     <form
-      className={`${t.card} space-y-3`}
+      className={`${t.card} space-y-3 ${a.frame}`}
       onSubmit={(e) => {
         e.preventDefault();
         if (v.trim()) void a.submit(v);
@@ -263,12 +255,12 @@ function FinalPhraseForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
       </div>
       <button
         type="submit"
-        disabled={a.busy || a.retryLeft > 0 || !v.trim()}
-        className={`min-h-12 w-full font-bold uppercase tracking-widest ${t.button} disabled:opacity-60`}
+        disabled={a.busy || a.open || a.retryLeft > 0 || !v.trim()}
+        className={`lk-key min-h-12 w-full font-bold uppercase tracking-widest ${t.button} disabled:opacity-60`}
       >
         {a.busy ? x({ en: "Transmitting…", ko: "전송 중…", "zh-TW": "傳送中…", es: "Transmitiendo…", ja: "送信中…", "pt-BR": "Transmitindo…" }) : x({ en: "Transmit", ko: "전송", "zh-TW": "傳送", es: "Transmitir", ja: "送信", "pt-BR": "Transmitir" })}
       </button>
-      <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
+      <FeedbackLine a={a} />
     </form>
   );
 }
@@ -282,7 +274,7 @@ function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
   const [v, setV] = useState("");
   return (
     <form
-      className={`${t.card} space-y-3`}
+      className={`${t.card} space-y-3 ${a.frame}`}
       onSubmit={(e) => {
         e.preventDefault();
         if (v.trim()) void a.submit(v);
@@ -310,14 +302,14 @@ function BinaryQuizForm({ code, env }: { code: string; env: RenderEnv }) {
           </label>
           <button
             type="submit"
-            disabled={a.busy || a.retryLeft > 0 || !v.trim()}
-            className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
+            disabled={a.busy || a.open || a.retryLeft > 0 || !v.trim()}
+            className={`lk-key min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
           >
             {a.busy ? x({ en: "Checking…", ko: "확인 중…", "zh-TW": "確認中…", es: "Comprobando…", ja: "確認中…", "pt-BR": "Verificando…" }) : x({ en: "Check answer", ko: "정답 확인", "zh-TW": "檢查答案", es: "Comprobar respuesta", ja: "答え合わせ", "pt-BR": "Verificar resposta" })}
           </button>
         </>
       )}
-      {!a.solved && <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />}
+      {!a.solved && <FeedbackLine a={a} />}
     </form>
   );
 }
@@ -330,7 +322,7 @@ function AdminLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
   const [show, setShow] = useState(false);
   return (
     <form
-      className={`${t.card} mx-auto max-w-sm space-y-3`}
+      className={`${t.card} mx-auto max-w-sm space-y-3 ${a.frame}`}
       onSubmit={(e) => {
         e.preventDefault();
         if (pass.trim()) void a.submit(pass);
@@ -355,12 +347,12 @@ function AdminLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
       </div>
       <button
         type="submit"
-        disabled={a.busy || a.retryLeft > 0 || !pass.trim()}
-        className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
+        disabled={a.busy || a.open || a.retryLeft > 0 || !pass.trim()}
+        className={`lk-key min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
       >
         {a.busy ? x({ en: "Checking…", ko: "확인 중…", "zh-TW": "確認中…", es: "Comprobando…", ja: "確認中…", "pt-BR": "Verificando…" }) : x({ en: "Unlock console", ko: "콘솔 잠금 해제", "zh-TW": "解鎖主控台", es: "Desbloquear consola", ja: "コンソールのロックを解除", "pt-BR": "Desbloquear console" })}
       </button>
-      <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
+      <FeedbackLine a={a} />
     </form>
   );
 }
@@ -375,7 +367,7 @@ function MailLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
   const [show, setShow] = useState(false);
   return (
     <form
-      className={`${t.card} mx-auto max-w-sm space-y-3`}
+      className={`${t.card} mx-auto max-w-sm space-y-3 ${a.frame}`}
       onSubmit={(e) => {
         e.preventDefault();
         void a.submit(`${user.trim()}:${pass}`);
@@ -412,12 +404,12 @@ function MailLoginForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
       </label>
       <button
         type="submit"
-        disabled={a.busy || a.retryLeft > 0 || !user.trim() || !pass}
-        className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
+        disabled={a.busy || a.open || a.retryLeft > 0 || !user.trim() || !pass}
+        className={`lk-key min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
       >
         {a.busy ? x({ en: "Signing in…", ko: "로그인 중…", "zh-TW": "登入中…", es: "Iniciando sesión…", ja: "ログイン中…", "pt-BR": "Entrando…" }) : x({ en: "Sign in", ko: "로그인", "zh-TW": "登入", es: "Iniciar sesión", ja: "ログイン", "pt-BR": "Entrar" })}
       </button>
-      <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
+      <FeedbackLine a={a} />
     </form>
   );
 }
@@ -430,7 +422,7 @@ function MailResetForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
   const [v, setV] = useState("");
   return (
     <form
-      className={`${t.card} mx-auto max-w-sm space-y-3`}
+      className={`${t.card} mx-auto max-w-sm space-y-3 ${a.frame}`}
       onSubmit={(e) => {
         e.preventDefault();
         if (v.trim()) void a.submit(v);
@@ -452,12 +444,12 @@ function MailResetForm({ prompt, env }: { prompt: string; env: RenderEnv }) {
       />
       <button
         type="submit"
-        disabled={a.busy || a.retryLeft > 0 || !v.trim()}
-        className={`min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
+        disabled={a.busy || a.open || a.retryLeft > 0 || !v.trim()}
+        className={`lk-key min-h-11 w-full font-semibold ${t.button} disabled:opacity-60`}
       >
         {a.busy ? x({ en: "Sending…", ko: "보내는 중…", "zh-TW": "傳送中…", es: "Enviando…", ja: "送信中…", "pt-BR": "Enviando…" }) : x({ en: "Send temporary password", ko: "임시 비밀번호 보내기", "zh-TW": "寄送臨時密碼", es: "Enviar contraseña temporal", ja: "仮パスワードを送信", "pt-BR": "Enviar senha temporária" })}
       </button>
-      <FeedbackLine feedback={a.feedback} retryLeft={a.retryLeft} />
+      <FeedbackLine a={a} />
     </form>
   );
 }

@@ -22,6 +22,7 @@ import {
   appendLog,
   jammedUntil,
   JAM_SEC,
+  lockState,
   MAX_LOG,
   nextHintTier,
   parseHints,
@@ -192,32 +193,27 @@ function closeupDTO(h: HotspotId, scene: AtlasScene, T: AT, now: Date): AtlasClo
   for (const id of LOCK_IDS) {
     const l = LOCKS[id];
     if (l.at !== h || !holds(l.when, has)) continue;
-    const until = jammedUntil(scene.jams, id, now);
-    c.lock = { id, kind: l.kind, length: l.length, label: T(l.label), ...(until ? { jammedUntil: until } : {}) };
+    c.lock = { id, kind: l.kind, length: l.length, label: T(l.label), ...lockState(scene.jams, id, now) };
   }
   if (h === "valves" && !has("water.drained")) c.valves = Object.fromEntries(VALVES.map((v) => [v, has(`valve.${v}`)])) as Record<ValveId, boolean>;
-  if (h === "gate") {
-    const until = jammedUntil(scene.jams, "gate", now);
-    c.gate = { powered: has("engine.on"), ...(until ? { jammedUntil: until } : {}) };
-  }
+  if (h === "gate") c.gate = { powered: has("engine.on"), ...lockState(scene.jams, "gate", now) };
   // With the can in hand, each pot can be watered until the right one opens the little door.
   if (h === "plate") {
     const sockets = GLYPHS.map((g) => {
       const seal = SEALS.find((s) => SEAL_SOCKETS[s] === g.id && has(`seated.${s}`)) ?? null;
       return { glyph: g.id, seal };
     });
-    c.plate = { sockets, registered: has("cathedral.registered") };
+    c.plate = { sockets, registered: has("cathedral.registered"), ...lockState(scene.jams, "plate", now) };
     if (!has("cathedral.registered") && SEALS.some((s) => scene.inventory.includes(s))) c.lines.push(T("c.plate.how"));
   }
   if (h === "core") {
     const canReroute = SECRETS.every((i) => scene.found.includes(i));
-    const until = jammedUntil(scene.jams, "core", now);
     c.core = {
       canReroute,
       rerouted: has("core.rerouted"),
       gates: AGES.map((age) => ({ age, name: T(`place.${age}`), origin: GATE_ORIGIN[age] })),
       convened: has("core.convened"),
-      ...(until ? { jammedUntil: until } : {}),
+      ...lockState(scene.jams, "core", now),
     };
     if (!has("core.convened")) {
       if (has("core.rerouted")) c.lines.push(T("c.core.rerouted"));

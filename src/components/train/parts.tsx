@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useT } from "@/i18n/client";
 import type { CloseupDoc, ItemDTO, ItemId } from "@/lib/train/types";
+import { LOCK_THEMES, LockBadge, lockFrameClass, LockStatus, useLockFeedback, type LockPulse, type LockTheme } from "@/components/shell/lockFeel";
 
 /** Small drawings of the things you can carry. */
 export function ItemIcon({ id, className = "h-10 w-10" }: { id: ItemId; className?: string }) {
@@ -278,71 +279,82 @@ export function LockDial({
   length,
   label,
   busy,
-  shake,
+  pulse,
+  opening = false,
   onTry,
   faces,
   jammedUntil,
+  left,
+  theme = LOCK_THEMES.brass,
 }: {
   jammedUntil?: string;
+  /** Wrong guesses left before it jams (once one has gone wrong). */
+  left?: number;
   length: number;
   label: string;
   busy: boolean;
-  shake: boolean;
+  /** This player's last guess, from the shell (shake on a miss, glow when it opens). */
+  pulse: LockPulse;
+  /** Held on screen for a moment after it opened. */
+  opening?: boolean;
   onTry: (code: string) => void;
   /** Wheel faces; digits 0–9 by default. */
   faces?: string[];
+  theme?: LockTheme;
 }) {
   const t = useT();
   const wheel = faces ?? ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
   const [digits, setDigits] = useState<number[]>(() => Array.from({ length }, () => 0));
-  const [now, setNow] = useState(() => Date.now());
-  const jammedFor = jammedUntil ? Math.ceil((new Date(jammedUntil).getTime() - now) / 1000) : 0;
-  useEffect(() => {
-    if (!jammedUntil) return;
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [jammedUntil]);
+  const fb = useLockFeedback({ pulse, jammedUntil, opening });
+  const open = fb.phase === "open";
+  const frozen = busy || fb.jammed || open;
   // Seven wheels must still fit a phone: narrow them past five.
   const w = length > 5 ? "w-9" : "w-12";
   const bump = (i: number, d: number) => setDigits((ds) => ds.map((v, j) => (j === i ? (v + d + wheel.length) % wheel.length : v)));
   return (
-    <div className="rounded-xl border border-[#c9a227]/50 bg-[#1b120b] p-4">
-      <p className="text-center font-mono text-[11px] uppercase tracking-[0.3em] text-[#c9a227]">{label}</p>
-      <div className={`mt-3 flex justify-center gap-2 ${shake ? "nx-shake" : ""}`}>
+    <div className={`rounded-xl border border-[#c9a227]/50 bg-[#1b120b] p-4 ${lockFrameClass(theme, fb.phase)}`}>
+      <p className="flex items-center justify-center gap-2 text-center font-mono text-[11px] uppercase tracking-[0.3em] text-[#c9a227]">
+        <LockBadge open={open} theme={theme} className="h-4 w-4 shrink-0" />
+        {label}
+      </p>
+      <div className="mt-3 flex justify-center gap-2">
         {digits.map((v, i) => (
           <div key={i} className="flex flex-col items-center">
             <button
               type="button"
               aria-label={t("train.lock.up", { n: i + 1 })}
+              disabled={fb.jammed || open}
               onClick={() => bump(i, 1)}
-              className={`flex h-10 ${w} items-center justify-center rounded-t-md bg-[#3d2615] text-[#ecd27a] active:bg-[#5b3a22]`}
+              className={`lk-key flex h-10 ${w} items-center justify-center rounded-t-md bg-[#3d2615] text-[#ecd27a] active:bg-[#5b3a22] ${fb.jammed ? "disabled:opacity-50" : ""}`}
             >
               ▲
             </button>
             <output
               aria-label={t("train.lock.wheel", { n: i + 1 })}
-              className={`flex h-14 ${w} items-center justify-center border-y border-[#7a5f12] bg-gradient-to-b from-[#ecd27a] via-[#c9a227] to-[#8a6b1a] font-mono text-3xl font-bold text-[#1b120b]`}
+              className={`flex h-14 ${w} items-center justify-center border-y border-[#7a5f12] bg-gradient-to-b from-[#ecd27a] via-[#c9a227] to-[#8a6b1a] font-mono text-3xl font-bold text-[#1b120b] ${fb.jammed ? "saturate-50" : ""}`}
             >
               <span className={faces && (wheel[v] === "♥" || wheel[v] === "♦") ? "text-[#8a1f17]" : undefined}>{wheel[v]}</span>
             </output>
             <button
               type="button"
               aria-label={t("train.lock.down", { n: i + 1 })}
+              disabled={fb.jammed || open}
               onClick={() => bump(i, -1)}
-              className={`flex h-10 ${w} items-center justify-center rounded-b-md bg-[#3d2615] text-[#ecd27a] active:bg-[#5b3a22]`}
+              className={`lk-key flex h-10 ${w} items-center justify-center rounded-b-md bg-[#3d2615] text-[#ecd27a] active:bg-[#5b3a22] ${fb.jammed ? "disabled:opacity-50" : ""}`}
             >
               ▼
             </button>
           </div>
         ))}
       </div>
+      <LockStatus jamSec={fb.jamSec} left={open ? undefined : left} theme={theme} className="mt-3" />
       <button
         type="button"
-        disabled={busy || jammedFor > 0}
+        disabled={frozen}
         onClick={() => onTry(digits.map((v) => wheel[v]).join(""))}
-        className="mt-4 min-h-11 w-full rounded-md bg-[#c9a227] font-semibold text-[#1b120b] active:bg-[#ecd27a] disabled:opacity-60"
+        className={`lk-key mt-3 min-h-11 w-full rounded-md font-semibold text-[#1b120b] active:bg-[#ecd27a] ${open ? "bg-[#ecd27a]" : "bg-[#c9a227] disabled:opacity-60"}`}
       >
-        {jammedFor > 0 ? t("train.lock.jammed", { s: jammedFor }) : busy ? t("train.lock.trying") : t("train.lock.try")}
+        {open ? `✓ ${t("shell.lock.opened")}` : busy ? t("train.lock.trying") : t("train.lock.try")}
       </button>
     </div>
   );

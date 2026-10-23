@@ -11,6 +11,7 @@ import { Tour, type TourStep } from "@/components/shell/Tour";
 import { SolveGlow, useArrivals, useSolveMoments } from "@/components/shell/SolveMoments";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
+import { LOCK_THEMES, OPEN_HOLD_MS, useLockPulse, useOpenHold, type LockPulse } from "@/components/shell/lockFeel";
 import { LockDial } from "@/components/train/parts";
 import { useT } from "@/i18n/client";
 import { AtlasDocView, GatePanel, MirrorGrid, TankPanel, useSecondsUntil, ValvePanel } from "./parts";
@@ -87,7 +88,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
   const [intro, setIntro] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [shake, setShake] = useState(false);
+  const [lockPulse, fireLock] = useLockPulse();
   const [roomOpen, setRoomOpen] = useState(false);
   const [roomTab, setRoomTab] = useState<RoomTab>("people");
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -246,16 +247,19 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
         return null;
       }
       if (data.message) toast(data.message, data.ok ? "success" : "info");
-      if (!data.ok && (action.type === "unlock" || action.type === "dial")) {
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
+      // Every guess at a lock, the gate, the plate or the core gets the same feel.
+      if (action.type === "unlock" || action.type === "dial" || action.type === "seat" || action.type === "reroute") {
+        fireLock(data.ok ? "open" : "wrong");
+        ambience.current?.cue(data.ok ? "open" : "thunk");
       }
       // Failed guesses can still change things (a jam, a flood), so refresh whenever something was tried.
       void refresh();
-      if (data.arrived) go(data.arrived);
+      // Let the gate glow open for a moment before stepping through.
+      const arrived = data.arrived;
+      if (arrived) window.setTimeout(() => go(arrived), OPEN_HOLD_MS);
       return data;
     },
-    [busy, code, refresh, toast, t, go],
+    [busy, code, refresh, toast, t, go, fireLock],
   );
 
   const ctx: GameCtx = useMemo(
@@ -404,7 +408,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
             id={closeup}
             scene={scene}
             busy={busy}
-            shake={shake}
+            pulse={lockPulse}
             onClose={() => setCloseup(null)}
             act={act}
             go={go}
@@ -615,7 +619,7 @@ function CloseupSheet({
   id,
   scene,
   busy,
-  shake,
+  pulse,
   onClose,
   act,
   go,
@@ -626,7 +630,7 @@ function CloseupSheet({
   id: HotspotId;
   scene: AtlasSceneDTO;
   busy: boolean;
-  shake: boolean;
+  pulse: LockPulse;
   onClose: () => void;
   act: (a: AtlasSceneAction) => Promise<AtlasActionResponse | null>;
   go: (p: LocationId) => void;
@@ -636,7 +640,9 @@ function CloseupSheet({
   onNotes: () => void;
 }) {
   const t = useT();
-  const c = scene.closeups[id];
+  // An opened lock stays up, glowing, for a moment before the close-up shows what's inside.
+  const live = scene.closeups[id];
+  const { value: c, opening } = useOpenHold(live, id, live?.lock?.id);
   if (!c) return null;
   return (
     <Sheet
@@ -668,12 +674,22 @@ function CloseupSheet({
           plate={c.plate}
           held={scene.inventory.filter((i) => i.id.startsWith("seal-")).map((i) => ({ id: i.id, name: i.name }))}
           busy={busy}
+          pulse={pulse}
           act={act}
         />
       )}
-      {c.core && <CorePanel core={c.core} busy={busy} act={act} />}
+      {c.core && <CorePanel core={c.core} busy={busy} pulse={pulse} act={act} />}
       {c.valves && <ValvePanel valves={c.valves} busy={busy} onTurn={(v) => void act({ type: "operate", target: id, op: v })} />}
-      {c.gate && <GatePanel powered={c.gate.powered} jammedUntil={c.gate.jammedUntil} busy={busy} onPull={(outer, inner) => void act({ type: "dial", outer, inner })} />}
+      {c.gate && (
+        <GatePanel
+          powered={c.gate.powered}
+          jammedUntil={c.gate.jammedUntil}
+          left={c.gate.left}
+          busy={busy}
+          pulse={pulse}
+          onPull={(outer, inner) => void act({ type: "dial", outer, inner })}
+        />
+      )}
       {c.lock && (
         <LockDial
           key={c.lock.id}
@@ -681,8 +697,11 @@ function CloseupSheet({
           label={c.lock.label}
           faces={c.lock.kind === "symbols" ? GLYPHS.map((g) => g.char) : undefined}
           jammedUntil={c.lock.jammedUntil}
+          left={c.lock.left}
           busy={busy}
-          shake={shake}
+          pulse={pulse}
+          opening={opening}
+          theme={LOCK_THEMES.atlas}
           onTry={(input) => void act({ type: "unlock", lock: c.lock!.id, input })}
         />
       )}

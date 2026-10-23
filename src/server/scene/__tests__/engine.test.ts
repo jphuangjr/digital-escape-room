@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addHint, appendLog, jammedUntil, JAM_AFTER, JAM_SEC, MAX_LOG, nextHintTier, parseHints, parseJams, parseVote, recordGuess, stepVote, tally } from "../engine";
+import { addHint, appendLog, jammedUntil, JAM_AFTER, JAM_SEC, lockState, MAX_LOG, nextHintTier, parseHints, parseJams, parseVote, recordGuess, stepVote, tally } from "../engine";
 import { sceneGame } from "../games";
 
 const t0 = new Date("2026-01-01T00:00:00Z");
@@ -28,6 +28,15 @@ describe("jamming locks", () => {
     expect(jammedNow).toBe(true);
     expect(jammedUntil(jams, "door", later(JAM_SEC - 1))).toBeTruthy();
     expect(jammedUntil(jams, "door", later(JAM_SEC + 1))).toBeNull();
+  });
+
+  it("tells the client only the jam's end, or how many wrong guesses are left", () => {
+    let jams = recordGuess({}, "door", false, t0).jams;
+    expect(lockState({}, "door", t0)).toEqual({});
+    expect(lockState(jams, "door", t0)).toEqual({ left: JAM_AFTER - 1 });
+    for (let i = 1; i < JAM_AFTER; i++) jams = recordGuess(jams, "door", false, t0).jams;
+    expect(lockState(jams, "door", later(1))).toEqual({ jammedUntil: later(JAM_SEC).toISOString() });
+    expect(lockState(jams, "door", later(JAM_SEC + 1))).toEqual({});
   });
 
   it("parses only known locks with sane fields", () => {

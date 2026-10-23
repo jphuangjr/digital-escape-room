@@ -55,13 +55,11 @@ const messages: Record<keyof typeof en, string> = {
   "apps.email.unread": "未読",
 
   // Files
-  "apps.files.tooManyAttempts": "試行回数が多すぎます。",
   "apps.files.unreachable": "サーバーに接続できませんでした。もう一度お試しください。",
   "apps.files.folderUnlocked": "フォルダーのロックを解除しました",
   "apps.files.wrongPin": "PINが違います。",
   "apps.files.enterPin": "4桁のPINを入力",
   "apps.files.pinProgress": "4桁中 {count} 桁入力済み",
-  "apps.files.lockedOut": "ロック中です。{s}秒後に再試行してください",
   "apps.files.checking": "確認中…",
   "apps.files.pinClear": "クリア",
   "apps.files.pinDelete": "削除",

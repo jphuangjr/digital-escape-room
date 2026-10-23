@@ -105,7 +105,6 @@ const messages: Record<keyof typeof en, string> = {
   "train.lock.wheel": "{n}번 바퀴",
   "train.lock.try": "자물쇠 열어 보기",
   "train.lock.trying": "시도하는 중…",
-  "train.lock.jammed": "걸림 · {s}초",
   "train.notes.title": "테오도르의 쪽지",
   "train.notes.intro": "막혔나요? 야간 포터를 불러 보세요. 벨을 울릴 때마다 더 분명한 쪽지가 오고, 일행 모두가 함께 볼 수 있어요.",
   "train.notes.tier": "{title} · 쪽지 {tier}/3",
