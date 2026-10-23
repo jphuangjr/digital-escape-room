@@ -14,6 +14,7 @@ import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
 import { LookingToo, PresenceAvatars, PresenceDots, teammates, usePresence, within } from "@/components/shell/Presence";
 import { LOCK_THEMES, OPEN_HOLD_MS, useLockPulse, useOpenHold, type LockPulse } from "@/components/shell/lockFeel";
+import { SceneStage, useSheetZoom, useTapOrigin, ZoomSheet } from "@/components/shell/sceneMotion";
 import { LockDial } from "@/components/train/parts";
 import { useT } from "@/i18n/client";
 import { AtlasDocView, GatePanel, MirrorGrid, TankPanel, useSecondsUntil, ValvePanel } from "./parts";
@@ -245,7 +246,13 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
     [code, state, refresh, toast],
   );
 
-  const turn = (d: number) => setWallIdxBy((m) => ({ ...m, [here]: (wallIdx + d + walls.length) % walls.length }));
+  // Which way the last turn went, so the next wall pans in from that side; and the spot a close-up grows from.
+  const [turnDir, setTurnDir] = useState<1 | -1>(1);
+  const tapOrigin = useTapOrigin();
+  const turn = (d: 1 | -1) => {
+    setTurnDir(d);
+    setWallIdxBy((m) => ({ ...m, [here]: (wallIdx + d + walls.length) % walls.length }));
+  };
   const swipe = useRef<{ x: number; y: number } | null>(null);
   const others = teammates(state.players, state.me.id, within(view));
   const onWall = (w: string) => teammates(state.players, state.me.id, within(`atlas:${here}:${w}`));
@@ -287,7 +294,8 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
             if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - s.y) * 1.5) turn(dx < 0 ? 1 : -1);
           }}
         >
-          <div key={`${here}:${wall}`} className="at-enter relative aspect-[3/4] h-full max-h-full max-w-full" data-tour="at-wall">
+          <SceneStage id={`${here}:${wall}`} group={here} dir={turnDir} origin={tapOrigin}>
+          <div className="relative aspect-[3/4] h-full max-h-full max-w-full" data-tour="at-wall">
             <WallArt
               wall={wall}
               state={wallState}
@@ -303,6 +311,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
               className="absolute right-2 top-2"
             />
           </div>
+          </SceneStage>
           {walls.length > 1 && (
             <>
               <button type="button" aria-label={t("atlas.turnLeft")} onClick={() => turn(-1)} className="absolute left-1 top-1/2 flex h-14 w-10 -translate-y-1/2 items-center justify-center rounded-md bg-black/40 text-2xl text-[#f4e7b5] active:bg-black/60">
@@ -384,21 +393,25 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
           </nav>
         </footer>
 
-        {closeup && (
-          <CloseupSheet
-            id={closeup}
-            scene={scene}
-            busy={busy}
-            pulse={lockPulse}
-            onClose={() => setCloseup(null)}
-            act={act}
-            go={go}
-            notes={notesDocked ? <AtlasNotebook ctx={ctx} scene={scene} seen={seen} current={closeup} /> : null}
-            notesOn={notesDocked}
-            onNotes={() => setNotesDocked(!notesDocked)}
-            alsoHere={teammates(state.players, state.me.id, (v) => v === `${view}/${closeup}`)}
-          />
-        )}
+        <ZoomSheet
+          value={closeup}
+          origin={tapOrigin}
+          render={(closeup) => (
+            <CloseupSheet
+              id={closeup}
+              scene={scene}
+              busy={busy}
+              pulse={lockPulse}
+              onClose={() => setCloseup(null)}
+              act={act}
+              go={go}
+              notes={notesDocked ? <AtlasNotebook ctx={ctx} scene={scene} seen={seen} current={closeup} /> : null}
+              notesOn={notesDocked}
+              onNotes={() => setNotesDocked(!notesDocked)}
+              alsoHere={teammates(state.players, state.me.id, (v) => v === `${view}/${closeup}`)}
+            />
+          )}
+        />
         {itemOpen && <ItemSheet item={scene.inventory.find((i) => i.id === itemOpen) ?? null} onClose={() => setItemOpen(null)} />}
         {notebookOpen && (
           <Sheet title={t("atlas.notebook.title")} onClose={() => setNotebookOpen(false)} tall bare>
@@ -563,6 +576,7 @@ function Sheet({
   bare?: boolean;
 }) {
   const t = useT();
+  const zoom = useSheetZoom();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -570,6 +584,7 @@ function Sheet({
   }, [onClose]);
   const panel = (
     <div
+      ref={side ? undefined : zoom?.panel}
       className={`relative flex min-h-0 w-full flex-col overflow-hidden ${side ? "flex-1 md:w-auto" : `max-w-md rounded-t-2xl border-t border-[#9fd3c7]/40 ${tall ? "h-[86dvh]" : "max-h-[86dvh]"}`} bg-[#0b161b]`}
       style={side ? undefined : { paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
     >
@@ -584,10 +599,11 @@ function Sheet({
     </div>
   );
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={title}>
-      <button aria-label={t("atlas.close")} className="absolute inset-0 bg-black/60" onClick={onClose} />
+    <div ref={zoom?.root} className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={title}>
+      <button ref={zoom?.backdrop} aria-label={t("atlas.close")} className="absolute inset-0 bg-black/60" onClick={onClose} />
       {side ? (
         <div
+          ref={zoom?.panel}
           className="relative flex h-[94dvh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border-t border-[#9fd3c7]/40 bg-[#0b161b] md:h-[86dvh] md:max-w-4xl md:flex-row"
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         >

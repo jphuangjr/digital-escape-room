@@ -336,11 +336,12 @@ button {
   0%, 100% { transform: rotate(-1.5deg); }
   50% { transform: rotate(1.5deg); }
 }
-/* A wall fades in when you turn to it or arrive; a place's name drifts in and out on arrival. */
-.at-enter { animation: at-enter 0.45s ease-out both; }
+/* Arriving somewhere, the place comes up out of the dark and a step closer (turning between walls is
+   SceneStage's pan, src/components/shell/sceneMotion.tsx); a place's name drifts in and out on arrival. */
+.at-enter { animation: at-enter 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 @keyframes at-enter {
-  from { opacity: 0; filter: brightness(0.6); }
-  to { opacity: 1; filter: none; }
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: none; }
 }
 .at-arrive { animation: at-arrive 2.6s ease-in-out both; }
 @keyframes at-arrive {
@@ -805,4 +806,16 @@ a:active > .lb-card {
 }
 @media (prefers-reduced-motion: reduce) {
   .pr-in { animation: none; }
+}
+
+/* ---------- Moving between screens (src/components/shell/sceneMotion.tsx) ---------- */
+/* Turns, walks, close-ups and Ada's windows are driven from script (so a second tap carries on from mid-move);
+   a wall or window on its way out is `tx-leaving`. Under reduced motion nothing moves and nothing lingers. */
+@media (prefers-reduced-motion: reduce) {
+  .at-enter {
+    animation: none !important;
+  }
+  .tx-leaving {
+    display: none !important;
+  }
 }
