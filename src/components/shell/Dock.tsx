@@ -65,7 +65,7 @@ export function Dock({
                       {badge}
                     </span>
                   )}
-                  <PresenceAvatars players={people[app] ?? []} size="sm" ring="#0c0a09" className="absolute -bottom-1.5 -left-3" />
+                  <PresenceAvatars players={people[app] ?? []} size="sm" ring="#0c0a09" className="absolute -left-3 -top-1.5" />
                 </span>
                 <span className="text-[10px] tracking-wide">{label}</span>
                 {on && <span aria-hidden className="mt-0.5 h-0.5 w-5 rounded bg-amber-400" />}

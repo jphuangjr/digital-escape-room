@@ -400,7 +400,7 @@ export function AppTile({
             {badge}
           </span>
         )}
-        <PresenceAvatars players={people} size="sm" ring="#1c1917" className="absolute -bottom-1.5 -left-1.5" />
+        <PresenceAvatars players={people} size="sm" ring="#1c1917" className="absolute -left-1.5 -top-1.5" />
       </span>
       <span className={`text-xs ${locked ? "text-stone-600" : "text-stone-300"}`}>{label}</span>
     </button>

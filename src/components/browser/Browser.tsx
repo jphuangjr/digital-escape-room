@@ -458,7 +458,7 @@ function NewTab({
               <li key={s.host}>
                 <button
                   onClick={() => onOpen(s.host)}
-                  className="flex min-h-11 w-full items-center gap-3 rounded-lg border border-stone-800 bg-stone-900/60 px-3 active:bg-stone-800"
+                  className="flex min-h-11 w-full items-center gap-3 rounded-lg border border-stone-800 bg-stone-900/60 px-3 text-left active:bg-stone-800"
                 >
                   <PresenceAvatars players={s.players} size="sm" ring="#1c1917" />
                   <span className="min-w-0 flex-1 truncate font-mono text-sm text-stone-200">{s.host}</span>
