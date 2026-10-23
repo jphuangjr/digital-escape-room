@@ -81,6 +81,13 @@ import zhProfile from "./zh-TW/profile";
 import esProfile from "./es/profile";
 import jaProfile from "./ja/profile";
 import ptProfile from "./pt-BR/profile";
+import enResult from "./en/result";
+import koResult from "./ko/result";
+import zhResult from "./zh-TW/result";
+import esResult from "./es/result";
+import jaResult from "./ja/result";
+import ptResult from "./pt-BR/result";
+
 import enWait from "./en/wait";
 import koWait from "./ko/wait";
 import zhWait from "./zh-TW/wait";
@@ -90,15 +97,15 @@ import ptWait from "./pt-BR/wait";
 
 export type Messages = Record<string, string>;
 
-const en: Messages = { ...enWait, ...enAtlas, ...enProfile, ...enTrain, ...enBoard, ...enTour, ...enCommon, ...enSite, ...enShell, ...enRoom, ...enApps, ...enBrowser, ...enAdmin, ...enApi };
-const ko: Messages = { ...koWait, ...koAtlas, ...koProfile, ...koTrain, ...koBoard, ...koTour, ...koCommon, ...koSite, ...koShell, ...koRoom, ...koApps, ...koBrowser, ...koAdmin, ...koApi };
+const en: Messages = { ...enWait, ...enResult, ...enAtlas, ...enProfile, ...enTrain, ...enBoard, ...enTour, ...enCommon, ...enSite, ...enShell, ...enRoom, ...enApps, ...enBrowser, ...enAdmin, ...enApi };
+const ko: Messages = { ...koWait, ...koResult, ...koAtlas, ...koProfile, ...koTrain, ...koBoard, ...koTour, ...koCommon, ...koSite, ...koShell, ...koRoom, ...koApps, ...koBrowser, ...koAdmin, ...koApi };
 
-const zhTW: Messages = { ...zhWait, ...zhAtlas, ...zhProfile, ...zhTrain, ...zhBoard, ...zhTour, ...zhCommon, ...zhSite, ...zhShell, ...zhRoom, ...zhApps, ...zhBrowser, ...zhAdmin, ...zhApi };
+const zhTW: Messages = { ...zhWait, ...zhResult, ...zhAtlas, ...zhProfile, ...zhTrain, ...zhBoard, ...zhTour, ...zhCommon, ...zhSite, ...zhShell, ...zhRoom, ...zhApps, ...zhBrowser, ...zhAdmin, ...zhApi };
 
-const es: Messages = { ...esWait, ...esAtlas, ...esProfile, ...esTrain, ...esBoard, ...esTour, ...esCommon, ...esSite, ...esShell, ...esRoom, ...esApps, ...esBrowser, ...esAdmin, ...esApi };
+const es: Messages = { ...esWait, ...esResult, ...esAtlas, ...esProfile, ...esTrain, ...esBoard, ...esTour, ...esCommon, ...esSite, ...esShell, ...esRoom, ...esApps, ...esBrowser, ...esAdmin, ...esApi };
 
-const ja: Messages = { ...jaWait, ...jaAtlas, ...jaProfile, ...jaTrain, ...jaBoard, ...jaTour, ...jaCommon, ...jaSite, ...jaShell, ...jaRoom, ...jaApps, ...jaBrowser, ...jaAdmin, ...jaApi };
+const ja: Messages = { ...jaWait, ...jaResult, ...jaAtlas, ...jaProfile, ...jaTrain, ...jaBoard, ...jaTour, ...jaCommon, ...jaSite, ...jaShell, ...jaRoom, ...jaApps, ...jaBrowser, ...jaAdmin, ...jaApi };
 
-const ptBR: Messages = { ...ptWait, ...ptAtlas, ...ptProfile, ...ptTrain, ...ptBoard, ...ptTour, ...ptCommon, ...ptSite, ...ptShell, ...ptRoom, ...ptApps, ...ptBrowser, ...ptAdmin, ...ptApi };
+const ptBR: Messages = { ...ptWait, ...ptResult, ...ptAtlas, ...ptProfile, ...ptTrain, ...ptBoard, ...ptTour, ...ptCommon, ...ptSite, ...ptShell, ...ptRoom, ...ptApps, ...ptBrowser, ...ptAdmin, ...ptApi };
 
 export const MESSAGES: Record<Locale, Messages> = { en, ko, "zh-TW": zhTW, es, ja, "pt-BR": ptBR };

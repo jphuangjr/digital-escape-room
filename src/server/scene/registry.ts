@@ -59,6 +59,8 @@ export interface SceneGame<S = unknown, A = unknown, D = unknown> {
   badges(scene: S): string[];
   /** Whether a stored ending (CaseRecord.ending) counts as solving the game. */
   solvedEnding(ending: string | null): boolean;
+  /** Who picked up what, from the case log, for the end-of-game credits. `key` marks evidence and the like. */
+  finds(scene: S, loc: Locale): { playerId: string; item: string; key: boolean }[];
 }
 
 /** Type-checks a game definition; list it in ./games.ts to make rooms of that game playable. */

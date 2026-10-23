@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RoomState } from "@/lib/types";
 import type { HotspotId, ItemDTO, ItemId, SceneAction, SceneActionResponse, SceneDTO, Suspect, TrainRoomId, WallId } from "@/lib/train/types";
@@ -13,6 +12,7 @@ import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
 import { useT } from "@/i18n/client";
 import { Leaderboard } from "@/components/site/Leaderboard";
+import { ResultReveal, type RevealTheme } from "@/components/site/ResultReveal";
 import { CorridorArt, WallArt } from "./walls";
 import { CloseupDocView, ItemIcon, ItemReading, LockDial } from "./parts";
 import { setSoundPreferred, soundPreferred, TrainAmbience } from "./sound";
@@ -460,7 +460,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
         )}
         {notesOpen && <NotesSheet scene={scene} busy={busy} onClose={() => setNotesOpen(false)} onRing={() => void act({ type: "hint" })} />}
         {scene.vote && !scene.ending && <VotePanel state={state} scene={scene} busy={busy} act={act} />}
-        {scene.ending && <EndingPanel scene={scene} code={code} />}
+        {scene.ending && <EndingPanel scene={scene} code={code} signedIn={state.me.signedIn} />}
         {intro && (
           <IntroCard
             onClose={() => {
@@ -879,49 +879,52 @@ function VotePanel({ state, scene, busy, act }: { state: RoomState; scene: Scene
   );
 }
 
-function EndingPanel({ scene, code }: { scene: SceneDTO; code: string }) {
+const ENDING_THEME: RevealTheme = {
+  eyebrow: "font-mono text-[#c9a227]",
+  accent: "text-[#ecd27a]",
+  title: "font-serif text-4xl text-[#ecd27a]",
+  label: "text-stone-500",
+  value: "text-stone-100",
+  tile: "border-[#3d2615] bg-[#1b120b]/60",
+  divide: "divide-[#3d2615]",
+  muted: "text-stone-400",
+  text: "text-stone-100",
+  chip: "border-[#c9a227]/50 bg-[#c9a227]/10 text-[#ecd27a]",
+  primary: "block min-h-12 w-full rounded-lg bg-[#c9a227] py-3 text-center font-semibold text-[#1b120b] active:bg-[#ecd27a]",
+  ghost: "block min-h-12 rounded-lg border border-[#c9a227]/50 py-3 text-center text-[#ecd27a] active:bg-[#3d2615]",
+};
+
+function EndingPanel({ scene, code, signedIn }: { scene: SceneDTO; code: string; signedIn: boolean }) {
   const t = useT();
   const e = scene.ending!;
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#120c07] px-4 pb-10" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label={e.title}>
-      <article className="mx-auto max-w-md space-y-5 pt-6">
-        <p className={`text-center font-mono text-[11px] uppercase tracking-[0.3em] ${e.correct ? "text-[#c9a227]" : "text-red-400"}`}>
-          {t(e.correct ? "train.end.solved" : "train.end.closed", { name: suspectName(t, e.accused) })}
-        </p>
-        <h1 className="text-center font-serif text-4xl text-[#ecd27a]">{e.title}</h1>
-        <div className="space-y-4 font-serif text-[16px] leading-relaxed text-stone-200">
-          {e.paragraphs.map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
-        </div>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-lg border border-[#3d2615] p-2">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500">{t("train.end.time")}</p>
-            <p className="font-mono text-lg text-stone-100">{t("train.end.minutes", { n: e.minutes })}</p>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#120c07] px-4 pb-14" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label={e.title}>
+      <article className="mx-auto max-w-md pt-6">
+        <ResultReveal
+          code={code}
+          gameId={TRAIN_GAME_ID}
+          signedIn={signedIn}
+          theme={ENDING_THEME}
+          eyebrow={<span className={e.correct ? "" : "text-red-400"}>{t(e.correct ? "train.end.solved" : "train.end.closed", { name: suspectName(t, e.accused) })}</span>}
+          title={e.title}
+          extraStats={[
+            { label: t("train.end.evidence"), value: e.evidenceFound, total: e.evidenceTotal },
+            { label: t("train.end.votes"), value: e.counts[e.accused] },
+          ]}
+          slotBadges={["nx-every-clue"]}
+          badgeSlot={
+            e.everyClue && (
+              <p className="mx-auto w-fit rounded-full border border-[#c9a227]/60 bg-[#c9a227]/10 px-3 py-1 text-xs font-semibold text-[#ecd27a]">{t("train.end.everyClue")}</p>
+            )
+          }
+        >
+          <div className="space-y-4 font-serif text-[16px] leading-relaxed text-stone-200">
+            {e.paragraphs.map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
           </div>
-          <div className="rounded-lg border border-[#3d2615] p-2">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500">{t("train.end.evidence")}</p>
-            <p className="font-mono text-lg text-stone-100">
-              {e.evidenceFound}/{e.evidenceTotal}
-            </p>
-          </div>
-          <div className="rounded-lg border border-[#3d2615] p-2">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500">{t("train.end.votes")}</p>
-            <p className="font-mono text-lg text-stone-100">{e.counts[e.accused]}</p>
-          </div>
-        </div>
-        {e.everyClue && (
-          <p className="mx-auto w-fit rounded-full border border-[#c9a227]/60 bg-[#c9a227]/10 px-3 py-1 text-xs font-semibold text-[#ecd27a]">{t("train.end.everyClue")}</p>
-        )}
-        <Leaderboard gameId={TRAIN_GAME_ID} roomCode={code} tone="room" />
-        <div className="flex flex-col gap-2">
-          <Link href={`/play/${TRAIN_GAME_ID}`} className="block min-h-12 rounded-lg bg-[#c9a227] py-3 text-center font-semibold text-[#1b120b]">
-            {t("site.playAgain")}
-          </Link>
-          <Link href="/" className="block min-h-12 rounded-lg border border-[#c9a227]/50 py-3 text-center text-[#ecd27a]">
-            {t("train.end.lobby")}
-          </Link>
-        </div>
+          <Leaderboard gameId={TRAIN_GAME_ID} roomCode={code} tone="room" />
+        </ResultReveal>
       </article>
     </div>
   );

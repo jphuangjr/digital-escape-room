@@ -424,7 +424,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
         )}
         {placesOpen && <PlacesSheet scene={scene} here={here} onClose={() => setPlacesOpen(false)} onGo={go} />}
         {scene.vote && !scene.ending && <VotePanel state={state} scene={scene} busy={busy} act={act} />}
-        {scene.ending && <EndingPanel scene={scene} code={code} />}
+        {scene.ending && <EndingPanel scene={scene} code={code} signedIn={state.me.signedIn} />}
         {intro && (
           <IntroCard
             onClose={() => {

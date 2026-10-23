@@ -1,0 +1,38 @@
+import type en from "../en/result";
+
+const messages: Record<keyof typeof en, string> = {
+  "result.notFinished": "Este caso ainda não foi encerrado.",
+  "result.skip": "Toque para pular",
+  "result.stat.time": "Tempo",
+  "result.stat.hints": "Dicas",
+  "result.stat.attempts": "Tentativas",
+  "result.stat.wrong": "{n} erradas",
+  "result.stat.team": "Equipe",
+  "result.stat.rank": "Posição",
+  "result.credits": "Quem fez o quê",
+  "result.credit.locks": "{n, plural, one {# cadeado aberto} other {# cadeados abertos}}",
+  "result.credit.puzzles": "{n, plural, one {# enigma resolvido} other {# enigmas resolvidos}}",
+  "result.credit.finds": "{n, plural, one {# achado} other {# achados}}",
+  "result.credit.topLocks": "Abriu mais cadeados",
+  "result.credit.topPuzzles": "Resolveu mais enigmas",
+  "result.credit.topFinds": "Encontrou mais coisas",
+  "result.credit.support": "Manteve a equipe no rumo",
+  "result.badges": "Conquistado nesta partida",
+  "result.rank": "#{rank} de {total} no ranking",
+  "result.share": "Compartilhar resultado",
+  "result.shareCopied": "Link copiado",
+  "result.shareText": "{solved, select, yes {Escapamos de} other {Encerramos o caso de}} {game} em {time}. Você consegue fazer melhor?",
+  "result.readEnding": "Ler o que aconteceu",
+  "result.ending.caught": "Ladrão pego",
+  "result.ending.wrong": "Suspeito errado acusado",
+  "result.ending.escaped": "Escaparam",
+  "result.page.title": "O resultado de uma equipe · {game}",
+  "result.page.eyebrow": "Resultado do caso",
+  "result.page.team": "{n, plural, one {Solo} other {Equipe de #}}",
+  "result.page.description": "{team}: terminaram {game} em {time}. Sua equipe consegue superar?",
+  "result.page.teaser": "Acha que sua equipe faria melhor? Aqui não tem spoiler: só o caso, um cronômetro e quem você chamar.",
+  "result.page.cta": "Jogar este caso",
+  "result.page.all": "Todos os escape rooms",
+};
+
+export default messages;

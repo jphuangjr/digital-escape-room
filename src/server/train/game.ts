@@ -2,7 +2,7 @@ import "server-only";
 import type { SceneAction, SceneDTO } from "@/lib/train/types";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { defineSceneGame } from "../scene/registry";
-import { THIEF } from "./content";
+import { EVIDENCE, itemText, THIEF } from "./content";
 import { applyAction, parseScene, sceneDTO, type TrainScene } from "./scene";
 import { trainT } from "./text";
 
@@ -23,4 +23,12 @@ export const trainGame = defineSceneGame<TrainScene, SceneAction, SceneDTO>({
   badges: (scene) => (scene.ending?.everyClue ? ["everyclue"] : []),
   // A train case is solved only by naming the thief.
   solvedEnding: (ending) => ending === THIEF,
+  finds: (scene, loc) => {
+    const T = trainT(loc);
+    return scene.log.flatMap((l) =>
+      l.key === "log.found" && l.item
+        ? [{ playerId: l.playerId, item: itemText(l.item, T, { held: false, peeled: false }).name, key: EVIDENCE.includes(l.item) }]
+        : [],
+    );
+  },
 });

@@ -3,8 +3,8 @@ import type { AtlasSceneAction, AtlasSceneDTO } from "@/lib/atlas/types";
 import { ATLAS_ENDINGS, ATLAS_GAME_ID } from "@/lib/atlas/types";
 import { defineSceneGame } from "../scene/registry";
 import { applyAction, parseScene, sceneDTO, type AtlasScene } from "./scene";
-import { atlasT } from "./text";
-import { SECRETS } from "./world";
+import { atlasT, type AtlasTextKey } from "./text";
+import { SEALS, SECRETS } from "./world";
 
 const ACTIONS = new Set<AtlasSceneAction["type"]>(["take", "operate", "use", "unlock", "dial", "hint", "seat", "reroute", "vote", "close-vote", "tiebreak"]);
 
@@ -44,4 +44,13 @@ export const atlasGame = defineSceneGame<AtlasScene, AtlasSceneAction, AtlasScen
     ...(scene.ending?.choice === "reroute" ? ["atlas-reroute"] : []),
   ],
   solvedEnding: (ending) => (ATLAS_ENDINGS as (string | null)[]).includes(ending),
+  // The seals and the cross-Age secrets are the finds worth a credit.
+  finds: (scene, loc) => {
+    const T = atlasT(loc);
+    return scene.log.flatMap((l) =>
+      l.key === "log.found" && l.item
+        ? [{ playerId: l.playerId, item: T(`item.${l.item}.name` as AtlasTextKey), key: SEALS.includes(l.item) || SECRETS.includes(l.item) }]
+        : [],
+    );
+  },
 });
