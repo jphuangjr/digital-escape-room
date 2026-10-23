@@ -125,6 +125,11 @@ button {
   overflow-wrap: break-word;
 }
 
+/* Chinese, Japanese and Korean have no italics; browsers fake them with a slant, so keep them upright. */
+:is(:lang(zh), :lang(ja), :lang(ko)) .italic {
+  font-style: normal;
+}
+
 /* Chinese and Japanese: balance heading lines so a title doesn't leave one character alone on the last line. */
 :is(:lang(zh), :lang(ja)) :is(h1, h2, h3) {
   text-wrap: balance;
