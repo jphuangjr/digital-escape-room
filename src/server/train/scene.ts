@@ -254,6 +254,7 @@ export function sceneDTO(scene: TrainScene, opts: { startedAt?: Date; now?: Date
     at: h.at,
   }));
   const log: SceneLogEntry[] = scene.log.slice(-30).map((l) => ({
+    ...(SOLVE_LOGS.has(l.key) ? { solve: true } : {}),
     id: l.id,
     at: l.at,
     playerId: l.playerId,
@@ -298,6 +299,9 @@ export interface ActionResult {
   /** The accusation just closed: the room is finished. */
   finished?: boolean;
 }
+
+/** Case-log lines that mark a lock opened or a puzzle solved (the room celebrates these). */
+const SOLVE_LOGS = new Set<TrainTextKey>(["log.suitcase", "log.door", "log.cashbox", "log.washstand", "log.dumbwaiter", "log.telegram"]);
 
 /** Apply one player action to the scene. Pure: no I/O, so it's unit-testable. */
 export function applyAction(

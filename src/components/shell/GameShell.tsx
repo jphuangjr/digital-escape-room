@@ -20,6 +20,7 @@ import { Dock } from "./Dock";
 import { StatusBar } from "./StatusBar";
 import { RoomSheet } from "./RoomSheet";
 import { Toasts, type ToastItem } from "./Toasts";
+import { SolveGlow, useArrivals, useSolveMoments } from "./SolveMoments";
 
 const PRESENCE_MS = 15_000;
 
@@ -163,14 +164,26 @@ export function GameShell({
     const list = state.progress.discoveries;
     if (knownDiscoveries.current) {
       for (const d of list) {
-        if (knownDiscoveries.current.has(d.id) || d.playerId === state.me.id) continue;
+        if (knownDiscoveries.current.has(d.id) || d.playerId === state.me.id || d.kind === "puzzle") continue;
         const msg = `${discoveryWho(d, t)}${discoverySeparator(locale)}${describeDiscovery(d, t)}`;
         if (d.kind === "site") toast(msg, "info", { label: t("shell.toast.open"), onClick: () => openAddress(d.host) });
-        else toast(msg, "success");
       }
     }
     knownDiscoveries.current = new Set(list.map((d) => d.id));
   }, [state.progress.discoveries, state.me.id, toast, openAddress, t, locale]);
+
+  // Solved puzzles: a moment for the whole room, the solver included ("You unlocked Ada's Tools").
+  const solveFlash = useSolveMoments(
+    state.progress.discoveries.flatMap((d) =>
+      d.kind === "puzzle"
+        ? [{ id: d.id, text: `${discoveryWho(d, t, d.playerId === state.me.id)}${discoverySeparator(locale)}${describeDiscovery(d, t)}` }]
+        : [],
+    ),
+    toast,
+  );
+  // A newly unlocked app or a new message glows once on its icon.
+  const arrived = useArrivals([...unlocked.map((a) => `app:${a}`), ...state.emails.map((e) => `mail:${e.id}`)]);
+  const glowing = new Set<AppId>([...arrived].map((k) => (k.startsWith("mail:") ? "email" : (k.slice(4) as AppId))));
 
   // ---------- chat toasts (when the chat isn't on screen) ----------
   const chatVisible = roomOpen && roomTab === "chat";
@@ -249,6 +262,7 @@ export function GameShell({
                 locked={!isUnlocked(app)}
                 badge={badges[app]}
                 active={active === app}
+                glow={glowing.has(app)}
                 onClick={() => openApp(app)}
                 size="sm"
               />
@@ -256,7 +270,7 @@ export function GameShell({
           </nav>
 
           <main className="relative flex min-h-0 min-w-0 flex-1 md:p-5 md:pl-1">
-            {active === null && <HomeScreen isUnlocked={isUnlocked} badges={badges} openApp={openApp} />}
+            {active === null && <HomeScreen isUnlocked={isUnlocked} badges={badges} glowing={glowing} openApp={openApp} />}
             <div
               className={`relative min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-stone-950 md:mx-auto md:max-w-5xl md:rounded-xl md:border md:border-stone-800 md:shadow-2xl md:shadow-black ${
                 active === null ? "hidden" : "flex"
@@ -300,6 +314,7 @@ export function GameShell({
           active={active}
           isUnlocked={isUnlocked}
           badges={badges}
+          glowing={glowing}
           onOpen={openApp}
           onRoom={() => setRoomOpen(true)}
           onlineCount={state.players.filter((p) => p.online).length}
@@ -319,6 +334,7 @@ export function GameShell({
           }}
         />
         {tourOpen && <Tour onClose={closeTour} showSheet={tourSheet} openApp={openApp} />}
+        <SolveGlow flash={solveFlash} />
         <Toasts
           items={toasts}
           placement={roomOpen ? "top" : "bottom"}
@@ -335,6 +351,7 @@ export function AppTile({
   locked,
   badge,
   active,
+  glow,
   onClick,
   size = "lg",
 }: {
@@ -342,6 +359,8 @@ export function AppTile({
   locked: boolean;
   badge?: number;
   active?: boolean;
+  /** Just unlocked, or something new inside: glow once. */
+  glow?: boolean;
   onClick: () => void;
   size?: "sm" | "lg";
 }) {
@@ -359,7 +378,7 @@ export function AppTile({
       } active:bg-stone-800/70`}
     >
       <span
-        className={`relative flex items-center justify-center rounded-2xl border ${
+        className={`relative flex items-center justify-center rounded-2xl border ${glow ? "sm-new-tab" : ""} ${
           size === "lg" ? "h-16 w-16" : "h-12 w-12"
         } ${
           locked
@@ -387,10 +406,12 @@ export function AppTile({
 function HomeScreen({
   isUnlocked,
   badges,
+  glowing,
   openApp,
 }: {
   isUnlocked: (a: AppId) => boolean;
   badges: Partial<Record<AppId, number>>;
+  glowing: Set<AppId>;
   openApp: (a: AppId) => void;
 }) {
   const x = pick(useLocale());
@@ -411,7 +432,7 @@ function HomeScreen({
       </p>
       <div className="mt-8 grid grid-cols-3 gap-2 md:hidden">
         {APP_ORDER.map((app) => (
-          <AppTile key={app} app={app} locked={!isUnlocked(app)} badge={badges[app]} onClick={() => openApp(app)} />
+          <AppTile key={app} app={app} locked={!isUnlocked(app)} badge={badges[app]} glow={glowing.has(app)} onClick={() => openApp(app)} />
         ))}
       </div>
     </div>

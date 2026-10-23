@@ -8,6 +8,7 @@ import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
 import { useChat } from "@/lib/client/chat";
 import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
 import { Tour, type TourStep } from "@/components/shell/Tour";
+import { SolveGlow, useArrivals, useSolveMoments } from "@/components/shell/SolveMoments";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
 import { useT } from "@/i18n/client";
@@ -158,12 +159,15 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   useEffect(() => {
     if (knownLog.current) {
       for (const e of scene.log) {
-        if (knownLog.current.has(e.id) || e.playerId === state.me.id) continue;
+        if (knownLog.current.has(e.id) || e.playerId === state.me.id || e.solve) continue;
         toast(e.text, "success");
       }
     }
     knownLog.current = new Set(scene.log.map((e) => e.id));
   }, [scene.log, state.me.id, toast]);
+  // Locks and puzzles: a moment for the whole room, the solver included.
+  const solveFlash = useSolveMoments(scene.log.filter((e) => e.solve), toast, { sound: soundOn });
+  const arrived = useArrivals(scene.inventory.map((i) => i.id));
 
   // ---------- chat toasts ----------
   const knownChat = useRef<Set<string> | null>(null);
@@ -381,7 +385,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
                     key={it.id}
                     type="button"
                     onClick={() => setItemOpen(it.id)}
-                    className="relative flex w-16 shrink-0 flex-col items-center rounded-lg border border-[#3d2615] bg-[#24160c] px-1 py-1 active:border-[#c9a227]"
+                    className={`relative flex w-16 shrink-0 flex-col items-center rounded-lg border border-[#3d2615] bg-[#24160c] px-1 py-1 active:border-[#c9a227] ${arrived.has(it.id) ? "sm-new-tile" : ""}`}
                   >
                     <ItemIcon id={it.id} className="h-9 w-9" />
                     <span className="mt-0.5 line-clamp-1 text-[10px] text-stone-300">{it.name}</span>
@@ -402,6 +406,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               onClick={() => setItemsOpen(!itemsOpen)}
               badge={scene.inventory.length > 0 ? String(scene.inventory.length) : undefined}
               dot={newItems}
+              glow={!itemsOpen && arrived.size > 0}
             />
             <TabButton icon="📝" label={t("train.tab.notes")} onClick={() => setNotebookOpen(true)} />
             <TabButton
@@ -503,7 +508,8 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             }}
           />
         )}
-        <Toasts items={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} placement={closeup || itemOpen || roomOpen || notebookOpen ? "top" : "bottom"} />
+        <SolveGlow flash={solveFlash} />
+        <Toasts items={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} placement={closeup || itemOpen || itemsOpen || roomOpen || notebookOpen ? "top" : "bottom"} />
       </div>
     </GameContext.Provider>
   );
@@ -956,6 +962,7 @@ function TabButton({
   active,
   badge,
   dot,
+  glow,
   alert,
   tour,
   ...aria
@@ -966,6 +973,8 @@ function TabButton({
   active?: boolean;
   badge?: string;
   dot?: boolean;
+  /** Something just arrived: glow once. */
+  glow?: boolean;
   alert?: boolean;
   /** The guided tour's name for this control. */
   tour?: string;
@@ -979,7 +988,7 @@ function TabButton({
       onClick={onClick}
       data-tour={tour}
       {...aria}
-      className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 active:bg-[#3d2615] ${active ? "bg-[#24160c] text-[#ecd27a]" : "text-stone-300"}`}
+      className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 active:bg-[#3d2615] ${glow ? "sm-new-tab" : ""} ${active ? "bg-[#24160c] text-[#ecd27a]" : "text-stone-300"}`}
     >
       {active && <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-[#c9a227]" aria-hidden />}
       <span className="relative text-lg leading-none" aria-hidden>

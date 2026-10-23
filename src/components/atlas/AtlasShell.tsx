@@ -8,6 +8,7 @@ import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
 import { useChat } from "@/lib/client/chat";
 import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
 import { Tour, type TourStep } from "@/components/shell/Tour";
+import { SolveGlow, useArrivals, useSolveMoments } from "@/components/shell/SolveMoments";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
 import { LockDial } from "@/components/train/parts";
@@ -179,10 +180,13 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
   const knownLog = useRef<Set<string> | null>(null);
   useEffect(() => {
     if (knownLog.current) {
-      for (const e of scene.log) if (!knownLog.current.has(e.id) && e.playerId !== state.me.id) toast(e.text, "success");
+      for (const e of scene.log) if (!knownLog.current.has(e.id) && e.playerId !== state.me.id && !e.solve) toast(e.text, "success");
     }
     knownLog.current = new Set(scene.log.map((e) => e.id));
   }, [scene.log, state.me.id, toast]);
+  // Locks and puzzles: a moment for the whole room, the solver included.
+  const solveFlash = useSolveMoments(scene.log.filter((e) => e.solve), toast, { sound: soundOn });
+  const arrived = useArrivals(scene.inventory.map((i) => i.id));
   const knownChat = useRef<Set<string> | null>(null);
   useEffect(() => {
     if (!chat.loaded) return;
@@ -356,7 +360,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
               <div className="flex min-h-16 gap-1.5 overflow-x-auto py-1">
                 {scene.inventory.length === 0 && <p className="self-center px-1 text-sm text-stone-500">{t("atlas.thingsEmpty")}</p>}
                 {scene.inventory.map((it) => (
-                  <ItemTile key={it.id} item={it} onClick={() => setItemOpen(it.id)} />
+                  <ItemTile key={it.id} item={it} onClick={() => setItemOpen(it.id)} fresh={arrived.has(it.id)} />
                 ))}
               </div>
             </div>
@@ -372,6 +376,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
               onClick={() => setItemsOpen(!itemsOpen)}
               badge={scene.inventory.length > 0 ? String(scene.inventory.length) : undefined}
               dot={newItems}
+              glow={!itemsOpen && arrived.size > 0}
             />
             <TabButton icon="📝" tour="at-notebook" label={t("atlas.tab.notebook")} onClick={() => setNotebookOpen(true)} />
             <TabButton
@@ -466,7 +471,8 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
             }}
           />
         )}
-        <Toasts items={toasts} onDismiss={(id) => setToasts((ts) => ts.filter((x) => x.id !== id))} placement={closeup || itemOpen || roomOpen || notebookOpen ? "top" : "bottom"} />
+        <SolveGlow flash={solveFlash} />
+        <Toasts items={toasts} onDismiss={(id) => setToasts((ts) => ts.filter((x) => x.id !== id))} placement={closeup || itemOpen || itemsOpen || roomOpen || notebookOpen ? "top" : "bottom"} />
       </div>
     </GameContext.Provider>
   );
@@ -480,6 +486,7 @@ function TabButton({
   active,
   badge,
   dot,
+  glow,
   alert,
   tour,
   ...aria
@@ -490,6 +497,8 @@ function TabButton({
   active?: boolean;
   badge?: string;
   dot?: boolean;
+  /** Something just arrived: glow once. */
+  glow?: boolean;
   alert?: boolean;
   /** The guided tour's name for this control. */
   tour?: string;
@@ -503,7 +512,7 @@ function TabButton({
       onClick={onClick}
       {...aria}
       data-tour={tour}
-      className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 active:bg-[#1f3640] ${active ? "bg-[#0f2129] text-[#f4e7b5]" : "text-stone-300"}`}
+      className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 active:bg-[#1f3640] ${glow ? "sm-new-tab" : ""} ${active ? "bg-[#0f2129] text-[#f4e7b5]" : "text-stone-300"}`}
     >
       {active && <span className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-[#d8b56a]" aria-hidden />}
       <span className="relative text-lg leading-none" aria-hidden>
@@ -523,12 +532,12 @@ function TabButton({
   );
 }
 
-function ItemTile({ item, onClick, small }: { item: AtlasItemDTO; onClick: () => void; small?: boolean }) {
+function ItemTile({ item, onClick, small, fresh }: { item: AtlasItemDTO; onClick: () => void; small?: boolean; fresh?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-16 shrink-0 flex-col items-center rounded-lg border border-[#1f3640] bg-[#0f2129] px-1 py-1 active:border-[#d8b56a] disabled:opacity-60"
+      className={`flex w-16 shrink-0 flex-col items-center rounded-lg border border-[#1f3640] bg-[#0f2129] px-1 py-1 active:border-[#d8b56a] disabled:opacity-60 ${fresh ? "sm-new-tile" : ""}`}
     >
       <AtlasItemIcon id={item.id} className={small ? "h-8 w-8" : "h-9 w-9"} />
       <span className="mt-0.5 line-clamp-1 text-[10px] text-stone-300">{item.name}</span>

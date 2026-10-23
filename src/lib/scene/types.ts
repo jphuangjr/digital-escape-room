@@ -38,6 +38,8 @@ export interface SceneLogEntry {
   playerId: string;
   playerName: string;
   text: string;
+  /** A lock opened or a puzzle solved: the whole room gets a moment for it. */
+  solve?: boolean;
 }
 
 export type HintTier = 1 | 2 | 3;
