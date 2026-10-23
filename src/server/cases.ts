@@ -6,7 +6,7 @@ import { parseProgress } from "./logic";
 import { sceneGame } from "./scene/games";
 
 /** Badges the team earned in a room, to keep on each case record. */
-function roomBadges(room: Pick<Room, "gameId" | "progress" | "scene">): string[] {
+export function roomBadges(room: Pick<Room, "gameId" | "progress" | "scene">): string[] {
   const game = sceneGame(room.gameId);
   if (game) return game.badges(game.parse(room.scene));
   return parseProgress(room.progress).badges;

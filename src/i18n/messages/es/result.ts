@@ -1,0 +1,38 @@
+import type en from "../en/result";
+
+const messages: Record<keyof typeof en, string> = {
+  "result.notFinished": "Este caso aún no está cerrado.",
+  "result.skip": "Toca para saltar",
+  "result.stat.time": "Tiempo",
+  "result.stat.hints": "Pistas",
+  "result.stat.attempts": "Intentos",
+  "result.stat.wrong": "{n} fallidos",
+  "result.stat.team": "Equipo",
+  "result.stat.rank": "Puesto",
+  "result.credits": "Quién hizo qué",
+  "result.credit.locks": "{n, plural, one {# candado abierto} other {# candados abiertos}}",
+  "result.credit.puzzles": "{n, plural, one {# acertijo resuelto} other {# acertijos resueltos}}",
+  "result.credit.finds": "{n, plural, one {# hallazgo} other {# hallazgos}}",
+  "result.credit.topLocks": "Abrió más candados",
+  "result.credit.topPuzzles": "Resolvió más acertijos",
+  "result.credit.topFinds": "Encontró más cosas",
+  "result.credit.support": "Mantuvo al equipo en marcha",
+  "result.badges": "Conseguido en esta partida",
+  "result.rank": "#{rank} de {total} en la clasificación",
+  "result.share": "Compartir resultado",
+  "result.shareCopied": "Enlace copiado",
+  "result.shareText": "{solved, select, yes {Escapamos de} other {Cerramos el caso de}} {game} en {time}. ¿Puedes hacerlo mejor?",
+  "result.readEnding": "Leer lo que pasó",
+  "result.ending.caught": "Ladrón atrapado",
+  "result.ending.wrong": "Sospechoso equivocado",
+  "result.ending.escaped": "Escaparon",
+  "result.page.title": "El resultado de un equipo · {game}",
+  "result.page.eyebrow": "Resultado del caso",
+  "result.page.team": "{n, plural, one {En solitario} other {Equipo de #}}",
+  "result.page.description": "{team}: terminaron {game} en {time}. ¿Tu equipo puede superarlo?",
+  "result.page.teaser": "¿Crees que tu equipo lo haría mejor? Aquí no hay spoilers: solo el caso, un cronómetro y quien tú traigas.",
+  "result.page.cta": "Jugar este caso",
+  "result.page.all": "Todos los escape rooms",
+};
+
+export default messages;

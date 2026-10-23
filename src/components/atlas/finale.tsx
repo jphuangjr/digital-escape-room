@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import type { RoomState } from "@/lib/types";
 import type { AgeId, AtlasActionResponse, AtlasCloseupDTO, AtlasEnding, AtlasSceneAction, AtlasSceneDTO, GlyphId, ItemId } from "@/lib/atlas/types";
 import { AGES, ATLAS_GAME_ID, GLYPHS } from "@/lib/atlas/types";
 import { Leaderboard } from "@/components/site/Leaderboard";
+import { ResultReveal, type RevealTheme } from "@/components/site/ResultReveal";
 import { useT } from "@/i18n/client";
 import { AtlasItemIcon } from "./items";
 import { RingPicker, useSecondsUntil } from "./parts";
@@ -165,50 +165,52 @@ export function VotePanel({ state, scene, busy, act }: { state: RoomState; scene
   );
 }
 
-export function EndingPanel({ scene, code }: { scene: AtlasSceneDTO; code: string }) {
+const ENDING_THEME: RevealTheme = {
+  eyebrow: "font-mono text-[#9fd3c7]",
+  accent: "text-[#9fd3c7]",
+  title: "font-serif text-4xl text-[#f4e7b5]",
+  label: "text-stone-500",
+  value: "text-stone-100",
+  tile: "border-[#1f3640] bg-[#0b161b]/70",
+  divide: "divide-[#1f3640]",
+  muted: "text-stone-400",
+  text: "text-stone-100",
+  chip: "border-[#9fd3c7]/40 bg-[#9fd3c7]/10 text-[#d9efe9]",
+  primary: "block min-h-12 w-full rounded-lg bg-[#d8b56a] py-3 text-center font-semibold text-[#14110a] active:bg-[#f4e7b5]",
+  ghost: "block min-h-12 rounded-lg border border-[#d8b56a]/50 py-3 text-center text-[#f4e7b5] active:bg-[#1f3640]",
+};
+
+export function EndingPanel({ scene, code, signedIn }: { scene: AtlasSceneDTO; code: string; signedIn: boolean }) {
   const t = useT();
   const e = scene.ending!;
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-[#071015] px-4 pb-10"
+      className="fixed inset-0 z-50 overflow-y-auto bg-[#071015] px-4 pb-14"
       style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
       role="dialog"
       aria-modal="true"
       aria-label={e.title}
     >
-      <article className="mx-auto max-w-md space-y-5 pt-6">
-        <p className="text-center font-mono text-[11px] uppercase tracking-[0.3em] text-[#9fd3c7]">{t("atlas.end.eyebrow")}</p>
-        <h1 className="text-center font-serif text-4xl text-[#f4e7b5]">{e.title}</h1>
-        <div className="space-y-4 font-serif text-[16px] leading-relaxed text-stone-200">
-          {e.paragraphs.map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
-        </div>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-lg border border-[#1f3640] p-2">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500">{t("atlas.end.time")}</p>
-            <p className="font-mono text-lg text-stone-100">{t("atlas.end.minutes", { n: e.minutes })}</p>
+      <article className="mx-auto max-w-md pt-6">
+        <ResultReveal
+          code={code}
+          gameId={ATLAS_GAME_ID}
+          signedIn={signedIn}
+          theme={ENDING_THEME}
+          eyebrow={t("atlas.end.eyebrow")}
+          title={e.title}
+          extraStats={[
+            { label: t("atlas.end.secrets"), value: e.secretsFound, total: e.secretsTotal },
+            { label: t("atlas.end.votes"), value: e.counts[e.choice] },
+          ]}
+        >
+          <div className="space-y-4 font-serif text-[16px] leading-relaxed text-stone-200">
+            {e.paragraphs.map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
           </div>
-          <div className="rounded-lg border border-[#1f3640] p-2">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500">{t("atlas.end.secrets")}</p>
-            <p className="font-mono text-lg text-stone-100">
-              {e.secretsFound}/{e.secretsTotal}
-            </p>
-          </div>
-          <div className="rounded-lg border border-[#1f3640] p-2">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500">{t("atlas.end.votes")}</p>
-            <p className="font-mono text-lg text-stone-100">{e.counts[e.choice]}</p>
-          </div>
-        </div>
-        <Leaderboard gameId={ATLAS_GAME_ID} roomCode={code} tone="room" />
-        <div className="flex flex-col gap-2">
-          <Link href={`/play/${ATLAS_GAME_ID}`} className="block min-h-12 rounded-lg bg-[#d8b56a] py-3 text-center font-semibold text-[#14110a]">
-            {t("site.playAgain")}
-          </Link>
-          <Link href="/" className="block min-h-12 rounded-lg border border-[#d8b56a]/50 py-3 text-center text-[#f4e7b5]">
-            {t("atlas.end.lobby")}
-          </Link>
-        </div>
+          <Leaderboard gameId={ATLAS_GAME_ID} roomCode={code} tone="room" />
+        </ResultReveal>
       </article>
     </div>
   );

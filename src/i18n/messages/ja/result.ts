@@ -1,0 +1,38 @@
+import type en from "../en/result";
+
+const messages: Record<keyof typeof en, string> = {
+  "result.notFinished": "この事件はまだ終わっていません。",
+  "result.skip": "タップでスキップ",
+  "result.stat.time": "所要時間",
+  "result.stat.hints": "ヒント",
+  "result.stat.attempts": "回答",
+  "result.stat.wrong": "不正解 {n}",
+  "result.stat.team": "チーム",
+  "result.stat.rank": "順位",
+  "result.credits": "誰が何をしたか",
+  "result.credit.locks": "錠を{n}個解除",
+  "result.credit.puzzles": "謎を{n}個解いた",
+  "result.credit.finds": "発見 {n}件",
+  "result.credit.topLocks": "いちばん多く錠を開けた",
+  "result.credit.topPuzzles": "いちばん多く謎を解いた",
+  "result.credit.topFinds": "いちばん多く見つけた",
+  "result.credit.support": "チームを支えた",
+  "result.badges": "今回獲得したもの",
+  "result.rank": "ランキング {total}チーム中 {rank}位",
+  "result.share": "結果をシェア",
+  "result.shareCopied": "リンクをコピーしました",
+  "result.shareText": "{game}を{time}で{solved, select, yes {脱出しました} other {終わらせました}}。あなたはもっと速くできる？",
+  "result.readEnding": "何が起きたかを読む",
+  "result.ending.caught": "犯人を確保",
+  "result.ending.wrong": "別の容疑者を告発",
+  "result.ending.escaped": "脱出成功",
+  "result.page.title": "あるチームの結果 · {game}",
+  "result.page.eyebrow": "事件の結果",
+  "result.page.team": "{n, plural, =1 {ソロ} other {#人チーム}}",
+  "result.page.description": "{team}で{game}を{time}でクリア。あなたのチームは超えられる？",
+  "result.page.teaser": "あなたのチームならもっとうまくやれる？ネタバレはありません。事件とタイマー、そして仲間がいれば十分です。",
+  "result.page.cta": "この事件をプレイ",
+  "result.page.all": "すべての脱出ゲーム",
+};
+
+export default messages;

@@ -2,11 +2,11 @@
 
 import { Leaderboard } from "@/components/site/Leaderboard";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useT } from "@/i18n/client";
 import type { GameCtx } from "@/lib/client/game";
 import type { Ending } from "@/lib/types";
-import { ColorDot, CompassBadge, EnvelopeBadge, btnGhost, formatCountdown, useNow } from "./shared";
+import { ResultReveal, type RevealTheme } from "@/components/site/ResultReveal";
+import { ColorDot, CompassBadge, EnvelopeBadge, btnGhost, btnPrimary, formatCountdown, useNow } from "./shared";
 
 /** Labels and blurbs are the `room.vote.choice.<id>` / `room.vote.blurb.<id>` messages. */
 const CHOICES: { id: Ending; tone: string }[] = [
@@ -181,6 +181,21 @@ function VotingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
   );
 }
 
+const ENDING_THEME: RevealTheme = {
+  eyebrow: "text-amber-500/80",
+  accent: "text-amber-400",
+  title: "text-3xl font-black tracking-tight text-amber-300 sm:text-4xl",
+  label: "text-zinc-500",
+  value: "text-zinc-100",
+  tile: "border-zinc-800 bg-zinc-900/60",
+  divide: "divide-zinc-800",
+  muted: "text-zinc-400",
+  text: "text-zinc-100",
+  chip: "border-amber-500/40 bg-amber-500/10 text-amber-200",
+  primary: `${btnPrimary} min-h-12 w-full`,
+  ghost: `${btnGhost} min-h-12 w-full`,
+};
+
 function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => void }) {
   const ending = ctx.state.ending!;
   const hasCompass = ctx.state.progress.badges.includes("compass");
@@ -198,98 +213,98 @@ function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
           {t("room.ending.keepBrowsing")}
         </button>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
-        <article className="mx-auto max-w-lg space-y-6">
-          <header className="pt-2 text-center">
-            <p className="text-xs uppercase tracking-[0.3em] text-amber-500/80">
-              {t("room.ending.eyebrow", { ending: ending.ending })}
-            </p>
-            <h1 id="ending-title" className="mt-2 text-3xl font-black tracking-tight text-amber-300 sm:text-4xl">
-              {ending.title}
-            </h1>
-          </header>
-
-          <div className="space-y-4 text-[15px] leading-relaxed text-zinc-200">
-            {ending.body.split(/\n{2,}/).map((p, i) => (
-              <p key={i} className="whitespace-pre-wrap">
-                {p}
-              </p>
-            ))}
-          </div>
-
-          <section className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">{t("room.ending.theVote")}</h2>
-            <div className="flex gap-3">
-              {(["EXPOSE", "PROTECT"] as const).map((c) => (
-                <div
-                  key={c}
-                  className={`flex-1 rounded-lg border p-3 text-center ${
-                    ending.ending === c ? "border-amber-500/60 bg-amber-500/10" : "border-zinc-800"
-                  }`}
-                >
-                  <div className="text-xs font-bold tracking-wider text-zinc-400">{t(`room.vote.choice.${c}`)}</div>
-                  <div className="font-mono text-2xl font-bold text-zinc-100">{summary[c]}</div>
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-14">
+        <article className="mx-auto max-w-lg">
+          <ResultReveal
+            code={ctx.code}
+            gameId={ctx.state.gameId}
+            signedIn={ctx.state.me.signedIn}
+            theme={ENDING_THEME}
+            eyebrow={t("room.ending.eyebrow", { ending: ending.ending })}
+            title={ending.title}
+            titleId="ending-title"
+            extraStats={[{ label: t("result.stat.team"), value: ctx.state.players.length }]}
+            slotBadges={["ada-compass", "ada-envelope"]}
+            badgeSlot={
+              (hasEnvelope || hasCompass) && (
+                <div className="flex flex-wrap justify-center gap-4">
+                  {hasEnvelope && (
+                    <div className="flex flex-col items-center gap-2 text-center">
+                      <EnvelopeBadge label={t("room.ending.envelopeEarned")} />
+                      <p className="text-xs text-zinc-500">{t("room.ending.envelopeNote")}</p>
+                    </div>
+                  )}
+                  {hasCompass && (
+                    <div className="flex flex-col items-center gap-2 text-center">
+                      <CompassBadge label={t("room.ending.compassEarned")} />
+                      <p className="text-xs text-zinc-500">{t("room.ending.compassNote")}</p>
+                    </div>
+                  )}
                 </div>
+              )
+            }
+            extraActions={
+              <button className={ENDING_THEME.ghost} onClick={onMinimize}>
+                {t("room.ending.keepBrowsingLaptop")}
+              </button>
+            }
+          >
+            <div className="space-y-4 text-[15px] leading-relaxed text-zinc-200">
+              {ending.body.split(/\n{2,}/).map((p, i) => (
+                <p key={i} className="whitespace-pre-wrap">
+                  {p}
+                </p>
               ))}
             </div>
-            {summary.tieBrokenByHost && (
-              <p className="mt-3 text-center text-sm text-amber-300">{t("room.ending.tieBroken")}</p>
+
+            <section className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">{t("room.ending.theVote")}</h2>
+              <div className="flex gap-3">
+                {(["EXPOSE", "PROTECT"] as const).map((c) => (
+                  <div
+                    key={c}
+                    className={`flex-1 rounded-lg border p-3 text-center ${
+                      ending.ending === c ? "border-amber-500/60 bg-amber-500/10" : "border-zinc-800"
+                    }`}
+                  >
+                    <div className="text-xs font-bold tracking-wider text-zinc-400">{t(`room.vote.choice.${c}`)}</div>
+                    <div className="font-mono text-2xl font-bold text-zinc-100">{summary[c]}</div>
+                  </div>
+                ))}
+              </div>
+              {summary.tieBrokenByHost && (
+                <p className="mt-3 text-center text-sm text-amber-300">{t("room.ending.tieBroken")}</p>
+              )}
+            </section>
+
+            {ending.bonusEpilogue && (
+              <section className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+                <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-amber-400">{t("room.ending.epilogue")}</h2>
+                <div className="space-y-3 text-[15px] italic leading-relaxed text-zinc-200">
+                  {ending.bonusEpilogue.split(/\n{2,}/).map((p, i) => (
+                    <p key={i} className="whitespace-pre-wrap">
+                      {p}
+                    </p>
+                  ))}
+                </div>
+              </section>
             )}
-          </section>
 
-          <Leaderboard gameId={ctx.state.gameId} roomCode={ctx.code} tone="room" />
+            {ending.maraEpilogue && (
+              <section className="rounded-xl border border-sky-400/30 bg-sky-400/5 p-4">
+                <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-sky-300">{t("room.ending.maraHeading")}</h2>
+                <div className="space-y-3 text-[15px] italic leading-relaxed text-zinc-200">
+                  {ending.maraEpilogue.split(/\n{2,}/).map((p, i) => (
+                    <p key={i} className="whitespace-pre-wrap">
+                      {p}
+                    </p>
+                  ))}
+                </div>
+              </section>
+            )}
 
-          {ending.bonusEpilogue && (
-            <section className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-              <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-amber-400">{t("room.ending.epilogue")}</h2>
-              <div className="space-y-3 text-[15px] italic leading-relaxed text-zinc-200">
-                {ending.bonusEpilogue.split(/\n{2,}/).map((p, i) => (
-                  <p key={i} className="whitespace-pre-wrap">
-                    {p}
-                  </p>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {ending.maraEpilogue && (
-            <section className="rounded-xl border border-sky-400/30 bg-sky-400/5 p-4">
-              <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-sky-300">{t("room.ending.maraHeading")}</h2>
-              <div className="space-y-3 text-[15px] italic leading-relaxed text-zinc-200">
-                {ending.maraEpilogue.split(/\n{2,}/).map((p, i) => (
-                  <p key={i} className="whitespace-pre-wrap">
-                    {p}
-                  </p>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {hasEnvelope && (
-            <div className="flex flex-col items-center gap-2 text-center">
-              <EnvelopeBadge label={t("room.ending.envelopeEarned")} />
-              <p className="text-xs text-zinc-500">{t("room.ending.envelopeNote")}</p>
-            </div>
-          )}
-
-          {hasCompass && (
-            <div className="flex flex-col items-center gap-2 text-center">
-              <CompassBadge label={t("room.ending.compassEarned")} />
-              <p className="text-xs text-zinc-500">{t("room.ending.compassNote")}</p>
-            </div>
-          )}
-
-          <div className="flex flex-wrap justify-center gap-2">
-            <button className={btnGhost} onClick={onMinimize}>
-              {t("room.ending.keepBrowsingLaptop")}
-            </button>
-            <Link href={`/play/${ctx.state.gameId}`} className={btnGhost}>
-              {t("site.playAgain")}
-            </Link>
-            <Link href="/" className={btnGhost}>
-              {t("room.ending.backToLobby")}
-            </Link>
-          </div>
+            <Leaderboard gameId={ctx.state.gameId} roomCode={ctx.code} tone="room" />
+          </ResultReveal>
         </article>
       </div>
     </div>

@@ -1,0 +1,38 @@
+import type en from "../en/result";
+
+const messages: Record<keyof typeof en, string> = {
+  "result.notFinished": "這個案子還沒結束。",
+  "result.skip": "點一下略過",
+  "result.stat.time": "時間",
+  "result.stat.hints": "提示",
+  "result.stat.attempts": "嘗試",
+  "result.stat.wrong": "答錯 {n} 次",
+  "result.stat.team": "隊伍",
+  "result.stat.rank": "名次",
+  "result.credits": "誰做了什麼",
+  "result.credit.locks": "打開 {n} 道鎖",
+  "result.credit.puzzles": "解開 {n} 道謎題",
+  "result.credit.finds": "找到 {n} 樣東西",
+  "result.credit.topLocks": "打開最多道鎖",
+  "result.credit.topPuzzles": "解開最多謎題",
+  "result.credit.topFinds": "找到最多東西",
+  "result.credit.support": "幫隊伍穩住方向",
+  "result.badges": "這一局獲得",
+  "result.rank": "排行榜 {total} 隊中的第 {rank} 名",
+  "result.share": "分享結果",
+  "result.shareCopied": "已複製連結",
+  "result.shareText": "我們花了 {time}{solved, select, yes {逃出} other {結束了}}《{game}》。你們能更快嗎？",
+  "result.readEnding": "閱讀事情的經過",
+  "result.ending.caught": "抓到竊賊",
+  "result.ending.wrong": "指控了錯的嫌疑人",
+  "result.ending.escaped": "成功逃脫",
+  "result.page.title": "一支隊伍的成績 · {game}",
+  "result.page.eyebrow": "案件結果",
+  "result.page.team": "{n, plural, =1 {單人} other {# 人隊伍}}",
+  "result.page.description": "{team}花了 {time} 完成《{game}》。你的隊伍能贏過他們嗎？",
+  "result.page.teaser": "覺得你的隊伍能做得更好？這裡沒有劇透：只有案子、計時器，和你找來的夥伴。",
+  "result.page.cta": "挑戰這個案子",
+  "result.page.all": "所有密室逃脫",
+};
+
+export default messages;
