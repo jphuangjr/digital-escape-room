@@ -24,6 +24,7 @@ const messages: Record<keyof typeof en, string> = {
   "room.view.newTab": "새 브라우저 탭",
   "room.view.app": "{app} 앱",
   "room.view.desktop": "바탕화면",
+  "room.presence.lookingToo": "{names} 님도 이걸 보고 있어요",
   "room.qr.title": "스캔해서 참가하기",
   "room.qr.label": "방 {code} 참가용 QR 코드",
   "room.qr.help": "휴대폰 카메라를 여기에 대 보세요. Google로 로그인하거나 이름만 입력해도 참가할 수 있어요.",
