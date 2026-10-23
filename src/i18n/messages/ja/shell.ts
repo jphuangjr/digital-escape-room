@@ -27,6 +27,14 @@ const messages: Record<keyof typeof en, string> = {
   "shell.toast.open": "開く",
   "shell.toast.reply": "返信",
   "shell.toast.newEmail": "{kind, select, voicemail {新しい留守電メッセージ：{subject}} other {新着メール：{subject}}}",
+  "shell.chapter.aria": "第{n}章（全{total}章）：{name}。進行状況を表示",
+  "shell.chapter.title": "進行状況",
+  "shell.chapter.of": "第{n}章／全{total}章",
+  "shell.chapter.new": "新しい章：{name}",
+  "shell.chapter.now": "現在",
+  "shell.chapter.ahead": "この先",
+  "shell.chapter.close": "閉じる",
+  "shell.chapter.note": "まだたどり着いていない章の名前は伏せられています。",
 };
 
 export default messages;

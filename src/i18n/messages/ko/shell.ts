@@ -27,6 +27,14 @@ const messages: Record<keyof typeof en, string> = {
   "shell.toast.open": "열기",
   "shell.toast.reply": "답장",
   "shell.toast.newEmail": "{kind, select, voicemail {새 음성 메시지: {subject}} other {새 이메일: {subject}}}",
+  "shell.chapter.aria": "{total}장 중 {n}장: {name}. 진행 상황 보기",
+  "shell.chapter.title": "진행 상황",
+  "shell.chapter.of": "{total}장 중 {n}장",
+  "shell.chapter.new": "새로운 장: {name}",
+  "shell.chapter.now": "지금",
+  "shell.chapter.ahead": "아직 남은 장",
+  "shell.chapter.close": "닫기",
+  "shell.chapter.note": "아직 도달하지 않은 장은 이름이 공개되지 않아요.",
 };
 
 export default messages;

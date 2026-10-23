@@ -9,6 +9,7 @@ import { useChat } from "@/lib/client/chat";
 import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
 import { Tour, type TourStep } from "@/components/shell/Tour";
 import { SolveGlow, useArrivals, useSolveMoments } from "@/components/shell/SolveMoments";
+import { ChapterLine } from "@/components/shell/ChapterLine";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
 import { useLockPulse, useOpenHold, type LockPulse } from "@/components/shell/lockFeel";
@@ -248,6 +249,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               {place === "corridor" ? t("train.room.corridor") : t("train.title", { room: roomName, wall: t(`train.wall.${wall}`) })}
             </p>
           </div>
+          <ChapterLine chapter={state.chapter} toast={toast} theme="train" />
           <button
             type="button"
             onClick={toggleSound}

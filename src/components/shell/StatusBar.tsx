@@ -5,6 +5,7 @@ import { useIntl } from "react-intl";
 import { useT } from "@/i18n/client";
 import type { AppId } from "@/lib/types";
 import type { GameCtx } from "@/lib/client/game";
+import { ChapterLine } from "./ChapterLine";
 import { CompassMark, HomeIcon, PeopleIcon } from "./icons";
 
 function useClock() {
@@ -63,6 +64,7 @@ export function StatusBar({
         <span className="hidden font-mono text-xs text-stone-500 sm:inline">
           {ctx.code}
         </span>
+        <ChapterLine chapter={ctx.state.chapter} toast={ctx.toast} theme="ada" />
         <button
           data-tour="room"
           onClick={onRoom}
