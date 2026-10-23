@@ -24,6 +24,7 @@ const messages: Record<keyof typeof en, string> = {
   "room.view.newTab": "新的瀏覽器分頁",
   "room.view.app": "{app} App",
   "room.view.desktop": "桌面",
+  "room.presence.lookingToo": "{count, plural, other {{names}也在看這裡}}",
   "room.qr.title": "掃描即可加入",
   "room.qr.label": "加入房間 {code} 的 QR 碼",
   "room.qr.help": "用手機相機對準這裡。可以使用 Google 登入，或只輸入名字加入。",

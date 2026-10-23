@@ -22,6 +22,7 @@ const messages: Record<keyof typeof en, string> = {
   "browser.error.unreachable": "Não foi possível encontrar o endereço IP do servidor de <addr>{address}</addr>.",
   "browser.error.timeout": "<addr>{address}</addr> demorou demais para responder.",
   "browser.newTab.title": "Nova guia",
+  "browser.newTab.team": "Sua equipe está em",
 
   // View Source
   "browser.source.dialog": "Código-fonte da página",

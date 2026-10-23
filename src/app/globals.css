@@ -795,3 +795,14 @@ a:active > .lb-card {
     display: none;
   }
 }
+
+/* ---------- Teammate presence (src/components/shell/Presence.tsx) ----------
+   Avatars and "looking at this too" settle in softly as a teammate arrives. */
+.pr-in { animation: pr-in 0.35s ease-out both; }
+@keyframes pr-in {
+  from { opacity: 0; transform: scale(0.7); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pr-in { animation: none; }
+}

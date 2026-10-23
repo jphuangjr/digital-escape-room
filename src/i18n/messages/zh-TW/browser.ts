@@ -22,6 +22,7 @@ const messages: Record<keyof typeof en, string> = {
   "browser.error.unreachable": "找不到 <addr>{address}</addr> 的伺服器 IP 位址。",
   "browser.error.timeout": "<addr>{address}</addr> 回應時間過長。",
   "browser.newTab.title": "新分頁",
+  "browser.newTab.team": "隊友正在看",
 
   // View Source
   "browser.source.dialog": "網頁原始碼",

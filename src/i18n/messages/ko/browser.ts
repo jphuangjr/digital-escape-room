@@ -22,6 +22,7 @@ const messages: Record<keyof typeof en, string> = {
   "browser.error.unreachable": "<addr>{address}</addr>의 서버 IP 주소를 찾을 수 없어요.",
   "browser.error.timeout": "<addr>{address}</addr>에서 응답하는 데 시간이 너무 오래 걸려요.",
   "browser.newTab.title": "새 탭",
+  "browser.newTab.team": "팀원이 보고 있는 곳",
 
   // View Source
   "browser.source.dialog": "페이지 소스",

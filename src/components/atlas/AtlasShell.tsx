@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { RoomState } from "@/lib/types";
+import type { PlayerPublic, RoomState } from "@/lib/types";
 import type { AtlasActionResponse, AtlasItemDTO, AtlasSceneAction, AtlasSceneDTO, HotspotId, ItemId, LocationId } from "@/lib/atlas/types";
 import { GLYPHS, LOCATIONS, WALLS } from "@/lib/atlas/types";
 import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
@@ -11,6 +11,7 @@ import { Tour, type TourStep } from "@/components/shell/Tour";
 import { SolveGlow, useArrivals, useSolveMoments } from "@/components/shell/SolveMoments";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
+import { LookingToo, PresenceAvatars, PresenceDots, teammates, usePresence, within } from "@/components/shell/Presence";
 import { LOCK_THEMES, OPEN_HOLD_MS, useLockPulse, useOpenHold, type LockPulse } from "@/components/shell/lockFeel";
 import { LockDial } from "@/components/train/parts";
 import { useT } from "@/i18n/client";
@@ -29,7 +30,6 @@ import { useGameSound } from "@/components/shell/useGameSound";
  * everything found or opened is shared with the room. English only until it is translated.
  */
 
-const PRESENCE_MS = 15_000;
 const TABS: RoomTab[] = ["people", "chat", "attempts"];
 const INTRO_KEY = "atlas_intro_done";
 const TOUR_DONE_KEY = "atlas_tour_done_v1";
@@ -149,16 +149,9 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
   }, []);
 
   // ---------- presence ----------
+  // The wall, plus the close-up when one is open: teammates see you on the wall either way.
   const view = `atlas:${here}:${wall}`;
-  const viewRef = useRef(view);
-  useEffect(() => {
-    viewRef.current = view;
-    void apiFetch(code, "/presence", { method: "POST", body: { view } });
-  }, [code, view]);
-  useEffect(() => {
-    const id = setInterval(() => void apiFetch(code, "/presence", { method: "POST", body: { view: viewRef.current } }), PRESENCE_MS);
-    return () => clearInterval(id);
-  }, [code]);
+  usePresence(code, closeup ? `${view}/${closeup}` : view);
 
   // ---------- teammates' finds and chat ----------
   const knownLog = useRef<Set<string> | null>(null);
@@ -253,7 +246,8 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
 
   const turn = (d: number) => setWallIdxBy((m) => ({ ...m, [here]: (wallIdx + d + walls.length) % walls.length }));
   const swipe = useRef<{ x: number; y: number } | null>(null);
-  const others = state.players.filter((p) => p.online && p.id !== state.me.id && p.currentView === view);
+  const others = teammates(state.players, state.me.id, within(view));
+  const onWall = (w: string) => teammates(state.players, state.me.id, within(`atlas:${here}:${w}`));
   const nextHint = scene.nextHints[here] ?? null;
   const wallState: WallState = useMemo(
     () => ({
@@ -300,15 +294,12 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
               pulse={showSpots}
               onTap={setCloseup}
             />
-            {others.length > 0 && (
-              <div className="absolute right-2 top-2 flex -space-x-1.5" aria-label={t("atlas.lookingHere", { names: others.map((p) => p.displayName).join(", ") })}>
-                {others.map((p) => (
-                  <span key={p.id} title={p.displayName} className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#071015] text-xs font-bold text-black" style={{ backgroundColor: p.color }}>
-                    {p.displayName.charAt(0).toUpperCase()}
-                  </span>
-                ))}
-              </div>
-            )}
+            <PresenceAvatars
+              players={others}
+              ring="#071015"
+              label={t("atlas.lookingHere", { names: others.map((p) => p.displayName).join(", ") })}
+              className="absolute right-2 top-2"
+            />
           </div>
           {walls.length > 1 && (
             <>
@@ -329,7 +320,11 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
               </button>
               <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5" aria-hidden>
                 {walls.map((w, i) => (
-                  <span key={w} className={`h-1.5 w-1.5 rounded-full ${i === wallIdx ? "bg-[#f4e7b5]" : "bg-stone-600"}`} />
+                  <span key={w} className="relative flex justify-center">
+                    <span className={`h-1.5 w-1.5 rounded-full ${i === wallIdx ? "bg-[#f4e7b5]" : "bg-stone-600"}`} />
+                    {/* a teammate on another wall of this place: their colour just above its pip */}
+                    {i !== wallIdx && <PresenceDots players={onWall(w)} className="absolute bottom-2.5" />}
+                  </span>
                 ))}
               </div>
             </>
@@ -399,6 +394,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
             notes={notesDocked ? <AtlasNotebook ctx={ctx} scene={scene} seen={seen} current={closeup} /> : null}
             notesOn={notesDocked}
             onNotes={() => setNotesDocked(!notesDocked)}
+            alsoHere={teammates(state.players, state.me.id, (v) => v === `${view}/${closeup}`)}
           />
         )}
         {itemOpen && <ItemSheet item={scene.inventory.find((i) => i.id === itemOpen) ?? null} onClose={() => setItemOpen(null)} />}
@@ -415,7 +411,15 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
             onClose={() => setLetterOpen(null)}
           />
         )}
-        {placesOpen && <PlacesSheet scene={scene} here={here} onClose={() => setPlacesOpen(false)} onGo={go} />}
+        {placesOpen && (
+          <PlacesSheet
+            scene={scene}
+            here={here}
+            onClose={() => setPlacesOpen(false)}
+            onGo={go}
+            people={(p) => teammates(state.players, state.me.id, (v) => v.startsWith(`atlas:${p}:`))}
+          />
+        )}
         {scene.vote && !scene.ending && <VotePanel state={state} scene={scene} busy={busy} act={act} />}
         {scene.ending && <EndingPanel scene={scene} code={code} signedIn={state.me.signedIn} />}
         {intro && (
@@ -610,6 +614,7 @@ function CloseupSheet({
   notes,
   notesOn,
   onNotes,
+  alsoHere,
 }: {
   id: HotspotId;
   scene: AtlasSceneDTO;
@@ -622,6 +627,8 @@ function CloseupSheet({
   notes: React.ReactNode;
   notesOn: boolean;
   onNotes: () => void;
+  /** Teammates with this same close-up open. */
+  alsoHere: PlayerPublic[];
 }) {
   const t = useT();
   // An opened lock stays up, glowing, for a moment before the close-up shows what's inside.
@@ -645,6 +652,7 @@ function CloseupSheet({
         </button>
       }
     >
+      <LookingToo players={alsoHere} ring="#0b161b" className="text-[#9fd3c7]" />
       {c.lines.map((l, i) => (
         <p key={i} className="text-[15px] leading-relaxed text-stone-200">
           {l}
@@ -772,7 +780,20 @@ function NotesSheet({ scene, here, busy, onClose, onAsk }: { scene: AtlasSceneDT
 }
 
 /** The Atlas: every place the team has reached, for fast travel. */
-function PlacesSheet({ scene, here, onClose, onGo }: { scene: AtlasSceneDTO; here: LocationId; onClose: () => void; onGo: (p: LocationId) => void }) {
+function PlacesSheet({
+  scene,
+  here,
+  onClose,
+  onGo,
+  people,
+}: {
+  scene: AtlasSceneDTO;
+  here: LocationId;
+  onClose: () => void;
+  onGo: (p: LocationId) => void;
+  /** Teammates standing in a place. */
+  people: (p: LocationId) => PlayerPublic[];
+}) {
   const t = useT();
   return (
     <Sheet title={t("atlas.placesTitle")} onClose={onClose}>
@@ -789,7 +810,10 @@ function PlacesSheet({ scene, here, onClose, onGo }: { scene: AtlasSceneDTO; her
             }`}
           >
             <span className={`font-serif text-lg ${p.reachable ? "text-stone-100" : "text-stone-600"}`}>{p.reachable ? p.name : "? ? ?"}</span>
-            <span className="text-xs text-stone-500">{p.id === here ? t("atlas.here") : p.reachable ? "" : t("atlas.notReached")}</span>
+            <span className="flex items-center gap-2 text-xs text-stone-500">
+              {p.reachable && <PresenceAvatars players={people(p.id)} size="sm" ring="#0f2129" />}
+              {p.id === here ? t("atlas.here") : p.reachable ? "" : t("atlas.notReached")}
+            </span>
           </button>
         ))}
       </div>

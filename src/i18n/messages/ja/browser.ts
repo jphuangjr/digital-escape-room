@@ -22,6 +22,7 @@ const messages: Record<keyof typeof en, string> = {
   "browser.error.unreachable": "<addr>{address}</addr> のサーバーIPアドレスが見つかりませんでした。",
   "browser.error.timeout": "<addr>{address}</addr> からの応答に時間がかかりすぎています。",
   "browser.newTab.title": "新しいタブ",
+  "browser.newTab.team": "チームが見ているページ",
 
   // View Source
   "browser.source.dialog": "ページのソース",
