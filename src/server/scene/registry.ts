@@ -1,5 +1,6 @@
 import "server-only";
 import type { Locale } from "@/i18n/config";
+import type { ChapterDTO } from "@/lib/types";
 import type { RoomCtx, Who } from "./engine";
 
 /** What one action did to a scene. */
@@ -55,6 +56,8 @@ export interface SceneGame<S = unknown, A = unknown, D = unknown> {
   ending(scene: S): SceneEnding | null;
   /** What the team has done so far, for playtest analytics: story flags set and hints taken. */
   progress(scene: S): { flags: string[]; hints: { id: string; puzzle: string; tier: number }[] };
+  /** How far along the team is, for the progress line: the chapter reached, and only the names of chapters reached. */
+  chapter(scene: S, loc: Locale): ChapterDTO;
   /** Badges the team earned, kept on each case record. */
   badges(scene: S): string[];
   /** Whether a stored ending (CaseRecord.ending) counts as solving the game. */

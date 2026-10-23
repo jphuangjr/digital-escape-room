@@ -337,6 +337,13 @@ const text: Record<keyof typeof en, string> = {
   "end.osei.text": "オセイ医師は処方箋を書いたことを認め、事情聴取のため国境で身柄を拘束された。あとは伯爵夫人の弁護士たちがうまく片づけた。\n春になるころ、ヴァルガの星は紛失扱いとなり、保険金は支払われ、ヴァルガ家の借金はひっそりと清算された。",
   "end.lindqvist.title": "まったくの見当違い",
   "end.lindqvist.text": "リンドクヴィスト夫人は憤慨し、それから大喜びした。人生でいちばん胸躍る出来事だったのだ。彼女は国境警察にその一部始終を、二度も話して聞かせた。\nその騒ぎのさなか、ヴァルガ伯爵夫人はやけに軽いハンドバッグを手に列車を降りた。星が再び人の目に触れることはなかった。",
+
+  // ---------- chapters (the progress line; a name is only sent once the team reaches it) ----------
+  "chapter.compartment": "12B号室",
+  "chapter.telegram": "電報",
+  "chapter.dining": "食堂車",
+  "chapter.cashbox": "手提げ金庫",
+  "chapter.accusation": "告発",
 };
 
 export default text;
