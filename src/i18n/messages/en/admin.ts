@@ -9,7 +9,7 @@ const messages = {
   "admin.tabs.codes": "Purchase codes",
   "admin.tabs.playtest": "Playtest",
   "admin.tabs.board": "Leaderboard",
-  "admin.board.help": "Admins-only runs are kept off the public board automatically. Hide older test runs here, or bring a run back.",
+  "admin.board.help": "Runs played only by admins stay off the public board automatically. Hide older test runs here, or bring a run back.",
   "admin.board.hide": "Hide",
   "admin.board.show": "Show",
   "admin.board.hidden": "hidden",

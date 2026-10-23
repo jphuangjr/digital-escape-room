@@ -205,6 +205,7 @@ function PlaytestPanel() {
 /** Recent leaderboard entries with a hide/unhide switch, for test runs that went on the public board. */
 function BoardPanel() {
   const t = useT();
+  const intl = useIntl();
   const [entries, setEntries] = useState<AdminBoardEntry[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -256,7 +257,7 @@ function BoardPanel() {
                 ))}
               </p>
               <p className="text-xs text-noir-ink-faint">
-                {gameTitle(e.gameId)} · {formatDuration(e.durationMs)} · {new Date(e.finishedAt).toLocaleDateString()}
+                {gameTitle(e.gameId)} · {formatDuration(e.durationMs)} · {intl.formatDate(e.finishedAt, { dateStyle: "medium", timeStyle: "short" })}
                 {e.hidden && <> · {t("admin.board.hidden")}</>}
               </p>
             </div>
