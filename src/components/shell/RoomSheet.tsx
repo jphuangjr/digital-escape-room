@@ -31,6 +31,11 @@ function describeView(view: string | null, t: ReturnType<typeof useT>): string {
     const w = view.slice(6).split("/")[0];
     return w === "corridor" ? t("train.view.corridor") : t("train.view.wall", { wall: t(`train.wall.${w}`) });
   }
+  // The Atlas: "atlas:<place>:<wall>", maybe with "/<hotspot>": name the wall.
+  if (view.startsWith("atlas:")) {
+    const w = view.split("/")[0].split(":")[2];
+    if (w) return t(`atlas.wall.${w}`);
+  }
   return view;
 }
 
