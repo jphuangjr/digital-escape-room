@@ -109,7 +109,8 @@ export function GameShell({
     const app = appOf(p.currentView!);
     if (app) (people[app] ??= []).push(p);
   }
-  const alsoHere = view === "desktop" ? [] : others.filter((p) => p.currentView === view);
+  // (Not on the desktop or a blank tab: being there together means nothing.)
+  const alsoHere = view === "desktop" || view === "browser:newtab" ? [] : others.filter((p) => p.currentView === view);
 
   useEffect(() => {
     if (active === "browser") setView(`browser:${browserAddress ?? "newtab"}`);
