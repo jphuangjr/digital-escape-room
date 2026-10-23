@@ -34,6 +34,7 @@ import {
   appendLog,
   jammedUntil,
   JAM_SEC,
+  lockState,
   nextHintTier,
   parseHints,
   parseJams,
@@ -197,8 +198,7 @@ function lockAt(h: HotspotId, has: (f: string) => boolean, T: TT, scene: TrainSc
         : h === "cashbox" && !has("cashbox.open")
           ? { id: "cashbox", kind: "symbols", length: 4, label: T("lock.cashbox") }
           : undefined;
-  const until = lock && jammedUntil(scene.jams, lock.id, now);
-  return lock && until ? { ...lock, jammedUntil: until } : lock;
+  return lock && { ...lock, ...lockState(scene.jams, lock.id, now) };
 }
 
 /** The first puzzle the team hasn't done yet (what Teodor would help with). */

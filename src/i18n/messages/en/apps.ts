@@ -53,13 +53,11 @@ const messages = {
   "apps.email.unread": "Unread",
 
   // Files
-  "apps.files.tooManyAttempts": "Too many attempts.",
   "apps.files.unreachable": "Couldn't reach the server. Try again.",
   "apps.files.folderUnlocked": "Folder unlocked",
   "apps.files.wrongPin": "Wrong PIN.",
   "apps.files.enterPin": "Enter 4-digit PIN",
   "apps.files.pinProgress": "{count} of 4 digits entered",
-  "apps.files.lockedOut": "Locked out. Retry in {s}s",
   "apps.files.checking": "Checking…",
   "apps.files.pinClear": "Clear",
   "apps.files.pinDelete": "Delete",

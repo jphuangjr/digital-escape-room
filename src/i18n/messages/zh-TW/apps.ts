@@ -55,13 +55,11 @@ const messages: Record<keyof typeof en, string> = {
   "apps.email.unread": "未讀",
 
   // Files
-  "apps.files.tooManyAttempts": "嘗試次數過多。",
   "apps.files.unreachable": "無法連線到伺服器，請再試一次。",
   "apps.files.folderUnlocked": "資料夾已解鎖",
   "apps.files.wrongPin": "PIN 碼錯誤。",
   "apps.files.enterPin": "請輸入 4 位數 PIN 碼",
   "apps.files.pinProgress": "已輸入 {count}/4 位數",
-  "apps.files.lockedOut": "已鎖定，請於 {s} 秒後再試",
   "apps.files.checking": "檢查中…",
   "apps.files.pinClear": "清除",
   "apps.files.pinDelete": "刪除",

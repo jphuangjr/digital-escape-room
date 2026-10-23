@@ -1,5 +1,6 @@
 import "server-only";
 import type { HintTier } from "@/lib/scene/types";
+import { JAM_AFTER, JAM_SEC } from "@/lib/rules";
 
 // Rules every physical-room game shares: the case log, jamming locks, tiered hints and the room vote.
 // Pure functions over plain data, so each game's applyAction stays unit-testable.
@@ -29,9 +30,8 @@ export function appendLog<E extends StoredLogBase>(log: E[], who: Who, now: Date
 
 // ---------- Jamming locks ----------
 
-/** Wrong guesses in a row before a lock jams, and for how long. */
-export const JAM_AFTER = 3;
-export const JAM_SEC = 60;
+// Wrong guesses in a row before a lock jams, and for how long (shared with the client's countdowns).
+export { JAM_AFTER, JAM_SEC };
 
 export interface Jam {
   wrong: number;
@@ -43,6 +43,17 @@ export type Jams<L extends string> = Partial<Record<L, Jam>>;
 export function jammedUntil<L extends string>(jams: Jams<L> | undefined, lock: L, now: Date): string | null {
   const until = jams?.[lock]?.until;
   return until && new Date(until) > now ? until : null;
+}
+
+/**
+ * What a lock's DTO may show about its jam: when it frees up, or (once someone has guessed wrong) how many more
+ * wrong guesses it takes. Counts only, never the answer.
+ */
+export function lockState<L extends string>(jams: Jams<L> | undefined, lock: L, now: Date): { jammedUntil?: string; left?: number } {
+  const until = jammedUntil(jams, lock, now);
+  if (until) return { jammedUntil: until };
+  const wrong = jams?.[lock]?.wrong ?? 0;
+  return wrong > 0 ? { left: Math.max(1, JAM_AFTER - wrong) } : {};
 }
 
 /** Record a guess: a right one clears the count; three wrong in a row jam the lock for JAM_SEC. */

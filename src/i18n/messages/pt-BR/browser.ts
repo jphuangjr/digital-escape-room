@@ -40,17 +40,14 @@ const messages: Record<keyof typeof en, string> = {
   "browser.redacted.revealed": "Revelado: {text}",
 
   // In-site forms: game-system feedback only (site labels stay English)
-  "browser.form.cooling": "Tentativas demais. O sistema está esfriando.",
   "browser.form.connectionError": "Erro de conexão. Tente de novo.",
   "browser.form.accepted": "Aceito.",
   "browser.form.correct": "Correto!",
   "browser.form.rejected": "Recusado. Não é isso.",
-  "browser.form.retryIn": "Tente de novo em {s} s.",
   "browser.form.decreaseShift": "Diminuir deslocamento",
   "browser.form.increaseShift": "Aumentar deslocamento",
   "browser.form.shiftSolved": "✓ Anúncios decifrados para a sala toda.",
   "browser.form.lockNote": "Cuidado: uma chave errada bloqueia o sistema para todos por 1 minuto. Descubra primeiro.",
-  "browser.form.locked": "Bloqueado · {s} s",
   "browser.form.binaryPassed": "✓ Aprovado. Abra o Decodificador e procure a guia Binário.",
 };
 

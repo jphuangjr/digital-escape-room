@@ -211,13 +211,13 @@ export interface AtlasCloseupDTO {
   /** The plaza mirrors (Sunken Meridian). */
   mirrors?: MirrorGridDTO;
   /** The Observatory plate's seven sockets and the seal seated in each, if any. */
-  plate?: { sockets: { glyph: GlyphId; seal: ItemId | null }[]; registered: boolean };
+  plate?: { sockets: { glyph: GlyphId; seal: ItemId | null }[]; registered: boolean; jammedUntil?: string; left?: number };
   /** The Atlas Core: whether the team may reroute the Ages (all three secrets found), and each Age gate's number. */
-  core?: { canReroute: boolean; rerouted: boolean; gates: { age: AgeId; name: string; origin: number }[]; jammedUntil?: string; convened: boolean };
+  core?: { canReroute: boolean; rerouted: boolean; gates: { age: AgeId; name: string; origin: number }[]; jammedUntil?: string; left?: number; convened: boolean };
   /** The Pelagic airlock's three tanks: capacities and current levels (big, pressure, small). */
   tanks?: { caps: number[]; levels: number[]; balanced: boolean };
   /** This close-up has the Threshold rings (the gate). */
-  gate?: { powered: boolean; jammedUntil?: string };
+  gate?: { powered: boolean; jammedUntil?: string; left?: number };
 }
 
 export type AtlasItemDTO = SceneItemDTO<ItemId>;

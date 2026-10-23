@@ -8,7 +8,8 @@ import { AGES, ATLAS_GAME_ID, GLYPHS } from "@/lib/atlas/types";
 import { Leaderboard } from "@/components/site/Leaderboard";
 import { useT } from "@/i18n/client";
 import { AtlasItemIcon } from "./items";
-import { RingPicker, useSecondsUntil } from "./parts";
+import { RingPicker } from "./parts";
+import { LOCK_THEMES, lockFrameClass, LockStatus, useLockFeedback, type LockPulse } from "@/components/shell/lockFeel";
 
 type Act = (a: AtlasSceneAction) => Promise<AtlasActionResponse | null>;
 const primary = "min-h-12 w-full rounded-lg bg-[#d8b56a] font-semibold text-[#14110a] active:bg-[#f4e7b5] disabled:opacity-60";
@@ -18,18 +19,21 @@ export function PlatePanel({
   plate,
   held,
   busy,
+  pulse,
   act,
 }: {
   plate: NonNullable<AtlasCloseupDTO["plate"]>;
   held: { id: ItemId; name: string }[];
   busy: boolean;
+  pulse: LockPulse;
   act: Act;
 }) {
   const t = useT();
   const [seal, setSeal] = useState<ItemId | null>(held[0]?.id ?? null);
   const chosen = held.some((h) => h.id === seal) ? seal : (held[0]?.id ?? null);
+  const fb = useLockFeedback({ pulse, jammedUntil: plate.jammedUntil });
   return (
-    <div className="space-y-3 rounded-xl border border-[#8a7440] bg-[#1c170c] p-3">
+    <div className={`space-y-3 rounded-xl border border-[#8a7440] bg-[#1c170c] p-3 ${lockFrameClass(LOCK_THEMES.atlas, fb.phase)}`}>
       {held.length > 0 && !plate.registered && (
         <div className="flex flex-wrap gap-2" role="group" aria-label={t("atlas.plate.seals")}>
           {held.map((h) => (
@@ -53,10 +57,10 @@ export function PlatePanel({
             <button
               key={s.glyph}
               type="button"
-              disabled={busy || !chosen || Boolean(s.seal) || plate.registered}
+              disabled={busy || fb.jammed || !chosen || Boolean(s.seal) || plate.registered}
               onClick={() => chosen && void act({ type: "seat", seal: chosen, socket: s.glyph })}
               aria-label={s.seal ? t("atlas.plate.filled", { glyph: char }) : t("atlas.plate.socket", { glyph: char })}
-              className={`flex h-14 flex-col items-center justify-center rounded-full border-2 text-lg ${
+              className={`lk-key flex h-14 flex-col items-center justify-center rounded-full border-2 text-lg ${
                 s.seal ? "border-[#f4e7b5] bg-[#3a3320]" : plate.registered && s.glyph === "peak" ? "border-[#ffd75e] bg-[#5a4a1a] text-[#ffd75e]" : "border-[#8a7440] text-[#e9d9a6]"
               } disabled:opacity-90`}
             >
@@ -65,30 +69,33 @@ export function PlatePanel({
           );
         })}
       </div>
+      {!plate.registered && <LockStatus jamSec={fb.jamSec} left={plate.left} theme={LOCK_THEMES.atlas} />}
     </div>
   );
 }
 
 
 /** The Atlas Core: reroute every Age gate to the Observatory (when all three secrets are found). */
-export function CorePanel({ core, busy, act }: { core: NonNullable<AtlasCloseupDTO["core"]>; busy: boolean; act: Act }) {
+export function CorePanel({ core, busy, pulse, act }: { core: NonNullable<AtlasCloseupDTO["core"]>; busy: boolean; pulse: LockPulse; act: Act }) {
   const t = useT();
   const [rings, setRings] = useState<Record<AgeId, { outer: GlyphId; inner: GlyphId }>>(
     () => Object.fromEntries(AGES.map((a) => [a, { outer: "sun", inner: "sun" }])) as Record<AgeId, { outer: GlyphId; inner: GlyphId }>,
   );
-  const wait = useSecondsUntil(core.jammedUntil);
-  if (!core.canReroute || core.rerouted || core.convened) return null;
+  const fb = useLockFeedback({ pulse, jammedUntil: core.jammedUntil });
+  // Once rerouted the rings go away, after a moment's glow.
+  if ((!core.canReroute || core.rerouted || core.convened) && fb.phase !== "open") return null;
   return (
-    <div className="space-y-4 rounded-xl border border-[#9fd3c7]/60 bg-[#0d2228] p-3">
+    <div className={`space-y-4 rounded-xl border border-[#9fd3c7]/60 bg-[#0d2228] p-3 ${lockFrameClass(LOCK_THEMES.atlas, fb.phase)}`}>
       {core.gates.map((g) => (
         <div key={g.age} className="space-y-2">
           <p className="text-sm font-semibold text-[#f4e7b5]">{t("atlas.core.gate", { name: g.name, n: g.origin })}</p>
-          <RingPicker label={t("atlas.gate.outer")} value={rings[g.age].outer} onChange={(v) => setRings((r) => ({ ...r, [g.age]: { ...r[g.age], outer: v } }))} />
-          <RingPicker label={t("atlas.gate.inner")} value={rings[g.age].inner} onChange={(v) => setRings((r) => ({ ...r, [g.age]: { ...r[g.age], inner: v } }))} />
+          <RingPicker label={t("atlas.gate.outer")} value={rings[g.age].outer} disabled={fb.jammed} onChange={(v) => setRings((r) => ({ ...r, [g.age]: { ...r[g.age], outer: v } }))} />
+          <RingPicker label={t("atlas.gate.inner")} value={rings[g.age].inner} disabled={fb.jammed} onChange={(v) => setRings((r) => ({ ...r, [g.age]: { ...r[g.age], inner: v } }))} />
         </div>
       ))}
-      <button type="button" disabled={busy || wait > 0} onClick={() => void act({ type: "reroute", rings })} className={primary}>
-        {wait > 0 ? t("atlas.core.jammed", { s: wait }) : t("atlas.core.reroute")}
+      <LockStatus jamSec={fb.jamSec} left={core.left} theme={LOCK_THEMES.atlas} />
+      <button type="button" disabled={busy || fb.jammed} onClick={() => void act({ type: "reroute", rings })} className={`lk-key ${primary}`}>
+        {t("atlas.core.reroute")}
       </button>
     </div>
   );

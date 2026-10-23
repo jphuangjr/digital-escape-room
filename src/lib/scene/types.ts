@@ -29,6 +29,8 @@ export interface SceneLockDTO<L extends string = string> {
   label: string;
   /** Set while the lock is jammed after too many wrong guesses. */
   jammedUntil?: string;
+  /** Wrong guesses left before it jams, once someone has guessed wrong (a count only). */
+  left?: number;
 }
 
 /** A line in the shared case log ("Sam found a screwdriver"). */
