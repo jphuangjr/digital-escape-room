@@ -294,7 +294,8 @@ export function sceneDTO(scene: AtlasScene, opts: { startedAt?: Date; now?: Date
     log,
     hints,
     nextHints,
-    places: LOCATIONS.map((id) => ({ id, name: T(`place.${id}`), reachable: open.includes(id) })),
+    // A place is named only once the team can stand there.
+    places: LOCATIONS.map((id) => ({ id, name: open.includes(id) ? T(`place.${id}`) : "", reachable: open.includes(id) })),
     vote:
       scene.vote && !scene.ending
         ? {

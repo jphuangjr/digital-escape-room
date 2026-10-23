@@ -224,6 +224,7 @@ export type AtlasItemDTO = SceneItemDTO<ItemId>;
 
 export interface PlaceDTO {
   id: LocationId;
+  /** Empty until the team can stand there. */
   name: string;
   reachable: boolean;
 }

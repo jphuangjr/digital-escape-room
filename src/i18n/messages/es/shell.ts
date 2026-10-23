@@ -29,6 +29,14 @@ const messages: Record<keyof typeof en, string> = {
   "shell.toast.open": "Abrir",
   "shell.toast.reply": "Responder",
   "shell.toast.newEmail": "{kind, select, voicemail {Nuevo mensaje de voz: {subject}} other {Nuevo correo: {subject}}}",
+  "shell.chapter.aria": "Capítulo {n} de {total}: {name}. Ver el progreso",
+  "shell.chapter.title": "Progreso",
+  "shell.chapter.of": "Capítulo {n} de {total}",
+  "shell.chapter.new": "Nuevo capítulo: {name}",
+  "shell.chapter.now": "Ahora",
+  "shell.chapter.ahead": "Por descubrir",
+  "shell.chapter.close": "Cerrar",
+  "shell.chapter.note": "Los capítulos siguientes no tienen nombre hasta que el equipo llegue a ellos.",
 };
 
 export default messages;

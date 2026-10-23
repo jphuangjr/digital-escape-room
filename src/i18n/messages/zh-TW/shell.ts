@@ -29,6 +29,14 @@ const messages: Record<keyof typeof en, string> = {
   "shell.toast.open": "開啟",
   "shell.toast.reply": "回覆",
   "shell.toast.newEmail": "{kind, select, voicemail {新語音留言：{subject}} other {新電子郵件：{subject}}}",
+  "shell.chapter.aria": "第 {n} 章（共 {total} 章）：{name}。查看進度",
+  "shell.chapter.title": "進度",
+  "shell.chapter.of": "第 {n} 章，共 {total} 章",
+  "shell.chapter.new": "新章節：{name}",
+  "shell.chapter.now": "目前",
+  "shell.chapter.ahead": "尚未抵達",
+  "shell.chapter.close": "關閉",
+  "shell.chapter.note": "還沒抵達的章節，要等你們到了才會揭曉名稱。",
 };
 
 export default messages;

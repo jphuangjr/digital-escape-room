@@ -440,6 +440,13 @@ const text: Record<keyof typeof en, string> = {
   "hint.core.1": "Leia a página de Corin no atril. Quando o grupo estiver pronto, chame todos para decidir no Núcleo.",
   "hint.core.2": "Se você encontrou os três segredos (o primeiro mapa, o mapa das marés e a flor-da-noite), o Núcleo pode antes redirecionar as Eras: o número do portal de cada Era, mais o dobro do anel externo, mais o anel interno, precisa dar a volta e cair no 0.",
   "hint.core.3": "Arquivo (portal 1): externo ☉, interno ☾. Meridiano (portal 2): externo ≈, interno ◈. Biblioteca (portal 3): externo ≈, interno ☾.",
+
+  // ---------- chapters (the progress line; a name is only sent once the team reaches it) ----------
+  "chapter.observatory": "Observatório",
+  "chapter.threshold": "O Limiar",
+  "chapter.ages": "As Eras silenciosas",
+  "chapter.cathedral": "Catedral Nula",
+  "chapter.choice": "A escolha",
 };
 
 export default text;

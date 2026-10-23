@@ -9,6 +9,7 @@ import { useChat } from "@/lib/client/chat";
 import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
 import { Tour, type TourStep } from "@/components/shell/Tour";
 import { SolveGlow, useArrivals, useSolveMoments } from "@/components/shell/SolveMoments";
+import { ChapterLine } from "@/components/shell/ChapterLine";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
 import { LookingToo, PresenceAvatars, PresenceDots, teammates, usePresence, within } from "@/components/shell/Presence";
@@ -263,6 +264,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
       <div className="fixed inset-0 flex flex-col bg-[#071015] text-stone-200" style={{ paddingTop: "env(safe-area-inset-top)" }}>
         <header className="flex h-12 shrink-0 items-center gap-1.5 border-b border-[#1f3640] px-3">
           <p className="min-w-0 flex-1 truncate font-serif text-base text-[#f4e7b5]">{t("atlas.title", { place: placeName, wall: t(`atlas.wall.${wall}`) })}</p>
+          <ChapterLine chapter={state.chapter} toast={toast} theme="atlas" />
           <button
             type="button"
             onClick={toggleSound}
@@ -809,7 +811,15 @@ function PlacesSheet({
               p.id === here ? "border-[#f4e7b5] bg-[#1f3640]" : p.reachable ? "border-[#9fd3c7]/40 bg-[#0f2129] active:bg-[#1f3640]" : "border-[#1f3640] bg-transparent"
             }`}
           >
-            <span className={`font-serif text-lg ${p.reachable ? "text-stone-100" : "text-stone-600"}`}>{p.reachable ? p.name : "? ? ?"}</span>
+            <span className="flex min-w-0 items-center gap-2.5">
+              <span
+                aria-hidden
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] ${p.reachable ? "bg-[#9fd3c7] text-[#071015]" : "border border-dashed border-[#1f3640]"}`}
+              >
+                {p.reachable ? "✓" : ""}
+              </span>
+              <span className={`truncate font-serif text-lg ${p.reachable ? "text-stone-100" : "text-stone-600"}`}>{p.reachable ? p.name : "? ? ?"}</span>
+            </span>
             <span className="flex items-center gap-2 text-xs text-stone-500">
               {p.reachable && <PresenceAvatars players={people(p.id)} size="sm" ring="#0f2129" />}
               {p.id === here ? t("atlas.here") : p.reachable ? "" : t("atlas.notReached")}
