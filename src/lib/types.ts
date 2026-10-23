@@ -241,6 +241,18 @@ export interface AdminCodeDTO {
   redemptions: { email: string; at: string }[]; // newest first, up to 50
 }
 
+/** A leaderboard entry as the admin page's hide/unhide list sees it. */
+export interface AdminBoardEntry {
+  id: string;
+  gameId: string;
+  finishedAt: string;
+  durationMs: number;
+  solved: boolean;
+  /** off the public boards (an admin's test run) */
+  hidden: boolean;
+  players: { name: string; color: string }[];
+}
+
 /** One room chat message. Delivered live over the realtime channel as the `chat.message` payload. */
 export interface ChatMessageDTO {
   id: string;

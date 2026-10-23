@@ -256,7 +256,7 @@ export function ResultReveal({
         </section>
       )}
 
-      {(badges.length > 0 || badgeSlot || result?.rank) && (
+      {(badges.length > 0 || badgeSlot || result?.rank || result?.testRun) && (
         <section className={`space-y-3 text-center ${on(3)}`}>
           {badges.length > 0 && (
             <>
@@ -272,6 +272,7 @@ export function ResultReveal({
           )}
           {badgeSlot}
           {result?.rank && <p className={`font-mono text-sm ${theme.accent}`}>{t("result.rank", { rank: result.rank, total: result.boardSize })}</p>}
+          {result?.testRun && <p className={`font-mono text-xs ${theme.muted}`}>{t("result.testRun")}</p>}
         </section>
       )}
 

@@ -18,6 +18,7 @@ const messages = {
   "result.credit.support": "Kept the team on track",
   "result.badges": "Earned this run",
   "result.rank": "#{rank} of {total} on the leaderboard",
+  "result.testRun": "Test run · not on the leaderboard",
   "result.share": "Share result",
   "result.shareCopied": "Link copied",
   "result.shareText": "{solved, select, yes {We escaped} other {We closed the case on}} {game} in {time}. Can you do better?",

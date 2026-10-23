@@ -26,6 +26,8 @@ export interface RoomResult {
   /** Place on the game's leaderboard (1 = best), when the room has an entry. */
   rank: number | null;
   boardSize: number;
+  /** An admin's test run: kept off the public leaderboard, so it has no rank and no share card. */
+  testRun: boolean;
   /** Achievement ids (see src/lib/achievements.ts) this run earned for the team. */
   badges: string[];
   /** The leaderboard entry id behind the public /s/<id> result card, or null if there is none. */

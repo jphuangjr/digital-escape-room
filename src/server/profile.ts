@@ -7,7 +7,7 @@ import { ATLAS_ENDINGS, ATLAS_GAME_ID } from "@/lib/atlas/types";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { sceneGame } from "./scene/games";
 import { db } from "./db";
-import { rankOf } from "./leaderboard";
+import { boardWhere, rankOf } from "./leaderboard";
 
 const HOUR_MS = 60 * 60 * 1000;
 
@@ -67,7 +67,7 @@ export async function getProfile(user: User): Promise<ProfileResponse> {
   const played = new Set(cases.map((c) => c.gameId));
   const shownGames = GAMES.filter((g) => g.status === "live" || played.has(g.id)).map((g) => g.id);
   const boardSizes = new Map(
-    await Promise.all(shownGames.map(async (g) => [g, await db.leaderboardEntry.count({ where: { gameId: g } })] as const)),
+    await Promise.all(shownGames.map(async (g) => [g, await db.leaderboardEntry.count({ where: boardWhere(g) })] as const)),
   );
 
   return {

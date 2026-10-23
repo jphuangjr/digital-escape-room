@@ -19,6 +19,7 @@ const messages: Record<keyof typeof en, string> = {
   "result.credit.support": "幫隊伍穩住方向",
   "result.badges": "這一局獲得",
   "result.rank": "排行榜 {total} 隊中的第 {rank} 名",
+  "result.testRun": "測試遊玩 · 不列入排行榜",
   "result.share": "分享結果",
   "result.shareCopied": "已複製連結",
   "result.shareText": "我們花了 {time}{solved, select, yes {逃出} other {結束了}}《{game}》。你們能更快嗎？",

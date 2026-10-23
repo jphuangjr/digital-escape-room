@@ -19,6 +19,7 @@ const messages: Record<keyof typeof en, string> = {
   "result.credit.support": "팀의 방향을 잡아 줬어요",
   "result.badges": "이번 플레이에서 획득",
   "result.rank": "리더보드 {total}팀 중 {rank}위",
+  "result.testRun": "테스트 플레이 · 리더보드에 기록되지 않음",
   "result.share": "결과 공유",
   "result.shareCopied": "링크를 복사했어요",
   "result.shareText": "{game}{solved, select, yes {을(를) {time} 만에 탈출했어요} other {의 사건을 {time} 만에 종결했어요}}. 더 빨리 할 수 있나요?",
