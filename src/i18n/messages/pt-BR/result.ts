@@ -19,6 +19,7 @@ const messages: Record<keyof typeof en, string> = {
   "result.credit.support": "Manteve a equipe no rumo",
   "result.badges": "Conquistado nesta partida",
   "result.rank": "#{rank} de {total} no ranking",
+  "result.testRun": "Partida de teste · fora do ranking",
   "result.share": "Compartilhar resultado",
   "result.shareCopied": "Link copiado",
   "result.shareText": "{solved, select, yes {Escapamos de} other {Encerramos o caso de}} {game} em {time}. Você consegue fazer melhor?",

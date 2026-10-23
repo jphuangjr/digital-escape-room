@@ -4,7 +4,7 @@ import type { Locale } from "@/i18n/config";
 import { runBadges, type ResultCredit, type RoomResult } from "@/lib/result";
 import { roomBadges } from "./cases";
 import { db } from "./db";
-import { rankOf } from "./leaderboard";
+import { boardWhere, rankOf } from "./leaderboard";
 import { BONUS_PUZZLE_IDS } from "./logic";
 import { sceneGame } from "./scene/games";
 
@@ -44,8 +44,9 @@ export async function getRoomResult(room: Room, loc: Locale): Promise<RoomResult
     };
   }
   const [rank, boardSize] = entry
-    ? await Promise.all([rankOf(entry), db.leaderboardEntry.count({ where: { gameId: room.gameId } })])
+    ? await Promise.all([rankOf(entry), db.leaderboardEntry.count({ where: boardWhere(room.gameId) })])
     : [null, 0];
+  const testRun = Boolean(entry?.hidden);
 
   const finds = game && scene ? game.finds(scene, loc) : [];
   const solvedCount = new Map(solvedBy.map((s) => [s.playerId, s._count._all]));
@@ -67,14 +68,16 @@ export async function getRoomResult(room: Room, loc: Locale): Promise<RoomResult
     ...stats,
     rank,
     boardSize,
+    testRun,
     badges: runBadges({ roomBadges: roomBadges(room), rank, ...stats }),
-    shareId: entry?.id ?? null,
+    // A test run has no public card to share.
+    shareId: entry && !testRun ? entry.id : null,
     credits,
   };
 }
 
 /** What a public result card shows: no names, no answers, no credits. */
-export type SharedResult = Omit<RoomResult, "credits" | "shareId"> & { finishedAt: string };
+export type SharedResult = Omit<RoomResult, "credits" | "shareId" | "testRun"> & { finishedAt: string };
 
 /**
  * A leaderboard entry as a public result card. The room may be long gone, so badges come from the team's
@@ -83,10 +86,11 @@ export type SharedResult = Omit<RoomResult, "credits" | "shareId"> & { finishedA
 export async function getSharedResult(id: string): Promise<SharedResult | null> {
   if (!/^[a-z0-9]{10,40}$/i.test(id)) return null;
   const entry: LeaderboardEntry | null = await db.leaderboardEntry.findUnique({ where: { id } }).catch(() => null);
-  if (!entry) return null;
+  // An admin's test run has no public card: it 404s like an unknown id.
+  if (!entry || entry.hidden) return null;
   const [rank, boardSize, record] = await Promise.all([
     rankOf(entry),
-    db.leaderboardEntry.count({ where: { gameId: entry.gameId } }),
+    db.leaderboardEntry.count({ where: boardWhere(entry.gameId) }),
     db.caseRecord.findFirst({ where: { roomRef: entry.roomRef }, select: { badges: true } }),
   ]);
   return {
