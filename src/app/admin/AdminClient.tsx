@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useIntl } from "react-intl";
-import type { AdminCodeDTO } from "@/lib/types";
-import { ALL_GAMES, GAMES } from "@/lib/games";
+import type { AdminBoardEntry, AdminCodeDTO } from "@/lib/types";
+import { ALL_GAMES, GAMES, formatDuration, gameTitle } from "@/lib/games";
 import { ATLAS_GAME_ID } from "@/lib/atlas/types";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import type { PlaytestReport } from "@/server/playtest";
@@ -36,11 +36,11 @@ export function AdminClient() {
 
 function AdminTabs() {
   const t = useT();
-  const [tab, setTab] = useState<"codes" | "playtest">("codes");
+  const [tab, setTab] = useState<"codes" | "playtest" | "board">("codes");
   return (
     <>
-      <div role="tablist" aria-label={t("admin.tabs.aria")} className="grid grid-cols-2 gap-2">
-        {(["codes", "playtest"] as const).map((k) => (
+      <div role="tablist" aria-label={t("admin.tabs.aria")} className="grid grid-cols-3 gap-2">
+        {(["codes", "playtest", "board"] as const).map((k) => (
           <button
             key={k}
             role="tab"
@@ -52,7 +52,7 @@ function AdminTabs() {
           </button>
         ))}
       </div>
-      {tab === "codes" ? <CodesPanel /> : <PlaytestPanel />}
+      {tab === "codes" ? <CodesPanel /> : tab === "playtest" ? <PlaytestPanel /> : <BoardPanel />}
     </>
   );
 }
@@ -198,6 +198,80 @@ function PlaytestPanel() {
           </section>
         </>
       )}
+    </div>
+  );
+}
+
+/** Recent leaderboard entries with a hide/unhide switch, for test runs that went on the public board. */
+function BoardPanel() {
+  const t = useT();
+  const intl = useIntl();
+  const [entries, setEntries] = useState<AdminBoardEntry[] | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      const res = await fetch("/api/admin/leaderboard");
+      const data = (await res.json().catch(() => ({}))) as { entries?: AdminBoardEntry[]; error?: string };
+      if (!live) return;
+      if (!res.ok) setErr(data.error ?? t("admin.msg.loadFailed"));
+      setEntries(data.entries ?? []);
+    })();
+    return () => {
+      live = false;
+    };
+  }, [t]);
+
+  async function toggle(e: AdminBoardEntry) {
+    setBusy(e.id);
+    setErr(null);
+    const res = await fetch("/api/admin/leaderboard", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: e.id, hidden: !e.hidden }),
+    });
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
+    setBusy(null);
+    if (!res.ok) return setErr(data.error ?? t("admin.board.failed"));
+    setEntries((cur) => (cur ?? []).map((x) => (x.id === e.id ? { ...x, hidden: !e.hidden } : x)));
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-sm text-noir-ink-dim">{t("admin.board.help")}</p>
+      {err && <p className="text-sm text-red-300">{err}</p>}
+      {!entries && <p className="text-noir-ink-faint">{t("common.loading")}</p>}
+      {entries?.length === 0 && <p className="text-sm text-noir-ink-faint">{t("admin.play.none")}</p>}
+      <ul className="flex flex-col gap-2">
+        {entries?.map((e) => (
+          <li key={e.id} className={`flex items-center gap-3 rounded-xl border border-noir-line bg-noir-bg-2 p-3 ${e.hidden ? "opacity-60" : ""}`}>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm text-noir-ink">
+                {e.players.map((p, i) => (
+                  <span key={i}>
+                    {i > 0 && ", "}
+                    <span style={{ color: p.color }}>●</span> {p.name}
+                  </span>
+                ))}
+              </p>
+              <p className="text-xs text-noir-ink-faint">
+                {gameTitle(e.gameId)} · {formatDuration(e.durationMs)} · {intl.formatDate(e.finishedAt, { dateStyle: "medium", timeStyle: "short" })}
+                {e.hidden && <> · {t("admin.board.hidden")}</>}
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={busy === e.id}
+              onClick={() => void toggle(e)}
+              className="min-h-11 shrink-0 rounded-lg border border-noir-line px-3 text-sm text-noir-ink-dim disabled:opacity-50"
+            >
+              {e.hidden ? t("admin.board.show") : t("admin.board.hide")}
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -19,6 +19,7 @@ const messages: Record<keyof typeof en, string> = {
   "result.credit.support": "チームを支えた",
   "result.badges": "今回獲得したもの",
   "result.rank": "ランキング {total}チーム中 {rank}位",
+  "result.testRun": "テストプレイ · ランキング対象外",
   "result.share": "結果をシェア",
   "result.shareCopied": "リンクをコピーしました",
   "result.shareText": "{game}を{time}で{solved, select, yes {脱出しました} other {終わらせました}}。あなたはもっと速くできる？",
