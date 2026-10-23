@@ -691,6 +691,9 @@ a:active > .lb-card {
   }
   .ld-steam {
     opacity: 0.4;
+  }
+}
+
 /* ---------- Shared solve moments (src/components/shell/SolveMoments.tsx) ---------- */
 /* A solve toast drops in with a brass sheen; its seal rings out once; the screen edge glows briefly. */
 .sm-toast {
