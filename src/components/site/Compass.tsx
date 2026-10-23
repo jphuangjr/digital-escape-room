@@ -1,5 +1,8 @@
-/** Broken-needle compass with 7 notches: the site's motif. */
-export function Compass({ className = "" }: { className?: string }) {
+/**
+ * Broken-needle compass with 7 notches: the site's motif. `needle` animates the needle (lobby only):
+ * "sway" drifts like a compass settling, "search" turns slowly round, as if looking for north.
+ */
+export function Compass({ className = "", needle }: { className?: string; needle?: "sway" | "search" }) {
   const notches = Array.from({ length: 7 }, (_, i) => (i * 360) / 7);
   return (
     <svg viewBox="0 0 100 100" className={className} aria-hidden>
@@ -17,8 +20,10 @@ export function Compass({ className = "" }: { className?: string }) {
           transform={`rotate(${a} 50 50)`}
         />
       ))}
-      <path d="M50 50 L56 24 L50 30 Z" fill="currentColor" transform="rotate(18 50 50)" />
-      <path d="M50 54 L46 70 L52 64 Z" fill="currentColor" opacity="0.55" transform="rotate(-24 50 50)" />
+      <g className={needle ? `lb-needle lb-needle-${needle}` : undefined}>
+        <path d="M50 50 L56 24 L50 30 Z" fill="currentColor" transform="rotate(18 50 50)" />
+        <path d="M50 54 L46 70 L52 64 Z" fill="currentColor" opacity="0.55" transform="rotate(-24 50 50)" />
+      </g>
       <circle cx="50" cy="50" r="3" fill="currentColor" />
     </svg>
   );
