@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     return { progress: { ...progress, visitedSites: [...visited], discoveries } };
   });
 
-  track(room.id, player.id, "site.visit", { address: page.address, host });
+  track(room.id, player.id, "site.visit", { gameId: room.gameId, address: page.address, host });
   if (res.changed) await publish(room.code, "progress.updated", { reason: "visit", host });
 
   return json<ResolveResponse>({ ok: true, page, progress: res.progress });

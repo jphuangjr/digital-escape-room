@@ -32,7 +32,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   try {
     const created = await db.hintRequest.create({ data: { roomId: room.id, puzzleId, tier, playerId: player.id } });
     await touchRoom(room);
-    track(room.id, player.id, "hint", { puzzleId, tier });
+    track(room.id, player.id, "hint", { gameId: room.gameId, puzzleId, tier });
     await publish(room.code, "hint.unlocked", { puzzleId, tier });
     return json<HintDTO>(hintDTO(created, await getLocale()), 201);
   } catch (err) {

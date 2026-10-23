@@ -90,7 +90,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
 
   const correct = checkAnswer(puzzleId, input);
   const attempt = await db.attempt.create({ data: { roomId: room.id, playerId: player.id, puzzleId, input, correct } });
-  track(room.id, player.id, "attempt", { puzzleId, correct });
+  track(room.id, player.id, "attempt", { gameId: room.gameId, puzzleId, correct });
 
   let nextProgress = progress;
   let solvedNow = false;
@@ -119,6 +119,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     }
     if (solvedNow) {
       track(room.id, player.id, "puzzle.solved", {
+        gameId: room.gameId,
         puzzleId,
         msFromRoomStart: attempt.createdAt.getTime() - room.createdAt.getTime(),
       });

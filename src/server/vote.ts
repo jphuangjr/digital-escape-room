@@ -61,7 +61,14 @@ export async function finishRoom(room: Room, ending: Ending, playerId: string | 
   if (res.count !== 1) return null;
   const updated = await db.room.findUnique({ where: { id: room.id } });
   if (!updated) return null;
-  track(room.id, playerId, "ending", { ending, tieBrokenByHost: byHost });
+  const hintsUsed = await db.hintRequest.count({ where: { roomId: room.id } }).catch(() => null);
+  track(room.id, playerId, "ending", {
+    gameId: room.gameId,
+    ending,
+    tieBrokenByHost: byHost,
+    hintsUsed,
+    msFromRoomStart: (updated.finishedAt ?? new Date()).getTime() - room.createdAt.getTime(),
+  });
   await Promise.all([recordCaseEnding(room.id, ending).catch(() => {}), recordLeaderboardEnding(room.id, ending).catch(() => {})]);
   await publish(room.code, "ending.resolved", { ending });
   return updated;

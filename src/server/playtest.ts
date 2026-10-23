@@ -134,3 +134,53 @@ export function playtestReport(gameId: string, events: PlaytestEvent[], now: Dat
 }
 
 export type PlaytestReport = ReturnType<typeof playtestReport>;
+
+/**
+ * Ada's events in the shape `playtestReport` reads. Ada has no story flags, so each first solve of a puzzle
+ * (`puzzle:<id>`) and each first visit to a site (`site:<host>`) becomes a funnel step. Times run from the
+ * room's `room.created` event (or its first event). Older rows predate `gameId` on Ada's events, so callers
+ * pass every event of the game's rooms and this stamps `gameId`; endings without a time or hint count get them
+ * from the room's own events.
+ */
+export function adaPlaytestEvents(gameId: string, events: PlaytestEvent[]): PlaytestEvent[] {
+  const byRoom = new Map<string, PlaytestEvent[]>();
+  for (const e of events) byRoom.set(e.roomRef, [...(byRoom.get(e.roomRef) ?? []), e]);
+  const out: PlaytestEvent[] = [];
+  for (const [roomRef, list] of byRoom) {
+    const sorted = [...list].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    const start = (sorted.find((e) => e.type === "room.created") ?? sorted[0]).createdAt.getTime();
+    const since = (e: PlaytestEvent) => Math.max(0, e.createdAt.getTime() - start);
+    const step = (e: PlaytestEvent, flag: string) => ({ roomRef, type: "milestone", createdAt: e.createdAt, data: { gameId, flag, msFromRoomStart: since(e) } });
+    const seen = new Set<string>();
+    let hints = 0;
+    for (const e of sorted) {
+      const d: Record<string, unknown> = { ...(e.data ?? {}), gameId };
+      switch (e.type) {
+        case "site.visit": {
+          const flag = `site:${String(d.host ?? d.address ?? "?")}`;
+          if (!seen.has(flag)) out.push(step(e, flag));
+          seen.add(flag);
+          break;
+        }
+        case "puzzle.solved": {
+          const flag = `puzzle:${String(d.puzzleId)}`;
+          if (!seen.has(flag)) out.push(step(e, flag));
+          seen.add(flag);
+          out.push({ ...e, data: { msFromRoomStart: since(e), ...d } });
+          break;
+        }
+        case "hint":
+          hints++;
+          out.push({ ...e, data: d });
+          break;
+        case "ending":
+          out.push({ ...e, data: { msFromRoomStart: since(e), hintsUsed: hints, ...d } });
+          break;
+        case "attempt":
+          out.push({ ...e, data: d });
+          break;
+      }
+    }
+  }
+  return out;
+}
