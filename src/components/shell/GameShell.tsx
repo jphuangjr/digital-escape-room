@@ -7,7 +7,7 @@ import { useChat } from "@/lib/client/chat";
 import { Tour, TOUR_DONE_KEY } from "./Tour";
 import type { RoomTab } from "./RoomSheet";
 import { describeDiscovery, discoverySeparator, discoveryWho } from "@/lib/client/discoveries";
-import type { AppId, RoomState } from "@/lib/types";
+import type { AppId, PlayerPublic, RoomState } from "@/lib/types";
 import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
 import { Browser } from "@/components/browser/Browser";
 import { NotesApp } from "@/components/apps/NotesApp";
@@ -21,8 +21,14 @@ import { StatusBar } from "./StatusBar";
 import { RoomSheet } from "./RoomSheet";
 import { Toasts, type ToastItem } from "./Toasts";
 import { SolveGlow, useArrivals, useSolveMoments } from "./SolveMoments";
+import { LookingToo, PresenceAvatars, teammates, usePresence } from "./Presence";
 
-const PRESENCE_MS = 15_000;
+/** The app a presence view is in: "browser:thedrift.blog" → browser, "app:notes" → notes. */
+function appOf(view: string): AppId | null {
+  if (view.startsWith("browser:")) return "browser";
+  if (view.startsWith("app:")) return (APP_ORDER as string[]).includes(view.split(":")[1]) ? (view.split(":")[1] as AppId) : null;
+  return null;
+}
 
 export function GameShell({
   code,
@@ -94,33 +100,16 @@ export function GameShell({
   }, []);
 
   // ---------- presence ----------
-  const viewRef = useRef<string>("browser:newtab");
-  const sendPresence = useCallback(
-    (view: string) => {
-      void apiFetch(code, "/presence", { method: "POST", body: { view } });
-    },
-    [code],
-  );
-  const setView = useCallback(
-    (view: string) => {
-      if (viewRef.current === view) return;
-      viewRef.current = view;
-      sendPresence(view);
-    },
-    [sendPresence],
-  );
-  useEffect(() => {
-    sendPresence(viewRef.current);
-    const t = setInterval(() => sendPresence(viewRef.current), PRESENCE_MS);
-    const onVis = () => {
-      if (document.visibilityState === "visible") sendPresence(viewRef.current);
-    };
-    document.addEventListener("visibilitychange", onVis);
-    return () => {
-      clearInterval(t);
-      document.removeEventListener("visibilitychange", onVis);
-    };
-  }, [sendPresence]);
+  const [view, setView] = useState("browser:newtab");
+  usePresence(code, view);
+  // Which app each teammate has open (a dot on its icon), and who has this very page or app open too.
+  const others = teammates(state.players, state.me.id, () => true);
+  const people: Partial<Record<AppId, PlayerPublic[]>> = {};
+  for (const p of others) {
+    const app = appOf(p.currentView!);
+    if (app) (people[app] ??= []).push(p);
+  }
+  const alsoHere = view === "desktop" ? [] : others.filter((p) => p.currentView === view);
 
   useEffect(() => {
     if (active === "browser") setView(`browser:${browserAddress ?? "newtab"}`);
@@ -263,6 +252,7 @@ export function GameShell({
                 badge={badges[app]}
                 active={active === app}
                 glow={glowing.has(app)}
+                people={people[app]}
                 onClick={() => openApp(app)}
                 size="sm"
               />
@@ -270,7 +260,7 @@ export function GameShell({
           </nav>
 
           <main className="relative flex min-h-0 min-w-0 flex-1 md:p-5 md:pl-1">
-            {active === null && <HomeScreen isUnlocked={isUnlocked} badges={badges} glowing={glowing} openApp={openApp} />}
+            {active === null && <HomeScreen isUnlocked={isUnlocked} badges={badges} glowing={glowing} people={people} openApp={openApp} />}
             <div
               className={`relative min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-stone-950 md:mx-auto md:max-w-5xl md:rounded-xl md:border md:border-stone-800 md:shadow-2xl md:shadow-black ${
                 active === null ? "hidden" : "flex"
@@ -306,6 +296,15 @@ export function GameShell({
                   {app === "decoder" && isUnlocked("decoder") && <DecoderApp ctx={ctx} />}
                 </section>
               ))}
+              {alsoHere.length > 0 && (
+                <div className="pointer-events-none absolute inset-x-0 bottom-3 z-10 flex justify-center px-4">
+                  <LookingToo
+                    players={alsoHere}
+                    ring="#1c1917"
+                    className="max-w-full rounded-full border border-stone-700 bg-stone-900/90 py-1 pl-1.5 pr-3 text-stone-300 shadow-lg shadow-black/40"
+                  />
+                </div>
+              )}
             </div>
           </main>
         </div>
@@ -315,6 +314,7 @@ export function GameShell({
           isUnlocked={isUnlocked}
           badges={badges}
           glowing={glowing}
+          people={people}
           onOpen={openApp}
           onRoom={() => setRoomOpen(true)}
           onlineCount={state.players.filter((p) => p.online).length}
@@ -352,6 +352,7 @@ export function AppTile({
   badge,
   active,
   glow,
+  people = [],
   onClick,
   size = "lg",
 }: {
@@ -361,6 +362,8 @@ export function AppTile({
   active?: boolean;
   /** Just unlocked, or something new inside: glow once. */
   glow?: boolean;
+  /** Teammates with this app open. */
+  people?: PlayerPublic[];
   onClick: () => void;
   size?: "sm" | "lg";
 }) {
@@ -397,6 +400,7 @@ export function AppTile({
             {badge}
           </span>
         )}
+        <PresenceAvatars players={people} size="sm" ring="#1c1917" className="absolute -bottom-1.5 -left-1.5" />
       </span>
       <span className={`text-xs ${locked ? "text-stone-600" : "text-stone-300"}`}>{label}</span>
     </button>
@@ -407,11 +411,13 @@ function HomeScreen({
   isUnlocked,
   badges,
   glowing,
+  people,
   openApp,
 }: {
   isUnlocked: (a: AppId) => boolean;
   badges: Partial<Record<AppId, number>>;
   glowing: Set<AppId>;
+  people: Partial<Record<AppId, PlayerPublic[]>>;
   openApp: (a: AppId) => void;
 }) {
   const x = pick(useLocale());
@@ -432,7 +438,7 @@ function HomeScreen({
       </p>
       <div className="mt-8 grid grid-cols-3 gap-2 md:hidden">
         {APP_ORDER.map((app) => (
-          <AppTile key={app} app={app} locked={!isUnlocked(app)} badge={badges[app]} glow={glowing.has(app)} onClick={() => openApp(app)} />
+          <AppTile key={app} app={app} locked={!isUnlocked(app)} badge={badges[app]} glow={glowing.has(app)} people={people[app]} onClick={() => openApp(app)} />
         ))}
       </div>
     </div>
