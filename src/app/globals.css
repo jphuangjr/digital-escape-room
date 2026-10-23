@@ -544,3 +544,147 @@ a:active > .lb-card {
     display: none;
   }
 }
+
+/* ---------- Game trailers (src/components/site/GameTrailer.tsx) ----------
+   Landing heroes and lobby-card strips drawn from each game's opening room: a slow drift across one wall, a
+   second wall crossfading in halfway (48s round); Ada's laptop opens Email, then Notes (14s loop). */
+.tr-shot-a {
+  animation: tr-drift 24s ease-in-out infinite alternate;
+}
+.tr-shot-b {
+  opacity: 0;
+  animation: tr-drift 24s ease-in-out infinite alternate-reverse, tr-cross 48s ease-in-out infinite;
+}
+.tr-card .tr-shot-a {
+  animation-duration: 36s;
+}
+@keyframes tr-drift {
+  from { transform: scale(1.04) translate(-1.5%, -1%); }
+  to { transform: scale(1.14) translate(1.5%, 1.5%); }
+}
+@keyframes tr-cross {
+  0%, 42% { opacity: 0; }
+  50%, 92% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.tr-win,
+.tr-cursor {
+  transform-box: view-box;
+}
+.tr-win-a { animation: tr-win-a 14s ease-in-out infinite; }
+.tr-win-b { animation: tr-win-b 14s ease-in-out infinite; }
+@keyframes tr-win-a {
+  0%, 12% { opacity: 0; transform: scale(0.2); }
+  18%, 44% { opacity: 1; transform: none; }
+  48%, 100% { opacity: 0; transform: scale(0.2); }
+}
+@keyframes tr-win-b {
+  0%, 56% { opacity: 0; transform: scale(0.2); }
+  62%, 88% { opacity: 1; transform: none; }
+  92%, 100% { opacity: 0; transform: scale(0.2); }
+}
+.tr-tile-a rect { animation: tr-tile-a 14s ease-in-out infinite; }
+.tr-tile-b rect { animation: tr-tile-b 14s ease-in-out infinite; }
+@keyframes tr-tile-a {
+  0%, 9%, 16%, 100% { stroke-opacity: 0.3; }
+  12% { stroke-opacity: 1; }
+}
+@keyframes tr-tile-b {
+  0%, 53%, 60%, 100% { stroke-opacity: 0.3; }
+  56% { stroke-opacity: 1; }
+}
+.tr-cursor { animation: tr-cursor 14s ease-in-out infinite; }
+@keyframes tr-cursor {
+  0% { transform: translate(420px, 272px); }
+  10% { transform: translate(258px, 216px); }
+  12% { transform: translate(258px, 216px) scale(0.85); }
+  14%, 46% { transform: translate(258px, 216px); }
+  54% { transform: translate(194px, 216px); }
+  56% { transform: translate(194px, 216px) scale(0.85); }
+  58%, 90% { transform: translate(194px, 216px); }
+  100% { transform: translate(420px, 272px); }
+}
+.tr-breathe { animation: at-breathe 7s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  /* hold the first shot still: no drift or crossfade, the art's own loops stopped, Ada's Email left open */
+  .tr-frame *,
+  .tr-frame *::before,
+  .tr-frame *::after {
+    animation: none !important;
+  }
+  .tr-shot-b,
+  .tr-win-b,
+  .tr-cursor {
+    opacity: 0;
+  }
+}
+
+/* ---------- Room loading (src/components/site/RoomLoader.tsx) ----------
+   Shown only until the room's state arrives; nothing waits on these. The tip fades in late (1.2s), so a quick
+   load never flashes it. */
+.ld-late {
+  animation: lb-in 0.5s ease-out 1.2s both;
+}
+.ld-tip {
+  animation: ld-tip 0.5s ease-out both;
+}
+@keyframes ld-tip {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.ld-boot-mark {
+  animation: ld-boot-mark 1.6s ease-in-out infinite;
+}
+@keyframes ld-boot-mark {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+.ld-boot-bar {
+  width: 92%;
+  transform-origin: left;
+  animation: ld-boot-bar 3s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+@keyframes ld-boot-bar {
+  from { transform: scaleX(0.04); }
+  to { transform: none; }
+}
+.ld-boot-line {
+  animation: lb-in 0.3s ease-out both;
+}
+.ld-steam {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ld-steam 1.8s ease-out infinite;
+}
+@keyframes ld-steam {
+  0% { transform: translateY(8px) scale(0.4); opacity: 0; }
+  30% { opacity: 0.55; }
+  100% { transform: translateY(-14px) scale(1.4); opacity: 0; }
+}
+.ld-blink {
+  animation: ld-blink 1.4s steps(1, end) infinite;
+}
+@keyframes ld-blink {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0.3; }
+}
+.ld-turn {
+  transform-box: view-box;
+  transform-origin: 60px 60px;
+  animation: lb-search 24s linear infinite reverse;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ld-late,
+  .ld-tip,
+  .ld-boot-mark,
+  .ld-boot-bar,
+  .ld-boot-line,
+  .ld-steam,
+  .ld-blink,
+  .ld-turn {
+    animation: none !important;
+  }
+  .ld-steam {
+    opacity: 0.4;
+  }
+}

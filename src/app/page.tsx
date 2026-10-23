@@ -8,6 +8,7 @@ import { getT } from "@/i18n/server";
 import { DirectoryAccount, DirectoryCases, JoinBox } from "./DirectoryClient";
 import { VaultIntro } from "@/components/site/VaultIntro";
 import { LobbyAmbience } from "@/components/site/LobbyAmbience";
+import { GameTrailer } from "@/components/site/GameTrailer";
 
 function GameCard({ game, t, i }: { game: GameInfo; t: Translate; i: number }) {
   const staging = game.status === "staging";
@@ -18,7 +19,8 @@ function GameCard({ game, t, i }: { game: GameInfo; t: Translate; i: number }) {
         live ? "border-noir-line bg-noir-bg-2/90 active:border-noir-brass" : "border-dashed border-noir-line/70 bg-noir-bg-2/40"
       }`}
     >
-      <div className="flex items-start gap-4">
+      {live && <GameTrailer gameId={game.id} t={t} variant="card" className="-mx-5 -mt-5 -mb-1 h-28 rounded-t-xl opacity-70" />}
+      <div className="relative flex items-start gap-4">
         <Compass needle={live ? "sway" : undefined} className={`h-14 w-14 shrink-0 ${live ? "text-noir-brass" : "text-noir-ink-faint"}`} />
         <div className="min-w-0">
           <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-noir-ink-faint">

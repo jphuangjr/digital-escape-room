@@ -16,6 +16,7 @@ import { CompassMark } from "@/components/shell/icons";
 import { FormattedMessage } from "react-intl";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { getGame, gameText } from "@/lib/games";
+import { RoomLoader } from "@/components/site/RoomLoader";
 
 type Phase =
   | { kind: "loading" }
@@ -60,7 +61,7 @@ export function RoomClient({ code, gameId = "ada-voss" }: { code: string; gameId
 
   return (
     <div className="min-h-[100dvh] bg-[#0b0a08] text-stone-200">
-      {phase.kind === "loading" && <Splash text={t(gameId === TRAIN_GAME_ID ? "train.room.boarding" : gameId === ATLAS_GAME_ID ? "atlas.loading" : "site.room.booting")} />}
+      {phase.kind === "loading" && <RoomLoader gameId={gameId} />}
       {phase.kind === "notfound" && <NotFound />}
       {phase.kind === "error" && (
         <Splash text={phase.status ? t("site.room.serverError", { status: phase.status }) : t("site.room.networkError")}>
