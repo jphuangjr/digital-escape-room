@@ -21,12 +21,22 @@ const messages: Record<keyof typeof en, string> = {
   "shell.status.laptop": "艾達的筆電",
   "shell.status.phase": "{status, select, voting {投票進行中} finished {案件已結案} other {調查進行中}}",
   "shell.status.roomAria": "房間資訊，{online} 人在線",
+  "shell.status.soundOff": "關閉筆電音效",
+  "shell.status.soundOn": "開啟筆電音效",
   "shell.status.unreadAria": "{count, plural, other {# 則未讀訊息}}",
   "shell.toast.decoderLocked": "解碼器尚未解鎖。請繼續在各個網站中挖掘線索。",
   "shell.toast.decoderUnlocked": "解碼器已解鎖！請在工具列中找到它。",
   "shell.toast.open": "開啟",
   "shell.toast.reply": "回覆",
   "shell.toast.newEmail": "{kind, select, voicemail {新語音留言：{subject}} other {新電子郵件：{subject}}}",
+  "shell.chapter.aria": "第 {n} 章（共 {total} 章）：{name}。查看進度",
+  "shell.chapter.title": "進度",
+  "shell.chapter.of": "第 {n} 章，共 {total} 章",
+  "shell.chapter.new": "新章節：{name}",
+  "shell.chapter.now": "目前",
+  "shell.chapter.ahead": "尚未抵達",
+  "shell.chapter.close": "關閉",
+  "shell.chapter.note": "還沒抵達的章節，要等你們到了才會揭曉名稱。",
 };
 
 export default messages;

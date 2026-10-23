@@ -349,6 +349,13 @@ const text = {
   "end.osei.text": "Dr. Osei admits to writing the prescription and is held for questioning at the border. The Countess's lawyers do the rest.\nBy spring the Star of Varga is listed as lost, the insurance has paid out, and the Varga estate's debts are quietly settled.",
   "end.lindqvist.title": "Very much the wrong suspect",
   "end.lindqvist.text": "Mrs. Lindqvist is outraged, then delighted: it is the most exciting thing that has ever happened to her, and she tells the border police all about it, twice.\nIn the confusion, the Countess Varga steps off the train with a very light handbag. The Star is never seen again.",
+
+  // ---------- chapters (the progress line; a name is only sent once the team reaches it) ----------
+  "chapter.compartment": "Compartment 12B",
+  "chapter.telegram": "The telegram",
+  "chapter.dining": "The dining car",
+  "chapter.cashbox": "The cash box",
+  "chapter.accusation": "The accusation",
 };
 
 export default text;

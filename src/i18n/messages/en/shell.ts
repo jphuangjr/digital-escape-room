@@ -19,12 +19,22 @@ const messages = {
   "shell.status.laptop": "Ada's Laptop",
   "shell.status.phase": "{status, select, voting {Vote in progress} finished {Case closed} other {Investigation open}}",
   "shell.status.roomAria": "Room details, {online} online",
+  "shell.status.soundOff": "Turn laptop sound off",
+  "shell.status.soundOn": "Turn laptop sound on",
   "shell.status.unreadAria": "{count, plural, one {# unread message} other {# unread messages}}",
   "shell.toast.decoderLocked": "Decoder is locked. Keep digging through the sites.",
   "shell.toast.decoderUnlocked": "Decoder unlocked! Find it in your dock.",
   "shell.toast.open": "Open",
   "shell.toast.reply": "Reply",
   "shell.toast.newEmail": "{kind, select, voicemail {New voicemail: {subject}} other {New email: {subject}}}",
+  "shell.chapter.aria": "Chapter {n} of {total}: {name}. Show progress",
+  "shell.chapter.title": "Progress",
+  "shell.chapter.of": "Chapter {n} of {total}",
+  "shell.chapter.new": "New chapter: {name}",
+  "shell.chapter.now": "Now",
+  "shell.chapter.ahead": "Still ahead",
+  "shell.chapter.close": "Close",
+  "shell.chapter.note": "Chapters ahead stay unnamed until your team reaches them.",
 } as const;
 
 export default messages;

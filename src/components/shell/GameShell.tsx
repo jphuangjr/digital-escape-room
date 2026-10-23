@@ -7,7 +7,7 @@ import { useChat } from "@/lib/client/chat";
 import { Tour, TOUR_DONE_KEY } from "./Tour";
 import type { RoomTab } from "./RoomSheet";
 import { describeDiscovery, discoverySeparator, discoveryWho } from "@/lib/client/discoveries";
-import type { AppId, RoomState } from "@/lib/types";
+import type { AppId, PlayerPublic, RoomState } from "@/lib/types";
 import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
 import { Browser } from "@/components/browser/Browser";
 import { NotesApp } from "@/components/apps/NotesApp";
@@ -21,8 +21,17 @@ import { StatusBar } from "./StatusBar";
 import { RoomSheet } from "./RoomSheet";
 import { Toasts, type ToastItem } from "./Toasts";
 import { SolveGlow, useArrivals, useSolveMoments } from "./SolveMoments";
+import { useGameSound } from "./useGameSound";
+import { LaptopAmbience, SOUND_PREF_KEY } from "./laptopSound";
+import { LookingToo, PresenceAvatars, teammates, usePresence } from "./Presence";
+import { useWindowMotion } from "./sceneMotion";
 
-const PRESENCE_MS = 15_000;
+/** The app a presence view is in: "browser:thedrift.blog" → browser, "app:notes" → notes. */
+function appOf(view: string): AppId | null {
+  if (view.startsWith("browser:")) return "browser";
+  if (view.startsWith("app:")) return (APP_ORDER as string[]).includes(view.split(":")[1]) ? (view.split(":")[1] as AppId) : null;
+  return null;
+}
 
 export function GameShell({
   code,
@@ -85,6 +94,12 @@ export function GameShell({
     [unlocked],
   );
 
+  // ---------- sound: off unless turned on; the fan and room, key ticks, a blip for new mail ----------
+  const { on: soundOn, toggle: toggleSound, sound } = useGameSound(
+    { prefKey: SOUND_PREF_KEY, defaultOn: false, ambience: () => new LaptopAmbience() },
+    { place: "laptop", open: active, sheet: roomOpen, typing: true },
+  );
+
   // ---------- toasts ----------
   const toast = useCallback<GameCtx["toast"]>((msg, tone = "info", action) => {
     const id = ++toastId.current;
@@ -94,33 +109,17 @@ export function GameShell({
   }, []);
 
   // ---------- presence ----------
-  const viewRef = useRef<string>("browser:newtab");
-  const sendPresence = useCallback(
-    (view: string) => {
-      void apiFetch(code, "/presence", { method: "POST", body: { view } });
-    },
-    [code],
-  );
-  const setView = useCallback(
-    (view: string) => {
-      if (viewRef.current === view) return;
-      viewRef.current = view;
-      sendPresence(view);
-    },
-    [sendPresence],
-  );
-  useEffect(() => {
-    sendPresence(viewRef.current);
-    const t = setInterval(() => sendPresence(viewRef.current), PRESENCE_MS);
-    const onVis = () => {
-      if (document.visibilityState === "visible") sendPresence(viewRef.current);
-    };
-    document.addEventListener("visibilitychange", onVis);
-    return () => {
-      clearInterval(t);
-      document.removeEventListener("visibilitychange", onVis);
-    };
-  }, [sendPresence]);
+  const [view, setView] = useState("browser:newtab");
+  usePresence(code, view);
+  // Which app each teammate has open (a dot on its icon), and who has this very page or app open too.
+  const others = teammates(state.players, state.me.id, () => true);
+  const people: Partial<Record<AppId, PlayerPublic[]>> = {};
+  for (const p of others) {
+    const app = appOf(p.currentView!);
+    if (app) (people[app] ??= []).push(p);
+  }
+  // (Not on the desktop or a blank tab: being there together means nothing.)
+  const alsoHere = view === "desktop" || view === "browser:newtab" ? [] : others.filter((p) => p.currentView === view);
 
   useEffect(() => {
     if (active === "browser") setView(`browser:${browserAddress ?? "newtab"}`);
@@ -129,6 +128,8 @@ export function GameShell({
   }, [active, browserAddress, setView]);
 
   // ---------- app switching ----------
+  // Windows grow from their icon, shrink back into it and cross-fade between apps.
+  const motion = useWindowMotion(active);
   const openApp = useCallback(
     (app: AppId) => {
       if (!isUnlocked(app)) {
@@ -219,6 +220,7 @@ export function GameShell({
     if (knownEmails.current) {
       const fresh = state.emails.filter((e) => !knownEmails.current!.has(e.id));
       if (fresh.length) {
+        sound.current?.play("mail");
         const vm = fresh.find((e) => e.kind === "voicemail");
         toast(
           t("shell.toast.newEmail", { kind: vm ? "voicemail" : "email", subject: (vm ?? fresh[0]).subject }),
@@ -227,7 +229,7 @@ export function GameShell({
       }
     }
     knownEmails.current = new Set(ids);
-  }, [state.emails, toast, t]);
+  }, [state.emails, toast, t, sound]);
   // ---------- context ----------
   const api = useCallback<GameCtx["api"]>((path, init) => apiFetch(code, path, init), [code]);
   const ctx = useMemo<GameCtx>(
@@ -239,7 +241,7 @@ export function GameShell({
 
   return (
     <GameContext.Provider value={ctx}>
-      <div className="fixed inset-0 flex flex-col overflow-hidden bg-[#0b0a08] text-stone-200">
+      <div className="fixed inset-0 flex flex-col overflow-hidden bg-[#0b0a08] text-stone-200" onClickCapture={motion.onClickCapture}>
         <Grain />
         <StatusBar
           ctx={ctx}
@@ -247,6 +249,8 @@ export function GameShell({
           chatUnread={chat.unread}
           onRoom={() => setRoomOpen(true)}
           onHome={() => setActive(null)}
+          soundOn={soundOn}
+          onSound={toggleSound}
         />
 
         <div className="relative flex min-h-0 flex-1">
@@ -263,6 +267,7 @@ export function GameShell({
                 badge={badges[app]}
                 active={active === app}
                 glow={glowing.has(app)}
+                people={people[app]}
                 onClick={() => openApp(app)}
                 size="sm"
               />
@@ -270,11 +275,17 @@ export function GameShell({
           </nav>
 
           <main className="relative flex min-h-0 min-w-0 flex-1 md:p-5 md:pl-1">
-            {active === null && <HomeScreen isUnlocked={isUnlocked} badges={badges} glowing={glowing} openApp={openApp} />}
+            {(active === null || motion.homeBehind) && (
+              <div className={motion.homeBehind ? "absolute inset-0 flex md:inset-5 md:left-1" : "contents"} inert={active !== null}>
+                <HomeScreen isUnlocked={isUnlocked} badges={badges} glowing={glowing} people={people} openApp={openApp} />
+              </div>
+            )}
             <div
+              ref={motion.win}
               className={`relative min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-stone-950 md:mx-auto md:max-w-5xl md:rounded-xl md:border md:border-stone-800 md:shadow-2xl md:shadow-black ${
-                active === null ? "hidden" : "flex"
+                motion.shown === null ? "hidden" : "flex"
               }`}
+              inert={active === null}
             >
               {/* Window chrome, desktop only */}
               <div className="hidden h-10 shrink-0 items-center gap-2 border-b border-stone-800 bg-stone-900/80 px-3 md:flex">
@@ -292,10 +303,12 @@ export function GameShell({
               {mounted.map((app) => (
                 <section
                   key={app}
+                  ref={motion.section(app)}
                   aria-label={t(`shell.app.${app}`)}
-                  className={`min-h-0 flex-1 flex-col ${active === app ? "flex" : "hidden"} ${
+                  aria-hidden={motion.leaving === app || undefined}
+                  className={`min-h-0 flex-1 flex-col ${motion.shown === app || motion.leaving === app ? "flex" : "hidden"} ${
                     app === "browser" ? "overflow-hidden" : "overflow-y-auto overflow-x-hidden"
-                  }`}
+                  } ${motion.leaving === app ? "tx-leaving pointer-events-none absolute inset-0 md:top-10" : motion.leaving && motion.shown === app ? "relative z-[1]" : ""}`}
                 >
                   {app === "browser" && (
                     <Browser ctx={ctx} navRequest={navRequest} onAddressChange={setBrowserAddress} />
@@ -306,6 +319,15 @@ export function GameShell({
                   {app === "decoder" && isUnlocked("decoder") && <DecoderApp ctx={ctx} />}
                 </section>
               ))}
+              {alsoHere.length > 0 && (
+                <div className="pointer-events-none absolute inset-x-0 bottom-3 z-10 flex justify-center px-4">
+                  <LookingToo
+                    players={alsoHere}
+                    ring="#1c1917"
+                    className="max-w-full rounded-full border border-stone-700 bg-stone-900/90 py-1 pl-1.5 pr-3 text-stone-300 shadow-lg shadow-black/40"
+                  />
+                </div>
+              )}
             </div>
           </main>
         </div>
@@ -315,6 +337,7 @@ export function GameShell({
           isUnlocked={isUnlocked}
           badges={badges}
           glowing={glowing}
+          people={people}
           onOpen={openApp}
           onRoom={() => setRoomOpen(true)}
           onlineCount={state.players.filter((p) => p.online).length}
@@ -352,6 +375,7 @@ export function AppTile({
   badge,
   active,
   glow,
+  people = [],
   onClick,
   size = "lg",
 }: {
@@ -361,6 +385,8 @@ export function AppTile({
   active?: boolean;
   /** Just unlocked, or something new inside: glow once. */
   glow?: boolean;
+  /** Teammates with this app open. */
+  people?: PlayerPublic[];
   onClick: () => void;
   size?: "sm" | "lg";
 }) {
@@ -397,6 +423,7 @@ export function AppTile({
             {badge}
           </span>
         )}
+        <PresenceAvatars players={people} size="sm" ring="#1c1917" className="absolute -left-1.5 -top-1.5" />
       </span>
       <span className={`text-xs ${locked ? "text-stone-600" : "text-stone-300"}`}>{label}</span>
     </button>
@@ -407,11 +434,13 @@ function HomeScreen({
   isUnlocked,
   badges,
   glowing,
+  people,
   openApp,
 }: {
   isUnlocked: (a: AppId) => boolean;
   badges: Partial<Record<AppId, number>>;
   glowing: Set<AppId>;
+  people: Partial<Record<AppId, PlayerPublic[]>>;
   openApp: (a: AppId) => void;
 }) {
   const x = pick(useLocale());
@@ -432,7 +461,7 @@ function HomeScreen({
       </p>
       <div className="mt-8 grid grid-cols-3 gap-2 md:hidden">
         {APP_ORDER.map((app) => (
-          <AppTile key={app} app={app} locked={!isUnlocked(app)} badge={badges[app]} glow={glowing.has(app)} onClick={() => openApp(app)} />
+          <AppTile key={app} app={app} locked={!isUnlocked(app)} badge={badges[app]} glow={glowing.has(app)} people={people[app]} onClick={() => openApp(app)} />
         ))}
       </div>
     </div>

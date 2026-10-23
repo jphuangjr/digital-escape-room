@@ -16,6 +16,7 @@ import { hintCooldownUntil, isFragmentTag, ONLINE_WINDOW_MS, parseProgress } fro
 import type { Locale } from "@/i18n/config";
 import { getLocale } from "@/i18n/server";
 import { baseEmails, bonusEmails, getHint, voicemailsFor } from "./content";
+import { adaChapter } from "./content/chapters";
 import { buildEnding, loadVoteState } from "./vote";
 import { sceneGame } from "./scene/games";
 
@@ -65,6 +66,7 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
 
   const byId = new Map(players.map((p) => [p.id, p]));
   const progress = parseProgress(room.progress);
+  const scene = game ? game.parse(room.scene) : null;
   const hints = hintRows.map((h) => hintDTO(h, loc));
 
   const hintCooldowns: Partial<Record<HintPuzzleId, string>> = {};
@@ -124,6 +126,7 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
       game ? [] : [...baseEmails(loc), ...voicemailsFor(progress, hints, loc), ...bonusEmails(progress, loc)],
     vote,
     ending,
-    ...(game ? { scene: game.dto(game.parse(room.scene), { startedAt: room.createdAt, now, loc }) as RoomState["scene"] } : {}),
+    chapter: game ? game.chapter(scene, loc) : adaChapter(progress, loc),
+    ...(game ? { scene: game.dto(scene, { startedAt: room.createdAt, now, loc }) as RoomState["scene"] } : {}),
   };
 }

@@ -2,6 +2,7 @@ import "server-only";
 import type { AtlasSceneAction, AtlasSceneDTO } from "@/lib/atlas/types";
 import { ATLAS_ENDINGS, ATLAS_GAME_ID } from "@/lib/atlas/types";
 import { defineSceneGame } from "../scene/registry";
+import { atlasChapter } from "./chapters";
 import { applyAction, parseScene, sceneDTO, type AtlasScene } from "./scene";
 import { atlasT, type AtlasTextKey } from "./text";
 import { SEALS, SECRETS } from "./world";
@@ -39,6 +40,7 @@ export const atlasGame = defineSceneGame<AtlasScene, AtlasSceneAction, AtlasScen
   ending: (scene) => scene.ending && { ending: scene.ending.choice, solved: true, hintsUsed: scene.hints.length },
   // Every cross-Age secret found, and the ending only they unlock.
   progress: (scene) => ({ flags: scene.flags, hints: scene.hints }),
+  chapter: atlasChapter,
   badges: (scene) => [
     ...(scene.ending && scene.ending.secrets === SECRETS.length ? ["atlas-secrets"] : []),
     ...(scene.ending?.choice === "reroute" ? ["atlas-reroute"] : []),

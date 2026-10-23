@@ -24,6 +24,7 @@ const messages: Record<keyof typeof en, string> = {
   "room.view.newTab": "una pestaña nueva del navegador",
   "room.view.app": "la app {app}",
   "room.view.desktop": "el escritorio",
+  "room.presence.lookingToo": "{count, plural, one {{names} también está mirando esto} other {{names} también están mirando esto}}",
   "room.qr.title": "Escanea para unirte",
   "room.qr.label": "Código QR para unirse a la sala {code}",
   "room.qr.help": "Apunta aquí con la cámara de un teléfono. Pueden iniciar sesión con Google o solo escribir un nombre.",

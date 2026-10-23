@@ -22,6 +22,7 @@ const messages = {
   "room.view.newTab": "a new browser tab",
   "room.view.app": "{app} app",
   "room.view.desktop": "the desktop",
+  "room.presence.lookingToo": "{names} {count, plural, one {is} other {are}} looking at this too",
   "room.qr.title": "Scan to join",
   "room.qr.label": "QR code to join room {code}",
   "room.qr.help": "Point a phone camera here. They can sign in with Google or just enter a name.",

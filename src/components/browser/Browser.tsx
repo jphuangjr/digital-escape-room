@@ -6,7 +6,7 @@ import { FormattedMessage } from "react-intl";
 import { useLocale, useT } from "@/i18n/client";
 import { pick } from "@/i18n/config";
 import { PUZZLE_AFFECTS_HOSTS } from "@/lib/client/discoveries";
-import type { PuzzleId, ResolveResponse, SitePage } from "@/lib/types";
+import type { PlayerPublic, PuzzleId, ResolveResponse, SitePage } from "@/lib/types";
 import { normalizeAddress, type GameCtx } from "@/lib/client/game";
 import {
   BackIcon,
@@ -17,6 +17,7 @@ import {
   ReloadIcon,
   StarIcon,
 } from "@/components/shell/icons";
+import { PresenceAvatars, teammates } from "@/components/shell/Presence";
 import { SiteRenderer } from "./SiteRenderer";
 import { ViewSource } from "./ViewSource";
 
@@ -361,6 +362,7 @@ export function Browser({
         {view.kind === "newtab" && (
           <NewTab
             bookmarks={bookmarks}
+            team={teamSites(ctx)}
             onOpen={(a) => void load(a, "push")}
           />
         )}
@@ -414,21 +416,66 @@ export function Browser({
   );
 }
 
-function NewTab({ bookmarks, onOpen }: { bookmarks: Bookmark[]; onOpen: (address: string) => void }) {
+const hostOf = (address: string) => address.split("/")[0];
+
+/**
+ * Which sites teammates have open, by host. Only sites the team has already visited are named (every
+ * page that loads counts), so a half-typed guess or a site nobody has reached never shows up here.
+ */
+function teamSites(ctx: GameCtx): { host: string; players: PlayerPublic[] }[] {
+  const known = new Set(ctx.state.progress.visitedSites);
+  const byHost = new Map<string, PlayerPublic[]>();
+  for (const p of teammates(ctx.state.players, ctx.state.me.id, (v) => v.startsWith("browser:"))) {
+    const host = hostOf(p.currentView!.slice(8));
+    if (!known.has(host)) continue;
+    byHost.set(host, [...(byHost.get(host) ?? []), p]);
+  }
+  return [...byHost].map(([host, players]) => ({ host, players }));
+}
+
+function NewTab({
+  bookmarks,
+  team,
+  onOpen,
+}: {
+  bookmarks: Bookmark[];
+  team: { host: string; players: PlayerPublic[] }[];
+  onOpen: (address: string) => void;
+}) {
   const t = useT();
   const x = pick(useLocale());
+  const at = (address: string) => team.find((s) => s.host === hostOf(address))?.players ?? [];
   return (
     <div className="mx-auto flex max-w-md flex-col items-center px-6 py-12 text-center">
       <CompassMark className="h-16 w-16 text-amber-500/60" />
       <p className="mt-4 font-serif text-lg text-stone-200">{t("browser.newTab.title")}</p>
       <p className="mt-1 text-sm italic text-stone-500">&ldquo;{x({ en: "Start at the beginning.", ko: "처음부터 시작해.", "zh-TW": "從頭開始。", es: "Empieza por el principio.", ja: "最初から始めて。", "pt-BR": "Comece pelo começo." })}&rdquo;</p>
+      {team.length > 0 && (
+        <div className="mt-8 w-full text-left">
+          <p className="px-1 text-xs font-semibold uppercase tracking-wider text-stone-500">{t("browser.newTab.team")}</p>
+          <ul className="mt-2 space-y-1.5">
+            {team.map((s) => (
+              <li key={s.host}>
+                <button
+                  onClick={() => onOpen(s.host)}
+                  className="flex min-h-11 w-full items-center gap-3 rounded-lg border border-stone-800 bg-stone-900/60 px-3 text-left active:bg-stone-800"
+                >
+                  <PresenceAvatars players={s.players} size="sm" ring="#1c1917" />
+                  <span className="min-w-0 flex-1 truncate font-mono text-sm text-stone-200">{s.host}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="mt-8 grid w-full grid-cols-2 gap-3">
         {bookmarks.map((b) => (
           <button
             key={b.address}
             onClick={() => onOpen(b.address)}
-            className="flex min-h-20 flex-col items-center justify-center gap-1 rounded-xl border border-stone-800 bg-stone-900 p-3 active:bg-stone-800"
+            className="relative flex min-h-20 flex-col items-center justify-center gap-1 rounded-xl border border-stone-800 bg-stone-900 p-3 active:bg-stone-800"
           >
+            <PresenceAvatars players={at(b.address)} size="sm" ring="#1c1917" className="absolute right-2 top-2" />
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/15 font-serif text-amber-300">
               {bookmarkTitle(b, x).charAt(0)}
             </span>
