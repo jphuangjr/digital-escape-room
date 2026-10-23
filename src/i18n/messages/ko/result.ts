@@ -1,0 +1,38 @@
+import type en from "../en/result";
+
+const messages: Record<keyof typeof en, string> = {
+  "result.notFinished": "아직 사건이 끝나지 않았어요.",
+  "result.skip": "탭해서 건너뛰기",
+  "result.stat.time": "시간",
+  "result.stat.hints": "힌트",
+  "result.stat.attempts": "시도",
+  "result.stat.wrong": "오답 {n}회",
+  "result.stat.team": "팀",
+  "result.stat.rank": "순위",
+  "result.credits": "누가 무엇을 했나",
+  "result.credit.locks": "자물쇠 {n}개 해제",
+  "result.credit.puzzles": "퍼즐 {n}개 해결",
+  "result.credit.finds": "발견 {n}개",
+  "result.credit.topLocks": "자물쇠를 가장 많이 열었어요",
+  "result.credit.topPuzzles": "퍼즐을 가장 많이 풀었어요",
+  "result.credit.topFinds": "가장 많이 찾아냈어요",
+  "result.credit.support": "팀의 방향을 잡아 줬어요",
+  "result.badges": "이번 플레이에서 획득",
+  "result.rank": "리더보드 {total}팀 중 {rank}위",
+  "result.share": "결과 공유",
+  "result.shareCopied": "링크를 복사했어요",
+  "result.shareText": "{game}{solved, select, yes {을(를) {time} 만에 탈출했어요} other {의 사건을 {time} 만에 종결했어요}}. 더 빨리 할 수 있나요?",
+  "result.readEnding": "무슨 일이 있었는지 읽기",
+  "result.ending.caught": "도둑 검거",
+  "result.ending.wrong": "엉뚱한 용의자 지목",
+  "result.ending.escaped": "탈출 성공",
+  "result.page.title": "어느 팀의 결과 · {game}",
+  "result.page.eyebrow": "사건 결과",
+  "result.page.team": "{n, plural, =1 {혼자서} other {#명 팀}}",
+  "result.page.description": "{team}(으)로 {game}을(를) {time} 만에 마쳤어요. 여러분의 팀은 이길 수 있을까요?",
+  "result.page.teaser": "여러분의 팀이라면 더 잘할 수 있을까요? 스포일러는 없어요. 사건과 타이머, 그리고 함께할 사람만 있으면 돼요.",
+  "result.page.cta": "이 사건 플레이하기",
+  "result.page.all": "모든 방탈출",
+};
+
+export default messages;

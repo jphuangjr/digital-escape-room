@@ -7,6 +7,7 @@ import type { MeResponse, OpenHostedRoom } from "@/lib/types";
 import { AccountBar, ContinueRooms, GoogleButton, MyCases } from "@/components/site/Account";
 import { Leaderboard } from "@/components/site/Leaderboard";
 import { Compass } from "@/components/site/Compass";
+import { GameTrailer } from "@/components/site/GameTrailer";
 import { ReplaceRoomDialog } from "@/components/site/ReplaceRoomDialog";
 import { RedeemBox } from "@/components/site/RedeemBox";
 import { LanguageSwitcher, useT } from "@/i18n/client";
@@ -173,6 +174,8 @@ export function AdaLanding() {
             />
           </h1>
         </header>
+
+        <GameTrailer gameId={GAME_ID} t={t} className="-mt-2 aspect-[16/10] rounded-xl border border-noir-line" />
 
         <section className="space-y-3 font-serif text-base leading-relaxed text-noir-ink-dim">
           <p>{t("site.ada.intro")}</p>

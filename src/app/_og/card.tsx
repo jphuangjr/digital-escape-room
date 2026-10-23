@@ -71,3 +71,72 @@ export function ogCard({ eyebrow, title, subtitle, badge }: { eyebrow: string; t
     OG_SIZE,
   );
 }
+
+/** Each game's colours on its result card. */
+const RESULT_TONES: Record<string, { bg: string; glow: string; accent: string; line: string }> = {
+  "ada-voss": { bg: BG, glow: "#2a2210", accent: BRASS, line: "#3a3220" },
+  "nightingale-express": { bg: "#120c07", glow: "#3d2615", accent: "#ecd27a", line: "#4a3020" },
+  "atlas-silent-worlds": { bg: "#071015", glow: "#12303a", accent: "#9fd3c7", line: "#1f3640" },
+};
+
+/** A shared result: game, ending (spoiler-free), time, team size and badges. Text only, no emoji fonts. */
+export function resultCard({
+  gameId,
+  game,
+  ending,
+  stats,
+  badges,
+}: {
+  gameId: string;
+  game: string;
+  ending: string;
+  stats: { label: string; value: string }[];
+  badges: string[];
+}) {
+  const tone = RESULT_TONES[gameId] ?? RESULT_TONES["ada-voss"];
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 56,
+          padding: "0 80px",
+          background: `radial-gradient(circle at 22% 38%, ${tone.glow} 0%, ${tone.bg} 62%)`,
+          color: INK,
+          fontFamily: "serif",
+        }}
+      >
+        <CompassArt size={240} color={tone.accent} />
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 14 }}>
+          <div style={{ fontSize: 24, letterSpacing: 8, textTransform: "uppercase", color: DIM }}>Escape Escape · Case result</div>
+          <div style={{ fontSize: game.length > 26 ? 54 : 66, lineHeight: 1.08, color: INK }}>{game}</div>
+          <div style={{ fontSize: 38, fontStyle: "italic", color: tone.accent }}>{ending}</div>
+          <div style={{ display: "flex", gap: 16, marginTop: 14 }}>
+            {stats.map((s) => (
+              <div
+                key={s.label}
+                style={{ display: "flex", flexDirection: "column", padding: "10px 22px", border: `2px solid ${tone.line}`, borderRadius: 14, background: "rgba(0,0,0,0.25)" }}
+              >
+                <div style={{ fontSize: 18, letterSpacing: 4, textTransform: "uppercase", color: DIM }}>{s.label}</div>
+                <div style={{ fontSize: 40, fontFamily: "monospace", color: INK }}>{s.value}</div>
+              </div>
+            ))}
+          </div>
+          {badges.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 8 }}>
+              {badges.slice(0, 5).map((b) => (
+                <div key={b} style={{ fontSize: 22, color: tone.accent, border: `2px solid ${tone.accent}`, borderRadius: 999, padding: "4px 16px" }}>
+                  {b}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    ),
+    OG_SIZE,
+  );
+}

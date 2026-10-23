@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RoomState } from "@/lib/types";
 import type { HotspotId, ItemDTO, ItemId, SceneAction, SceneActionResponse, SceneDTO, Suspect, TrainRoomId, WallId } from "@/lib/train/types";
@@ -9,10 +8,12 @@ import { apiFetch, GameContext, type GameCtx } from "@/lib/client/game";
 import { useChat } from "@/lib/client/chat";
 import { RoomSheet, type RoomTab } from "@/components/shell/RoomSheet";
 import { Tour, type TourStep } from "@/components/shell/Tour";
+import { SolveGlow, useArrivals, useSolveMoments } from "@/components/shell/SolveMoments";
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
 import { useT } from "@/i18n/client";
 import { Leaderboard } from "@/components/site/Leaderboard";
+import { ResultReveal, type RevealTheme } from "@/components/site/ResultReveal";
 import { CorridorArt, WallArt } from "./walls";
 import { CloseupDocView, ItemIcon, ItemReading, LockDial } from "./parts";
 import { setSoundPreferred, soundPreferred, TrainAmbience } from "./sound";
@@ -158,12 +159,15 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   useEffect(() => {
     if (knownLog.current) {
       for (const e of scene.log) {
-        if (knownLog.current.has(e.id) || e.playerId === state.me.id) continue;
+        if (knownLog.current.has(e.id) || e.playerId === state.me.id || e.solve) continue;
         toast(e.text, "success");
       }
     }
     knownLog.current = new Set(scene.log.map((e) => e.id));
   }, [scene.log, state.me.id, toast]);
+  // Locks and puzzles: a moment for the whole room, the solver included.
+  const solveFlash = useSolveMoments(scene.log.filter((e) => e.solve), toast, { sound: soundOn });
+  const arrived = useArrivals(scene.inventory.map((i) => i.id));
 
   // ---------- chat toasts ----------
   const knownChat = useRef<Set<string> | null>(null);
@@ -381,7 +385,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
                     key={it.id}
                     type="button"
                     onClick={() => setItemOpen(it.id)}
-                    className="relative flex w-16 shrink-0 flex-col items-center rounded-lg border border-[#3d2615] bg-[#24160c] px-1 py-1 active:border-[#c9a227]"
+                    className={`relative flex w-16 shrink-0 flex-col items-center rounded-lg border border-[#3d2615] bg-[#24160c] px-1 py-1 active:border-[#c9a227] ${arrived.has(it.id) ? "sm-new-tile" : ""}`}
                   >
                     <ItemIcon id={it.id} className="h-9 w-9" />
                     <span className="mt-0.5 line-clamp-1 text-[10px] text-stone-300">{it.name}</span>
@@ -402,6 +406,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               onClick={() => setItemsOpen(!itemsOpen)}
               badge={scene.inventory.length > 0 ? String(scene.inventory.length) : undefined}
               dot={newItems}
+              glow={!itemsOpen && arrived.size > 0}
             />
             <TabButton icon="📝" label={t("train.tab.notes")} onClick={() => setNotebookOpen(true)} />
             <TabButton
@@ -460,7 +465,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
         )}
         {notesOpen && <NotesSheet scene={scene} busy={busy} onClose={() => setNotesOpen(false)} onRing={() => void act({ type: "hint" })} />}
         {scene.vote && !scene.ending && <VotePanel state={state} scene={scene} busy={busy} act={act} />}
-        {scene.ending && <EndingPanel scene={scene} code={code} />}
+        {scene.ending && <EndingPanel scene={scene} code={code} signedIn={state.me.signedIn} />}
         {intro && (
           <IntroCard
             onClose={() => {
@@ -503,7 +508,8 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             }}
           />
         )}
-        <Toasts items={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} placement={closeup || itemOpen || roomOpen || notebookOpen ? "top" : "bottom"} />
+        <SolveGlow flash={solveFlash} />
+        <Toasts items={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} placement={closeup || itemOpen || itemsOpen || roomOpen || notebookOpen ? "top" : "bottom"} />
       </div>
     </GameContext.Provider>
   );
@@ -879,49 +885,52 @@ function VotePanel({ state, scene, busy, act }: { state: RoomState; scene: Scene
   );
 }
 
-function EndingPanel({ scene, code }: { scene: SceneDTO; code: string }) {
+const ENDING_THEME: RevealTheme = {
+  eyebrow: "font-mono text-[#c9a227]",
+  accent: "text-[#ecd27a]",
+  title: "font-serif text-4xl text-[#ecd27a]",
+  label: "text-stone-500",
+  value: "text-stone-100",
+  tile: "border-[#3d2615] bg-[#1b120b]/60",
+  divide: "divide-[#3d2615]",
+  muted: "text-stone-400",
+  text: "text-stone-100",
+  chip: "border-[#c9a227]/50 bg-[#c9a227]/10 text-[#ecd27a]",
+  primary: "block min-h-12 w-full rounded-lg bg-[#c9a227] py-3 text-center font-semibold text-[#1b120b] active:bg-[#ecd27a]",
+  ghost: "block min-h-12 rounded-lg border border-[#c9a227]/50 py-3 text-center text-[#ecd27a] active:bg-[#3d2615]",
+};
+
+function EndingPanel({ scene, code, signedIn }: { scene: SceneDTO; code: string; signedIn: boolean }) {
   const t = useT();
   const e = scene.ending!;
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#120c07] px-4 pb-10" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label={e.title}>
-      <article className="mx-auto max-w-md space-y-5 pt-6">
-        <p className={`text-center font-mono text-[11px] uppercase tracking-[0.3em] ${e.correct ? "text-[#c9a227]" : "text-red-400"}`}>
-          {t(e.correct ? "train.end.solved" : "train.end.closed", { name: suspectName(t, e.accused) })}
-        </p>
-        <h1 className="text-center font-serif text-4xl text-[#ecd27a]">{e.title}</h1>
-        <div className="space-y-4 font-serif text-[16px] leading-relaxed text-stone-200">
-          {e.paragraphs.map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
-        </div>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-lg border border-[#3d2615] p-2">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500">{t("train.end.time")}</p>
-            <p className="font-mono text-lg text-stone-100">{t("train.end.minutes", { n: e.minutes })}</p>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#120c07] px-4 pb-14" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label={e.title}>
+      <article className="mx-auto max-w-md pt-6">
+        <ResultReveal
+          code={code}
+          gameId={TRAIN_GAME_ID}
+          signedIn={signedIn}
+          theme={ENDING_THEME}
+          eyebrow={<span className={e.correct ? "" : "text-red-400"}>{t(e.correct ? "train.end.solved" : "train.end.closed", { name: suspectName(t, e.accused) })}</span>}
+          title={e.title}
+          extraStats={[
+            { label: t("train.end.evidence"), value: e.evidenceFound, total: e.evidenceTotal },
+            { label: t("train.end.votes"), value: e.counts[e.accused] },
+          ]}
+          slotBadges={["nx-every-clue"]}
+          badgeSlot={
+            e.everyClue && (
+              <p className="mx-auto w-fit rounded-full border border-[#c9a227]/60 bg-[#c9a227]/10 px-3 py-1 text-xs font-semibold text-[#ecd27a]">{t("train.end.everyClue")}</p>
+            )
+          }
+        >
+          <div className="space-y-4 font-serif text-[16px] leading-relaxed text-stone-200">
+            {e.paragraphs.map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
           </div>
-          <div className="rounded-lg border border-[#3d2615] p-2">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500">{t("train.end.evidence")}</p>
-            <p className="font-mono text-lg text-stone-100">
-              {e.evidenceFound}/{e.evidenceTotal}
-            </p>
-          </div>
-          <div className="rounded-lg border border-[#3d2615] p-2">
-            <p className="text-[10px] uppercase tracking-wider text-stone-500">{t("train.end.votes")}</p>
-            <p className="font-mono text-lg text-stone-100">{e.counts[e.accused]}</p>
-          </div>
-        </div>
-        {e.everyClue && (
-          <p className="mx-auto w-fit rounded-full border border-[#c9a227]/60 bg-[#c9a227]/10 px-3 py-1 text-xs font-semibold text-[#ecd27a]">{t("train.end.everyClue")}</p>
-        )}
-        <Leaderboard gameId={TRAIN_GAME_ID} roomCode={code} tone="room" />
-        <div className="flex flex-col gap-2">
-          <Link href={`/play/${TRAIN_GAME_ID}`} className="block min-h-12 rounded-lg bg-[#c9a227] py-3 text-center font-semibold text-[#1b120b]">
-            {t("site.playAgain")}
-          </Link>
-          <Link href="/" className="block min-h-12 rounded-lg border border-[#c9a227]/50 py-3 text-center text-[#ecd27a]">
-            {t("train.end.lobby")}
-          </Link>
-        </div>
+          <Leaderboard gameId={TRAIN_GAME_ID} roomCode={code} tone="room" />
+        </ResultReveal>
       </article>
     </div>
   );
@@ -953,6 +962,7 @@ function TabButton({
   active,
   badge,
   dot,
+  glow,
   alert,
   tour,
   ...aria
@@ -963,6 +973,8 @@ function TabButton({
   active?: boolean;
   badge?: string;
   dot?: boolean;
+  /** Something just arrived: glow once. */
+  glow?: boolean;
   alert?: boolean;
   /** The guided tour's name for this control. */
   tour?: string;
@@ -976,7 +988,7 @@ function TabButton({
       onClick={onClick}
       data-tour={tour}
       {...aria}
-      className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 active:bg-[#3d2615] ${active ? "bg-[#24160c] text-[#ecd27a]" : "text-stone-300"}`}
+      className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 active:bg-[#3d2615] ${glow ? "sm-new-tab" : ""} ${active ? "bg-[#24160c] text-[#ecd27a]" : "text-stone-300"}`}
     >
       {active && <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-[#c9a227]" aria-hidden />}
       <span className="relative text-lg leading-none" aria-hidden>

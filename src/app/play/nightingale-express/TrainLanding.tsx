@@ -10,6 +10,7 @@ import { LanguageSwitcher, useT } from "@/i18n/client";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { AVATAR_COLORS } from "@/app/r/[code]/RoomClient";
 import { Leaderboard } from "@/components/site/Leaderboard";
+import { GameTrailer } from "@/components/site/GameTrailer";
 
 /**
  * Landing page for a physical-room game (The Nightingale Express by default): start or rejoin a room. Staging
@@ -100,6 +101,7 @@ export function TrainLanding({
           <h1 className="mt-2 font-serif text-4xl text-noir-ink">{gameText(t, game, "title")}</h1>
           <p className="mt-2 font-serif italic text-noir-ink-dim">{gameText(t, game, "tagline")}</p>
         </header>
+        <GameTrailer gameId={gameId} t={t} className="aspect-[16/10] rounded-xl border border-noir-line" />
         <p className="font-serif leading-relaxed text-noir-ink-dim">{gameText(t, game, "blurb")}</p>
         <ContinueRooms me={me} gameId={gameId} />
         <AccountBar me={me} callbackUrl={game.href} />
