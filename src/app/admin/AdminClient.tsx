@@ -57,7 +57,7 @@ function AdminTabs() {
   );
 }
 
-const PLAYTEST_GAMES = [ATLAS_GAME_ID, TRAIN_GAME_ID];
+const PLAYTEST_GAMES = [ATLAS_GAME_ID, TRAIN_GAME_ID, "ada-voss"];
 const PLAYTEST_DAYS = [7, 30, 90];
 
 /** Where playtesters get stuck in a physical-room game: how far rooms got, where they gave up, hints and locks. */

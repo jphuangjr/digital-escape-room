@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { playtestReport, STALL_AFTER_MS, type PlaytestEvent } from "../playtest";
+import { adaPlaytestEvents, playtestReport, STALL_AFTER_MS, type PlaytestEvent } from "../playtest";
 
 const G = "atlas-silent-worlds";
 const t0 = new Date("2026-10-01T10:00:00Z").getTime();
@@ -49,5 +49,39 @@ describe("playtestReport", () => {
     ]);
     expect(r.hints).toEqual([{ puzzleId: "engine", requests: 3, rooms: 2, byTier: { 1: 2, 2: 1, 3: 0 } }]);
     expect(r.endings).toEqual({ reroute: 1 });
+  });
+});
+
+describe("adaPlaytestEvents", () => {
+  const A = "ada-voss";
+  // Older Ada rows: no gameId, no times on solves or endings.
+  const raw = (roomRef: string, type: string, min: number, data: Record<string, unknown> = {}): PlaytestEvent => ({ roomRef, type, createdAt: at(min), data });
+  const events = [
+    raw("R", "room.created", 0, { gameId: A }),
+    raw("R", "site.visit", 2, { host: "meridian-inst.com" }),
+    raw("R", "site.visit", 3, { host: "meridian-inst.com" }),
+    raw("R", "attempt", 9, { puzzleId: "bonus-pin", correct: false }),
+    raw("R", "attempt", 10, { puzzleId: "bonus-pin", correct: true }),
+    raw("R", "puzzle.solved", 10, { puzzleId: "bonus-pin" }),
+    raw("R", "hint", 30, { puzzleId: "final-phrase", tier: 1 }),
+    raw("R", "ending", 70, { ending: "expose" }),
+    raw("S", "room.created", 0, { gameId: A }),
+    raw("S", "site.visit", 4, { host: "meridian-inst.com" }),
+  ];
+  const report = playtestReport(A, adaPlaytestEvents(A, events), at(24 * 60));
+
+  it("turns first site visits and first solves into funnel steps, timed from the room's start", () => {
+    expect(report.milestones).toEqual([
+      { flag: "site:meridian-inst.com", rooms: 2, share: 1, medianMinutes: 3 },
+      { flag: "puzzle:bonus-pin", rooms: 1, share: 0.5, medianMinutes: 10 },
+    ]);
+  });
+
+  it("fills in ending time and hints, and counts the room's locks and stalls", () => {
+    expect(report.rooms).toMatchObject({ started: 2, finished: 1, medianMinutesToFinish: 70, medianHintsPerFinish: 1 });
+    expect(report.endings).toEqual({ expose: 1 });
+    expect(report.locks[0]).toMatchObject({ puzzleId: "bonus-pin", attempts: 2, wrongAttempts: 1, roomsSolved: 1, medianMinutesToSolve: 10 });
+    expect(report.hints).toEqual([{ puzzleId: "final-phrase", requests: 1, rooms: 1, byTier: { 1: 1, 2: 0, 3: 0 } }]);
+    expect(report.stalls).toEqual([{ after: "site:meridian-inst.com", rooms: 1 }]);
   });
 });
