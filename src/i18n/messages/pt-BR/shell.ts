@@ -21,6 +21,8 @@ const messages: Record<keyof typeof en, string> = {
   "shell.status.laptop": "Notebook da Ada",
   "shell.status.phase": "{status, select, voting {Votação em andamento} finished {Caso encerrado} other {Investigação aberta}}",
   "shell.status.roomAria": "Detalhes da sala, {online} on-line",
+  "shell.status.soundOff": "Desligar o som do notebook",
+  "shell.status.soundOn": "Ligar o som do notebook",
   "shell.status.unreadAria": "{count, plural, one {# mensagem não lida} other {# mensagens não lidas}}",
   "shell.toast.decoderLocked": "O Decodificador está bloqueado. Continue investigando os sites.",
   "shell.toast.decoderUnlocked": "Decodificador desbloqueado! Procure no seu dock.",

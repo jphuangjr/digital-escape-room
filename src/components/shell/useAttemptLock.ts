@@ -5,6 +5,7 @@ import type { AttemptDTO, PuzzleId } from "@/lib/types";
 import { ATTEMPT_LIMIT, ATTEMPT_WINDOW_MS, WRONG_ANSWER_LOCKOUT_MS } from "@/lib/rules";
 import { useNow } from "@/components/apps/shared";
 import { useLockPulse } from "./lockFeel";
+import { activeGameSound } from "./gameSound";
 
 /** Show "n more wrong guesses" only when it's close. */
 const WARN_AT = 2;
@@ -16,7 +17,15 @@ const WARN_AT = 2;
  * without being told anything about the answer. A 429 from the server still wins if it says longer.
  */
 export function useAttemptLock(attempts: AttemptDTO[], puzzleId: PuzzleId) {
-  const [pulse, fire] = useLockPulse();
+  const [pulse, firePulse] = useLockPulse();
+  // The lock's sound goes with its look.
+  const fire = useCallback(
+    (kind: "wrong" | "open") => {
+      firePulse(kind);
+      activeGameSound()?.lock(kind === "open" ? "open" : "thunk");
+    },
+    [firePulse],
+  );
   const [retryUntil, setRetryUntil] = useState<number | null>(null);
   const now = useNow(1000);
   const room = useMemo(() => {

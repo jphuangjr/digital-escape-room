@@ -21,6 +21,8 @@ const messages: Record<keyof typeof en, string> = {
   "shell.status.laptop": "エイダのノートPC",
   "shell.status.phase": "{status, select, voting {投票中} finished {事件解決} other {捜査中}}",
   "shell.status.roomAria": "ルームの詳細、{online} 人がオンライン",
+  "shell.status.soundOff": "ノートPCの音を消す",
+  "shell.status.soundOn": "ノートPCの音を出す",
   "shell.status.unreadAria": "{count, plural, other {未読メッセージ # 件}}",
   "shell.toast.decoderLocked": "デコーダーはロックされています。サイトをもっと調べてみてください。",
   "shell.toast.decoderUnlocked": "デコーダーのロックが解除されました！ドックから開けます。",

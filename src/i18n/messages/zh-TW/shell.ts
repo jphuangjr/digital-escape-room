@@ -21,6 +21,8 @@ const messages: Record<keyof typeof en, string> = {
   "shell.status.laptop": "艾達的筆電",
   "shell.status.phase": "{status, select, voting {投票進行中} finished {案件已結案} other {調查進行中}}",
   "shell.status.roomAria": "房間資訊，{online} 人在線",
+  "shell.status.soundOff": "關閉筆電音效",
+  "shell.status.soundOn": "開啟筆電音效",
   "shell.status.unreadAria": "{count, plural, other {# 則未讀訊息}}",
   "shell.toast.decoderLocked": "解碼器尚未解鎖。請繼續在各個網站中挖掘線索。",
   "shell.toast.decoderUnlocked": "解碼器已解鎖！請在工具列中找到它。",

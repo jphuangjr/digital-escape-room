@@ -17,7 +17,8 @@ import { Leaderboard } from "@/components/site/Leaderboard";
 import { ResultReveal, type RevealTheme } from "@/components/site/ResultReveal";
 import { CorridorArt, WallArt } from "./walls";
 import { CloseupDocView, ItemIcon, ItemReading, LockDial } from "./parts";
-import { setSoundPreferred, soundPreferred, TrainAmbience } from "./sound";
+import { SOUND_PREF_KEY, TrainAmbience } from "./sound";
+import { useGameSound } from "@/components/shell/useGameSound";
 import { TrainNotebook, useDockedNotes, useSeenClues } from "./notebook";
 
 /**
@@ -105,30 +106,11 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), action ? 7000 : 3800);
   }, []);
 
-  // ---------- sound ----------
-  const ambience = useRef<TrainAmbience | null>(null);
-  const [soundOn, setSoundOn] = useState(true);
-  useEffect(() => {
-    setSoundOn(soundPreferred());
-    ambience.current = new TrainAmbience();
-    // Browsers only allow audio after a gesture: start on the first tap if sound is on.
-    const first = () => {
-      if (soundPreferred()) ambience.current?.start();
-    };
-    window.addEventListener("pointerdown", first, { once: true });
-    return () => {
-      window.removeEventListener("pointerdown", first);
-      ambience.current?.stop();
-    };
-  }, []);
-  useEffect(() => ambience.current?.setPlace(place), [place]);
-  const toggleSound = () => {
-    const next = !soundOn;
-    setSoundOn(next);
-    setSoundPreferred(next);
-    if (next) ambience.current?.start();
-    else ambience.current?.stop();
-  };
+  // ---------- sound: the carriage's ambience and the UI's small sounds, started on the first tap ----------
+  const { on: soundOn, toggle: toggleSound, sound } = useGameSound(
+    { prefKey: SOUND_PREF_KEY, defaultOn: true, ambience: () => new TrainAmbience() },
+    { place, open: closeup, turn: `${place}:${wall}`, sheet: roomOpen },
+  );
 
   // ---------- presence ----------
   const view = place === "corridor" ? "train:corridor" : `train:${wall}`;
@@ -167,7 +149,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
     knownLog.current = new Set(scene.log.map((e) => e.id));
   }, [scene.log, state.me.id, toast]);
   // Locks and puzzles: a moment for the whole room, the solver included.
-  const solveFlash = useSolveMoments(scene.log.filter((e) => e.solve), toast, { sound: soundOn });
+  const solveFlash = useSolveMoments(scene.log.filter((e) => e.solve), toast);
   const arrived = useArrivals(scene.inventory.map((i) => i.id));
 
   // ---------- chat toasts ----------
@@ -205,13 +187,14 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
       if (data.message) toast(data.message, data.ok ? "success" : "info");
       if (action.type === "unlock") {
         fireLock(data.ok ? "open" : "wrong");
-        ambience.current?.cue(data.ok ? "open" : "thunk");
+        sound.current?.lock(data.ok ? "open" : "thunk");
       }
+      if (action.type === "take" && data.ok) sound.current?.play("take");
       // A wrong guess can jam the lock, so refresh then too.
       if (data.ok || action.type === "unlock") void refresh();
       return data;
     },
-    [busy, code, refresh, toast, t, fireLock],
+    [busy, code, refresh, toast, t, fireLock, sound],
   );
 
   const ctx: GameCtx = useMemo(

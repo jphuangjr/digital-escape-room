@@ -1,7 +1,7 @@
 /**
  * The two lock sounds, built with Web Audio on a game's running ambience (no audio files): a soft brass "thunk"
- * for a wrong guess and a click-and-ring for one that opens. Only games that already play sound call these,
- * and only while the player has sound on.
+ * for a wrong guess and a click-and-ring for one that opens. Played through the shared game sound (gameSound.ts),
+ * so only while the player has sound on.
  */
 export type LockCue = "thunk" | "open";
 

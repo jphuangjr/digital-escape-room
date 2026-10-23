@@ -1,43 +1,16 @@
 "use client";
 
 import type { LocationId } from "@/lib/atlas/types";
-import { playLockCue, type LockCue } from "@/components/shell/lockSound";
+import { noiseBuffer, noteSound, type Ambience } from "@/components/shell/gameSound";
 
 /**
  * Ambient sound for The Atlas of Silent Worlds: one soundscape per place, generated with Web Audio (no audio files)
- * and crossfaded as the player moves. Browsers only allow sound after a tap, so `start()` is called from a user
- * gesture; the player's mute choice is remembered per device.
+ * and crossfaded as the player moves. It plays through the shared game sound (shell/gameSound.ts), which starts it
+ * after a tap and owns the switch.
  */
 
-const PREF_KEY = "atlas_sound";
-
-export function soundPreferred(): boolean {
-  try {
-    return localStorage.getItem(PREF_KEY) !== "off";
-  } catch {
-    return true;
-  }
-}
-
-export function setSoundPreferred(on: boolean) {
-  try {
-    localStorage.setItem(PREF_KEY, on ? "on" : "off");
-  } catch {}
-}
-
-function noiseBuffer(ctx: AudioContext, seconds: number, brown = false): AudioBuffer {
-  const buf = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate);
-  const data = buf.getChannelData(0);
-  let last = 0;
-  for (let i = 0; i < data.length; i++) {
-    const white = Math.random() * 2 - 1;
-    if (brown) {
-      last = (last + 0.02 * white) / 1.02;
-      data[i] = last * 3.5;
-    } else data[i] = white;
-  }
-  return buf;
-}
+/** The player's sound switch on this device ("on" / "off"); sound is on unless turned off. */
+export const SOUND_PREF_KEY = "atlas_sound";
 
 type Mood = "rain" | "drips" | "vault" | "glasshouse" | "desert" | "shade" | "deep" | "void";
 
@@ -59,7 +32,7 @@ interface Layer {
   stop: () => void;
 }
 
-export class AtlasAmbience {
+export class AtlasAmbience implements Ambience {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private noise: AudioBuffer | null = null;
@@ -67,19 +40,12 @@ export class AtlasAmbience {
   private layer: { mood: Mood; layer: Layer } | null = null;
   private place: LocationId = "observatory";
 
-  get running() {
-    return this.ctx !== null;
-  }
-
-  start() {
+  start(ctx: AudioContext, out: AudioNode) {
     if (this.ctx) return;
-    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AC) return;
-    const ctx = new AC();
     this.ctx = ctx;
     const master = ctx.createGain();
     master.gain.value = 0.85;
-    master.connect(ctx.destination);
+    master.connect(out);
     this.master = master;
     this.noise = noiseBuffer(ctx, 4);
     this.brown = noiseBuffer(ctx, 6, true);
@@ -90,23 +56,16 @@ export class AtlasAmbience {
   stop() {
     this.layer?.layer.stop();
     this.layer = null;
-    const ctx = this.ctx;
     this.ctx = null;
     this.master = null;
-    if (ctx) void ctx.close().catch(() => {});
-  }
-
-  /** A lock's thunk or click, over the soundscape (silent while sound is off). */
-  cue(cue: LockCue) {
-    if (this.ctx && this.master) playLockCue(this.ctx, this.master, cue);
   }
 
   /** Crossfade to the soundscape of a place (kept and applied on start when sound is off). */
-  setPlace(place: LocationId) {
-    this.place = place;
+  setPlace(place: string) {
+    this.place = place as LocationId;
     const ctx = this.ctx;
     if (!ctx || !this.master) return;
-    const mood = MOOD[place];
+    const mood = MOOD[this.place] ?? "rain";
     if (this.layer?.mood === mood) return;
     const now = ctx.currentTime;
     const old = this.layer?.layer;
@@ -114,7 +73,11 @@ export class AtlasAmbience {
       old.gain.gain.cancelScheduledValues(now);
       old.gain.gain.setValueAtTime(old.gain.gain.value, now);
       old.gain.gain.linearRampToValueAtTime(0, now + 1.6);
-      setTimeout(() => old.stop(), 1800);
+      setTimeout(() => {
+        try {
+          old.stop();
+        } catch {}
+      }, 1800);
     }
     const layer = this.build(ctx, mood);
     layer.gain.gain.setValueAtTime(0, now);
@@ -187,7 +150,11 @@ export class AtlasAmbience {
     const next = () => {
       timer = setTimeout(() => {
         if (!live || !this.ctx) return;
-        play(this.ctx.currentTime + 0.02);
+        // Nothing piles up while the sound is paused (the tab hidden).
+        if (this.ctx.state === "running") {
+          play(this.ctx.currentTime + 0.02);
+          noteSound("ambience:event");
+        }
         next();
       }, minMs + Math.random() * (maxMs - minMs));
     };

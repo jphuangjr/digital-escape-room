@@ -21,6 +21,8 @@ const messages: Record<keyof typeof en, string> = {
   "shell.status.laptop": "에이다의 노트북",
   "shell.status.phase": "{status, select, voting {투표 진행 중} finished {사건 종결} other {수사 진행 중}}",
   "shell.status.roomAria": "방 정보, {online}명 접속 중",
+  "shell.status.soundOff": "노트북 소리 끄기",
+  "shell.status.soundOn": "노트북 소리 켜기",
   "shell.status.unreadAria": "{count, plural, other {읽지 않은 메시지 #개}}",
   "shell.toast.decoderLocked": "해독기는 아직 잠겨 있어요. 사이트를 더 파헤쳐 보세요.",
   "shell.toast.decoderUnlocked": "해독기가 열렸어요! 앱 목록에서 찾아보세요.",

@@ -21,7 +21,8 @@ import { AtlasItemIcon } from "./items";
 import { SPOTS } from "./walls";
 import { AtlasNotebook, useDockedNotes, useSeenClues } from "./notebook";
 import { isLetter, LetterCard, lettersHeld } from "./story";
-import { AtlasAmbience, setSoundPreferred, soundPreferred } from "./sound";
+import { AtlasAmbience, SOUND_PREF_KEY } from "./sound";
+import { useGameSound } from "@/components/shell/useGameSound";
 
 /**
  * The room screen for The Atlas of Silent Worlds: one illustrated wall at a time, tap to look closer, a shared inventory, the Atlas of places reached. Where each player stands is their own;
@@ -122,29 +123,11 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
   const wall = walls[wallIdx];
   const placeName = scene.places.find((p) => p.id === here)?.name ?? "";
 
-  // ---------- sound: one soundscape per place, started on the first tap ----------
-  const ambience = useRef<AtlasAmbience | null>(null);
-  const [soundOn, setSoundOn] = useState(true);
-  useEffect(() => {
-    setSoundOn(soundPreferred());
-    ambience.current = new AtlasAmbience();
-    const first = () => {
-      if (soundPreferred()) ambience.current?.start();
-    };
-    window.addEventListener("pointerdown", first, { once: true });
-    return () => {
-      window.removeEventListener("pointerdown", first);
-      ambience.current?.stop();
-    };
-  }, []);
-  useEffect(() => ambience.current?.setPlace(here), [here]);
-  const toggleSound = () => {
-    const next = !soundOn;
-    setSoundOn(next);
-    setSoundPreferred(next);
-    if (next) ambience.current?.start();
-    else ambience.current?.stop();
-  };
+  // ---------- sound: one soundscape per place and the UI's small sounds, started on the first tap ----------
+  const { on: soundOn, toggle: toggleSound, sound } = useGameSound(
+    { prefKey: SOUND_PREF_KEY, defaultOn: true, ambience: () => new AtlasAmbience() },
+    { place: here, open: closeup, turn: `${here}:${wall}`, sheet: roomOpen },
+  );
 
   // ---------- arriving somewhere: the place's name, briefly ----------
   const [arrival, setArrival] = useState<string | null>(null);
@@ -186,7 +169,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
     knownLog.current = new Set(scene.log.map((e) => e.id));
   }, [scene.log, state.me.id, toast]);
   // Locks and puzzles: a moment for the whole room, the solver included.
-  const solveFlash = useSolveMoments(scene.log.filter((e) => e.solve), toast, { sound: soundOn });
+  const solveFlash = useSolveMoments(scene.log.filter((e) => e.solve), toast);
   const arrived = useArrivals(scene.inventory.map((i) => i.id));
   const knownChat = useRef<Set<string> | null>(null);
   useEffect(() => {
@@ -250,8 +233,9 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
       // Every guess at a lock, the gate, the plate or the core gets the same feel.
       if (action.type === "unlock" || action.type === "dial" || action.type === "seat" || action.type === "reroute") {
         fireLock(data.ok ? "open" : "wrong");
-        ambience.current?.cue(data.ok ? "open" : "thunk");
+        sound.current?.lock(data.ok ? "open" : "thunk");
       }
+      if (action.type === "take" && data.ok) sound.current?.play("take");
       // Failed guesses can still change things (a jam, a flood), so refresh whenever something was tried.
       void refresh();
       // Let the gate glow open for a moment before stepping through.
@@ -259,7 +243,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
       if (arrived) window.setTimeout(() => go(arrived), OPEN_HOLD_MS);
       return data;
     },
-    [busy, code, refresh, toast, t, go, fireLock],
+    [busy, code, refresh, toast, t, go, fireLock, sound],
   );
 
   const ctx: GameCtx = useMemo(

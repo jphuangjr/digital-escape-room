@@ -21,6 +21,8 @@ import { StatusBar } from "./StatusBar";
 import { RoomSheet } from "./RoomSheet";
 import { Toasts, type ToastItem } from "./Toasts";
 import { SolveGlow, useArrivals, useSolveMoments } from "./SolveMoments";
+import { useGameSound } from "./useGameSound";
+import { LaptopAmbience, SOUND_PREF_KEY } from "./laptopSound";
 
 const PRESENCE_MS = 15_000;
 
@@ -83,6 +85,12 @@ export function GameShell({
   const isUnlocked = useCallback(
     (app: AppId) => app !== "decoder" || unlocked.includes("decoder"),
     [unlocked],
+  );
+
+  // ---------- sound: off unless turned on; the fan and room, key ticks, a blip for new mail ----------
+  const { on: soundOn, toggle: toggleSound, sound } = useGameSound(
+    { prefKey: SOUND_PREF_KEY, defaultOn: false, ambience: () => new LaptopAmbience() },
+    { place: "laptop", open: active, sheet: roomOpen, typing: true },
   );
 
   // ---------- toasts ----------
@@ -219,6 +227,7 @@ export function GameShell({
     if (knownEmails.current) {
       const fresh = state.emails.filter((e) => !knownEmails.current!.has(e.id));
       if (fresh.length) {
+        sound.current?.play("mail");
         const vm = fresh.find((e) => e.kind === "voicemail");
         toast(
           t("shell.toast.newEmail", { kind: vm ? "voicemail" : "email", subject: (vm ?? fresh[0]).subject }),
@@ -227,7 +236,7 @@ export function GameShell({
       }
     }
     knownEmails.current = new Set(ids);
-  }, [state.emails, toast, t]);
+  }, [state.emails, toast, t, sound]);
   // ---------- context ----------
   const api = useCallback<GameCtx["api"]>((path, init) => apiFetch(code, path, init), [code]);
   const ctx = useMemo<GameCtx>(
@@ -247,6 +256,8 @@ export function GameShell({
           chatUnread={chat.unread}
           onRoom={() => setRoomOpen(true)}
           onHome={() => setActive(null)}
+          soundOn={soundOn}
+          onSound={toggleSound}
         />
 
         <div className="relative flex min-h-0 flex-1">

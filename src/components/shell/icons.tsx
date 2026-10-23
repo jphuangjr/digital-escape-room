@@ -23,6 +23,16 @@ export function CompassMark(props: P) {
   );
 }
 
+/** A small speaker, with sound waves while sound is on. */
+export function SpeakerIcon({ on, ...props }: P & { on: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden {...base} {...props}>
+      <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+      {on ? <path d="M15.5 9.2a4 4 0 0 1 0 5.6M18 6.8a7.4 7.4 0 0 1 0 10.4" /> : <path d="M16 9.5l5 5M21 9.5l-5 5" />}
+    </svg>
+  );
+}
+
 export function BrowserIcon(props: P) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden {...base} {...props}>
