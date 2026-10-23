@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useT } from "@/i18n/client";
 import type { GameCtx } from "@/lib/client/game";
 import type { ChapterDTO } from "@/lib/types";
@@ -85,7 +86,8 @@ export function ChapterLine({ chapter, toast, theme }: { chapter: ChapterDTO; to
           ))}
         </span>
       </button>
-      {open && <ChapterSheet chapter={chapter} theme={theme} onClose={() => setOpen(false)} />}
+      {/* Portalled: a header with a backdrop blur would otherwise trap a fixed sheet inside itself. */}
+      {open && createPortal(<ChapterSheet chapter={chapter} theme={theme} onClose={() => setOpen(false)} />, document.body)}
     </>
   );
 }
