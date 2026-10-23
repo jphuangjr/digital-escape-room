@@ -12,6 +12,7 @@ import type { RoomTab } from "./RoomSheet";
  * Invite / Chat / Hints inside it.
  */
 
+/** Ada's tour, remembered per game: `${TOUR_DONE_KEY}:${roomCode}`. */
 export const TOUR_DONE_KEY = "escape_tour_done_v1";
 
 export type TourStep = {

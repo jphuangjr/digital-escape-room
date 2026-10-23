@@ -49,11 +49,11 @@ export function GameShell({
   const [roomOpen, setRoomOpen] = useState(false);
   const [roomTab, setRoomTab] = useState<RoomTab>("people");
   const [tourOpen, setTourOpen] = useState(false);
-  // First visit on this device: run the tour once the laptop has settled (not during the vote/ending).
+  // First time in this game on this device: run the tour once the laptop has settled (not during the vote/ending).
   useEffect(() => {
     let done = false;
     try {
-      done = localStorage.getItem(TOUR_DONE_KEY) === "1";
+      done = localStorage.getItem(`${TOUR_DONE_KEY}:${code}`) === "1";
     } catch {}
     if (done || state.status !== "playing") return;
     const id = window.setTimeout(() => setTourOpen(true), 900);
@@ -70,9 +70,9 @@ export function GameShell({
   const closeTour = useCallback(() => {
     setTourOpen(false);
     try {
-      localStorage.setItem(TOUR_DONE_KEY, "1");
+      localStorage.setItem(`${TOUR_DONE_KEY}:${code}`, "1");
     } catch {}
-  }, []);
+  }, [code]);
   const chat = useChat(code, state.me.id);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [unreadEmails, setUnreadEmails] = useState(0);
