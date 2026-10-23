@@ -8,6 +8,7 @@ export function Dock({
   active,
   isUnlocked,
   badges,
+  glowing,
   onOpen,
   onRoom,
   onlineCount,
@@ -16,6 +17,8 @@ export function Dock({
   active: AppId | null;
   isUnlocked: (a: AppId) => boolean;
   badges: Partial<Record<AppId, number>>;
+  /** Apps that just unlocked or got something new: their icon glows once. */
+  glowing?: Set<AppId>;
   onOpen: (a: AppId) => void;
   onRoom: () => void;
   onlineCount: number;
@@ -46,7 +49,7 @@ export function Dock({
                 data-tour={`app-${app}`}
                 aria-label={t("shell.dock.appAria", { app: label, locked, unread: badge })}
                 aria-current={on ? "page" : undefined}
-                className={`flex min-h-14 w-full flex-col items-center justify-center gap-0.5 py-1.5 ${
+                className={`flex min-h-14 w-full flex-col items-center justify-center gap-0.5 py-1.5 ${glowing?.has(app) ? "sm-new-tab" : ""} ${
                   on ? "text-amber-400" : locked ? "text-stone-600" : "text-stone-400"
                 } active:bg-stone-900`}
               >

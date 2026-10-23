@@ -76,6 +76,24 @@ export interface AtlasScene {
   ending: { choice: AtlasEnding; at: string; counts: Record<AtlasEnding, number>; secrets: number } | null;
 }
 
+/** Case-log lines that mark a lock opened or a puzzle solved (the room celebrates these). */
+const SOLVE_LOGS = new Set<AtlasTextKey>([
+  "log.clock",
+  "log.stairs",
+  "log.drained",
+  "log.engine",
+  "log.index",
+  "log.registered",
+  "log.rerouted",
+  "log.balanced",
+  "log.registry",
+  "log.seed",
+  "log.lit",
+  "log.vault",
+  "log.dial",
+  "log.roots",
+  "log.crossed",
+]);
 const ITEM_IDS = Object.keys(ITEM_PLACES) as ItemId[];
 const HOTSPOT_IDS = Object.keys(HOTSPOT_WALL) as HotspotId[];
 const GLYPH_IDS = GLYPHS.map((g) => g.id);
@@ -260,6 +278,7 @@ export function sceneDTO(scene: AtlasScene, opts: { startedAt?: Date; now?: Date
     nextHints[p] = puzzle && next ? { title: T(`hint.${puzzle.id}.title` as AtlasTextKey), ...next } : null;
   }
   const log: SceneLogEntry[] = scene.log.slice(-30).map((l) => ({
+    ...(SOLVE_LOGS.has(l.key) ? { solve: true } : {}),
     id: l.id,
     at: l.at,
     playerId: l.playerId,
