@@ -21,6 +21,7 @@ import { StatusBar } from "./StatusBar";
 import { RoomSheet } from "./RoomSheet";
 import { Toasts, type ToastItem } from "./Toasts";
 import { SolveGlow, useArrivals, useSolveMoments } from "./SolveMoments";
+import { useWindowMotion } from "./sceneMotion";
 
 const PRESENCE_MS = 15_000;
 
@@ -129,6 +130,8 @@ export function GameShell({
   }, [active, browserAddress, setView]);
 
   // ---------- app switching ----------
+  // Windows grow from their icon, shrink back into it and cross-fade between apps.
+  const motion = useWindowMotion(active);
   const openApp = useCallback(
     (app: AppId) => {
       if (!isUnlocked(app)) {
@@ -239,7 +242,7 @@ export function GameShell({
 
   return (
     <GameContext.Provider value={ctx}>
-      <div className="fixed inset-0 flex flex-col overflow-hidden bg-[#0b0a08] text-stone-200">
+      <div className="fixed inset-0 flex flex-col overflow-hidden bg-[#0b0a08] text-stone-200" onClickCapture={motion.onClickCapture}>
         <Grain />
         <StatusBar
           ctx={ctx}
@@ -270,11 +273,17 @@ export function GameShell({
           </nav>
 
           <main className="relative flex min-h-0 min-w-0 flex-1 md:p-5 md:pl-1">
-            {active === null && <HomeScreen isUnlocked={isUnlocked} badges={badges} glowing={glowing} openApp={openApp} />}
+            {(active === null || motion.homeBehind) && (
+              <div className={motion.homeBehind ? "absolute inset-0 flex md:inset-5 md:left-1" : "contents"} inert={active !== null}>
+                <HomeScreen isUnlocked={isUnlocked} badges={badges} glowing={glowing} openApp={openApp} />
+              </div>
+            )}
             <div
+              ref={motion.win}
               className={`relative min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-stone-950 md:mx-auto md:max-w-5xl md:rounded-xl md:border md:border-stone-800 md:shadow-2xl md:shadow-black ${
-                active === null ? "hidden" : "flex"
+                motion.shown === null ? "hidden" : "flex"
               }`}
+              inert={active === null}
             >
               {/* Window chrome, desktop only */}
               <div className="hidden h-10 shrink-0 items-center gap-2 border-b border-stone-800 bg-stone-900/80 px-3 md:flex">
@@ -292,10 +301,12 @@ export function GameShell({
               {mounted.map((app) => (
                 <section
                   key={app}
+                  ref={motion.section(app)}
                   aria-label={t(`shell.app.${app}`)}
-                  className={`min-h-0 flex-1 flex-col ${active === app ? "flex" : "hidden"} ${
+                  aria-hidden={motion.leaving === app || undefined}
+                  className={`min-h-0 flex-1 flex-col ${motion.shown === app || motion.leaving === app ? "flex" : "hidden"} ${
                     app === "browser" ? "overflow-hidden" : "overflow-y-auto overflow-x-hidden"
-                  }`}
+                  } ${motion.leaving === app ? "tx-leaving pointer-events-none absolute inset-0 md:top-10" : motion.leaving && motion.shown === app ? "relative z-[1]" : ""}`}
                 >
                   {app === "browser" && (
                     <Browser ctx={ctx} navRequest={navRequest} onAddressChange={setBrowserAddress} />

@@ -12,6 +12,7 @@ import { SolveGlow, useArrivals, useSolveMoments } from "@/components/shell/Solv
 import { Toasts, type ToastItem } from "@/components/shell/Toasts";
 import { CloseIcon } from "@/components/shell/icons";
 import { useLockPulse, useOpenHold, type LockPulse } from "@/components/shell/lockFeel";
+import { SceneStage, useSheetZoom, useTapOrigin, ZoomSheet } from "@/components/shell/sceneMotion";
 import { useT } from "@/i18n/client";
 import { Leaderboard } from "@/components/site/Leaderboard";
 import { ResultReveal, type RevealTheme } from "@/components/site/ResultReveal";
@@ -230,8 +231,12 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
 
   // ---------- swipe between walls ----------
   const swipe = useRef<{ x: number; y: number } | null>(null);
-  const turn = (d: number) => {
+  // Which way the last turn went, so the next wall pans in from that side; and the spot a close-up grows from.
+  const [turnDir, setTurnDir] = useState<1 | -1>(1);
+  const tapOrigin = useTapOrigin();
+  const turn = (d: 1 | -1) => {
     if (place === "corridor") return;
+    setTurnDir(d);
     setWallIdxBy((m) => ({ ...m, [place]: (m[place] + d + walls.length) % walls.length }));
   };
   const pouchHere = Boolean(scene.closeups["under-berth"]?.takes.length);
@@ -271,7 +276,8 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(e.clientY - s.y) * 1.5) turn(dx < 0 ? 1 : -1);
           }}
         >
-          <div key={place === "corridor" ? "corridor" : `${place}:${wall}`} className="at-enter relative aspect-[3/4] h-full max-h-full max-w-full" data-tour="nx-wall">
+          <SceneStage id={place === "corridor" ? "corridor" : `${place}:${wall}`} group={place} dir={turnDir} origin={tapOrigin}>
+          <div className="relative aspect-[3/4] h-full max-h-full max-w-full" data-tour="nx-wall">
             {place === "corridor" ? (
               <CorridorArt onDining={() => setPlace("dining")} />
             ) : (
@@ -300,6 +306,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               </div>
             )}
           </div>
+          </SceneStage>
 
           {place !== "corridor" ? (
             <>
@@ -429,23 +436,27 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
           </nav>
         </footer>
 
-        {closeup && (
-          <CloseupSheet
-            id={closeup}
-            scene={scene}
-            busy={busy}
-            pulse={lockPulse}
-            onClose={() => setCloseup(null)}
-            act={act}
-            goCorridor={() => {
-              setCloseup(null);
-              setPlace("corridor");
-            }}
-            notes={notesDocked ? <TrainNotebook ctx={ctx} scene={scene} seen={seen} current={closeup} /> : null}
-            notesOn={notesDocked}
-            onNotes={() => setNotesDocked(!notesDocked)}
-          />
-        )}
+        <ZoomSheet
+          value={closeup}
+          origin={tapOrigin}
+          render={(closeup) => (
+            <CloseupSheet
+              id={closeup}
+              scene={scene}
+              busy={busy}
+              pulse={lockPulse}
+              onClose={() => setCloseup(null)}
+              act={act}
+              goCorridor={() => {
+                setCloseup(null);
+                setPlace("corridor");
+              }}
+              notes={notesDocked ? <TrainNotebook ctx={ctx} scene={scene} seen={seen} current={closeup} /> : null}
+              notesOn={notesDocked}
+              onNotes={() => setNotesDocked(!notesDocked)}
+            />
+          )}
+        />
         {itemOpen && (
           <ItemSheet
             item={scene.inventory.find((i) => i.id === itemOpen) ?? null}
@@ -540,6 +551,7 @@ function Sheet({
   bare?: boolean;
 }) {
   const t = useT();
+  const zoom = useSheetZoom();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -547,6 +559,7 @@ function Sheet({
   }, [onClose]);
   const panel = (
     <div
+      ref={side ? undefined : zoom?.panel}
       className={`relative flex min-h-0 w-full flex-col overflow-hidden bg-[#1b120b] ${side ? "flex-1 md:w-auto" : `max-w-md rounded-t-2xl border-t border-[#c9a227]/40 ${tall ? "h-[86dvh]" : "max-h-[86dvh]"}`}`}
       style={side ? undefined : { paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
     >
@@ -561,10 +574,11 @@ function Sheet({
     </div>
   );
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={title}>
-      <button aria-label={t("train.close")} className="absolute inset-0 bg-black/60" onClick={onClose} />
+    <div ref={zoom?.root} className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={title}>
+      <button ref={zoom?.backdrop} aria-label={t("train.close")} className="absolute inset-0 bg-black/60" onClick={onClose} />
       {side ? (
         <div
+          ref={zoom?.panel}
           className="relative flex h-[94dvh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border-t border-[#c9a227]/40 bg-[#1b120b] md:h-[86dvh] md:max-w-4xl md:flex-row"
           style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         >
