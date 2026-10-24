@@ -59,8 +59,21 @@ Gating: `intranet.meridian-inst.com` subpages beyond login require `intranet-log
 
 Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, files}`.
 
-## Accounts (optional Google sign-in, next-auth v4, JWT sessions)
-- Enabled only when `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET` are set (plus `AUTH_SECRET`); otherwise fully anonymous.
+## Accounts (optional sign-in, next-auth v4, JWT sessions)
+- Providers come from a registry in `src/server/auth.ts`: each is enabled only when its env vars are set (Google:
+  `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET`), plus `AUTH_SECRET`. `enabledProviders` lists them; `authEnabled` is
+  true when there's at least one, otherwise the app is fully anonymous (`googleEnabled` is a deprecated alias).
+- Identity model: a `User` (purchases, redemptions, case records and players all hang off `User.id`) has one or more
+  `AuthIdentity(provider, providerAccountId)` rows, unique per provider account, each with the provider's email and
+  whether the provider verified it. The JWT carries only our `uid`. `User.googleSub` is legacy: still written for
+  Google sign-ins during the rollout, read nowhere new, and dropped in a later migration.
+- Sign-in (`resolveUser` in `src/server/identity.ts`, one transaction): (a) a known identity → its user (email,
+  name and picture refreshed; empty names/pictures never overwrite stored ones; an unverified email never replaces
+  a stored one); (b) otherwise, if the provider **verified** the email and **exactly one** user already has a
+  verified identity with that email (case-insensitive), the new identity is linked to that user; (c) otherwise a new
+  user. Unverified or ambiguous emails never link accounts. A Google user with `googleSub` but no identity row yet is
+  matched by `googleSub`. Concurrent sign-ins creating the same identity: the loser re-reads the winner's row.
+- `GET /api/me` → `MeResponse` adds `authProviders` (enabled provider ids) and `user.providers` (linked ones).
 - Hosting (`POST /api/rooms`) requires sign-in when enabled → 401 `{signInRequired:true}`. Joining stays optional.
 - One open room per host: if the user already hosts non-expired rooms, `POST /api/rooms` → 409 `ReplaceRoomsRequired`
   listing them; resending with `replaceExisting: true` deletes them immediately (publishing `room.closed`) and creates
@@ -72,7 +85,9 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
 
 ## Purchases (hosting rights) and admin
 - Hosting a game requires owning it: `GamePurchase(userId, gameId)` (permanent; `source` "code" now, "stripe" later).
-  Admins (emails in `ACCOUNT_ADMIN`, comma-separated) own every game. Joining is always free.
+  Admins (emails in `ACCOUNT_ADMIN`, comma-separated) own every game. Joining is always free. Only a **verified**
+  email counts: `isAdmin` requires `User.emailVerified`, which `resolveUser` sets only from a verified identity, so
+  nobody can claim an admin's address through a provider that doesn't verify emails.
   `POST /api/rooms {gameId}` → 403 `{purchaseRequired:true}` when not owned.
 - `POST /api/redeem {code}` → `PurchaseCode` (KEY-XXXX-XXXX-XXXX) → purchase. Each account can claim a code once
   (`CodeRedemption`). Single-use codes have `maxUses` 1; group codes allow more (null = unlimited) and may expire.
