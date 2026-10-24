@@ -31,7 +31,9 @@ import { TrainNotebook, useDockedNotes, useSeenClues } from "./notebook";
  */
 
 const TABS: RoomTab[] = ["people", "chat", "attempts"];
-const TOUR_DONE_KEY = "nx_tour_done_v1";
+// Onboarding runs once per game (room) on each device: every new game starts with the premise and the tour.
+const introKey = (code: string) => `nx_intro_done:${code}`;
+const tourKey = (code: string) => `nx_tour_done_v1:${code}`;
 
 /** The first-time tour of the train: each step spotlights a real control (its data-tour name). */
 const TRAIN_TOUR: TourStep[] = [
@@ -93,14 +95,14 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   const walls = place === "dining" ? WALLS_DINING : WALLS_12B;
   const wallIdx = place === "dining" ? wallIdxBy.dining : wallIdxBy["12b"];
   const wall: WallId = walls[wallIdx];
-  // First time on this device: the premise and how to play.
+  // First time in this game on this device: the premise and how to play.
   useEffect(() => {
     try {
-      if (localStorage.getItem("nx_intro_done") !== "1") setIntro(true);
-      // Players who saw the intro before the tour existed get the tour once, after a moment.
-      else if (localStorage.getItem(TOUR_DONE_KEY) !== "1") window.setTimeout(() => setTourOpen(true), 900);
+      if (localStorage.getItem(introKey(code)) !== "1") setIntro(true);
+      // Back in the game after the intro but before the tour was finished: the tour again, after a moment.
+      else if (localStorage.getItem(tourKey(code)) !== "1") window.setTimeout(() => setTourOpen(true), 900);
     } catch {}
-  }, []);
+  }, [code]);
 
   const toast = useCallback<GameCtx["toast"]>((msg, tone = "info", action) => {
     const id = ++toastId.current;
@@ -462,8 +464,8 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             onClose={() => {
               setIntro(false);
               try {
-                localStorage.setItem("nx_intro_done", "1");
-                if (localStorage.getItem(TOUR_DONE_KEY) !== "1") setTourOpen(true);
+                localStorage.setItem(introKey(code), "1");
+                if (localStorage.getItem(tourKey(code)) !== "1") setTourOpen(true);
               } catch {}
             }}
           />
@@ -494,7 +496,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             onClose={() => {
               setTourOpen(false);
               try {
-                localStorage.setItem(TOUR_DONE_KEY, "1");
+                localStorage.setItem(tourKey(code), "1");
               } catch {}
             }}
           />

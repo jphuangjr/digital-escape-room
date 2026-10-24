@@ -33,8 +33,9 @@ import { useGameSound } from "@/components/shell/useGameSound";
  */
 
 const TABS: RoomTab[] = ["people", "chat", "attempts"];
-const INTRO_KEY = "atlas_intro_done";
-const TOUR_DONE_KEY = "atlas_tour_done_v1";
+// Onboarding runs once per game (room) on each device: every new game starts with the premise and the tour.
+const introKey = (code: string) => `atlas_intro_done:${code}`;
+const tourKey = (code: string) => `atlas_tour_done_v1:${code}`;
 
 /** The first-time tour of the Atlas: each step spotlights a real control (its data-tour name). */
 const ATLAS_TOUR: TourStep[] = [
@@ -108,16 +109,16 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
     },
     [placeKey],
   );
-  // Where this player stood last time on this device, and the intro the first time.
+  // Where this player stood last time on this device, and the intro the first time in this game.
   useEffect(() => {
     try {
       const saved = localStorage.getItem(placeKey) as LocationId | null;
       if (saved && (LOCATIONS as string[]).includes(saved)) setPlaceRaw(saved);
-      if (localStorage.getItem(INTRO_KEY) !== "1") setIntro(true);
-      // Players who saw the intro before the tour existed get the tour once, after a moment.
-      else if (localStorage.getItem(TOUR_DONE_KEY) !== "1") window.setTimeout(() => setTourOpen(true), 900);
+      if (localStorage.getItem(introKey(code)) !== "1") setIntro(true);
+      // Back in the game after the intro but before the tour was finished: the tour again, after a moment.
+      else if (localStorage.getItem(tourKey(code)) !== "1") window.setTimeout(() => setTourOpen(true), 900);
     } catch {}
-  }, [placeKey]);
+  }, [placeKey, code]);
   // Never stand somewhere the team can't reach (e.g. a stale saved place).
   const here: LocationId = canStand(place) ? place : "observatory";
   const walls = WALLS[here];
@@ -442,8 +443,8 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
             onClose={() => {
               setIntro(false);
               try {
-                localStorage.setItem(INTRO_KEY, "1");
-                if (localStorage.getItem(TOUR_DONE_KEY) !== "1") setTourOpen(true);
+                localStorage.setItem(introKey(code), "1");
+                if (localStorage.getItem(tourKey(code)) !== "1") setTourOpen(true);
               } catch {}
             }}
           />
@@ -473,7 +474,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
             onClose={() => {
               setTourOpen(false);
               try {
-                localStorage.setItem(TOUR_DONE_KEY, "1");
+                localStorage.setItem(tourKey(code), "1");
               } catch {}
             }}
           />
