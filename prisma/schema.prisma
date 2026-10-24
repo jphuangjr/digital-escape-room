@@ -51,16 +51,36 @@ model Player {
 /// A Google-signed-in person. Anonymous players have no User.
 model User {
   id        String       @id @default(cuid())
-  googleSub String       @unique
+  /// Legacy Google subject id (deprecated; AuthIdentity is the identity key). Still written for Google sign-ins
+  /// during the rollout; dropped in a later migration.
+  googleSub String?      @unique
   email     String?
+  /// True when `email` came from a sign-in provider that verified it. Only verified emails count for admin.
+  emailVerified Boolean  @default(false)
   name      String?
   image     String?
   createdAt DateTime     @default(now())
+  identities AuthIdentity[]
   players   Player[]
   cases     CaseRecord[]
   purchases GamePurchase[]
   codesMade PurchaseCode[] @relation("CodeCreatedBy")
   redemptions CodeRedemption[]
+}
+
+/// One sign-in account (Google today; Apple etc. later) linked to a User. A User can have several.
+model AuthIdentity {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          String // next-auth provider id: "google", "apple", ...
+  providerAccountId String // the provider's stable subject id
+  email             String?
+  emailVerified     Boolean  @default(false)
+  createdAt         DateTime @default(now())
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 /// Permanent right for a user to host a game. Created by redeeming a code (later: Stripe).

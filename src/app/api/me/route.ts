@@ -2,13 +2,14 @@ import type { Ending, MeResponse, RoomStatus } from "@/lib/types";
 import { db } from "@/server/db";
 import { json } from "@/server/http";
 import { cookies } from "next/headers";
-import { getSessionUser, googleEnabled } from "@/server/auth";
+import { authEnabled, enabledProviders, getSessionUser } from "@/server/auth";
+import { userProviders } from "@/server/identity";
 import { cookieName, ROOM_TTL_MS } from "@/server/session";
 import { isAdmin, isTester, ownedGameIds } from "@/server/purchases";
 
 /**
  * The signed-in user (if any), the unfinished rooms they're still in, and their finished cases with times.
- * Rooms come from Google sign-in and from this browser's room cookies, so guests see theirs too.
+ * Rooms come from the signed-in account and from this browser's room cookies, so guests see theirs too.
  */
 export async function GET() {
   const user = await getSessionUser();
@@ -20,7 +21,7 @@ export async function GET() {
     .slice(0, 40);
   const mine = [...(user ? [{ userId: user.id }] : []), ...(tokens.length ? [{ token: { in: tokens } }] : [])];
 
-  const [ownedGames, tester, players, cases] = await Promise.all([
+  const [ownedGames, tester, players, cases, providers] = await Promise.all([
     user ? ownedGameIds(user) : Promise.resolve([] as string[]),
     isTester(user),
     mine.length
@@ -33,14 +34,16 @@ export async function GET() {
         })
       : Promise.resolve([]),
     user ? db.caseRecord.findMany({ where: { userId: user.id }, orderBy: { finishedAt: "desc" }, take: 50 }) : Promise.resolve([]),
+    user ? userProviders(user.id) : Promise.resolve([] as string[]),
   ]);
 
   return json<MeResponse>({
-    googleEnabled,
+    googleEnabled: authEnabled,
+    authProviders: enabledProviders,
     isAdmin: user ? isAdmin(user) : false,
     isTester: tester,
     ownedGames,
-    user: user ? { name: user.name, email: user.email, image: user.image } : null,
+    user: user ? { name: user.name, email: user.email, image: user.image, providers } : null,
     activeRooms: players.map((p) => ({
       code: p.room.code,
       gameId: p.room.gameId,

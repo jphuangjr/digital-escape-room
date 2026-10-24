@@ -201,14 +201,16 @@ export interface AttemptResponse {
   progress: RoomProgress;
 }
 
-// ---------- Accounts (optional Google sign-in) ----------
+// ---------- Accounts (optional sign-in: Google today, more providers later) ----------
 
 export interface MeResponse {
-  googleEnabled: boolean; // false when the server has no OAuth credentials configured
-  isAdmin: boolean; // email listed in ACCOUNT_ADMIN
+  /** @deprecated Same as `authProviders.length > 0`; kept until the client switches over. */
+  googleEnabled: boolean;
+  authProviders: string[]; // sign-in providers configured on the server ("google", ...); empty = anonymous only
+  isAdmin: boolean; // verified email listed in ACCOUNT_ADMIN
   isTester: boolean; // holds a tester key that is still on (every game, staging included)
   ownedGames: string[]; // game ids this user may host (all of them for admins)
-  user: { name: string | null; email: string | null; image: string | null } | null;
+  user: { name: string | null; email: string | null; image: string | null; providers: string[] } | null;
   activeRooms: { code: string; gameId: string; status: RoomStatus; isHost: boolean; playerCount: number; createdAt: string }[];
   cases: {
     gameId: string;
