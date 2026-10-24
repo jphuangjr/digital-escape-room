@@ -20,7 +20,7 @@ export async function recordLeaderboardEntry(
 ): Promise<void> {
   const room = await db.room.findUnique({
     where: { id: roomId },
-    include: { players: { orderBy: { createdAt: "asc" }, select: { displayName: true, color: true, user: { select: { email: true } } } } },
+    include: { players: { orderBy: { createdAt: "asc" }, select: { displayName: true, color: true, user: { select: { email: true, emailVerified: true } } } } },
   });
   if (!room?.finishedAt) return;
   // Games in staging (admin playtests) stay off the public board.
@@ -58,7 +58,7 @@ export async function recordLeaderboardEntry(
  * admin. One guest or non-admin player (tester-key holders included) makes it a normal run. Decided by
  * account, never by display name. Its entry is kept but hidden from every public board and rank.
  */
-export function isAdminRun(players: { user: { email: string | null } | null }[]): boolean {
+export function isAdminRun(players: { user: { email: string | null; emailVerified: boolean } | null }[]): boolean {
   return players.length > 0 && players.every((p) => isAdmin(p.user));
 }
 

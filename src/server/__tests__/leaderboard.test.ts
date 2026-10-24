@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { aheadWhere, boardWhere, isAdminRun } from "../leaderboard";
 import { runBadges } from "@/lib/result";
 
-const admin = { user: { email: "owner@example.com" } };
-const admin2 = { user: { email: "Second@Example.com" } };
-const player = { user: { email: "player@example.com" } };
+const admin = { user: { email: "owner@example.com", emailVerified: true } };
+const admin2 = { user: { email: "Second@Example.com", emailVerified: true } };
+const player = { user: { email: "player@example.com", emailVerified: true } };
 const guest = { user: null };
 
 describe("isAdminRun", () => {
@@ -28,6 +28,10 @@ describe("isAdminRun", () => {
     expect(isAdminRun([player])).toBe(false);
     expect(isAdminRun([guest])).toBe(false);
     expect(isAdminRun([])).toBe(false);
+  });
+
+  it("doesn't count an admin's address the provider didn't verify", () => {
+    expect(isAdminRun([{ user: { email: "owner@example.com", emailVerified: false } }])).toBe(false);
   });
 
   it("hides nothing when no admins are configured", () => {

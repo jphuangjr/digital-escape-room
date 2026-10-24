@@ -8,14 +8,14 @@ import { publish } from "@/server/realtime";
 import { ownsGame, seesStaging } from "@/server/purchases";
 import { getGame } from "@/lib/games";
 import { track } from "@/server/analytics";
-import { getSessionUser, googleEnabled } from "@/server/auth";
+import { authEnabled, getSessionUser } from "@/server/auth";
 import { getT } from "@/i18n/server";
 
 export async function POST(req: Request) {
   // Hosting requires Google sign-in (joining stays optional). Skipped when OAuth isn't configured.
   const t = await getT();
   const user = await getSessionUser();
-  if (googleEnabled && !user) return error(401, t("api.rooms.signIn"), { signInRequired: true });
+  if (authEnabled && !user) return error(401, t("api.rooms.signIn"), { signInRequired: true });
   const body = await readBody(req);
   if (!body) return error(400, t("api.common.invalidJson"));
   const name = validateDisplayName(body.displayName);

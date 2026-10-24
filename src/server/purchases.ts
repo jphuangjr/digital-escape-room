@@ -5,8 +5,12 @@ import { ALL_GAMES, GAMES, getGame } from "@/lib/games";
 import { db } from "./db";
 import { formatCode, generateCodeBody, normalizeCodeInput, parseAdminEmails } from "./codes";
 
-export function isAdmin(user: Pick<User, "email"> | null): boolean {
-  if (!user?.email) return false;
+/**
+ * An admin: the account's email is listed in ACCOUNT_ADMIN *and* was verified by the sign-in provider it came
+ * from. An unverified email never counts, so nobody can claim an admin's address through a lax provider.
+ */
+export function isAdmin(user: Pick<User, "email" | "emailVerified"> | null): boolean {
+  if (!user?.email || !user.emailVerified) return false;
   return parseAdminEmails(process.env.ACCOUNT_ADMIN).has(user.email.toLowerCase());
 }
 
