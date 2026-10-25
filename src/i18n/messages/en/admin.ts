@@ -81,7 +81,7 @@ const messages = {
   "admin.code.more": "…and {count} more",
   "admin.qr.title": "Scan to claim {game}",
   "admin.qr.label": "QR code to redeem {code}",
-  "admin.qr.help": "They'll sign in with Google and the room is added to their account.",
+  "admin.qr.help": "They'll sign in and the room is added to their account.",
   "admin.qr.singleUse": "Single use.",
   "admin.qr.groupUses": "Once per account · {used}/{max} used.",
   "admin.qr.linkLabel": "claim link",

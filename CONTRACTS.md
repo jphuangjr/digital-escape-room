@@ -74,6 +74,20 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   user. Unverified or ambiguous emails never link accounts. A Google user with `googleSub` but no identity row yet is
   matched by `googleSub`. Concurrent sign-ins creating the same identity: the loser re-reads the winner's row.
 - `GET /api/me` → `MeResponse` adds `authProviders` (enabled provider ids) and `user.providers` (linked ones).
+- **Email code** (provider `email`, next-auth Credentials): `POST /api/account/email-code {email}` emails a 6-digit
+  code (Resend; enabled when `RESEND_API_KEY` + `EMAIL_FROM` are set). Same answer whether or not an account exists.
+  Codes are stored hashed (keyed with `AUTH_SECRET`), live 10 min, allow 5 wrong tries, and only the newest one per
+  address works; one code a minute and 5 an hour per address, 20 an hour per IP (429 `retryAfterSec`). A right code
+  signs in through `resolveUser` as a **verified** `email` identity, so it links to an existing account with that
+  email (rule b above) and is also the recovery path for a lost passkey.
+- **Passkeys** (provider `passkey`, WebAuthn via `@simplewebauthn`, discoverable credentials): enabled when any
+  account-creating provider is. A signed-in user adds one with `POST /api/account/passkeys/register-options` then
+  `POST /api/account/passkeys {response}`; `GET /api/account/passkeys` lists them, `DELETE /api/account/passkeys/[id]`
+  removes one. Sign-in: `POST /api/account/passkeys/login-options`, then next-auth `signIn("passkey", {response})`.
+  Challenges are stored server-side (`AuthChallenge`, single use, 5 min); the relying party is the request's host
+  (`AUTH_RP_ID` overrides), so a passkey works only on the domain it was made on. The signature counter is kept.
+- Client: every "Sign in" button calls `openSignIn(callbackUrl)`; `SignInHost` (root layout) shows the enabled
+  methods, or goes straight to Google when it's the only one.
 - Hosting (`POST /api/rooms`) requires sign-in when enabled → 401 `{signInRequired:true}`. Joining stays optional.
 - One open room per host: if the user already hosts non-expired rooms, `POST /api/rooms` → 409 `ReplaceRoomsRequired`
   listing them; resending with `replaceExisting: true` deletes them immediately (publishing `room.closed`) and creates

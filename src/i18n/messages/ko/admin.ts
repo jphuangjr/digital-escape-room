@@ -82,7 +82,7 @@ const messages: Record<keyof typeof en, string> = {
   "admin.code.more": "…외 {count}개",
   "admin.qr.title": "스캔해서 {game} 등록하기",
   "admin.qr.label": "{code} 등록용 QR 코드",
-  "admin.qr.help": "Google로 로그인하면 계정에 방이 추가돼요.",
+  "admin.qr.help": "로그인하면 계정에 방이 추가돼요.",
   "admin.qr.singleUse": "1회용이에요.",
   "admin.qr.groupUses": "계정당 1회 · {used}/{max} 사용됨.",
   "admin.qr.linkLabel": "등록 링크",

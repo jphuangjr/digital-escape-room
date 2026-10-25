@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { signIn } from "next-auth/react";
+import { openSignIn } from "@/components/site/SignIn";
 import type { MeResponse, RoomState } from "@/lib/types";
 import { apiFetch } from "@/lib/client/game";
 import { useRoomChannel } from "@/lib/realtime/client";
@@ -281,7 +281,7 @@ function JoinForm({
             <p className="text-xs text-stone-500">{t("site.room.optionalSignIn")}</p>
             <button
               type="button"
-              onClick={() => signIn("google", { callbackUrl: `/r/${code}` })}
+              onClick={() => openSignIn(`/r/${code}`)}
               className="mt-2 min-h-11 px-3 text-sm font-semibold text-amber-300 underline"
             >
               {t("site.room.signInGoogle")}

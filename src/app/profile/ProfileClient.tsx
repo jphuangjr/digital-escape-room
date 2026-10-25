@@ -6,7 +6,10 @@ import { useIntl } from "react-intl";
 import type { ProfileResponse } from "@/lib/types";
 import { endingLabel, formatDuration, localGameTitle } from "@/lib/games";
 import { LanguageSwitcher, useT } from "@/i18n/client";
-import { GoogleButton, useMe } from "@/components/site/Account";
+import { SignInButton, useMe } from "@/components/site/Account";
+import { addPasskey, KeyIcon } from "@/components/site/SignIn";
+import { browserSupportsWebAuthn } from "@simplewebauthn/browser";
+import type { PasskeyDTO } from "@/lib/types";
 
 type Load = { kind: "loading" } | { kind: "signedOut" } | { kind: "error" } | { kind: "ready"; data: ProfileResponse };
 
@@ -46,7 +49,7 @@ export function ProfileClient() {
           <section className="flex flex-col gap-4 rounded-xl border border-noir-line bg-noir-bg-2/90 p-6 text-center">
             <h1 className="font-serif text-2xl text-noir-ink">{t("profile.signIn.title")}</h1>
             <p className="text-sm leading-relaxed text-noir-ink-dim">{t("profile.signIn.text")}</p>
-            {me?.googleEnabled && <GoogleButton label={t("profile.signIn.button")} callbackUrl="/profile" />}
+            {(me?.authProviders?.length ?? 0) > 0 && <SignInButton label={t("profile.signIn.button")} callbackUrl="/profile" />}
           </section>
         )}
         {load.kind === "ready" && <Profile data={load.data} />}
@@ -79,6 +82,7 @@ function Profile({ data }: { data: ProfileResponse }) {
           <p className="text-sm text-noir-ink-faint">{t("profile.since", { date: date(data.user.since) })}</p>
         </div>
       </header>
+      <PasskeysSection />
 
       <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat label={t("profile.stat.cases")} value={String(data.totals.cases)} />
@@ -179,5 +183,80 @@ function Stat({ label, value, small, capitalize }: { label: string; value: strin
       <dt className="text-[10px] uppercase tracking-wider text-noir-ink-faint">{label}</dt>
       <dd className={`font-mono font-bold text-noir-ink ${small ? "text-sm" : "text-xl"} ${capitalize ? "capitalize" : ""}`}>{value}</dd>
     </div>
+  );
+}
+
+/** The account's passkeys: add one on this device, see when each was last used, remove one. */
+function PasskeysSection() {
+  const t = useT();
+  const intl = useIntl();
+  const me = useMe();
+  const [list, setList] = useState<PasskeyDTO[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [canAdd, setCanAdd] = useState(false);
+  const load = () =>
+    fetch("/api/account/passkeys")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { passkeys?: PasskeyDTO[] } | null) => setList(d?.passkeys ?? null))
+      .catch(() => setList(null));
+  useEffect(() => {
+    setCanAdd(browserSupportsWebAuthn());
+    void load();
+  }, []);
+  if (!me?.authProviders?.includes("passkey") || list === null) return null;
+  const date = (iso: string) => intl.formatDate(iso, { year: "numeric", month: "short", day: "numeric" });
+
+  async function add() {
+    setBusy(true);
+    setMsg(null);
+    try {
+      if (!(await addPasskey())) setMsg(t("auth.passkey.failed"));
+      await load();
+    } catch {
+      setMsg(t("auth.passkey.failed"));
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function remove(id: string) {
+    if (!confirm(t("auth.manage.removeConfirm"))) return;
+    await fetch(`/api/account/passkeys/${id}`, { method: "DELETE" });
+    await load();
+  }
+
+  return (
+    <section className="flex flex-col gap-3 rounded-xl border border-noir-line bg-noir-bg-2/90 p-4">
+      <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-noir-ink-faint">{t("auth.manage.title")}</h2>
+      <p className="text-sm text-noir-ink-dim">{t("auth.manage.body")}</p>
+      {list.length === 0 && <p className="text-sm text-noir-ink-faint">{t("auth.manage.none")}</p>}
+      <ul className="flex flex-col gap-2">
+        {list.map((p) => (
+          <li key={p.id} className="flex items-center gap-3 rounded-lg border border-noir-line bg-noir-bg-3 px-3 py-2">
+            <KeyIcon className="h-5 w-5 shrink-0 text-noir-brass" />
+            <span className="min-w-0 flex-1 text-sm">
+              <span className="block text-noir-ink">{p.synced ? t("auth.manage.synced") : t("auth.manage.thisDevice")}</span>
+              <span className="block text-xs text-noir-ink-faint">
+                {t("auth.manage.added", { date: date(p.createdAt) })} · {p.lastUsedAt ? t("auth.manage.lastUsed", { date: date(p.lastUsedAt) }) : t("auth.manage.never")}
+              </span>
+            </span>
+            <button type="button" onClick={() => remove(p.id)} className="min-h-11 shrink-0 px-2 text-sm text-noir-ink-faint underline">
+              {t("auth.manage.remove")}
+            </button>
+          </li>
+        ))}
+      </ul>
+      {canAdd && (
+        <button
+          type="button"
+          onClick={add}
+          disabled={busy}
+          className="flex min-h-12 items-center justify-center gap-2 rounded-lg border border-noir-brass/60 font-semibold text-noir-brass active:bg-noir-brass/10 disabled:opacity-60"
+        >
+          <KeyIcon /> {busy ? t("auth.passkey.creating") : t("auth.manage.add")}
+        </button>
+      )}
+      {msg && <p className="text-sm text-red-300">{msg}</p>}
+    </section>
   );
 }

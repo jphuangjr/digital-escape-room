@@ -5,7 +5,7 @@ const messages: Record<keyof typeof en, string> = {
   "profile.heading": "探偵プロフィール",
   "profile.signIn.title": "ログインしてプロフィールを表示",
   "profile.signIn.text": "プロフィールには、解決したすべての事件、ベストタイム、獲得した実績が記録されます。",
-  "profile.signIn.button": "Googleでログイン",
+  "profile.signIn.button": "ログイン",
   "profile.since": "{date}から探偵として活動中",
   "profile.stat.cases": "完了した事件",
   "profile.stat.solved": "解決",

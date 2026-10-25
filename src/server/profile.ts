@@ -71,7 +71,8 @@ export async function getProfile(user: User): Promise<ProfileResponse> {
   );
 
   return {
-    user: { name: user.name, image: user.image, since: user.createdAt.toISOString() },
+    // Email-only accounts have no name yet: show the address's local part.
+    user: { name: user.name ?? user.email?.split("@")[0] ?? null, image: user.image, since: user.createdAt.toISOString() },
     totals: {
       cases: cases.length,
       solved: rows.filter((r) => r.solved).length,

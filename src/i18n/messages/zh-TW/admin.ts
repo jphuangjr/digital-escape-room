@@ -82,7 +82,7 @@ const messages: Record<keyof typeof en, string> = {
   "admin.code.more": "…還有 {count} 個",
   "admin.qr.title": "掃描領取《{game}》",
   "admin.qr.label": "用來兌換 {code} 的 QR 碼",
-  "admin.qr.help": "對方使用 Google 登入後，房間就會加入他們的帳號。",
+  "admin.qr.help": "對方登入後，房間就會加入他們的帳號。",
   "admin.qr.singleUse": "僅限使用一次。",
   "admin.qr.groupUses": "每個帳號限一次 · 已用 {used}/{max}。",
   "admin.qr.linkLabel": "領取連結",

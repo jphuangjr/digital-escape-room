@@ -106,8 +106,11 @@ async function linkableUser(tx: Tx, email: string): Promise<User | null> {
   return tx.user.findUnique({ where: { id: [...users][0] } });
 }
 
-/** The providers a user has signed in with ("google", ...), oldest first. */
+/** The ways a user can sign in ("google", "email", "passkey"), oldest first. */
 export async function userProviders(userId: string): Promise<string[]> {
-  const rows = await db.authIdentity.findMany({ where: { userId }, select: { provider: true }, orderBy: { createdAt: "asc" } });
-  return [...new Set(rows.map((r) => r.provider))];
+  const [rows, passkeys] = await Promise.all([
+    db.authIdentity.findMany({ where: { userId }, select: { provider: true }, orderBy: { createdAt: "asc" } }),
+    db.passkey.count({ where: { userId } }),
+  ]);
+  return [...new Set([...rows.map((r) => r.provider), ...(passkeys ? ["passkey"] : [])])];
 }

@@ -5,7 +5,7 @@ const messages: Record<keyof typeof en, string> = {
   "profile.heading": "Perfil de investigador",
   "profile.signIn.title": "Entre para ver seu perfil",
   "profile.signIn.text": "Seu perfil guarda cada caso que você encerra, seus melhores tempos e as conquistas que você ganha.",
-  "profile.signIn.button": "Entrar com o Google",
+  "profile.signIn.button": "Entrar",
   "profile.since": "Investigador desde {date}",
   "profile.stat.cases": "Casos encerrados",
   "profile.stat.solved": "Resolvidos",
