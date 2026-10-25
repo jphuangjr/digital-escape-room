@@ -7,6 +7,8 @@ const messages: Record<keyof typeof en, string> = {
   "auth.google": "使用 Google 繼續",
   "auth.passkey.signIn": "使用通行金鑰登入",
   "auth.or": "或",
+  "auth.signUp.title": "註冊",
+  "auth.signUp.body": "第一次來？輸入電子郵件，我們會寄驗證碼給你。已有帳號也一樣在這裡輸入。",
   "auth.email.label": "電子郵件",
   "auth.email.placeholder": "you@example.com",
   "auth.email.send": "寄送驗證碼給我",

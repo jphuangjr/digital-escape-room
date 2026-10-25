@@ -7,6 +7,8 @@ const messages: Record<keyof typeof en, string> = {
   "auth.google": "Google로 계속하기",
   "auth.passkey.signIn": "패스키로 로그인",
   "auth.or": "또는",
+  "auth.signUp.title": "가입하기",
+  "auth.signUp.body": "처음이신가요? 이메일을 입력하면 코드를 보내 드려요. 이미 계정이 있어도 여기에 입력하세요.",
   "auth.email.label": "이메일",
   "auth.email.placeholder": "you@example.com",
   "auth.email.send": "인증 코드 받기",
