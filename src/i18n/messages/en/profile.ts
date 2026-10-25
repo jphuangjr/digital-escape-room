@@ -3,7 +3,7 @@ const messages = {
   "profile.heading": "Investigator profile",
   "profile.signIn.title": "Sign in to see your profile",
   "profile.signIn.text": "Your profile keeps every case you close, your best times and the achievements you earn.",
-  "profile.signIn.button": "Sign in with Google",
+  "profile.signIn.button": "Sign in",
   "profile.since": "Investigator since {date}",
   "profile.stat.cases": "Cases closed",
   "profile.stat.solved": "Solved",

@@ -6,7 +6,7 @@ const messages = {
   "api.room.notMember": "You are not a member of this room.",
   "api.room.full": "This room is full.",
   "api.room.missingCode": "Missing room code.",
-  "api.rooms.signIn": "Sign in with Google to host a room.",
+  "api.rooms.signIn": "Sign in to host a room.",
   "api.rooms.unlockToHost": "Unlock this game to host it.",
   "api.rooms.alreadyOpen": "You already have an open room.",
   "api.rooms.allocFailed": "Could not allocate a room code, try again.",
@@ -21,7 +21,7 @@ const messages = {
   "api.admin.countRange": "Count must be 1–50.",
   "api.admin.noSuchCode": "No such code, or it's already turned off.",
   "api.admin.unknownUser": "unknown",
-  "api.redeem.signIn": "Sign in with Google to redeem a code.",
+  "api.redeem.signIn": "Sign in to redeem a code.",
   "api.redeem.badFormat": "That doesn't look like a purchase code (KEY-XXXX-XXXX-XXXX).",
   "api.redeem.invalid": "That code isn't valid.",
   "api.redeem.revoked": "That code has been turned off.",
@@ -64,6 +64,20 @@ const messages = {
   "api.attempt.solved.maraReset": "Temporary password sent to the recovery contact.",
   "api.attempt.solved.maraLogin": "Signed in to Mara's HarbourMail.",
   "api.redeem.allGames": "Every escape room",
+  // Email-code sign-in and passkeys (src/app/api/account)
+  "api.account.emailOff": "Email sign-in isn't available right now.",
+  "api.account.badEmail": "That doesn't look like an email address.",
+  "api.account.tooMany": "Too many codes requested. Try again in a little while.",
+  "api.account.sendFailed": "We couldn't send the email. Try again.",
+  "api.account.signIn": "Sign in first.",
+  "api.account.passkeysOff": "Passkeys aren't available right now.",
+  "api.account.passkeyFailed": "That passkey couldn't be saved. Try again.",
+  "api.account.noPasskey": "That passkey isn't on your account.",
+  "api.account.mail.subject": "{code} is your Escape Escape code",
+  "api.account.mail.text": "Your Escape Escape sign-in code is {code}.\n\nIt expires in {minutes} minutes. If you didn't ask for it, you can ignore this email.",
+  "api.account.mail.intro": "Your Escape Escape sign-in code:",
+  "api.account.mail.expires": "It expires in {minutes} minutes.",
+  "api.account.mail.ignore": "If you didn't ask for it, you can ignore this email.",
 } as const;
 
 export default messages;

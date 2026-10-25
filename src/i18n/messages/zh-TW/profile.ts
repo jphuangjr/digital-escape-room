@@ -5,7 +5,7 @@ const messages: Record<keyof typeof en, string> = {
   "profile.heading": "偵探檔案",
   "profile.signIn.title": "登入以查看你的個人檔案",
   "profile.signIn.text": "個人檔案會記錄你結案的每個案件、最佳時間，以及獲得的成就。",
-  "profile.signIn.button": "使用 Google 登入",
+  "profile.signIn.button": "登入",
   "profile.since": "自 {date} 起成為偵探",
   "profile.stat.cases": "已結案件",
   "profile.stat.solved": "已破案",

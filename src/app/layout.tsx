@@ -4,6 +4,7 @@ import { IntlClientProvider } from "@/i18n/client";
 import { MESSAGES } from "@/i18n/messages";
 import { getLocale } from "@/i18n/server";
 import { InstallBanner } from "@/components/site/InstallBanner";
+import { SignInHost } from "@/components/site/SignIn";
 
 export const metadata: Metadata = {
   // Absolute base for link-preview image URLs. Set NEXT_PUBLIC_SITE_URL to override (e.g. for local testing).
@@ -34,6 +35,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <IntlClientProvider locale={locale} messages={MESSAGES[locale]}>
           {children}
           <InstallBanner />
+          <SignInHost />
         </IntlClientProvider>
       </body>
     </html>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MeResponse, OpenHostedRoom } from "@/lib/types";
-import { AccountBar, ContinueRooms, GoogleButton, MyCases } from "@/components/site/Account";
+import { AccountBar, ContinueRooms, SignInButton, MyCases } from "@/components/site/Account";
 import { Leaderboard } from "@/components/site/Leaderboard";
 import { Compass } from "@/components/site/Compass";
 import { GameTrailer } from "@/components/site/GameTrailer";
@@ -273,7 +273,7 @@ export function AdaLanding() {
 
           {mustSignInToHost ? (
             <div className="flex flex-col gap-2">
-              <GoogleButton label={t("site.ada.signInToHost")} callbackUrl="/play/ada-voss" />
+              <SignInButton label={t("site.ada.signInToHost")} callbackUrl="/play/ada-voss" />
               <p className="text-center text-xs text-noir-ink-faint">{t("site.ada.hostsSignIn")}</p>
             </div>
           ) : mustUnlockToHost ? (

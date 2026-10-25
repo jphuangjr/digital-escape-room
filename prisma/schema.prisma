@@ -61,6 +61,7 @@ model User {
   image     String?
   createdAt DateTime     @default(now())
   identities AuthIdentity[]
+  passkeys  Passkey[]
   players   Player[]
   cases     CaseRecord[]
   purchases GamePurchase[]
@@ -81,6 +82,50 @@ model AuthIdentity {
 
   @@unique([provider, providerAccountId])
   @@index([userId])
+}
+
+/// A WebAuthn passkey that signs its User in. Public key only; the private key never leaves the device.
+model Passkey {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credentialId String    @unique // base64url credential id from the authenticator
+  publicKey    Bytes
+  counter      Int       @default(0) // signature counter, to spot cloned authenticators
+  transports   String[]
+  deviceType   String // "singleDevice" | "multiDevice" (synced, e.g. iCloud Keychain)
+  backedUp     Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  @@index([userId])
+}
+
+/// A one-time sign-in code emailed to `email` (lowercased). Only its hash is stored.
+model EmailCode {
+  id         String    @id @default(cuid())
+  email      String
+  codeHash   String
+  ipHash     String? // hashed requester IP, for rate limiting
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([email, createdAt])
+  @@index([ipHash, createdAt])
+}
+
+/// A pending WebAuthn challenge (single use, short-lived). `userId` is set for registration, not for sign-in.
+model AuthChallenge {
+  id        String   @id @default(cuid())
+  challenge String   @unique
+  kind      String // "register" | "login"
+  userId    String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
 }
 
 /// Permanent right for a user to host a game. Created by redeeming a code (later: Stripe).
