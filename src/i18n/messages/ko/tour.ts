@@ -12,7 +12,7 @@ const messages: Record<keyof typeof en, string> = {
   "tour.room.title": "내 방",
   "tour.room.body": "방을 눌러 누가 있는지, 누가 접속 중인지, 각자 무엇을 보고 있는지 확인해 보세요. 방 코드는 맨 위에 있어요.",
   "tour.invite.title": "팀원 초대하기",
-  "tour.invite.body": "초대를 눌러 링크를 공유하거나, 참가자 목록 아래의 QR 코드를 친구에게 스캔하게 하세요. Google로 로그인하거나 이름만 입력해도 참가할 수 있어요.",
+  "tour.invite.body": "초대를 눌러 링크를 공유하거나, 참가자 목록 아래의 QR 코드를 친구에게 스캔하게 하세요. 로그인하거나 이름만 입력해도 참가할 수 있어요.",
   "tour.chat.title": "채팅",
   "tour.chat.body": "여기서 팀원들과 대화하세요. 누군가 메시지를 보내면 방에 빨간 배지가 표시돼요.",
   "tour.hints.title": "힌트와 기록",

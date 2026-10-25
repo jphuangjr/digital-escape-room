@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { gameText, getGame } from "@/lib/games";
-import { AccountBar, ContinueRooms, GoogleButton, MyCases, useMe } from "@/components/site/Account";
+import { AccountBar, ContinueRooms, SignInButton, MyCases, useMe } from "@/components/site/Account";
 import { RedeemBox } from "@/components/site/RedeemBox";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
@@ -140,7 +140,7 @@ export function TrainLanding({
           {err && <p className="text-sm text-noir-ink-dim">{err}</p>}
           {mustSignIn ? (
             <div className="flex flex-col gap-2">
-              <GoogleButton label={t("site.ada.signInToHost")} callbackUrl={game.href} />
+              <SignInButton label={t("site.ada.signInToHost")} callbackUrl={game.href} />
               <p className="text-center text-xs text-noir-ink-faint">{t("site.ada.hostsSignIn")}</p>
             </div>
           ) : mustUnlock ? (

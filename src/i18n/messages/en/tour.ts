@@ -11,7 +11,7 @@ const messages = {
   "tour.room.title": "Your room",
   "tour.room.body": "Tap Room to see who's here, who's online and what each person is looking at. Your room code is at the top.",
   "tour.invite.title": "Invite your team",
-  "tour.invite.body": "Tap Invite to share a link, or have friends scan the QR code below the player list. They can join with Google or just a name.",
+  "tour.invite.body": "Tap Invite to share a link, or have friends scan the QR code below the player list. They can sign in or just enter a name.",
   "tour.chat.title": "Chat",
   "tour.chat.body": "Talk to your team here. When someone sends a message you'll see a red badge on Room.",
   "tour.hints.title": "Hints and history",

@@ -12,7 +12,7 @@ const messages: Record<keyof typeof en, string> = {
   "tour.room.title": "你的房間",
   "tour.room.body": "點「房間」可以看到有誰在、誰在線上，以及每個人正在看什麼。房間代碼就在最上方。",
   "tour.invite.title": "邀請你的隊友",
-  "tour.invite.body": "點「邀請」分享連結，或請朋友掃描成員清單下方的 QR 碼。可以使用 Google 登入，或只輸入名字加入。",
+  "tour.invite.body": "點「邀請」分享連結，或請朋友掃描成員清單下方的 QR 碼。可以登入，或只輸入名字加入。",
   "tour.chat.title": "聊天",
   "tour.chat.body": "在這裡跟隊友聊天。有人傳訊息時，「房間」上會出現紅色標記。",
   "tour.hints.title": "提示與紀錄",

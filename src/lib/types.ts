@@ -203,10 +203,18 @@ export interface AttemptResponse {
 
 // ---------- Accounts (optional sign-in: Google today, more providers later) ----------
 
+/** One of the signed-in account's passkeys, as the profile page lists them. */
+export interface PasskeyDTO {
+  id: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+  synced: boolean; // a multi-device passkey (iCloud Keychain, Google Password Manager, ...)
+}
+
 export interface MeResponse {
   /** @deprecated Same as `authProviders.length > 0`; kept until the client switches over. */
   googleEnabled: boolean;
-  authProviders: string[]; // sign-in providers configured on the server ("google", ...); empty = anonymous only
+  authProviders: string[]; // sign-in providers configured on the server ("google", "email", "passkey"); empty = anonymous only
   isAdmin: boolean; // verified email listed in ACCOUNT_ADMIN
   isTester: boolean; // holds a tester key that is still on (every game, staging included)
   ownedGames: string[]; // game ids this user may host (all of them for admins)

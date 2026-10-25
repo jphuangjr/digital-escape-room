@@ -27,7 +27,7 @@ const messages: Record<keyof typeof en, string> = {
   "room.presence.lookingToo": "{count, plural, other {{names}也在看這裡}}",
   "room.qr.title": "掃描即可加入",
   "room.qr.label": "加入房間 {code} 的 QR 碼",
-  "room.qr.help": "用手機相機對準這裡。可以使用 Google 登入，或只輸入名字加入。",
+  "room.qr.help": "用手機相機對準這裡。可以登入，或只輸入名字加入。",
   // Shared helpers
   "room.time.justNow": "剛剛",
   "room.compassBadge": "指南針徽章",

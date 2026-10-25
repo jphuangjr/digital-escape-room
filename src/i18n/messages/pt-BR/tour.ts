@@ -12,7 +12,7 @@ const messages: Record<keyof typeof en, string> = {
   "tour.room.title": "Sua sala",
   "tour.room.body": "Toque em Sala para ver quem está aqui, quem está on-line e o que cada pessoa está vendo. O código da sala fica no topo.",
   "tour.invite.title": "Convide sua equipe",
-  "tour.invite.body": "Toque em Convidar para compartilhar um link ou peça para seus amigos escanearem o QR code abaixo da lista de jogadores. Dá para entrar com o Google ou só com um nome.",
+  "tour.invite.body": "Toque em Convidar para compartilhar um link ou peça para seus amigos escanearem o QR code abaixo da lista de jogadores. Dá para entrar na conta ou só com um nome.",
   "tour.chat.title": "Chat",
   "tour.chat.body": "Converse com a sua equipe aqui. Quando alguém mandar uma mensagem, você verá um indicador vermelho em Sala.",
   "tour.hints.title": "Dicas e histórico",

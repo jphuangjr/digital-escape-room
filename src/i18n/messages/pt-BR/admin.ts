@@ -83,7 +83,7 @@ const messages: Record<keyof typeof en, string> = {
   "admin.code.more": "…e mais {count}",
   "admin.qr.title": "Escaneie para resgatar {game}",
   "admin.qr.label": "Código QR para resgatar {code}",
-  "admin.qr.help": "A pessoa entra com o Google e a sala é adicionada à conta dela.",
+  "admin.qr.help": "A pessoa entra na conta e a sala é adicionada a ela.",
   "admin.qr.singleUse": "Uso único.",
   "admin.qr.groupUses": "Uma vez por conta · {used}/{max} usados.",
   "admin.qr.linkLabel": "link de resgate",

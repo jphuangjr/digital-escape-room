@@ -27,7 +27,7 @@ const messages: Record<keyof typeof en, string> = {
   "room.presence.lookingToo": "{count, plural, other {{names}もこれを見ています}}",
   "room.qr.title": "スキャンして参加",
   "room.qr.label": "ルーム {code} に参加するためのQRコード",
-  "room.qr.help": "スマホのカメラをここに向けてください。Googleでログインするか、名前を入力するだけで参加できます。",
+  "room.qr.help": "スマホのカメラをここに向けてください。ログインするか、名前を入力するだけで参加できます。",
   // Shared helpers
   "room.time.justNow": "たった今",
   "room.compassBadge": "コンパスバッジ",

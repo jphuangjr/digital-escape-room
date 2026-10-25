@@ -5,7 +5,7 @@ const messages: Record<keyof typeof en, string> = {
   "profile.heading": "탐정 프로필",
   "profile.signIn.title": "로그인하고 프로필을 확인하세요",
   "profile.signIn.text": "프로필에는 해결한 모든 사건과 최고 기록, 획득한 업적이 남아요.",
-  "profile.signIn.button": "Google로 로그인",
+  "profile.signIn.button": "로그인",
   "profile.since": "{date}부터 탐정으로 활동 중",
   "profile.stat.cases": "종결한 사건",
   "profile.stat.solved": "해결",

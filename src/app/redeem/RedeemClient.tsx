@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ALL_GAMES, getGame, gameText } from "@/lib/games";
 import { useT } from "@/i18n/client";
-import { GoogleButton, useMe } from "@/components/site/Account";
+import { SignInButton, useMe } from "@/components/site/Account";
 import { Compass } from "@/components/site/Compass";
 
 type Result = { ok: true; gameId: string; title: string; alreadyOwned: boolean } | { ok: false; error: string };
@@ -46,7 +46,7 @@ export function RedeemClient() {
       <>
         <p className="text-noir-ink-dim">{t("site.redeem.invite")}</p>
         <p className="font-mono tracking-wider text-noir-brass">{code}</p>
-        <GoogleButton label={t("site.redeem.signIn")} callbackUrl={`/redeem?code=${encodeURIComponent(code)}`} />
+        <SignInButton label={t("site.redeem.signIn")} callbackUrl={`/redeem?code=${encodeURIComponent(code)}`} />
       </>
     );
   } else if (!result) {

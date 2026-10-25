@@ -82,7 +82,7 @@ const messages: Record<keyof typeof en, string> = {
   "admin.code.more": "…ほか{count}件",
   "admin.qr.title": "スキャンして{game}を受け取る",
   "admin.qr.label": "{code} を引き換えるQRコード",
-  "admin.qr.help": "Googleでログインすると、ルームがアカウントに追加されます。",
+  "admin.qr.help": "ログインすると、ルームがアカウントに追加されます。",
   "admin.qr.singleUse": "1回限りです。",
   "admin.qr.groupUses": "アカウントごとに1回 · {used}/{max}使用済み。",
   "admin.qr.linkLabel": "受け取りリンク",
