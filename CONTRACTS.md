@@ -61,7 +61,7 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
 
 ## Accounts (optional sign-in, next-auth v4, JWT sessions)
 - Providers come from a registry in `src/server/auth.ts`: each is enabled only when its env vars are set (Google:
-  `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET`), plus `AUTH_SECRET`. `enabledProviders` lists them; `authEnabled` is
+  `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET`; Apple: below), plus `AUTH_SECRET`. `enabledProviders` lists them; `authEnabled` is
   true when there's at least one, otherwise the app is fully anonymous (`googleEnabled` is a deprecated alias).
 - Identity model: a `User` (purchases, redemptions, case records and players all hang off `User.id`) has one or more
   `AuthIdentity(provider, providerAccountId)` rows, unique per provider account, each with the provider's email and
@@ -86,8 +86,15 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   removes one. Sign-in: `POST /api/account/passkeys/login-options`, then next-auth `signIn("passkey", {response})`.
   Challenges are stored server-side (`AuthChallenge`, single use, 5 min); the relying party is the request's host
   (`AUTH_RP_ID` overrides), so a passkey works only on the domain it was made on. The signature counter is kept.
+- **Apple** (provider `apple`): enabled by `AUTH_APPLE_ID` (Services ID), `AUTH_APPLE_TEAM_ID`, `AUTH_APPLE_KEY_ID`,
+  `AUTH_APPLE_PRIVATE_KEY` (.p8). The client secret is an ES256 JWT minted from the key at startup (`src/server/apple.ts`);
+  a key that won't load leaves Apple off and logs `[auth] apple sign-in is misconfigured`. Apple's callback is a
+  cross-site `form_post`, so with Apple on, next-auth's callback-url/PKCE/state/nonce cookies are `SameSite=None;
+  Secure` (session cookie stays Lax). Apple's verified email links like Google's; "Hide My Email" relay addresses
+  won't match an existing account. No name or picture comes through, so the profile shows the email's local part
+  (or nothing for a relay address).
 - Client: every "Sign in" button calls `openSignIn(callbackUrl)`; `SignInHost` (root layout) shows the enabled
-  methods, or goes straight to Google when it's the only one.
+  methods, or goes straight to Apple or Google when that's the only one.
 - Hosting (`POST /api/rooms`) requires sign-in when enabled → 401 `{signInRequired:true}`. Joining stays optional.
 - One open room per host: if the user already hosts non-expired rooms, `POST /api/rooms` → 409 `ReplaceRoomsRequired`
   listing them; resending with `replaceExisting: true` deletes them immediately (publishing `room.closed`) and creates

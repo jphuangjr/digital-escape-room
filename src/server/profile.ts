@@ -6,6 +6,7 @@ import { GAMES } from "@/lib/games";
 import { ATLAS_ENDINGS, ATLAS_GAME_ID } from "@/lib/atlas/types";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { sceneGame } from "./scene/games";
+import { isAppleRelayEmail } from "./apple";
 import { db } from "./db";
 import { boardWhere, rankOf } from "./leaderboard";
 
@@ -71,8 +72,8 @@ export async function getProfile(user: User): Promise<ProfileResponse> {
   );
 
   return {
-    // Email-only accounts have no name yet: show the address's local part.
-    user: { name: user.name ?? user.email?.split("@")[0] ?? null, image: user.image, since: user.createdAt.toISOString() },
+    // Email-only and Apple accounts may have no name: show the address's local part (unless it's Apple's random relay).
+    user: { name: user.name ?? (isAppleRelayEmail(user.email) ? null : user.email?.split("@")[0]) ?? null, image: user.image, since: user.createdAt.toISOString() },
     totals: {
       cases: cases.length,
       solved: rows.filter((r) => r.solved).length,
