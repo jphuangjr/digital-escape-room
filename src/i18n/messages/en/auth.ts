@@ -7,6 +7,8 @@ const messages = {
   "auth.google": "Continue with Google",
   "auth.passkey.signIn": "Sign in with a passkey",
   "auth.or": "or",
+  "auth.signUp.title": "Sign up",
+  "auth.signUp.body": "New here? Enter your email and we'll send you a code. Already have an account? Same box.",
   "auth.email.label": "Email",
   "auth.email.placeholder": "you@example.com",
   "auth.email.send": "Email me a code",

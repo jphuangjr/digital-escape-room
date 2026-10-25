@@ -8,6 +8,8 @@ const messages: Record<keyof typeof en, string> = {
   "auth.google": "Googleで続ける",
   "auth.passkey.signIn": "パスキーでログイン",
   "auth.or": "または",
+  "auth.signUp.title": "新規登録",
+  "auth.signUp.body": "はじめての方はメールアドレスを入力してください。コードをお送りします。アカウントをお持ちの方も同じ欄からどうぞ。",
   "auth.email.label": "メールアドレス",
   "auth.email.placeholder": "you@example.com",
   "auth.email.send": "コードを送信",

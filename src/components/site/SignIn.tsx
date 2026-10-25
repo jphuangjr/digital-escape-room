@@ -207,6 +207,10 @@ function SignInSheet({ callbackUrl, providers, onClose }: { callbackUrl: string;
                     <span className="h-px flex-1 bg-noir-line" />
                   </p>
                 )}
+                <div>
+                  <h3 className="font-serif text-xl text-noir-ink">{t("auth.signUp.title")}</h3>
+                  <p className="mt-1 text-sm text-noir-ink-dim">{t("auth.signUp.body")}</p>
+                </div>
                 <label htmlFor="signin-email" className="text-xs uppercase tracking-widest text-noir-ink-faint">
                   {t("auth.email.label")}
                 </label>
