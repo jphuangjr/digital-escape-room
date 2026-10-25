@@ -7,6 +7,8 @@ const messages: Record<keyof typeof en, string> = {
   "auth.google": "Continuar com o Google",
   "auth.passkey.signIn": "Entrar com uma chave de acesso",
   "auth.or": "ou",
+  "auth.signUp.title": "Criar conta",
+  "auth.signUp.body": "Primeira vez? Digite seu e-mail e enviaremos um código. Já tem conta? Use o mesmo campo.",
   "auth.email.label": "E-mail",
   "auth.email.placeholder": "voce@exemplo.com",
   "auth.email.send": "Me envie um código",
