@@ -9,8 +9,8 @@ import { useT } from "@/i18n/client";
 
 /**
  * One sign-in sheet for the whole site. Any "Sign in" button calls `openSignIn(callbackUrl)`; `SignInHost` (in the
- * root layout) shows the methods the server has on: a passkey, Google, or a code emailed to you. With Google as
- * the only method it goes straight to Google, as before. After an email sign-in it offers to create a passkey.
+ * root layout) shows the methods the server has on: a passkey, Apple, Google, or a code emailed to you. With one
+ * OAuth provider as the only method it goes straight there. After an email sign-in it offers to create a passkey.
  */
 
 const OPEN_EVENT = "escape:signin";
@@ -26,6 +26,9 @@ async function fetchProviders(): Promise<string[]> {
 
 type Step = "choose" | "code" | "offer";
 
+/** Providers that leave the site to sign in. */
+const OAUTH = ["apple", "google"];
+
 export function SignInHost() {
   const [target, setTarget] = useState<string | null>(null);
   const [providers, setProviders] = useState<string[]>([]);
@@ -34,7 +37,7 @@ export function SignInHost() {
     const onOpen = (e: Event) => {
       const url = (e as CustomEvent<{ callbackUrl: string }>).detail.callbackUrl;
       void fetchProviders().then((list) => {
-        if (list.length === 1 && list[0] === "google") return void signIn("google", { callbackUrl: url });
+        if (list.length === 1 && OAUTH.includes(list[0])) return void signIn(list[0], { callbackUrl: url });
         setProviders(list);
         setTarget(url);
       });
@@ -174,6 +177,16 @@ function SignInSheet({ callbackUrl, providers, onClose }: { callbackUrl: string;
                 <KeyIcon /> {t("auth.passkey.signIn")}
               </button>
             )}
+            {providers.includes("apple") && (
+              <button
+                type="button"
+                className="flex min-h-12 w-full items-center justify-center gap-3 rounded-lg bg-white font-semibold text-black active:bg-neutral-200 disabled:opacity-60"
+                disabled={busy}
+                onClick={() => signIn("apple", { callbackUrl })}
+              >
+                <AppleMark /> {t("auth.apple")}
+              </button>
+            )}
             {providers.includes("google") && (
               <button type="button" className={secondary} disabled={busy} onClick={() => signIn("google", { callbackUrl })}>
                 <GoogleMark /> {t("auth.google")}
@@ -187,7 +200,7 @@ function SignInSheet({ callbackUrl, providers, onClose }: { callbackUrl: string;
                   void sendCode();
                 }}
               >
-                {(hasPasskeys || providers.includes("google")) && (
+                {(hasPasskeys || providers.some((p) => OAUTH.includes(p))) && (
                   <p className="my-1 flex items-center gap-3 text-xs uppercase tracking-widest text-noir-ink-faint">
                     <span className="h-px flex-1 bg-noir-line" />
                     {t("auth.or")}
@@ -293,6 +306,14 @@ export function KeyIcon({ className = "h-5 w-5" }: { className?: string }) {
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <circle cx="8" cy="15" r="4" />
       <path d="M10.85 12.15 19 4M18 5l2 2M15 8l2 2" />
+    </svg>
+  );
+}
+
+function AppleMark() {
+  return (
+    <svg viewBox="0 0 814 1000" className="h-5 w-5" fill="currentColor" aria-hidden>
+      <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z" />
     </svg>
   );
 }

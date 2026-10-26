@@ -269,8 +269,12 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
 
   return (
     <GameContext.Provider value={ctx}>
-      <div className="fixed inset-0 flex flex-col bg-[#071015] text-stone-200" style={{ paddingTop: "env(safe-area-inset-top)" }}>
-        <header className="flex h-12 shrink-0 items-center gap-1.5 border-b border-[#1f3640] px-3">
+      <div className="fixed inset-0 flex flex-col bg-[#071015] text-stone-200">
+        {/* The header owns the strip under the status bar and paints it solid, so iOS doesn't fade it as page content. */}
+        <header
+          className="relative z-10 flex shrink-0 items-center gap-1.5 border-b border-[#1f3640] bg-[#071015] px-3"
+          style={{ paddingTop: "env(safe-area-inset-top)", height: "calc(3rem + env(safe-area-inset-top))" }}
+        >
           <p className="min-w-0 flex-1 truncate font-serif text-base text-[#f4e7b5]">{t("atlas.title", { place: placeName, wall: t(`atlas.wall.${wall}`) })}</p>
           <ChapterLine chapter={state.chapter} toast={toast} theme="atlas" />
           <button

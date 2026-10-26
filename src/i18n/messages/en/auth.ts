@@ -3,6 +3,7 @@ const messages = {
   "auth.title": "Sign in",
   "auth.subtitle": "Keep your cases, times and games on any device. Friends can still join with just a name.",
   "auth.close": "Close",
+  "auth.apple": "Continue with Apple",
   "auth.google": "Continue with Google",
   "auth.passkey.signIn": "Sign in with a passkey",
   "auth.or": "or",
