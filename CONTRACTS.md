@@ -92,7 +92,7 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   cross-site `form_post`, so with Apple on, next-auth's callback-url/PKCE/state/nonce cookies are `SameSite=None;
   Secure` (session cookie stays Lax). Apple's verified email links like Google's; "Hide My Email" relay addresses
   won't match an existing account. No name or picture comes through, so the profile shows the email's local part
-  (or nothing for a relay address).
+  (or nothing for a relay address). Setup checklist (Apple developer site + Vercel): `docs/APPLE_SIGN_IN.md`.
 - Client: every "Sign in" button calls `openSignIn(callbackUrl)`; `SignInHost` (root layout) shows the enabled
   methods, or goes straight to Apple or Google when that's the only one.
 - Hosting (`POST /api/rooms`) requires sign-in when enabled → 401 `{signInRequired:true}`. Joining stays optional.
