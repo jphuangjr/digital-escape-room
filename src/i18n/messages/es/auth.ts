@@ -4,6 +4,7 @@ const messages: Record<keyof typeof en, string> = {
   "auth.title": "Iniciar sesión",
   "auth.subtitle": "Conserva tus casos, tiempos y juegos en cualquier dispositivo. Tus amigos pueden unirse solo con un nombre.",
   "auth.close": "Cerrar",
+  "auth.apple": "Continuar con Apple",
   "auth.google": "Continuar con Google",
   "auth.passkey.signIn": "Entrar con llave de acceso",
   "auth.or": "o",

@@ -4,6 +4,7 @@ const messages: Record<keyof typeof en, string> = {
   "auth.title": "로그인",
   "auth.subtitle": "어느 기기에서든 사건 기록과 게임을 이어갈 수 있어요. 친구들은 이름만으로도 참가할 수 있어요.",
   "auth.close": "닫기",
+  "auth.apple": "Apple로 계속하기",
   "auth.google": "Google로 계속하기",
   "auth.passkey.signIn": "패스키로 로그인",
   "auth.or": "또는",
