@@ -226,9 +226,13 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
 
   return (
     <GameContext.Provider value={ctx}>
-      <div className="fixed inset-0 flex flex-col bg-[#120c07] text-stone-200" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+      <div className="fixed inset-0 flex flex-col bg-[#120c07] text-stone-200">
         {/* top bar */}
-        <header className="flex h-12 shrink-0 items-center gap-2 border-b border-[#3d2615] px-3">
+        {/* The header owns the strip under the status bar and paints it solid, so iOS doesn't fade it as page content. */}
+        <header
+          className="relative z-10 flex shrink-0 items-center gap-2 border-b border-[#3d2615] bg-[#120c07] px-3"
+          style={{ paddingTop: "env(safe-area-inset-top)", height: "calc(3rem + env(safe-area-inset-top))" }}
+        >
           <div className="min-w-0 flex-1">
             <p className="truncate font-serif text-base text-[#ecd27a]">
               {place === "corridor" ? t("train.room.corridor") : t("train.title", { room: roomName, wall: t(`train.wall.${wall}`) })}
