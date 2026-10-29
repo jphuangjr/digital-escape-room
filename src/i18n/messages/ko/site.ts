@@ -25,6 +25,12 @@ const messages: Record<keyof typeof en, string> = {
   "site.join.label": "방 코드가 있나요?",
   "site.join.button": "참가",
   "site.join.invalidCode": "방 코드는 ADA-7K2Q 같은 형식이에요.",
+  "site.scan.button": "QR 코드 스캔",
+  "site.scan.hint": "방의 QR 코드에 카메라를 맞춰 주세요.",
+  "site.scan.notRoom": "방 초대 QR 코드가 아니에요. 호스트 화면의 코드를 스캔해 보세요.",
+  "site.scan.denied": "카메라 접근이 꺼져 있어요. 브라우저 설정에서 허용하거나 코드를 직접 입력하세요.",
+  "site.scan.unavailable": "사용할 수 있는 카메라가 없어요. 코드를 직접 입력하세요.",
+  "site.scan.close": "스캐너 닫기",
 
   "site.form.yourName": "이름",
   "site.form.nameNotice": "팀원들에게 보이고, 팀이 탈출하면 공개 리더보드에도 표시돼요. 실명을 밝히고 싶지 않다면 닉네임을 쓰세요.",

@@ -25,6 +25,12 @@ const messages = {
   "site.join.label": "Have a room code?",
   "site.join.button": "Join",
   "site.join.invalidCode": "Room codes look like ADA-7K2Q.",
+  "site.scan.button": "Scan QR code",
+  "site.scan.hint": "Point your camera at the room's QR code.",
+  "site.scan.notRoom": "That QR code isn't a room invite. Try the one on the host's screen.",
+  "site.scan.denied": "Camera access is off. Allow it in your browser settings, or type the code instead.",
+  "site.scan.unavailable": "No camera available here. Type the code instead.",
+  "site.scan.close": "Close scanner",
 
   // Shared form bits
   "site.form.yourName": "Your name",
