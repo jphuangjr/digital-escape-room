@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AccountBar, MyCases, useMe } from "@/components/site/Account";
+import { QrScanButton } from "@/components/site/QrScanner";
 import { useT } from "@/i18n/client";
 
 /** "ada 7k2q", "7K2Q" or "ADA-7K2Q" → "ADA-7K2Q". */
@@ -63,6 +64,7 @@ export function JoinBox() {
           maxLength={12}
           className="min-h-12 min-w-0 flex-1 rounded-lg border border-noir-line bg-noir-bg-3 px-3 font-mono text-lg tracking-widest text-noir-ink placeholder:text-noir-ink-faint"
         />
+        <QrScanButton onCode={(c) => router.push(`/r/${c}`)} />
         <button type="submit" className="min-h-12 shrink-0 rounded-lg bg-noir-brass px-5 font-semibold text-noir-bg active:bg-noir-brass-hi">
           {t("site.join.button")}
         </button>

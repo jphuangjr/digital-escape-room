@@ -25,6 +25,12 @@ const messages: Record<keyof typeof en, string> = {
   "site.join.label": "ルームコードをお持ちですか？",
   "site.join.button": "参加",
   "site.join.invalidCode": "ルームコードは ADA-7K2Q のような形式です。",
+  "site.scan.button": "QRコードを読み取る",
+  "site.scan.hint": "ルームのQRコードにカメラを向けてください。",
+  "site.scan.notRoom": "ルームの招待QRコードではありません。ホストの画面のコードを読み取ってください。",
+  "site.scan.denied": "カメラへのアクセスがオフです。ブラウザの設定で許可するか、コードを入力してください。",
+  "site.scan.unavailable": "使用できるカメラがありません。コードを入力してください。",
+  "site.scan.close": "スキャナーを閉じる",
 
   "site.form.yourName": "あなたの名前",
   "site.form.nameNotice": "チームのメンバーに表示され、脱出すると公開ランキングにも載ります。本名を出したくない場合はニックネームを使ってください。",

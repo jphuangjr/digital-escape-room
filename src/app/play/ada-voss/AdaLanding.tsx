@@ -13,6 +13,7 @@ import { RedeemBox } from "@/components/site/RedeemBox";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { getGame, gameText } from "@/lib/games";
 import { FormattedMessage } from "react-intl";
+import { QrScanButton } from "@/components/site/QrScanner";
 
 const COLORS = ["#c9a227", "#a3302a", "#3d8c88", "#6b7fd7", "#b56cc4", "#d9824b", "#7fae4e", "#d8d2c4"];
 const PREF_KEY = "ada.profile";
@@ -211,21 +212,27 @@ export function AdaLanding() {
           </div>
 
           {mode === "join" && (
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs uppercase tracking-widest text-noir-ink-faint">{t("site.ada.roomCode")}</span>
-              <input
-                value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                onBlur={() => setJoinCode((c) => normalizeCode(c))}
-                placeholder="ADA-7K2Q"
-                autoCapitalize="characters"
-                autoCorrect="off"
-                spellCheck={false}
-                inputMode="text"
-                maxLength={12}
-                className="min-h-12 rounded-lg border border-noir-line bg-noir-bg-3 px-3 font-mono text-lg tracking-widest text-noir-ink placeholder:text-noir-ink-faint"
-              />
-            </label>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="ada-room-code" className="text-xs uppercase tracking-widest text-noir-ink-faint">
+                {t("site.ada.roomCode")}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="ada-room-code"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  onBlur={() => setJoinCode((c) => normalizeCode(c))}
+                  placeholder="ADA-7K2Q"
+                  autoCapitalize="characters"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  inputMode="text"
+                  maxLength={12}
+                  className="min-h-12 min-w-0 flex-1 rounded-lg border border-noir-line bg-noir-bg-3 px-3 font-mono text-lg tracking-widest text-noir-ink placeholder:text-noir-ink-faint"
+                />
+                <QrScanButton onCode={setJoinCode} />
+              </div>
+            </div>
           )}
 
           <label className="flex flex-col gap-1.5">

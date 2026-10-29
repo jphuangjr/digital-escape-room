@@ -25,6 +25,12 @@ const messages: Record<keyof typeof en, string> = {
   "site.join.label": "有房間代碼嗎？",
   "site.join.button": "加入",
   "site.join.invalidCode": "房間代碼的格式像是 ADA-7K2Q。",
+  "site.scan.button": "掃描 QR 碼",
+  "site.scan.hint": "將相機對準房間的 QR 碼。",
+  "site.scan.notRoom": "這不是房間邀請的 QR 碼。請掃描主持人畫面上的那一個。",
+  "site.scan.denied": "相機權限已關閉。請在瀏覽器設定中允許，或改為輸入代碼。",
+  "site.scan.unavailable": "這裡沒有可用的相機。請改為輸入代碼。",
+  "site.scan.close": "關閉掃描器",
 
   "site.form.yourName": "你的名字",
   "site.form.nameNotice": "隊友會看到這個名字；隊伍逃脫後，它也會顯示在公開排行榜上。不想公開真名的話，請用暱稱。",
