@@ -25,6 +25,12 @@ const messages: Record<keyof typeof en, string> = {
   "site.join.label": "Tem um código da sala?",
   "site.join.button": "Entrar",
   "site.join.invalidCode": "Os códigos da sala são assim: ADA-7K2Q.",
+  "site.scan.button": "Ler QR code",
+  "site.scan.hint": "Aponte a câmera para o QR code da sala.",
+  "site.scan.notRoom": "Esse QR code não é um convite de sala. Tente o da tela do anfitrião.",
+  "site.scan.denied": "O acesso à câmera está desativado. Permita nas configurações do navegador ou digite o código.",
+  "site.scan.unavailable": "Nenhuma câmera disponível. Digite o código.",
+  "site.scan.close": "Fechar leitor",
 
   "site.form.yourName": "Seu nome",
   "site.form.nameNotice": "Aparece para sua equipe e, se vocês escaparem, no ranking público. Use um apelido se preferir não mostrar seu nome real.",
