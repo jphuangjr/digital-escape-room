@@ -1,7 +1,7 @@
 # Sign in with Apple: setup checklist
 
 The code shipped in #91 and stays switched off until the four `AUTH_APPLE_*` variables below are set in Vercel.
-Status: **not set up yet** (pending the Apple developer steps). Update this line when it's done.
+Status: **live** since 2026-10-29: Services ID, key and email source registered, the four variables set in Vercel Production, and sign-in tested on a phone.
 
 You need a paid Apple Developer Program membership ($99/year). Everything below is at
 developer.apple.com → Account → **Certificates, Identifiers & Profiles**.
