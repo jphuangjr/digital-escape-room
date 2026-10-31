@@ -1,38 +1,17 @@
 "use client";
 
-import { modernizeAddress } from "@/lib/domains";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { useLocale, useT } from "@/i18n/client";
 import { pick } from "@/i18n/config";
 import { PUZZLE_AFFECTS_HOSTS } from "@/lib/client/discoveries";
-import type { PlayerPublic, PuzzleId, ResolveResponse, SitePage } from "@/lib/types";
+import type { PlayerPublic, PuzzleId, ResolveResponse, SiteHistoryEntry, SitePage } from "@/lib/types";
 import { normalizeAddress, type GameCtx } from "@/lib/client/game";
-import {
-  BackIcon,
-  BookmarksIcon,
-  CodeIcon,
-  CompassMark,
-  ForwardIcon,
-  ReloadIcon,
-  StarIcon,
-} from "@/components/shell/icons";
+import { BackIcon, CodeIcon, CompassMark, ForwardIcon, HistoryIcon, ReloadIcon } from "@/components/shell/icons";
 import { PresenceAvatars, teammates } from "@/components/shell/Presence";
+import { useNow, useRelativeTime } from "@/components/apps/shared";
 import { SiteRenderer } from "./SiteRenderer";
 import { ViewSource } from "./ViewSource";
-
-interface Bookmark {
-  address: string;
-  title: string;
-}
-const DEFAULT_BOOKMARKS: Bookmark[] = [{ address: "meridian-inst.com", title: "Meridian Institute" }];
-
-/** The starter bookmark is stored in English; show it in the player's language. */
-function bookmarkTitle(b: Bookmark, x: ReturnType<typeof pick>): string {
-  return b.address === "meridian-inst.com" && b.title === "Meridian Institute"
-    ? x({ en: "Meridian Institute", ko: "메리디언 연구소", "zh-TW": "子午研究院", es: "Instituto Meridian", ja: "メリディアン研究所", "pt-BR": "Instituto Meridian" })
-    : b.title;
-}
 
 type View =
   | { kind: "newtab" }
@@ -41,15 +20,15 @@ type View =
   | { kind: "unreachable"; address: string }
   | { kind: "error"; address: string };
 
-function loadBookmarks(code: string): Bookmark[] {
+/** Sites this device has seen in the shared history, so newer ones can be marked "new". */
+const seenKey = (code: string) => `ada_history_seen_${code}`;
+function loadSeen(code: string): Set<string> | null {
   try {
-    const raw = localStorage.getItem(`ada_bookmarks_${code}`);
-    if (raw) {
-      const parsed = JSON.parse(raw) as Bookmark[];
-      if (Array.isArray(parsed)) return parsed.map((b) => ({ ...b, address: modernizeAddress(String(b.address ?? "")) }));
-    }
-  } catch {}
-  return DEFAULT_BOOKMARKS;
+    const raw = localStorage.getItem(seenKey(code));
+    return raw ? new Set(JSON.parse(raw) as string[]) : null;
+  } catch {
+    return null;
+  }
 }
 
 export function Browser({
@@ -63,13 +42,13 @@ export function Browser({
 }) {
   const t = useT();
   const locale = useLocale();
-  const x = pick(locale);
   const { code } = ctx;
+  // The room's shared history (server-built from everyone's visits), newest first.
+  const siteHistory = ctx.state.siteHistory ?? [];
   const [reloading, setReloading] = useState(false);
-  const [history, setHistory] = useState<{ entries: string[]; idx: number }>({ entries: [], idx: -1 });
+  const [nav, setNav] = useState<{ entries: string[]; idx: number }>({ entries: [], idx: -1 });
   const [view, setViewState] = useState<View>({ kind: "newtab" });
   const [input, setInput] = useState("");
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>(DEFAULT_BOOKMARKS);
   const [menuOpen, setMenuOpen] = useState(false);
   const [sourceOpen, setSourceOpen] = useState(false);
   const reqId = useRef(0);
@@ -78,15 +57,26 @@ export function Browser({
   const ctxRef = useRef(ctx);
   ctxRef.current = ctx;
 
-  const current = history.idx >= 0 ? history.entries[history.idx] : null;
+  const current = nav.idx >= 0 ? nav.entries[nav.idx] : null;
 
+  // Hosts this device has already seen in the history; null until loaded. Anything else is new (a dot on the button).
+  const [seen, setSeen] = useState<Set<string> | null>(null);
+  const historyHosts = siteHistory.map((e) => e.host).join(",");
   useEffect(() => {
-    setBookmarks(loadBookmarks(code));
+    const stored = loadSeen(code);
+    // First visit on this device: everything already there counts as seen.
+    setSeen(stored ?? new Set(historyHosts ? historyHosts.split(",") : []));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
-  const saveBookmarks = (b: Bookmark[]) => {
-    setBookmarks(b);
+  // New to this device, found by someone else (your own finds are never "new" to you).
+  const unseen = seen ? siteHistory.filter((e) => !seen.has(e.host) && e.foundById !== ctx.state.me.id).map((e) => e.host) : [];
+  // What was new when the menu opened: still labelled inside it, though opening it marks everything seen.
+  const [menuNew, setMenuNew] = useState<string[]>([]);
+  const markSeen = () => {
+    const all = new Set(siteHistory.map((e) => e.host));
+    setSeen(all);
     try {
-      localStorage.setItem(`ada_bookmarks_${code}`, JSON.stringify(b));
+      localStorage.setItem(seenKey(code), JSON.stringify([...all]));
     } catch {}
   };
 
@@ -104,7 +94,7 @@ export function Browser({
       setInput(address);
       setViewState((v) => (keepScroll && v.kind === "page" ? v : { kind: "loading", address }));
       if (mode === "push") {
-        setHistory((h) => {
+        setNav((h) => {
           if (h.entries[h.idx] === address) return h;
           const entries = [...h.entries.slice(0, h.idx + 1), address];
           return { entries, idx: entries.length - 1 };
@@ -117,7 +107,7 @@ export function Browser({
         setViewState({ kind: "page", page });
         setInput(page.address);
         if (page.address !== address) {
-          setHistory((h) => {
+          setNav((h) => {
             const entries = [...h.entries];
             if (entries[h.idx] === address) entries[h.idx] = page.address;
             return { entries, idx: h.idx };
@@ -156,10 +146,10 @@ export function Browser({
   }, [navRequest, load]);
 
   const go = (delta: number) => {
-    const idx = history.idx + delta;
-    if (idx < 0 || idx >= history.entries.length) return;
-    setHistory((h) => ({ ...h, idx }));
-    void load(history.entries[idx], "stay");
+    const idx = nav.idx + delta;
+    if (idx < 0 || idx >= nav.entries.length) return;
+    setNav((h) => ({ ...h, idx }));
+    void load(nav.entries[idx], "stay");
   };
   const reload = async () => {
     if (!current || reloading) return;
@@ -189,16 +179,6 @@ export function Browser({
     if (added.some((p) => PUZZLE_AFFECTS_HOSTS[p]?.includes(host))) void load(current, "stay", true);
   }, [solvedKey, current, load]);
 
-  const pageAddr = view.kind === "page" ? view.page.address : null;
-  const isBookmarked = !!pageAddr && bookmarks.some((b) => b.address === pageAddr);
-  const toggleBookmark = () => {
-    if (view.kind !== "page") return;
-    const p = view.page;
-    if (isBookmarked) saveBookmarks(bookmarks.filter((b) => b.address !== p.address));
-    else saveBookmarks([...bookmarks, { address: p.address, title: p.title }]);
-    ctx.toast(isBookmarked ? t("browser.toolbar.bookmarkRemoved") : t("browser.toolbar.bookmarked"), "info");
-  };
-
   const btn =
     "flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-stone-300 active:bg-stone-800 disabled:text-stone-700";
 
@@ -210,7 +190,7 @@ export function Browser({
           <button
             className={`${btn} hidden sm:flex`}
             onClick={() => go(-1)}
-            disabled={history.idx <= 0}
+            disabled={nav.idx <= 0}
             aria-label={t("browser.toolbar.back")}
           >
             <BackIcon className="h-5 w-5" />
@@ -218,7 +198,7 @@ export function Browser({
           <button
             className={`${btn} hidden sm:flex`}
             onClick={() => go(1)}
-            disabled={history.idx >= history.entries.length - 1}
+            disabled={nav.idx >= nav.entries.length - 1}
             aria-label={t("browser.toolbar.forward")}
           >
             <ForwardIcon className="h-5 w-5" />
@@ -257,21 +237,28 @@ export function Browser({
             <ReloadIcon className={`h-5 w-5 ${reloading ? "animate-spin" : ""}`} />
           </button>
           <button
-            className={btn}
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label={t("browser.toolbar.menu")}
+            className={`${btn} relative`}
+            onClick={() => {
+              if (!menuOpen) {
+                setMenuNew(unseen);
+                markSeen();
+              }
+              setMenuOpen((v) => !v);
+            }}
+            aria-label={t("browser.history.button", { count: unseen.length })}
             aria-expanded={menuOpen}
           >
-            <BookmarksIcon className="h-5 w-5" />
+            <HistoryIcon className="h-5 w-5" />
+            {unseen.length > 0 && <span aria-hidden className="absolute right-2 top-2 h-2 w-2 rounded-full bg-amber-400" />}
           </button>
         </div>
-        {/* Secondary row: back/forward pair (mobile), page title, bookmark star, view source */}
+        {/* Secondary row: back/forward pair (mobile), page title, view source */}
         <div className="flex items-center gap-1 overflow-x-auto px-1 pb-1">
           <div className="flex shrink-0 items-center overflow-hidden rounded-full border border-stone-800 sm:hidden">
             <button
               className={btn}
               onClick={() => go(-1)}
-              disabled={history.idx <= 0}
+              disabled={nav.idx <= 0}
               aria-label={t("browser.toolbar.back")}
             >
               <BackIcon className="h-5 w-5" />
@@ -280,7 +267,7 @@ export function Browser({
             <button
               className={btn}
               onClick={() => go(1)}
-              disabled={history.idx >= history.entries.length - 1}
+              disabled={nav.idx >= nav.entries.length - 1}
               aria-label={t("browser.toolbar.forward")}
             >
               <ForwardIcon className="h-5 w-5" />
@@ -289,17 +276,6 @@ export function Browser({
           <span className="min-w-0 flex-1 truncate px-2 text-xs text-stone-400">
             {view.kind === "page" ? view.page.title : view.kind === "loading" ? t("browser.toolbar.loading") : ""}
           </span>
-          <button
-            className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-stone-300 active:bg-stone-800 disabled:text-stone-700"
-            onClick={toggleBookmark}
-            disabled={view.kind !== "page"}
-            aria-pressed={isBookmarked}
-            aria-label={isBookmarked ? t("browser.toolbar.bookmarked") : t("browser.toolbar.bookmark")}
-          >
-            <StarIcon filled={isBookmarked} className={`h-5 w-5 sm:h-4 sm:w-4 ${isBookmarked ? "text-amber-400" : ""}`} />
-            {/* Icon-only on phones so long translations don't crowd out the page title. */}
-            <span className="hidden sm:inline">{isBookmarked ? t("browser.toolbar.bookmarked") : t("browser.toolbar.bookmark")}</span>
-          </button>
           <button
             className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-stone-300 active:bg-stone-800 disabled:text-stone-700"
             onClick={() => setSourceOpen(true)}
@@ -312,43 +288,16 @@ export function Browser({
         </div>
 
         {menuOpen && (
-          <div className="absolute right-1 top-full z-20 mt-1 w-72 max-w-[calc(100vw-1rem)] rounded-lg border border-stone-700 bg-stone-900 p-1 shadow-2xl shadow-black">
-            <p className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-stone-500">{t("browser.menu.bookmarks")}</p>
-            <ul>
-              {bookmarks.map((b) => (
-                <li key={b.address} className="flex items-center">
-                  <button
-                    className="flex min-h-11 min-w-0 flex-1 flex-col items-start justify-center rounded px-3 py-1 text-left active:bg-stone-800"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      void load(b.address, "push");
-                    }}
-                  >
-                    <span className="truncate text-sm text-stone-100">{bookmarkTitle(b, x)}</span>
-                    <span className="truncate font-mono text-xs text-stone-500">{b.address}</span>
-                  </button>
-                  <button
-                    className="flex h-11 w-11 items-center justify-center text-stone-500 active:bg-stone-800"
-                    aria-label={t("browser.menu.removeBookmark", { title: bookmarkTitle(b, x) })}
-                    onClick={() => saveBookmarks(bookmarks.filter((bm) => bm.address !== b.address))}
-                  >
-                    ✕
-                  </button>
-                </li>
-              ))}
-              {bookmarks.length === 0 && <li className="px-3 py-2 text-sm text-stone-500">{t("browser.menu.empty")}</li>}
-            </ul>
-            {view.kind === "page" && !isBookmarked && (
-              <button
-                className="mt-1 flex min-h-11 w-full items-center gap-2 rounded border-t border-stone-800 px-3 text-sm text-amber-300 active:bg-stone-800"
-                onClick={() => {
-                  toggleBookmark();
-                  setMenuOpen(false);
-                }}
-              >
-                <StarIcon className="h-4 w-4" /> {t("browser.menu.bookmarkThisPage")}
-              </button>
-            )}
+          <div className="absolute right-1 top-full z-20 mt-1 max-h-[70vh] w-80 max-w-[calc(100vw-1rem)] overflow-y-auto rounded-lg border border-stone-700 bg-stone-900 p-1 shadow-2xl shadow-black">
+            <HistoryList
+              ctx={ctx}
+              entries={siteHistory}
+              unseen={menuNew}
+              onOpen={(a) => {
+                setMenuOpen(false);
+                void load(a, "push");
+              }}
+            />
           </div>
         )}
       </div>
@@ -360,11 +309,7 @@ export function Browser({
         onClick={() => menuOpen && setMenuOpen(false)}
       >
         {view.kind === "newtab" && (
-          <NewTab
-            bookmarks={bookmarks}
-            team={teamSites(ctx)}
-            onOpen={(a) => void load(a, "push")}
-          />
+          <NewTab ctx={ctx} entries={siteHistory} unseen={unseen} onOpen={(a) => void load(a, "push")} />
         )}
         {view.kind === "loading" && (
           <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-stone-500">
@@ -419,10 +364,10 @@ export function Browser({
 const hostOf = (address: string) => address.split("/")[0];
 
 /**
- * Which sites teammates have open, by host. Only sites the team has already visited are named (every
+ * Which teammates have each site open, by host. Only sites the team has already visited are named (every
  * page that loads counts), so a half-typed guess or a site nobody has reached never shows up here.
  */
-function teamSites(ctx: GameCtx): { host: string; players: PlayerPublic[] }[] {
+function teamByHost(ctx: GameCtx): Map<string, PlayerPublic[]> {
   const known = new Set(ctx.state.progress.visitedSites);
   const byHost = new Map<string, PlayerPublic[]>();
   for (const p of teammates(ctx.state.players, ctx.state.me.id, (v) => v.startsWith("browser:"))) {
@@ -430,58 +375,91 @@ function teamSites(ctx: GameCtx): { host: string; players: PlayerPublic[] }[] {
     if (!known.has(host)) continue;
     byHost.set(host, [...(byHost.get(host) ?? []), p]);
   }
-  return [...byHost].map(([host, players]) => ({ host, players }));
+  return byHost;
+}
+
+/**
+ * The room's shared history: every site anyone has opened, newest first, with who found it and who's on it now.
+ * A site someone else just found is marked new until this device has seen it.
+ */
+function HistoryList({
+  ctx,
+  entries,
+  unseen,
+  onOpen,
+}: {
+  ctx: GameCtx;
+  entries: SiteHistoryEntry[];
+  unseen: string[];
+  onOpen: (address: string) => void;
+}) {
+  const t = useT();
+  const now = useNow(30_000);
+  const rel = useRelativeTime();
+  const team = teamByHost(ctx);
+  return (
+    <div className="text-left">
+      <p className="px-3 pb-0.5 pt-2 text-xs font-semibold uppercase tracking-wider text-stone-500">{t("browser.history.title")}</p>
+      <p className="px-3 pb-1 text-xs text-stone-500">{t("browser.history.shared")}</p>
+      <ul className="space-y-1">
+        {entries.map((e) => (
+          <li key={e.host}>
+            <button
+              onClick={() => onOpen(e.host)}
+              className="flex min-h-14 w-full items-center gap-3 rounded-lg px-3 py-2 text-left active:bg-stone-800"
+            >
+              <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500/15 font-serif text-amber-300">
+                {e.title.charAt(0)}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-2">
+                  <span className="truncate text-sm text-stone-100">{e.title}</span>
+                  {unseen.includes(e.host) && (
+                    <span className="shrink-0 rounded-full bg-amber-500/20 px-1.5 text-10px font-semibold uppercase tracking-wider text-amber-300">
+                      {t("browser.history.new")}
+                    </span>
+                  )}
+                </span>
+                <span className="block truncate font-mono text-xs text-stone-500">{e.host}</span>
+                <span className="block truncate text-xs text-stone-500">
+                  {e.foundBy
+                    ? t("browser.history.foundBy", {
+                        name: e.foundBy,
+                        isMe: e.foundById === ctx.state.me.id,
+                        when: e.foundAt ? rel(e.foundAt, now) : "",
+                      })
+                    : t("browser.history.start")}
+                </span>
+              </span>
+              <PresenceAvatars players={team.get(e.host) ?? []} size="sm" ring="#1c1917" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 function NewTab({
-  bookmarks,
-  team,
+  ctx,
+  entries,
+  unseen,
   onOpen,
 }: {
-  bookmarks: Bookmark[];
-  team: { host: string; players: PlayerPublic[] }[];
+  ctx: GameCtx;
+  entries: SiteHistoryEntry[];
+  unseen: string[];
   onOpen: (address: string) => void;
 }) {
   const t = useT();
   const x = pick(useLocale());
-  const at = (address: string) => team.find((s) => s.host === hostOf(address))?.players ?? [];
   return (
-    <div className="mx-auto flex max-w-md flex-col items-center px-6 py-12 text-center">
+    <div className="mx-auto flex max-w-md flex-col items-center px-4 py-12 text-center">
       <CompassMark className="h-16 w-16 text-amber-500/60" />
       <p className="mt-4 font-serif text-lg text-stone-200">{t("browser.newTab.title")}</p>
       <p className="mt-1 text-sm italic text-stone-500">&ldquo;{x({ en: "Start at the beginning.", ko: "처음부터 시작해.", "zh-TW": "從頭開始。", es: "Empieza por el principio.", ja: "最初から始めて。", "pt-BR": "Comece pelo começo." })}&rdquo;</p>
-      {team.length > 0 && (
-        <div className="mt-8 w-full text-left">
-          <p className="px-1 text-xs font-semibold uppercase tracking-wider text-stone-500">{t("browser.newTab.team")}</p>
-          <ul className="mt-2 space-y-1.5">
-            {team.map((s) => (
-              <li key={s.host}>
-                <button
-                  onClick={() => onOpen(s.host)}
-                  className="flex min-h-11 w-full items-center gap-3 rounded-lg border border-stone-800 bg-stone-900/60 px-3 text-left active:bg-stone-800"
-                >
-                  <PresenceAvatars players={s.players} size="sm" ring="#1c1917" />
-                  <span className="min-w-0 flex-1 truncate font-mono text-sm text-stone-200">{s.host}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <div className="mt-8 grid w-full grid-cols-2 gap-3">
-        {bookmarks.map((b) => (
-          <button
-            key={b.address}
-            onClick={() => onOpen(b.address)}
-            className="relative flex min-h-20 flex-col items-center justify-center gap-1 rounded-xl border border-stone-800 bg-stone-900 p-3 active:bg-stone-800"
-          >
-            <PresenceAvatars players={at(b.address)} size="sm" ring="#1c1917" className="absolute right-2 top-2" />
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/15 font-serif text-amber-300">
-              {bookmarkTitle(b, x).charAt(0)}
-            </span>
-            <span className="w-full truncate text-xs text-stone-300">{bookmarkTitle(b, x)}</span>
-          </button>
-        ))}
+      <div className="mt-8 w-full rounded-xl border border-stone-800 bg-stone-900/60 p-1">
+        <HistoryList ctx={ctx} entries={entries} unseen={unseen} onOpen={onOpen} />
       </div>
     </div>
   );
