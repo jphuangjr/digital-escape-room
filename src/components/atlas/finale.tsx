@@ -119,7 +119,7 @@ export function VotePanel({ state, scene, busy, act }: { state: RoomState; scene
       aria-label={t("atlas.vote.title")}
     >
       <div className="mx-auto w-full max-w-md space-y-4">
-        <p className="pt-4 text-center font-mono text-[11px] uppercase tracking-[0.3em] text-[#9fd3c7]">{t("atlas.vote.eyebrow")}</p>
+        <p className="pt-4 text-center font-mono text-11px uppercase tracking-[0.3em] text-[#9fd3c7]">{t("atlas.vote.eyebrow")}</p>
         <h1 className="text-center font-serif text-3xl text-[#f4e7b5]">{t("atlas.vote.title")}</h1>
         <p className="text-center text-sm text-stone-300">{t("atlas.vote.intro")}</p>
         <div className="space-y-2">
@@ -211,7 +211,7 @@ export function EndingPanel({ scene, code, signedIn }: { scene: AtlasSceneDTO; c
             { label: t("atlas.end.votes"), value: e.counts[e.choice] },
           ]}
         >
-          <div className="space-y-4 font-serif text-[16px] leading-relaxed text-stone-200">
+          <div className="space-y-4 font-serif text-16px leading-relaxed text-stone-200">
             {e.paragraphs.map((p, i) => (
               <p key={i}>{p}</p>
             ))}

@@ -106,7 +106,7 @@ export function Leaderboard({ gameId, roomCode, tone = "noir" }: { gameId: strin
         </ol>
       )}
 
-      {data && data.top.length > 0 && <p className={`text-[11px] ${c.meta}`}>{t("board.timeNote")}</p>}
+      {data && data.top.length > 0 && <p className={`text-11px ${c.meta}`}>{t("board.timeNote")}</p>}
     </section>
   );
 }
@@ -115,7 +115,7 @@ function Stat({ tone, label, value }: { tone: Tone; label: string; value: string
   const c = TONES[tone];
   return (
     <div className={`rounded-lg border px-1 py-2 ${c.stat}`}>
-      <dt className={`text-[10px] uppercase tracking-wider ${c.meta}`}>{label}</dt>
+      <dt className={`text-10px uppercase tracking-wider ${c.meta}`}>{label}</dt>
       <dd className={`font-mono text-base font-bold ${c.name}`}>{value}</dd>
     </div>
   );
@@ -145,7 +145,7 @@ function Row({ row, tone }: { row: LeaderboardRow; tone: Tone }) {
             {more > 0 && <span className={c.meta}> {t("board.morePlayers", { n: more })}</span>}
           </span>
           {row.mine && (
-            <span className={`shrink-0 text-[10px] font-semibold uppercase tracking-wider ${c.time}`}>{t("board.you")}</span>
+            <span className={`shrink-0 text-10px font-semibold uppercase tracking-wider ${c.time}`}>{t("board.you")}</span>
           )}
         </span>
         <span className={`block truncate text-xs ${c.meta}`}>

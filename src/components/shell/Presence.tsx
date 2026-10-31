@@ -77,7 +77,7 @@ export function useNames() {
 
 const SIZES = {
   md: "h-7 w-7 border-2 text-xs",
-  sm: "h-[18px] w-[18px] border text-[10px]",
+  sm: "h-[18px] w-[18px] border text-10px",
 } as const;
 
 /**

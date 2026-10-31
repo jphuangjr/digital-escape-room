@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LanguageSwitcher, useT } from "@/i18n/client";
+import { TextSizeControl } from "@/components/site/TextSize";
 import { QrCode } from "@/components/site/QrCode";
 import { GameTips } from "@/components/site/RoomLoader";
 import type { GameCtx } from "@/lib/client/game";
@@ -125,7 +126,8 @@ export function RoomSheet({
           </button>
         </div>
 
-        <div role="tablist" className="mt-3 flex border-b border-stone-800 px-2">
+        {/* Scrolls sideways rather than wrapping labels when the text size is large. */}
+        <div role="tablist" className="mt-3 flex overflow-x-auto border-b border-stone-800 px-2 [scrollbar-width:none]">
           {(
             [
               ["people", t("room.tab.people", { count: state.players.filter((p) => p.online).length })],
@@ -141,7 +143,7 @@ export function RoomSheet({
               data-tour={`tab-${id}`}
               aria-selected={tab === id}
               onClick={() => setTab(id)}
-              className={`min-h-11 flex-1 border-b-2 text-sm ${
+              className={`min-h-11 flex-1 whitespace-nowrap border-b-2 px-2 text-sm ${
                 tab === id ? "border-amber-400 text-amber-300" : "border-transparent text-stone-400"
               }`}
             >
@@ -208,6 +210,8 @@ export function RoomSheet({
               <div className="mt-3 flex justify-center">
                 <LanguageSwitcher tone="shell" />
               </div>
+              <p className="mt-3 text-center text-xs uppercase tracking-widest text-stone-500">{t("textSize.label")}</p>
+              <TextSizeControl className="mt-2" />
               <div className="mt-4 border-t border-stone-800 pt-4">
                 {onTour && <button
                   type="button"

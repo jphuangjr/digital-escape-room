@@ -72,7 +72,7 @@ export function AccountBar({ me, callbackUrl = "/", fallbackColor = "#c9a227" }:
                   {t("profile.link")}
                 </a>
                 {me!.isTester && !me!.isAdmin && (
-                  <span className="shrink-0 rounded border border-noir-brass/60 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-noir-brass">
+                  <span className="shrink-0 rounded border border-noir-brass/60 px-1.5 py-0.5 font-mono text-10px uppercase tracking-widest text-noir-brass">
                     {t("site.account.tester")}
                   </span>
                 )}

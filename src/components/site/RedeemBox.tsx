@@ -71,7 +71,7 @@ export function RedeemBox({ gameTitle, onRedeemed }: { gameTitle: string; onRede
           spellCheck={false}
           enterKeyHint="go"
           maxLength={24}
-          className="min-h-12 min-w-0 flex-1 rounded-lg border border-noir-line bg-noir-bg-2 px-2 font-mono text-[15px] text-noir-ink placeholder:text-noir-ink-faint"
+          className="min-h-12 min-w-0 flex-1 rounded-lg border border-noir-line bg-noir-bg-2 px-2 font-mono text-15px text-noir-ink placeholder:text-noir-ink-faint"
         />
         <button
           type="button"

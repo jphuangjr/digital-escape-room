@@ -27,6 +27,15 @@ const messages: Record<keyof typeof en, string> = {
   "tour.files.body": "エイダのファイルです。ロックされたフォルダもあり、そのコードは物語の中に隠されています。そのひとつを開くと、暗号を解くのに必要なツール「デコーダー」が使えるようになります。",
   "tour.end.title": "最初から始めて",
   "tour.end.body": "以上です。エイダの最後の言葉は「最初から始めて。」でした。健闘を祈ります、探偵さん。このツアーは「ルーム」からいつでも見直せます。",
+  "textSize.label": "文字サイズ",
+  "textSize.default": "標準",
+  "textSize.large": "大",
+  "textSize.larger": "特大",
+  "textSize.title": "文字サイズを選んでください",
+  "textSize.body": "この端末で読みやすいサイズを選んでください。手がかり、メッセージ、メニューすべてに反映されます。",
+  "textSize.sample": "手紙は二つ折りにされ、誰かが長く握りしめていた所でインクがにじんでいた。",
+  "textSize.continue": "続ける",
+  "textSize.later": "ルームメニューからいつでも変更できます。",
 };
 
 export default messages;

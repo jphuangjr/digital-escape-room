@@ -119,7 +119,7 @@ function Clues({ scene, seen, current }: { scene: SceneDTO; seen: HotspotId[]; c
       {open === key && <div className="space-y-2 px-3 pb-3">{body}</div>}
     </li>
   );
-  const heading = "mb-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500";
+  const heading = "mb-1.5 font-mono text-10px uppercase tracking-[0.25em] text-stone-500";
   return (
     <div className="h-full space-y-3 overflow-y-auto px-3 pb-3 pt-2">
       {readable.length > 0 && (
@@ -153,7 +153,7 @@ function Clues({ scene, seen, current }: { scene: SceneDTO; seen: HotspotId[]; c
                   <>
                     {c.doc && <CloseupDocView doc={c.doc} />}
                     {c.lines.map((l, i) => (
-                      <p key={i} className="text-[14px] leading-relaxed text-stone-300">
+                      <p key={i} className="text-14px leading-relaxed text-stone-300">
                         {l}
                       </p>
                     ))}

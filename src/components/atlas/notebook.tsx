@@ -126,7 +126,7 @@ function Clues({ scene, seen, current }: { scene: AtlasSceneDTO; seen: HotspotId
     <div className="h-full space-y-3 overflow-y-auto px-3 pb-3 pt-2">
       {(letters.length > 0 || lectern) && (
         <section>
-          <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-[#d8b56a]">
+          <h3 className="mb-1.5 font-mono text-10px uppercase tracking-[0.25em] text-[#d8b56a]">
             {t("atlas.notebook.story", { n: letters.length, total: LETTERS.length })}
           </h3>
           <ul className="space-y-1.5">
@@ -146,7 +146,7 @@ function Clues({ scene, seen, current }: { scene: AtlasSceneDTO; seen: HotspotId
                 lectern.c.title,
                 <>
                   {lectern.c.lines.map((line, i) => (
-                    <p key={i} className="text-[14px] leading-relaxed text-stone-300">
+                    <p key={i} className="text-14px leading-relaxed text-stone-300">
                       {line}
                     </p>
                   ))}
@@ -158,7 +158,7 @@ function Clues({ scene, seen, current }: { scene: AtlasSceneDTO; seen: HotspotId
       )}
       {readable.length > 0 && (
         <section>
-          <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("atlas.notebook.things")}</h3>
+          <h3 className="mb-1.5 font-mono text-10px uppercase tracking-[0.25em] text-stone-500">{t("atlas.notebook.things")}</h3>
           <ul className="space-y-1.5">
             {readable.map((i) =>
               row(
@@ -175,7 +175,7 @@ function Clues({ scene, seen, current }: { scene: AtlasSceneDTO; seen: HotspotId
       )}
       {places.map((p) => (
         <section key={p.id}>
-          <h3 className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{p.name}</h3>
+          <h3 className="mb-1.5 font-mono text-10px uppercase tracking-[0.25em] text-stone-500">{p.name}</h3>
           <ul className="space-y-1.5">
             {placeClues
               .filter((c) => c.place === p.id)
@@ -185,7 +185,7 @@ function Clues({ scene, seen, current }: { scene: AtlasSceneDTO; seen: HotspotId
                   c.title,
                   <>
                     {c.lines.map((l, i) => (
-                      <p key={i} className="text-[14px] leading-relaxed text-stone-300">
+                      <p key={i} className="text-14px leading-relaxed text-stone-300">
                         {l}
                       </p>
                     ))}

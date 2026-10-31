@@ -77,7 +77,7 @@ export function ChapterLine({ chapter, toast, theme }: { chapter: ChapterDTO; to
         aria-label={t("shell.chapter.aria", { n: index, total, name })}
         className={`flex h-11 min-w-11 shrink-0 flex-col items-center justify-center gap-1 rounded-md px-1.5 ${c.press} ${fresh ? "sm-new-tab" : ""}`}
       >
-        <span aria-hidden className={`font-mono text-[10px] leading-none tracking-[0.12em] ${c.label}`}>
+        <span aria-hidden className={`font-mono text-10px leading-none tracking-[0.12em] ${c.label}`}>
           {index}/{total}
         </span>
         <span aria-hidden className="flex gap-[3px]">
@@ -114,7 +114,7 @@ function ChapterSheet({ chapter, theme, onClose }: { chapter: ChapterDTO; theme:
             {t("shell.chapter.close")}
           </button>
         </div>
-        <p className={`mt-1 font-mono text-[11px] uppercase tracking-[0.2em] ${c.label}`}>{t("shell.chapter.of", { n: index, total })}</p>
+        <p className={`mt-1 font-mono text-11px uppercase tracking-[0.2em] ${c.label}`}>{t("shell.chapter.of", { n: index, total })}</p>
         <ol className="mt-3 space-y-1.5">
           {Array.from({ length: total }, (_, i) => {
             const name = reached[i];
@@ -123,11 +123,11 @@ function ChapterSheet({ chapter, theme, onClose }: { chapter: ChapterDTO; theme:
               <li key={i} className={`flex min-h-11 items-center gap-3 rounded-lg border px-3 ${c.row} ${name ? "" : "border-dashed opacity-70"}`}>
                 <span
                   aria-hidden
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-mono text-[11px] ${name ? `${c.on} text-black/80` : `${c.off} ${c.muted}`}`}
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-mono text-11px ${name ? `${c.on} text-black/80` : `${c.off} ${c.muted}`}`}
                 >
                   {name && !now ? "✓" : i + 1}
                 </span>
-                <span className={`min-w-0 flex-1 truncate ${name ? "font-serif text-[15px] text-stone-100" : `text-sm ${c.muted}`}`}>
+                <span className={`min-w-0 flex-1 truncate ${name ? "font-serif text-15px text-stone-100" : `text-sm ${c.muted}`}`}>
                   {name ?? t("shell.chapter.ahead")}
                 </span>
                 {now && <span className={`shrink-0 text-xs ${c.label}`}>{t("shell.chapter.now")}</span>}

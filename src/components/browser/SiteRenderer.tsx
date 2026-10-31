@@ -353,7 +353,7 @@ function StaffPhoto({ photo, t, name }: { photo: string | null; t: ThemeStyle; n
           <circle cx="20" cy="14" r="7" fill="currentColor" />
           <path d="M6 38c0-8 6.3-13 14-13s14 5 14 13z" fill="currentColor" />
         </svg>
-        <span className="mt-0.5 text-[9px] uppercase tracking-wider opacity-60">{x({ en: "no photo", ko: "사진 없음", "zh-TW": "沒有照片", es: "sin foto", ja: "写真なし", "pt-BR": "sem foto" })}</span>
+        <span className="mt-0.5 text-9px uppercase tracking-wider opacity-60">{x({ en: "no photo", ko: "사진 없음", "zh-TW": "沒有照片", es: "sin foto", ja: "写真なし", "pt-BR": "sem foto" })}</span>
       </div>
     );
   }
@@ -525,7 +525,7 @@ function BitsWidget({ t }: { t: ThemeStyle }) {
             className={`flex min-h-16 flex-col items-center justify-center gap-0.5 font-mono ${b ? t.button : t.buttonGhost}`}
           >
             <span className="text-2xl font-bold">{b}</span>
-            <span className="text-[11px] opacity-80">{PLACE_VALUES[i]}</span>
+            <span className="text-11px opacity-80">{PLACE_VALUES[i]}</span>
           </button>
         ))}
       </div>

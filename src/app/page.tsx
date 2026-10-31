@@ -23,7 +23,7 @@ function GameCard({ game, t, i }: { game: GameInfo; t: Translate; i: number }) {
       <div className="relative flex items-start gap-4">
         <Compass needle={live ? "sway" : undefined} className={`h-14 w-14 shrink-0 ${live ? "text-noir-brass" : "text-noir-ink-faint"}`} />
         <div className="min-w-0">
-          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-noir-ink-faint">
+          <p className="font-mono text-11px uppercase tracking-[0.25em] text-noir-ink-faint">
             {live ? gameText(t, game, "tone") : t("site.directory.comingSoon")}
             {staging && (
               <span className="ml-2 rounded border border-noir-blood/70 px-1.5 py-0.5 text-noir-blood">Staging · admins only</span>
@@ -107,7 +107,7 @@ export default async function Directory() {
           <DirectoryCases />
         </div>
 
-        <footer style={step(5 + games.length)} className="lb-in text-center font-mono text-[11px] text-noir-ink-faint">
+        <footer style={step(5 + games.length)} className="lb-in text-center font-mono text-11px text-noir-ink-faint">
           {t("site.directory.footer")}
         </footer>
       </div>

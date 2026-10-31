@@ -119,7 +119,7 @@ function PlaytestPanel() {
               [t("admin.play.medianHints"), report.rooms.medianHintsPerFinish ?? "—"],
             ].map(([label, value]) => (
               <div key={String(label)} className="rounded-xl border border-noir-line bg-noir-bg-2 p-3">
-                <p className="text-[11px] uppercase tracking-wider text-noir-ink-faint">{label}</p>
+                <p className="text-11px uppercase tracking-wider text-noir-ink-faint">{label}</p>
                 <p className="font-mono text-xl text-noir-ink">{value}</p>
               </div>
             ))}

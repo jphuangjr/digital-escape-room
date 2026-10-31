@@ -96,7 +96,7 @@ export function TrainLanding({
         </div>
         <header className="text-center">
           {game.status === "staging" && (
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-noir-blood">{t("train.landing.staging")}</p>
+            <p className="font-mono text-11px uppercase tracking-[0.3em] text-noir-blood">{t("train.landing.staging")}</p>
           )}
           <h1 className="mt-2 font-serif text-4xl text-noir-ink">{gameText(t, game, "title")}</h1>
           <p className="mt-2 font-serif italic text-noir-ink-dim">{gameText(t, game, "tagline")}</p>

@@ -47,7 +47,7 @@ export function Dock({
           const badge = badges[app] ?? 0;
           const on = active === app;
           return (
-            <li key={app} className="flex-1">
+            <li key={app} className="min-w-0 flex-1">
               <button
                 onClick={() => onOpen(app)}
                 data-tour={`app-${app}`}
@@ -61,19 +61,19 @@ export function Dock({
                   <Icon className="h-6 w-6" />
                   {locked && <LockIcon className="absolute -bottom-1 -right-2 h-3.5 w-3.5 text-stone-500" />}
                   {badge > 0 && (
-                    <span className="absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-none text-white">
+                    <span className="absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-10px font-bold leading-none text-white">
                       {badge}
                     </span>
                   )}
                   <PresenceAvatars players={people[app] ?? []} size="sm" ring="#0c0a09" className="absolute -left-3 -top-1.5" />
                 </span>
-                <span className="text-[10px] tracking-wide">{label}</span>
+                <span className="max-w-full truncate px-0.5 text-10px tracking-wide">{label}</span>
                 {on && <span aria-hidden className="mt-0.5 h-0.5 w-5 rounded bg-amber-400" />}
               </button>
             </li>
           );
         })}
-        <li className="flex-1">
+        <li className="min-w-0 flex-1">
           <button
             onClick={onRoom}
             data-tour="room"
@@ -83,14 +83,14 @@ export function Dock({
             <span className="relative">
               <PeopleIcon className="h-6 w-6" />
               <span
-                className={`absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold leading-none text-white ${
+                className={`absolute -right-2.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-10px font-bold leading-none text-white ${
                   chatUnread ? "bg-red-600" : "bg-emerald-600"
                 }`}
               >
                 {chatUnread ? (chatUnread > 9 ? "9+" : chatUnread) : onlineCount}
               </span>
             </span>
-            <span className="text-[10px] tracking-wide">{t("shell.dock.room")}</span>
+            <span className="max-w-full truncate px-0.5 text-10px tracking-wide">{t("shell.dock.room")}</span>
           </button>
         </li>
       </ul>
