@@ -97,7 +97,7 @@ export function StatusBar({
           <PeopleIcon className="hidden h-5 w-5 text-stone-400 md:block" />
           <span className="text-xs text-stone-400">{online.length}</span>
           {chatUnread > 0 && (
-            <span className="ml-1 rounded-full bg-red-600 px-1.5 text-[10px] font-bold leading-4 text-white" aria-label={t("shell.status.unreadAria", { count: chatUnread })}>
+            <span className="ml-1 rounded-full bg-red-600 px-1.5 text-10px font-bold leading-4 text-white" aria-label={t("shell.status.unreadAria", { count: chatUnread })}>
               {chatUnread > 9 ? "9+" : chatUnread}
             </span>
           )}

@@ -53,7 +53,7 @@ export function RoomLoader({ gameId }: { gameId: string }) {
         {t(train ? "train.room.boarding" : atlas ? "atlas.loading" : "site.room.booting")}
       </p>
       <div className="ld-late mt-8 max-w-xs">
-        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-stone-600">{t("wait.tips.label")}</p>
+        <p className="font-mono text-11px uppercase tracking-[0.25em] text-stone-600">{t("wait.tips.label")}</p>
         <GameTips gameId={gameId} className="mt-1.5 font-serif italic text-stone-500" />
       </div>
     </div>
@@ -68,7 +68,7 @@ function Boot() {
       <div className="mt-5 h-1 w-48 overflow-hidden rounded-full bg-stone-800">
         <div className="ld-boot-bar h-full rounded-full bg-amber-500/80" />
       </div>
-      <ul className="mt-4 w-full space-y-1 text-left font-mono text-[11px] text-stone-500">
+      <ul className="mt-4 w-full space-y-1 text-left font-mono text-11px text-stone-500">
         {(["boot1", "boot2", "boot3"] as const).map((k, i) => (
           <li key={k} className="ld-boot-line truncate" style={{ animationDelay: `${0.15 + i * 0.35}s` }}>
             <span className="text-amber-500/70">&gt;</span> {t(`wait.ada.${k}`)}
@@ -97,7 +97,7 @@ function Departures() {
         <path d="M29 58 h22" stroke="#7a5f12" strokeWidth="3" strokeLinecap="round" />
       </svg>
       <div className="mt-3 w-72 max-w-full rounded-md border border-noir-brass/40 bg-black/80 px-3 py-2.5 font-mono text-left shadow-[0_0_30px_-10px_rgba(201,162,39,0.4)]">
-        <div className="flex items-center justify-between border-b border-noir-brass/20 pb-1.5 text-[10px] uppercase tracking-[0.3em] text-noir-brass">
+        <div className="flex items-center justify-between border-b border-noir-brass/20 pb-1.5 text-10px uppercase tracking-[0.3em] text-noir-brass">
           <span>{t("wait.train.departures")}</span>
           <span className="tracking-normal">23:55</span>
         </div>
@@ -105,7 +105,7 @@ function Departures() {
           <span className="text-amber-200">23:55</span>
           <span className="min-w-0 flex-1 truncate text-stone-200">{game ? gameText(t, game, "title") : ""}</span>
         </div>
-        <div className="mt-1 flex items-baseline justify-between gap-3 text-[11px] uppercase tracking-wider">
+        <div className="mt-1 flex items-baseline justify-between gap-3 text-11px uppercase tracking-wider">
           <span className="text-stone-500">{t("wait.train.platform", { n: 3 })}</span>
           <span className="ld-blink text-amber-300">{t("wait.train.status")}</span>
         </div>

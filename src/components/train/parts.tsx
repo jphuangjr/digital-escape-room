@@ -124,7 +124,7 @@ export function ItemReading({ item }: { item: ItemDTO }) {
       className={`mt-3 rounded-sm p-4 shadow-inner ${telegram ? "bg-[#f3e9c6] text-[#3a3020]" : "bg-[#efe6d2] text-stone-900"}`}
       style={{ fontFamily: telegram ? "'Courier New', ui-monospace, monospace" : "Georgia, serif" }}
     >
-      {telegram && <p className="mb-2 text-center text-[11px] font-bold tracking-[0.3em] text-[#8a6b1a]">{t("train.telegraph")}</p>}
+      {telegram && <p className="mb-2 text-center text-11px font-bold tracking-[0.3em] text-[#8a6b1a]">{t("train.telegraph")}</p>}
       {item.reading.lines.map((l, i) => (
         <p key={i} className="text-sm font-semibold uppercase leading-relaxed tracking-wide">
           {l}
@@ -153,7 +153,7 @@ export function CloseupDocView({ doc }: { doc: CloseupDoc }) {
         {side === "front" ? (
           <>
             <p className="border-b-2 border-double border-stone-700 pb-1 text-center text-xl font-bold uppercase tracking-wide">{doc.masthead}</p>
-            <p className="mt-1 text-center text-[11px] italic text-stone-600">{doc.date}</p>
+            <p className="mt-1 text-center text-11px italic text-stone-600">{doc.date}</p>
             <h3 className="mt-3 text-lg font-bold leading-snug">{doc.headline}</h3>
             {doc.column.map((p, i) => (
               <p key={i} className="mt-2 text-sm leading-relaxed">
@@ -313,7 +313,7 @@ export function LockDial({
   const bump = (i: number, d: number) => setDigits((ds) => ds.map((v, j) => (j === i ? (v + d + wheel.length) % wheel.length : v)));
   return (
     <div className={`rounded-xl border border-[#c9a227]/50 bg-[#1b120b] p-4 ${lockFrameClass(theme, fb.phase)}`}>
-      <p className="flex items-center justify-center gap-2 text-center font-mono text-[11px] uppercase tracking-[0.3em] text-[#c9a227]">
+      <p className="flex items-center justify-center gap-2 text-center font-mono text-11px uppercase tracking-[0.3em] text-[#c9a227]">
         <LockBadge open={open} theme={theme} className="h-4 w-4 shrink-0" />
         {label}
       </p>

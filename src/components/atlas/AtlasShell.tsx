@@ -26,6 +26,7 @@ import { AtlasNotebook, useDockedNotes, useSeenClues } from "./notebook";
 import { isLetter, LetterCard, lettersHeld } from "./story";
 import { AtlasAmbience, SOUND_PREF_KEY } from "./sound";
 import { useGameSound } from "@/components/shell/useGameSound";
+import { useTextSizeStep } from "@/components/site/TextSize";
 
 /**
  * The room screen for The Atlas of Silent Worlds: one illustrated wall at a time, tap to look closer, a shared inventory, the Atlas of places reached. Where each player stands is their own;
@@ -91,6 +92,8 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
   const [placesOpen, setPlacesOpen] = useState(false);
   const [intro, setIntro] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  // Onboarding step one, once per device: the text size, above the intro. The tour waits for it.
+  const textStep = useTextSizeStep();
   const [busy, setBusy] = useState(false);
   const [lockPulse, fireLock] = useLockPulse();
   const [roomOpen, setRoomOpen] = useState(false);
@@ -355,7 +358,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
         <footer className="shrink-0 border-t border-[#1f3640] bg-[#0b161b]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
           {itemsOpen && (
             <div id="atlas-items" className="at-tray border-b border-[#1f3640] px-2 pt-1.5">
-              <p className="px-1 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("atlas.things")}</p>
+              <p className="px-1 font-mono text-10px uppercase tracking-[0.25em] text-stone-500">{t("atlas.things")}</p>
               <div className="flex min-h-16 gap-1.5 overflow-x-auto py-1">
                 {scene.inventory.length === 0 && <p className="self-center px-1 text-sm text-stone-500">{t("atlas.thingsEmpty")}</p>}
                 {scene.inventory.map((it) => (
@@ -466,7 +469,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
             setTourOpen(true);
           }}
         />
-        {tourOpen && (
+        {tourOpen && !textStep.pending && (
           <Tour
             steps={ATLAS_TOUR}
             prefix="atlas.tour"
@@ -483,6 +486,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
             }}
           />
         )}
+        {textStep.element}
         <SolveGlow flash={solveFlash} />
         <Toasts items={toasts} onDismiss={(id) => setToasts((ts) => ts.filter((x) => x.id !== id))} placement={closeup || itemOpen || itemsOpen || roomOpen || notebookOpen ? "top" : "bottom"} />
       </div>
@@ -531,7 +535,7 @@ function TabButton({
         {icon}
         {badge && (
           <span
-            className={`absolute -right-3 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold ${alert ? "bg-red-600 text-white" : "bg-[#d8b56a] text-[#14110a]"}`}
+            className={`absolute -right-3 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-10px font-bold ${alert ? "bg-red-600 text-white" : "bg-[#d8b56a] text-[#14110a]"}`}
           >
             {badge}
           </span>
@@ -539,7 +543,7 @@ function TabButton({
         {dot && !badge && <span className="absolute -right-1.5 -top-0.5 h-2 w-2 rounded-full bg-[#f4e7b5]" />}
         {dot && badge && <span className="absolute -left-1.5 -top-0.5 h-2 w-2 rounded-full bg-[#f4e7b5]" />}
       </span>
-      <span className="max-w-full truncate text-[11px] leading-tight">{label}</span>
+      <span className="max-w-full truncate text-11px leading-tight">{label}</span>
     </button>
   );
 }
@@ -552,7 +556,7 @@ function ItemTile({ item, onClick, small, fresh }: { item: AtlasItemDTO; onClick
       className={`flex w-16 shrink-0 flex-col items-center rounded-lg border border-[#1f3640] bg-[#0f2129] px-1 py-1 active:border-[#d8b56a] disabled:opacity-60 ${fresh ? "sm-new-tile" : ""}`}
     >
       <AtlasItemIcon id={item.id} className={small ? "h-8 w-8" : "h-9 w-9"} />
-      <span className="mt-0.5 line-clamp-1 text-[10px] text-stone-300">{item.name}</span>
+      <span className="mt-0.5 line-clamp-1 text-10px text-stone-300">{item.name}</span>
     </button>
   );
 }
@@ -677,7 +681,7 @@ function CloseupSheet({
     >
       <LookingToo players={alsoHere} ring="#0b161b" className="text-[#9fd3c7]" />
       {c.lines.map((l, i) => (
-        <p key={i} className="text-[15px] leading-relaxed text-stone-200">
+        <p key={i} className="text-15px leading-relaxed text-stone-200">
           {l}
         </p>
       ))}
@@ -748,7 +752,7 @@ function CloseupSheet({
       ))}
       {scene.inventory.length > 0 && (
         <div className="border-t border-[#1f3640] pt-3">
-          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("atlas.useHere")}</p>
+          <p className="mb-2 font-mono text-10px uppercase tracking-[0.25em] text-stone-500">{t("atlas.useHere")}</p>
           <div className="flex gap-1.5 overflow-x-auto pb-1">
             {scene.inventory.map((it) => (
               <ItemTile key={it.id} item={it} small onClick={() => !busy && void act({ type: "use", item: it.id, target: id })} />
@@ -767,7 +771,7 @@ function ItemSheet({ item, onClose }: { item: AtlasItemDTO | null; onClose: () =
     <Sheet title={item.name} onClose={onClose}>
       <div className="flex items-center gap-3">
         <AtlasItemIcon id={item.id} className="h-16 w-16 shrink-0" />
-        <p className="text-[15px] leading-relaxed text-stone-200">{item.description}</p>
+        <p className="text-15px leading-relaxed text-stone-200">{item.description}</p>
       </div>
       {item.reading && <AtlasDocView doc={{ kind: "note", lines: [item.reading.title, ...item.reading.lines] }} />}
       <p className="text-xs text-stone-500">{t("atlas.useTip")}</p>
@@ -785,8 +789,8 @@ function NotesSheet({ scene, here, busy, onClose, onAsk }: { scene: AtlasSceneDT
       <p className="text-sm text-stone-400">{t("atlas.notes.intro")}</p>
       {[...scene.hints].reverse().map((h) => (
         <div key={h.id} className="rounded-sm bg-[#efe6cf] px-4 py-3 text-stone-800 shadow">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-stone-500">{t("atlas.notes.tier", { title: h.title, tier: h.tier })}</p>
-          <p className="mt-1 text-[15px] leading-relaxed" style={{ fontFamily: "Georgia, serif" }}>
+          <p className="font-mono text-10px uppercase tracking-[0.2em] text-stone-500">{t("atlas.notes.tier", { title: h.title, tier: h.tier })}</p>
+          <p className="mt-1 text-15px leading-relaxed" style={{ fontFamily: "Georgia, serif" }}>
             {h.text}
           </p>
         </div>
@@ -835,7 +839,7 @@ function PlacesSheet({
             <span className="flex min-w-0 items-center gap-2.5">
               <span
                 aria-hidden
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] ${p.reachable ? "bg-[#9fd3c7] text-[#071015]" : "border border-dashed border-[#1f3640]"}`}
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-11px ${p.reachable ? "bg-[#9fd3c7] text-[#071015]" : "border border-dashed border-[#1f3640]"}`}
               >
                 {p.reachable ? "✓" : ""}
               </span>
@@ -857,9 +861,9 @@ function IntroCard({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4" role="dialog" aria-modal="true" aria-label={t("atlas.intro.title")}>
       <div className="w-full max-w-sm space-y-3 rounded-2xl border border-[#9fd3c7]/40 bg-[#0b161b] p-5">
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#9fd3c7]">{t("atlas.intro.when")}</p>
+        <p className="font-mono text-11px uppercase tracking-[0.3em] text-[#9fd3c7]">{t("atlas.intro.when")}</p>
         <h2 className="font-serif text-2xl text-[#f4e7b5]">{t("atlas.intro.title")}</h2>
-        <p className="font-serif text-[15px] leading-relaxed text-stone-200">{t("atlas.intro.text")}</p>
+        <p className="font-serif text-15px leading-relaxed text-stone-200">{t("atlas.intro.text")}</p>
         <button type="button" onClick={onClose} className={primary}>
           {t("atlas.intro.start")}
         </button>

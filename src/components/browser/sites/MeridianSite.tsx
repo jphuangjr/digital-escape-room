@@ -73,7 +73,7 @@ export function MeridianSite({
             <Crest />
             <span className="min-w-0">
               <span className="block truncate text-xl leading-tight tracking-wide sm:text-2xl">{name}</span>
-              <span className="block truncate text-[11px] uppercase tracking-[0.22em]" style={{ color: BRASS }}>
+              <span className="block truncate text-11px uppercase tracking-[0.22em]" style={{ color: BRASS }}>
                 {tagline}
               </span>
             </span>
@@ -92,12 +92,12 @@ export function MeridianSite({
                   type="button"
                   onClick={() => navigate(l.href)}
                   aria-current={isActive(l) ? "page" : undefined}
-                  className={`flex min-h-12 items-center gap-1 whitespace-nowrap border-b-2 px-3 text-[13px] font-medium tracking-wide ${
+                  className={`flex min-h-12 items-center gap-1 whitespace-nowrap border-b-2 px-3 text-13px font-medium tracking-wide ${
                     isActive(l) ? "border-[#c9a36b] text-[#1f2a44]" : "border-transparent text-[#5b5244]"
                   }`}
                 >
                   {l.text}
-                  {isExternal(l) && <span aria-hidden className="text-[10px] opacity-70">↗</span>}
+                  {isExternal(l) && <span aria-hidden className="text-10px opacity-70">↗</span>}
                 </button>
               </li>
             ))}
@@ -121,7 +121,7 @@ export function MeridianSite({
         <section className="border-b border-[#d8cfb8] bg-[#ece4d1]">
           <div className="mx-auto max-w-4xl px-4 py-5">
             {current && home && current !== home && (
-              <p className="mb-1 text-[11px] uppercase tracking-[0.18em] text-[#8a7d66]" style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
+              <p className="mb-1 text-11px uppercase tracking-[0.18em] text-[#8a7d66]" style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
                 <button type="button" className="underline-offset-2 hover:underline" onClick={() => navigate(home.href)}>
                   {home.text}
                 </button>{" "}

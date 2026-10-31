@@ -43,7 +43,7 @@ export function AttemptLog({ ctx }: { ctx: GameCtx }) {
                       ? t(`train.attempt.${a.puzzleId.slice(3)}`)
                       : a.puzzleId}</span>
               </div>
-              <div className="break-all font-mono text-[13px] text-zinc-300">{a.input || t("room.attempts.emptyInput")}</div>
+              <div className="break-all font-mono text-13px text-zinc-300">{a.input || t("room.attempts.emptyInput")}</div>
             </div>
             <div className="flex shrink-0 flex-col items-end">
               <span
@@ -52,7 +52,7 @@ export function AttemptLog({ ctx }: { ctx: GameCtx }) {
               >
                 {a.correct ? "✓" : "✗"}
               </span>
-              <span className="text-[11px] text-zinc-500">{relativeTime(a.createdAt, now)}</span>
+              <span className="text-11px text-zinc-500">{relativeTime(a.createdAt, now)}</span>
             </div>
           </li>
         ))}

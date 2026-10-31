@@ -27,6 +27,15 @@ const messages: Record<keyof typeof en, string> = {
   "tour.files.body": "Os arquivos da Ada. Algumas pastas estão bloqueadas: os códigos estão escondidos na história. Uma delas desbloqueia o Decodificador, uma ferramenta de que você vai precisar para as cifras.",
   "tour.end.title": "Comece pelo começo",
   "tour.end.body": "É isso. As últimas palavras da Ada foram “Comece pelo começo”. Boa sorte, detetive. Você pode rever este tour em Sala quando quiser.",
+  "textSize.label": "Tamanho do texto",
+  "textSize.default": "Padrão",
+  "textSize.large": "Grande",
+  "textSize.larger": "Maior",
+  "textSize.title": "Escolha o tamanho do texto",
+  "textSize.body": "Escolha o que for confortável de ler neste aparelho. Pistas, mensagens e menus seguem essa escolha.",
+  "textSize.sample": "A carta estava dobrada duas vezes, e a tinta tinha borrado onde alguém a segurou por tempo demais.",
+  "textSize.continue": "Continuar",
+  "textSize.later": "Você pode mudar isso quando quiser no menu da sala.",
 };
 
 export default messages;

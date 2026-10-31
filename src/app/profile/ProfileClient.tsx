@@ -77,7 +77,7 @@ function Profile({ data }: { data: ProfileResponse }) {
           </span>
         )}
         <div className="min-w-0">
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-noir-ink-faint">{t("profile.heading")}</p>
+          <p className="font-mono text-11px uppercase tracking-[0.3em] text-noir-ink-faint">{t("profile.heading")}</p>
           <h1 className="truncate font-serif text-3xl text-noir-ink">{data.user.name}</h1>
           <p className="text-sm text-noir-ink-faint">{t("profile.since", { date: date(data.user.since) })}</p>
         </div>
@@ -109,7 +109,7 @@ function Profile({ data }: { data: ProfileResponse }) {
               </span>
               <span className={`text-sm font-semibold ${a.earnedAt ? "text-noir-ink" : "text-noir-ink-dim"}`}>{t(`profile.ach.${a.id}.name`)}</span>
               <span className="text-xs leading-snug text-noir-ink-faint">{t(`profile.ach.${a.id}.how`)}</span>
-              <span className={`mt-auto pt-1 text-[11px] uppercase tracking-wider ${a.earnedAt ? "text-noir-brass" : "text-noir-ink-faint"}`}>
+              <span className={`mt-auto pt-1 text-11px uppercase tracking-wider ${a.earnedAt ? "text-noir-brass" : "text-noir-ink-faint"}`}>
                 {a.earnedAt ? t("profile.earned", { date: date(a.earnedAt) }) : `🔒 ${t("profile.locked")}`}
               </span>
             </li>
@@ -180,7 +180,7 @@ function Profile({ data }: { data: ProfileResponse }) {
 function Stat({ label, value, small, capitalize }: { label: string; value: string; small?: boolean; capitalize?: boolean }) {
   return (
     <div className={`rounded-lg border border-noir-line bg-noir-bg-3 ${small ? "px-1 py-2" : "px-3 py-3"}`}>
-      <dt className="text-[10px] uppercase tracking-wider text-noir-ink-faint">{label}</dt>
+      <dt className="text-10px uppercase tracking-wider text-noir-ink-faint">{label}</dt>
       <dd className={`font-mono font-bold text-noir-ink ${small ? "text-sm" : "text-xl"} ${capitalize ? "capitalize" : ""}`}>{value}</dd>
     </div>
   );

@@ -221,7 +221,7 @@ function A1Z26Tool({ ctx }: { ctx: GameCtx }) {
               className="flex min-h-12 flex-col items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 active:bg-zinc-800"
             >
               <span className="font-mono text-base font-bold text-zinc-100">{l}</span>
-              <span className="text-[10px] text-amber-400">{i + 1}</span>
+              <span className="text-10px text-amber-400">{i + 1}</span>
             </button>
           ))}
           <button
@@ -243,7 +243,7 @@ function A1Z26Tool({ ctx }: { ctx: GameCtx }) {
               className="flex min-h-12 flex-col items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 active:bg-zinc-800"
             >
               <span className="font-mono text-base font-bold text-zinc-100">{n}</span>
-              <span className="text-[10px] text-amber-400">{ALPHABET[n - 1]}</span>
+              <span className="text-10px text-amber-400">{ALPHABET[n - 1]}</span>
             </button>
           ))}
         </div>
@@ -318,7 +318,7 @@ function BinaryTool({ ctx }: { ctx: GameCtx }) {
               }`}
             >
               <span className="text-xl font-bold">{b}</span>
-              <span className="text-[10px] text-amber-400">{BIT_VALUES[i]}</span>
+              <span className="text-10px text-amber-400">{BIT_VALUES[i]}</span>
             </button>
           ))}
         </div>

@@ -138,7 +138,7 @@ export function EmailApp({ ctx }: { ctx: GameCtx }) {
             </div>
           )}
           <div
-            className={`space-y-4 break-words text-[15px] leading-relaxed text-zinc-200 ${
+            className={`space-y-4 break-words text-15px leading-relaxed text-zinc-200 ${
               open.kind === "voicemail" ? "border-l-2 border-amber-500/40 pl-3 italic" : ""
             }`}
           >
@@ -185,11 +185,11 @@ export function EmailApp({ ctx }: { ctx: GameCtx }) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className={`truncate text-sm ${isUnread ? "font-bold text-zinc-50" : "text-zinc-300"}`}>{e.from}</span>
-                    <span className="shrink-0 text-[11px] text-zinc-500">{e.date}</span>
+                    <span className="shrink-0 text-11px text-zinc-500">{e.date}</span>
                   </div>
                   <div className={`truncate text-sm ${isUnread ? "font-semibold text-amber-200" : "text-zinc-400"}`}>
                     {e.kind === "voicemail" && (
-                      <span className="mr-1.5 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-300">
+                      <span className="mr-1.5 rounded bg-amber-500/15 px-1.5 py-0.5 text-10px font-bold uppercase tracking-wide text-amber-300">
                         {t("apps.email.transcript")}
                       </span>
                     )}

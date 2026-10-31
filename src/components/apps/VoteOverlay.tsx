@@ -78,7 +78,7 @@ function VotingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
             <h1 id="vote-title" className="mt-2 text-4xl font-black tracking-tight text-amber-300 drop-shadow sm:text-5xl">
               {t("room.vote.title")}
             </h1>
-            <p className="mt-4 text-[15px] leading-relaxed text-zinc-300">
+            <p className="mt-4 text-15px leading-relaxed text-zinc-300">
               {t("room.vote.intro")}
             </p>
           </header>
@@ -249,7 +249,7 @@ function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
               </button>
             }
           >
-            <div className="space-y-4 text-[15px] leading-relaxed text-zinc-200">
+            <div className="space-y-4 text-15px leading-relaxed text-zinc-200">
               {ending.body.split(/\n{2,}/).map((p, i) => (
                 <p key={i} className="whitespace-pre-wrap">
                   {p}
@@ -280,7 +280,7 @@ function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
             {ending.bonusEpilogue && (
               <section className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
                 <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-amber-400">{t("room.ending.epilogue")}</h2>
-                <div className="space-y-3 text-[15px] italic leading-relaxed text-zinc-200">
+                <div className="space-y-3 text-15px italic leading-relaxed text-zinc-200">
                   {ending.bonusEpilogue.split(/\n{2,}/).map((p, i) => (
                     <p key={i} className="whitespace-pre-wrap">
                       {p}
@@ -293,7 +293,7 @@ function EndingScreen({ ctx, onMinimize }: { ctx: GameCtx; onMinimize: () => voi
             {ending.maraEpilogue && (
               <section className="rounded-xl border border-sky-400/30 bg-sky-400/5 p-4">
                 <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-sky-300">{t("room.ending.maraHeading")}</h2>
-                <div className="space-y-3 text-[15px] italic leading-relaxed text-zinc-200">
+                <div className="space-y-3 text-15px italic leading-relaxed text-zinc-200">
                   {ending.maraEpilogue.split(/\n{2,}/).map((p, i) => (
                     <p key={i} className="whitespace-pre-wrap">
                       {p}

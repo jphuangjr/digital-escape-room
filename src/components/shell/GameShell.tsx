@@ -25,6 +25,7 @@ import { useGameSound } from "./useGameSound";
 import { LaptopAmbience, SOUND_PREF_KEY } from "./laptopSound";
 import { LookingToo, PresenceAvatars, teammates, usePresence } from "./Presence";
 import { useWindowMotion } from "./sceneMotion";
+import { useTextSizeStep } from "@/components/site/TextSize";
 
 /** The app a presence view is in: "browser:thedrift.blog" → browser, "app:notes" → notes. */
 function appOf(view: string): AppId | null {
@@ -49,6 +50,8 @@ export function GameShell({
   const [roomOpen, setRoomOpen] = useState(false);
   const [roomTab, setRoomTab] = useState<RoomTab>("people");
   const [tourOpen, setTourOpen] = useState(false);
+  // Onboarding step one, once per device: the text size. The tour waits for it.
+  const textStep = useTextSizeStep();
   // First time in this game on this device: run the tour once the laptop has settled (not during the vote/ending).
   useEffect(() => {
     let done = false;
@@ -356,7 +359,8 @@ export function GameShell({
             setTourOpen(true);
           }}
         />
-        {tourOpen && <Tour onClose={closeTour} showSheet={tourSheet} openApp={openApp} />}
+        {tourOpen && !textStep.pending && <Tour onClose={closeTour} showSheet={tourSheet} openApp={openApp} />}
+        {textStep.element}
         <SolveGlow flash={solveFlash} />
         <Toasts
           items={toasts}
@@ -419,7 +423,7 @@ export function AppTile({
           </span>
         )}
         {!!badge && badge > 0 && (
-          <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-bold text-white">
+          <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-11px font-bold text-white">
             {badge}
           </span>
         )}

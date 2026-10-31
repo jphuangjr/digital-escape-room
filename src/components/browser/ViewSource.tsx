@@ -46,7 +46,7 @@ export function ViewSource({ address, source, onClose }: { address: string; sour
           </button>
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
-          <pre className="w-max min-w-full p-4 font-mono text-[13px] leading-relaxed">{tint(source)}</pre>
+          <pre className="w-max min-w-full p-4 font-mono text-13px leading-relaxed">{tint(source)}</pre>
         </div>
       </div>
     </div>

@@ -73,12 +73,12 @@ function Tile({ theme, label, value, total, sub, format, run, instant }: RevealS
   const shown = run || instant;
   return (
     <div className={`rounded-lg border p-2 text-center ${theme.tile}`}>
-      <p className={`text-[10px] uppercase tracking-wider ${theme.label}`}>{label}</p>
+      <p className={`text-10px uppercase tracking-wider ${theme.label}`}>{label}</p>
       <p className={`font-mono text-lg tabular-nums ${theme.value}`}>
         {shown ? (format ? format(n) : n) : "–"}
         {total !== undefined && shown && <span className={theme.muted}>/{total}</span>}
       </p>
-      {sub && <p className={`text-[11px] ${theme.muted}`}>{sub}</p>}
+      {sub && <p className={`text-11px ${theme.muted}`}>{sub}</p>}
     </div>
   );
 }
@@ -189,7 +189,7 @@ export function ResultReveal({
   return (
     <div onClick={skip} className="space-y-6">
       <header className={`pt-2 text-center ${on(0)}`}>
-        <div className={`text-[11px] uppercase tracking-[0.3em] ${theme.eyebrow}`}>{eyebrow}</div>
+        <div className={`text-11px uppercase tracking-[0.3em] ${theme.eyebrow}`}>{eyebrow}</div>
         <h1 id={titleId} className={`mt-2 ${theme.title}`}>
           {title}
         </h1>
@@ -242,7 +242,7 @@ export function ResultReveal({
                     {c.keyItems.length > 0 && (
                       <div className="mt-1 flex flex-wrap gap-1">
                         {c.keyItems.map((it) => (
-                          <span key={it} className={`rounded-full border px-2 py-0.5 text-[11px] ${theme.chip}`}>
+                          <span key={it} className={`rounded-full border px-2 py-0.5 text-11px ${theme.chip}`}>
                             {it}
                           </span>
                         ))}

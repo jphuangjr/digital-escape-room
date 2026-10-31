@@ -26,6 +26,15 @@ const messages = {
   "tour.files.body": "Ada's files. Some folders are locked: the codes are hidden in the story. One of them unlocks the Decoder, a tool you'll need for ciphers.",
   "tour.end.title": "Start at the beginning",
   "tour.end.body": "That's everything. Ada's last words were \"Start at the beginning\". Good luck, detective. You can replay this tour from Room any time.",
+  "textSize.label": "Text size",
+  "textSize.default": "Default",
+  "textSize.large": "Large",
+  "textSize.larger": "Larger",
+  "textSize.title": "Pick your text size",
+  "textSize.body": "Choose what's comfortable to read on this device. Clues, messages and menus all follow it.",
+  "textSize.sample": "The letter was folded twice, and the ink had run where someone held it too long.",
+  "textSize.continue": "Continue",
+  "textSize.later": "You can change this any time in the room menu.",
 } as const;
 
 export default messages;
