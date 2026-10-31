@@ -44,7 +44,7 @@ export default async function SharedResultPage({ params }: Props) {
     <main className="noir-vignette min-h-dvh px-4 pb-12" style={{ paddingTop: "max(2rem, env(safe-area-inset-top))" }}>
       <article className="mx-auto max-w-md space-y-6">
         <header className="space-y-2 text-center">
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-noir-ink-faint">{t("result.page.eyebrow")}</p>
+          <p className="font-mono text-11px uppercase tracking-[0.3em] text-noir-ink-faint">{t("result.page.eyebrow")}</p>
           <h1 className="font-serif text-3xl text-noir-ink">{gameText(t, game, "title")}</h1>
           <p className="font-serif text-xl italic text-noir-brass">{t(ending.id, ending.values)}</p>
         </header>
@@ -52,7 +52,7 @@ export default async function SharedResultPage({ params }: Props) {
         <div className="grid grid-cols-3 gap-2 text-center">
           {stats.map((s) => (
             <div key={s.label} className="rounded-lg border border-noir-line bg-noir-bg-2 p-2">
-              <p className="text-[10px] uppercase tracking-wider text-noir-ink-faint">{s.label}</p>
+              <p className="text-10px uppercase tracking-wider text-noir-ink-faint">{s.label}</p>
               <p className="font-mono text-lg text-noir-ink">{s.value}</p>
             </div>
           ))}

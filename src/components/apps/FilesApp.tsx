@@ -623,7 +623,7 @@ export function FilesApp({ ctx }: { ctx: GameCtx }) {
       <div className="flex h-full min-h-0 flex-col bg-zinc-950 text-zinc-100">
         {header(view.file.name, back)}
         <div className="min-h-0 flex-1 overflow-auto overscroll-contain p-4">
-          <pre className="whitespace-pre-wrap break-words font-mono text-[13px] leading-relaxed text-zinc-200">
+          <pre className="whitespace-pre-wrap break-words font-mono text-13px leading-relaxed text-zinc-200">
             {view.file.body}
           </pre>
         </div>

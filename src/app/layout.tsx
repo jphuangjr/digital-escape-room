@@ -5,6 +5,7 @@ import { MESSAGES } from "@/i18n/messages";
 import { getLocale } from "@/i18n/server";
 import { InstallBanner } from "@/components/site/InstallBanner";
 import { SignInHost } from "@/components/site/SignIn";
+import { TEXT_SIZE_SCRIPT } from "@/components/site/TextSize";
 
 export const metadata: Metadata = {
   // Absolute base for link-preview image URLs. Set NEXT_PUBLIC_SITE_URL to override (e.g. for local testing).
@@ -30,7 +31,11 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale();
   return (
-    <html lang={locale}>
+    // suppressHydrationWarning: TEXT_SIZE_SCRIPT sets data-text-size on <html> before React hydrates.
+    <html lang={locale} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: TEXT_SIZE_SCRIPT }} />
+      </head>
       <body className="antialiased bg-noir-bg text-noir-ink">
         <IntlClientProvider locale={locale} messages={MESSAGES[locale]}>
           {children}

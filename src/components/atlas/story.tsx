@@ -23,8 +23,8 @@ export function LetterView({ letter }: { letter: AtlasItemDTO }) {
   return (
     <>
       <AtlasDocView doc={{ kind: "note", lines: [letter.reading!.title, ...letter.reading!.lines] }} />
-      <p className="rounded-lg border border-[#9fd3c7]/30 bg-[#0d2228] px-3 py-2 text-[14px] leading-relaxed text-stone-200">
-        <span className="mb-0.5 block font-mono text-[10px] uppercase tracking-[0.25em] text-[#9fd3c7]">{t("atlas.story.meaning")}</span>
+      <p className="rounded-lg border border-[#9fd3c7]/30 bg-[#0d2228] px-3 py-2 text-14px leading-relaxed text-stone-200">
+        <span className="mb-0.5 block font-mono text-10px uppercase tracking-[0.25em] text-[#9fd3c7]">{t("atlas.story.meaning")}</span>
         {t(`atlas.story.recap.${letter.id}`)}
       </p>
     </>
@@ -42,9 +42,9 @@ export function LetterCard({ letter, held, onClose }: { letter: AtlasItemDTO; he
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 px-4 pb-6 pt-20" role="dialog" aria-modal="true" aria-label={letter.reading!.title}>
       <div className="mx-auto w-full max-w-md space-y-3 rounded-2xl border border-[#d8b56a]/50 bg-[#0b161b] p-5">
-        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#9fd3c7]">{t("atlas.story.eyebrow", { n: held, total: LETTERS.length })}</p>
+        <p className="font-mono text-11px uppercase tracking-[0.18em] text-[#9fd3c7]">{t("atlas.story.eyebrow", { n: held, total: LETTERS.length })}</p>
         <LetterView letter={letter} />
-        {held === LETTERS.length && <p className="font-serif text-[15px] italic leading-relaxed text-[#f4e7b5]">{t("atlas.story.allThree")}</p>}
+        {held === LETTERS.length && <p className="font-serif text-15px italic leading-relaxed text-[#f4e7b5]">{t("atlas.story.allThree")}</p>}
         <p className="text-xs text-stone-500">{t("atlas.story.kept")}</p>
         <button
           type="button"

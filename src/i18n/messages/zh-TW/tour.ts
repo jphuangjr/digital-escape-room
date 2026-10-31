@@ -27,6 +27,15 @@ const messages: Record<keyof typeof en, string> = {
   "tour.files.body": "這是艾達的檔案。有些資料夾上了鎖，密碼藏在故事裡。其中一個會解鎖「解碼器」，這是破解密碼時需要的工具。",
   "tour.end.title": "從頭開始",
   "tour.end.body": "導覽就到這裡。艾達最後留下的話是「從頭開始。」祝你好運，偵探。你隨時可以從「房間」重新觀看這段導覽。",
+  "textSize.label": "文字大小",
+  "textSize.default": "預設",
+  "textSize.large": "大",
+  "textSize.larger": "更大",
+  "textSize.title": "選擇文字大小",
+  "textSize.body": "選擇在這台裝置上讀起來舒服的大小。線索、訊息和選單都會套用。",
+  "textSize.sample": "那封信被摺了兩次，有人握得太久的地方，墨水已經暈開。",
+  "textSize.continue": "繼續",
+  "textSize.later": "之後隨時可以在房間選單中更改。",
 };
 
 export default messages;

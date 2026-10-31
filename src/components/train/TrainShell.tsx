@@ -23,6 +23,7 @@ import { CloseupDocView, ItemIcon, ItemReading, LockDial } from "./parts";
 import { SOUND_PREF_KEY, TrainAmbience } from "./sound";
 import { useGameSound } from "@/components/shell/useGameSound";
 import { TrainNotebook, useDockedNotes, useSeenClues } from "./notebook";
+import { useTextSizeStep } from "@/components/site/TextSize";
 
 /**
  * The room screen for The Nightingale Express (staging): one illustrated wall at a time, tap to look
@@ -70,6 +71,8 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   const [notebookOpen, setNotebookOpen] = useState(false);
   const [intro, setIntro] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  // Onboarding step one, once per device: the text size, above the intro. The tour waits for it.
+  const textStep = useTextSizeStep();
   const [showSpots, setShowSpots] = useState(false);
   useEffect(() => {
     if (!showSpots) return;
@@ -369,7 +372,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
         <footer className="shrink-0 border-t border-[#3d2615] bg-[#1b120b]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
           {itemsOpen && (
             <div id="nx-items" className="at-tray border-b border-[#3d2615] px-2 pt-1.5">
-              <p className="px-1 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("train.things")}</p>
+              <p className="px-1 font-mono text-10px uppercase tracking-[0.25em] text-stone-500">{t("train.things")}</p>
               <div className="flex min-h-16 gap-1.5 overflow-x-auto py-1">
                 {scene.inventory.length === 0 && <p className="self-center px-1 text-sm text-stone-500">{t("train.thingsEmpty")}</p>}
                 {scene.inventory.map((it) => (
@@ -380,8 +383,8 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
                     className={`relative flex w-16 shrink-0 flex-col items-center rounded-lg border border-[#3d2615] bg-[#24160c] px-1 py-1 active:border-[#c9a227] ${arrived.has(it.id) ? "sm-new-tile" : ""}`}
                   >
                     <ItemIcon id={it.id} className="h-9 w-9" />
-                    <span className="mt-0.5 line-clamp-1 text-[10px] text-stone-300">{it.name}</span>
-                    {it.evidence && <span className="absolute right-0.5 top-0.5 text-[10px]" aria-label={t("train.evidence")}>🔍</span>}
+                    <span className="mt-0.5 line-clamp-1 text-10px text-stone-300">{it.name}</span>
+                    {it.evidence && <span className="absolute right-0.5 top-0.5 text-10px" aria-label={t("train.evidence")}>🔍</span>}
                   </button>
                 ))}
               </div>
@@ -488,7 +491,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             setTourOpen(true);
           }}
         />
-        {tourOpen && (
+        {tourOpen && !textStep.pending && (
           <Tour
             steps={TRAIN_TOUR}
             prefix="train.tour"
@@ -505,6 +508,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
             }}
           />
         )}
+        {textStep.element}
         <SolveGlow flash={solveFlash} />
         <Toasts items={toasts} onDismiss={(id) => setToasts((t) => t.filter((x) => x.id !== id))} placement={closeup || itemOpen || itemsOpen || roomOpen || notebookOpen ? "top" : "bottom"} />
       </div>
@@ -631,7 +635,7 @@ function CloseupSheet({
       <LookingToo players={alsoHere} ring="#1b120b" className="text-[#e9d9a6]" />
       {c.doc && <CloseupDocView doc={c.doc} />}
       {c.lines.map((l, i) => (
-        <p key={i} className="text-[15px] leading-relaxed text-stone-200">
+        <p key={i} className="text-15px leading-relaxed text-stone-200">
           {l}
         </p>
       ))}
@@ -681,7 +685,7 @@ function CloseupSheet({
       ))}
       {scene.inventory.length > 0 && (
         <div className="border-t border-[#3d2615] pt-3">
-          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("train.useHere")}</p>
+          <p className="mb-2 font-mono text-10px uppercase tracking-[0.25em] text-stone-500">{t("train.useHere")}</p>
           <div className="flex gap-1.5 overflow-x-auto pb-1">
             {scene.inventory.map((it) => (
               <button
@@ -692,7 +696,7 @@ function CloseupSheet({
                 className="flex w-16 shrink-0 flex-col items-center rounded-lg border border-[#3d2615] bg-[#24160c] px-1 py-1 active:border-[#c9a227] disabled:opacity-60"
               >
                 <ItemIcon id={it.id} className="h-8 w-8" />
-                <span className="line-clamp-1 text-[10px] text-stone-300">{it.name}</span>
+                <span className="line-clamp-1 text-10px text-stone-300">{it.name}</span>
               </button>
             ))}
           </div>
@@ -723,7 +727,7 @@ function ItemSheet({
     <Sheet title={item.name} onClose={onClose}>
       <div className="flex items-center gap-3">
         <ItemIcon id={item.id} className="h-16 w-16 shrink-0" />
-        <p className="text-[15px] leading-relaxed text-stone-200">{item.description}</p>
+        <p className="text-15px leading-relaxed text-stone-200">{item.description}</p>
       </div>
       {item.evidence && <p className="text-xs text-[#ecd27a]">{t("train.evidenceNote")}</p>}
       <ItemReading item={item} />
@@ -740,7 +744,7 @@ function ItemSheet({
       ))}
       {others.length > 0 && (
         <div className="border-t border-[#3d2615] pt-3">
-          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-500">{t("train.combineWith")}</p>
+          <p className="mb-2 font-mono text-10px uppercase tracking-[0.25em] text-stone-500">{t("train.combineWith")}</p>
           <div className="flex gap-1.5 overflow-x-auto pb-1">
             {others.map((o) => (
               <button
@@ -751,7 +755,7 @@ function ItemSheet({
                 className="flex w-16 shrink-0 flex-col items-center rounded-lg border border-[#3d2615] bg-[#24160c] px-1 py-1 active:border-[#c9a227] disabled:opacity-60"
               >
                 <ItemIcon id={o.id} className="h-8 w-8" />
-                <span className="line-clamp-1 text-[10px] text-stone-300">{o.name}</span>
+                <span className="line-clamp-1 text-10px text-stone-300">{o.name}</span>
               </button>
             ))}
           </div>
@@ -785,10 +789,10 @@ function NotesSheet({ scene, busy, onClose, onRing }: { scene: SceneDTO; busy: b
       <p className="text-sm text-stone-400">{t("train.notes.intro")}</p>
       {[...scene.hints].reverse().map((h) => (
         <div key={h.id} className="rotate-[-0.5deg] rounded-sm bg-[#f7f2e4] px-4 py-3 text-stone-800 shadow">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-stone-500">
+          <p className="font-mono text-10px uppercase tracking-[0.2em] text-stone-500">
             {t("train.notes.tier", { title: h.title, tier: h.tier })}
           </p>
-          <p className="mt-1 text-[15px] leading-relaxed" style={{ fontFamily: "Georgia, serif" }}>
+          <p className="mt-1 text-15px leading-relaxed" style={{ fontFamily: "Georgia, serif" }}>
             {h.text}
           </p>
         </div>
@@ -815,7 +819,7 @@ function EvidenceStrip({ items }: { items: ItemDTO[] }) {
       {items.map((it) => (
         <span key={it.id} className="flex w-16 flex-col items-center rounded-lg border border-[#3d2615] bg-[#24160c] px-1 py-1" title={it.name}>
           <ItemIcon id={it.id} className="h-8 w-8" />
-          <span className="line-clamp-1 text-[10px] text-stone-300">{it.name}</span>
+          <span className="line-clamp-1 text-10px text-stone-300">{it.name}</span>
         </span>
       ))}
     </div>
@@ -833,7 +837,7 @@ function VotePanel({ state, scene, busy, act }: { state: RoomState; scene: Scene
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#120c07] px-4 pb-8" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label={t("train.vote.aria")}>
       <div className="mx-auto w-full max-w-md space-y-4">
-        <p className="pt-4 text-center font-mono text-[11px] uppercase tracking-[0.3em] text-[#c9a227]">{t("train.vote.eyebrow")}</p>
+        <p className="pt-4 text-center font-mono text-11px uppercase tracking-[0.3em] text-[#c9a227]">{t("train.vote.eyebrow")}</p>
         <h1 className="text-center font-serif text-3xl text-[#ecd27a]">{t("train.vote.title")}</h1>
         <p className="text-center text-sm text-stone-300">{t("train.vote.intro")}</p>
         <EvidenceStrip items={scene.evidence} />
@@ -932,7 +936,7 @@ function EndingPanel({ scene, code, signedIn }: { scene: SceneDTO; code: string;
             )
           }
         >
-          <div className="space-y-4 font-serif text-[16px] leading-relaxed text-stone-200">
+          <div className="space-y-4 font-serif text-16px leading-relaxed text-stone-200">
             {e.paragraphs.map((p, i) => (
               <p key={i}>{p}</p>
             ))}
@@ -949,9 +953,9 @@ function IntroCard({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4" role="dialog" aria-modal="true" aria-label={t("site.game.nightingale-express.title")}>
       <div className="w-full max-w-sm space-y-3 rounded-2xl border border-[#c9a227]/50 bg-[#1b120b] p-5">
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#c9a227]">{t("train.intro.when")}</p>
+        <p className="font-mono text-11px uppercase tracking-[0.3em] text-[#c9a227]">{t("train.intro.when")}</p>
         <h2 className="font-serif text-2xl text-[#ecd27a]">{t("train.intro.title")}</h2>
-        <p className="font-serif text-[15px] leading-relaxed text-stone-200">
+        <p className="font-serif text-15px leading-relaxed text-stone-200">
           {t("train.intro.text")}
         </p>
         <button type="button" onClick={onClose} className="min-h-12 w-full rounded-lg bg-[#c9a227] font-semibold text-[#1b120b] active:bg-[#ecd27a]">
@@ -1003,14 +1007,14 @@ function TabButton({
         {icon}
         {badge && (
           <span
-            className={`absolute -right-3 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold ${alert ? "bg-red-600 text-white" : "bg-[#c9a227] text-[#1b120b]"}`}
+            className={`absolute -right-3 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-10px font-bold ${alert ? "bg-red-600 text-white" : "bg-[#c9a227] text-[#1b120b]"}`}
           >
             {badge}
           </span>
         )}
         {dot && <span className={`absolute -top-0.5 h-2 w-2 rounded-full bg-[#ecd27a] ${badge ? "-left-1.5" : "-right-1.5"}`} />}
       </span>
-      <span className="max-w-full truncate text-[11px] leading-tight">{label}</span>
+      <span className="max-w-full truncate text-11px leading-tight">{label}</span>
     </button>
   );
 }

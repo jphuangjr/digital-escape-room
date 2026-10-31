@@ -305,7 +305,7 @@ export function AdaLanding() {
 
         <Leaderboard gameId={GAME_ID} />
 
-        <footer className="text-center font-mono text-[11px] text-noir-ink-faint">
+        <footer className="text-center font-mono text-11px text-noir-ink-faint">
           {t("site.ada.footer")}
         </footer>
       </div>

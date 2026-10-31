@@ -27,6 +27,15 @@ const messages: Record<keyof typeof en, string> = {
   "tour.files.body": "에이다의 파일이에요. 일부 폴더는 잠겨 있고, 코드는 이야기 속에 숨어 있어요. 그중 하나를 열면 암호를 풀 때 필요한 도구인 해독기가 잠금 해제돼요.",
   "tour.end.title": "처음부터 시작해",
   "tour.end.body": "이제 다 둘러봤어요. 에이다의 마지막 말은 “처음부터 시작해.”였어요. 행운을 빌어요, 탐정님. 이 투어는 언제든 방에서 다시 볼 수 있어요.",
+  "textSize.label": "글자 크기",
+  "textSize.default": "기본",
+  "textSize.large": "크게",
+  "textSize.larger": "더 크게",
+  "textSize.title": "글자 크기를 골라 주세요",
+  "textSize.body": "이 기기에서 읽기 편한 크기를 선택하세요. 단서, 메시지, 메뉴에 모두 적용돼요.",
+  "textSize.sample": "편지는 두 번 접혀 있었고, 누군가 너무 오래 쥐고 있던 자리에 잉크가 번져 있었다.",
+  "textSize.continue": "계속",
+  "textSize.later": "방 메뉴에서 언제든 바꿀 수 있어요.",
 };
 
 export default messages;

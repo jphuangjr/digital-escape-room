@@ -99,7 +99,7 @@ export function HintsPanel({ ctx }: { ctx: GameCtx }) {
                   {hints.length === 0 && <p className="text-sm text-zinc-500">{t("room.hints.none")}</p>}
                   {hints.map((h) => (
                     <div key={h.tier} className="rounded-lg border-l-2 border-amber-500/50 bg-zinc-950/60 p-2.5">
-                      <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-amber-400">
+                      <div className="mb-1 text-11px font-semibold uppercase tracking-wide text-amber-400">
                         {t("room.hints.tier", { tier: h.tier })}
                       </div>
                       <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-200">{h.text}</p>

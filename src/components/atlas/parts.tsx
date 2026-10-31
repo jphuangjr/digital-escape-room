@@ -48,7 +48,7 @@ function StarChart({ title, stars }: { title: string; stars: ChartStar[] }) {
   const t = useT();
   return (
     <figure className="rounded-xl border border-[#2c4a55] bg-[#071017] p-3">
-      <figcaption className="text-center font-mono text-[11px] uppercase tracking-[0.3em] text-[#9fd3c7]">{title}</figcaption>
+      <figcaption className="text-center font-mono text-11px uppercase tracking-[0.3em] text-[#9fd3c7]">{title}</figcaption>
       <svg viewBox="0 0 300 300" className="mx-auto mt-2 w-full max-w-[300px]" role="img" aria-label={t("atlas.chart.aria")}>
         <circle cx="150" cy="150" r="138" fill="none" stroke="#2c4a55" strokeWidth="1.5" />
         <circle cx="150" cy="150" r="4" fill="#f4e7b5" />
@@ -78,7 +78,7 @@ export function AtlasDocView({ doc }: { doc: AtlasDoc }) {
   switch (doc.kind) {
     case "note":
       return (
-        <div className="space-y-2 rounded-sm bg-[#efe6cf] px-4 py-3 text-[15px] leading-relaxed text-stone-800 shadow" style={{ fontFamily: "Georgia, serif" }}>
+        <div className="space-y-2 rounded-sm bg-[#efe6cf] px-4 py-3 text-15px leading-relaxed text-stone-800 shadow" style={{ fontFamily: "Georgia, serif" }}>
           {doc.lines.map((l, i) => (
             <p key={i} className={i === 0 ? "italic" : undefined}>
               {l}
@@ -104,7 +104,7 @@ export function AtlasDocView({ doc }: { doc: AtlasDoc }) {
           <p className="text-center text-xs uppercase tracking-[0.25em] text-stone-500">{doc.title}</p>
           <table className="mt-2 w-full text-sm">
             <thead>
-              <tr className="text-left text-[11px] uppercase tracking-wider text-stone-500">
+              <tr className="text-left text-11px uppercase tracking-wider text-stone-500">
                 <th className="py-1 font-normal">{t("atlas.ledger.place")}</th>
                 <th className="py-1 text-center font-normal">{t("atlas.ledger.outer")}</th>
                 <th className="py-1 text-center font-normal">{t("atlas.ledger.inner")}</th>
@@ -287,7 +287,7 @@ export function TankPanel({ tanks }: { tanks: { caps: number[]; levels: number[]
           <div className={`relative w-14 rounded-b-md border-2 ${i === 1 ? "border-[#d8b56a]" : "border-[#6f9aa6]"}`} style={{ height: cap * unit }}>
             <div className="absolute inset-x-0 bottom-0 rounded-b-sm bg-[#2f8f8a]/80 transition-all" style={{ height: tanks.levels[i] * unit }} />
           </div>
-          <span className={`text-[11px] uppercase tracking-wider ${i === 1 ? "text-[#f4e7b5]" : "text-stone-400"}`}>{t(names[i])}</span>
+          <span className={`text-11px uppercase tracking-wider ${i === 1 ? "text-[#f4e7b5]" : "text-stone-400"}`}>{t(names[i])}</span>
         </div>
       ))}
     </div>
@@ -318,7 +318,7 @@ export function ValvePanel({ valves, busy, onTurn }: { valves: Record<ValveId, b
               🛞
             </span>
             <span className="text-xs font-semibold uppercase tracking-wider">{name}</span>
-            <span className="text-[11px]">{state}</span>
+            <span className="text-11px">{state}</span>
           </button>
         );
       })}
@@ -331,7 +331,7 @@ export function RingPicker({ label, value, onChange, disabled = false }: { label
   const t = useT();
   return (
     <fieldset>
-      <legend className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.25em] text-[#9fd3c7]">{label}</legend>
+      <legend className="mb-1.5 font-mono text-11px uppercase tracking-[0.25em] text-[#9fd3c7]">{label}</legend>
       <div className="grid grid-cols-7 gap-1">
         {GLYPHS.map((g) => (
           <button

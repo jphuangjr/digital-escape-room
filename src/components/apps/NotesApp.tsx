@@ -49,7 +49,7 @@ function TagBadge({ tag }: { tag: FragmentTag | null }) {
   if (!tag || !FRAGMENT_TAGS.includes(tag)) return null;
   const l = t(`apps.notes.tag.${tag}`);
   return (
-    <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-300">
+    <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-11px font-semibold uppercase tracking-wide text-amber-300">
       #{l}
     </span>
   );
@@ -163,7 +163,7 @@ export function NotesApp({ ctx, tags = FRAGMENT_TAGS }: { ctx: GameCtx; tags?: F
           <TagChips value={tag} onChange={setTag} tags={tags} />
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs text-zinc-500">{t("apps.notes.privateHint")}</span>
-            <button className={btnPrimary} disabled={!body.trim() || busy === "create"} onClick={create}>
+            <button className={`${btnPrimary} shrink-0 whitespace-nowrap`} disabled={!body.trim() || busy === "create"} onClick={create}>
               {busy === "create" ? t("apps.notes.saving") : t("apps.notes.saveNote")}
             </button>
           </div>
@@ -213,7 +213,7 @@ export function NotesApp({ ctx, tags = FRAGMENT_TAGS }: { ctx: GameCtx; tags?: F
                     </div>
                   </div>
                 ) : (
-                  <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-zinc-100">{n.body}</p>
+                  <p className="whitespace-pre-wrap break-words text-15px leading-relaxed text-zinc-100">{n.body}</p>
                 )}
 
                 {!isEditing && (isMine || canDelete) && (

@@ -68,7 +68,7 @@ export function ChatPanel({ ctx, chat }: { ctx: GameCtx; chat: Chat }) {
                 >
                   {m.body}
                 </div>
-                <span className="mt-0.5 text-[10px] text-stone-600">{relativeTime(m.createdAt, now, intl)}</span>
+                <span className="mt-0.5 text-10px text-stone-600">{relativeTime(m.createdAt, now, intl)}</span>
               </div>
             );
           })
@@ -111,7 +111,7 @@ export function ChatPanel({ ctx, chat }: { ctx: GameCtx; chat: Chat }) {
             {t("room.chat.send")}
           </button>
         </div>
-        {draft.length > MAX - 60 && <p className="mt-1 text-right text-[10px] text-stone-500">{t("room.chat.left", { count: MAX - draft.length })}</p>}
+        {draft.length > MAX - 60 && <p className="mt-1 text-right text-10px text-stone-500">{t("room.chat.left", { count: MAX - draft.length })}</p>}
       </form>
     </div>
   );
