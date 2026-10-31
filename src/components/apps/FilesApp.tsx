@@ -33,7 +33,7 @@ Assignment:
 Find out what happened to Ada. She left one message behind:
 "If you're reading this, I got too close. Start at the beginning."
 
-This laptop is hers. The browser still has her bookmarks. Her inbox is
+This laptop is hers. The browser still has her history. Her inbox is
 still syncing. Work together, write down everything, and share what
 matters with the rest of the room.
 
@@ -47,7 +47,7 @@ Fee: paid in advance. Questions: none, apparently.`,
 에이다에게 무슨 일이 있었는지 알아낼 것. 그녀가 남긴 메시지는 하나뿐이다.
 "이걸 읽고 있다면, 내가 너무 가까이 갔다는 뜻이야. 처음부터 시작해."
 
-이 노트북은 그녀의 것이다. 브라우저엔 아직 그녀의 북마크가 있고, 메일함은
+이 노트북은 그녀의 것이다. 브라우저엔 아직 그녀의 방문 기록이 있고, 메일함은
 아직 동기화 중이다. 함께 움직이고, 전부 적어 두고, 중요한 건
 방 사람들과 나눌 것.
 
@@ -61,7 +61,7 @@ Fee: paid in advance. Questions: none, apparently.`,
 查出艾達發生了什麼事。她只留下一則訊息：
 「如果你正在讀這段話，代表我靠得太近了。從頭開始。」
 
-這台筆電是她的。瀏覽器裡還留著她的書籤，收件匣也還在同步。
+這台筆電是她的。瀏覽器裡還留著她的瀏覽紀錄，收件匣也還在同步。
 大家一起行動，把一切都記下來，重要的事要跟房間裡的其他人分享。
 
 酬勞：已預付。疑問：看來沒有。`,
@@ -74,7 +74,7 @@ Encargo:
 Averiguar qué le pasó a Ada. Dejó un solo mensaje:
 "Si estás leyendo esto, me acerqué demasiado. Empieza por el principio."
 
-Esta laptop es suya. El navegador todavía tiene sus marcadores. Su bandeja
+Esta laptop es suya. El navegador todavía tiene su historial. Su bandeja
 de entrada sigue sincronizándose. Trabajen juntos, anoten todo y compartan
 lo importante con el resto de la sala.
 
@@ -88,7 +88,7 @@ Honorarios: pagados por adelantado. Preguntas: ninguna, al parecer.`,
 エイダの身に何が起きたのかを突き止めること。彼女が残したメッセージはひとつだけ。
 「これを読んでいるなら、私は近づきすぎた。最初から始めて。」
 
-このノートPCは彼女のものだ。ブラウザには彼女のブックマークが残り、受信箱は
+このノートPCは彼女のものだ。ブラウザには彼女の閲覧履歴が残り、受信箱は
 まだ同期を続けている。協力し、すべてを書き留め、重要なことは
 ルームのメンバーと共有すること。
 
@@ -102,7 +102,7 @@ Missão:
 Descobrir o que aconteceu com a Ada. Ela deixou uma única mensagem:
 "Se você está lendo isto, eu cheguei perto demais. Comece pelo começo."
 
-Este notebook é dela. O navegador ainda tem os favoritos dela. A caixa
+Este notebook é dela. O navegador ainda tem o histórico dela. A caixa
 de entrada ainda está sincronizando. Trabalhem juntos, anotem tudo e
 compartilhem o que importa com o resto da sala.
 
@@ -114,7 +114,7 @@ Honorários: pagos adiantado. Perguntas: nenhuma, pelo jeito.`,
     body: {
       en: `FIELD NOTES FOR WHOEVER USES THIS MACHINE
 
-- Browser: type an address in the bar, or tap a bookmark.
+- Browser: type an address in the bar, or tap a site in History.
   Every page has a "View Source" button. Images have "File Info".
   Black bars can be tapped to reveal what's underneath.
 - Notes: private by default. Tap "Share to room" when it matters.
@@ -125,7 +125,7 @@ Honorários: pagos adiantado. Perguntas: nenhuma, pelo jeito.`,
 - Stuck? The hints panel can ask Ada for a nudge.`,
       ko: `이 기계를 쓰는 누군가를 위한 현장 메모
 
-- 브라우저: 주소창에 주소를 입력하거나 북마크를 누를 것.
+- 브라우저: 주소창에 주소를 입력하거나 방문 기록에서 사이트를 누를 것.
   모든 페이지에 "소스 보기" 버튼이 있다. 이미지엔 "파일 정보"가 있다.
   검은 줄은 누르면 아래 숨은 내용이 보인다.
 - 메모: 기본은 비공개. 중요하면 "방에 공유"를 누를 것.
@@ -136,7 +136,7 @@ Honorários: pagos adiantado. Perguntas: nenhuma, pelo jeito.`,
 - 막혔다면? 힌트 패널에서 에이다에게 귀띔을 부탁할 수 있다.`,
       "zh-TW": `給使用這台機器的人的現場筆記
 
-- 瀏覽器：在網址列輸入網址，或點選書籤。
+- 瀏覽器：在網址列輸入網址，或從瀏覽紀錄點選網站。
   每個頁面都有「檢視原始碼」按鈕，圖片則有「檔案資訊」。
   黑色色塊點一下，就能看到底下藏著什麼。
 - 筆記：預設為私人。重要的話就點「分享到房間」。
@@ -147,7 +147,7 @@ Honorários: pagos adiantado. Perguntas: nenhuma, pelo jeito.`,
 - 卡住了？可以在提示面板請艾達給點暗示。`,
       es: `NOTAS DE CAMPO PARA QUIEN USE ESTA MÁQUINA
 
-- Navegador: escribe una dirección en la barra o toca un marcador.
+- Navegador: escribe una dirección en la barra o toca un sitio del historial.
   Cada página tiene un botón "Ver código fuente". Las imágenes tienen
   "Información del archivo". Las barras negras se pueden tocar para
   revelar lo que hay debajo.
@@ -159,7 +159,7 @@ Honorários: pagos adiantado. Perguntas: nenhuma, pelo jeito.`,
 - ¿Atascado? En el panel de pistas puedes pedirle a Ada un empujón.`,
       ja: `このマシンを使う誰かへの現場メモ
 
-- ブラウザ：アドレスバーにアドレスを入力するか、ブックマークをタップ。
+- ブラウザ：アドレスバーにアドレスを入力するか、履歴からサイトをタップ。
   どのページにも「ソースを表示」ボタンがある。画像には「ファイル情報」がある。
   黒塗りの部分はタップすると下に隠れた内容が見える。
 - メモ：初期設定では非公開。大事なときは「ルームに共有」をタップ。
@@ -170,7 +170,7 @@ Honorários: pagos adiantado. Perguntas: nenhuma, pelo jeito.`,
 - 行き詰まったら？ ヒントパネルからエイダにそれとなく助けを頼める。`,
       "pt-BR": `NOTAS DE CAMPO PARA QUEM USAR ESTA MÁQUINA
 
-- Navegador: digite um endereço na barra ou toque num favorito.
+- Navegador: digite um endereço na barra ou toque num site do histórico.
   Toda página tem um botão "Ver código-fonte". As imagens têm
   "Informações do arquivo". Toque nas tarjas pretas para revelar
   o que há por baixo.

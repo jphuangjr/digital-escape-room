@@ -19,6 +19,7 @@ import { baseEmails, bonusEmails, getHint, voicemailsFor } from "./content";
 import { adaChapter } from "./content/chapters";
 import { buildEnding, loadVoteState } from "./vote";
 import { sceneGame } from "./scene/games";
+import { siteHistory } from "./siteHistory";
 
 export function isOnline(p: Pick<Player, "lastSeenAt">, now = new Date()): boolean {
   return now.getTime() - p.lastSeenAt.getTime() <= ONLINE_WINDOW_MS;
@@ -127,6 +128,6 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
     vote,
     ending,
     chapter: game ? game.chapter(scene, loc) : adaChapter(progress, loc),
-    ...(game ? { scene: game.dto(scene, { startedAt: room.createdAt, now, loc }) as RoomState["scene"] } : {}),
+    ...(game ? { scene: game.dto(scene, { startedAt: room.createdAt, now, loc }) as RoomState["scene"] } : { siteHistory: siteHistory(progress, loc) }),
   };
 }
