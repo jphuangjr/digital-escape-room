@@ -126,17 +126,12 @@ export function ReloadIcon(props: P) {
     </svg>
   );
 }
-export function StarIcon({ filled, ...props }: P & { filled?: boolean }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden {...base} fill={filled ? "currentColor" : "none"} {...props}>
-      <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z" />
-    </svg>
-  );
-}
-export function BookmarksIcon(props: P) {
+/** A clock with a counter-clockwise arrow: the browser's history. */
+export function HistoryIcon(props: P) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden {...base} {...props}>
-      <path d="M6 3h12v18l-6-4-6 4z" />
+      <path d="M3.5 12a8.5 8.5 0 1 0 2.5-6M3 4v4h4" />
+      <path d="M12 7.5V12l3 2" />
     </svg>
   );
 }

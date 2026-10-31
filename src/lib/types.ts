@@ -139,11 +139,23 @@ export interface RoomState {
   ending: EndingDTO | null;
   /** The team's chapter, worked out on the server from the room's state. */
   chapter: ChapterDTO;
+  /** Ada only: the room's shared browser history, newest first (see src/server/siteHistory.ts). */
+  siteHistory?: SiteHistoryEntry[];
   /** Physical-room games only: the shared scene (narrow by gameId). */
   scene?: import("@/lib/train/types").SceneDTO | import("@/lib/atlas/types").AtlasSceneDTO;
 }
 
 // ---------- Fake internet ----------
+
+/** A site in the room's shared browser history. `foundBy`/`foundAt` are null for the start page, or once the
+ * discovery has aged out of the room's capped discovery list. */
+export interface SiteHistoryEntry {
+  host: string;
+  title: string;
+  foundBy: string | null;
+  foundById: string | null;
+  foundAt: string | null;
+}
 
 export interface ImageFileInfo {
   filename: string;
