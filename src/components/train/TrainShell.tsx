@@ -93,7 +93,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
   const [roomTab, setRoomTab] = useState<RoomTab>("people");
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const toastId = useRef(0);
-  const chat = useChat(code, state.me.id);
+  const chat = useChat(code, state.me.id, state.me.blocked);
   const t = useT();
   const walls = place === "dining" ? WALLS_DINING : WALLS_12B;
   const wallIdx = place === "dining" ? wallIdxBy.dining : wallIdxBy["12b"];

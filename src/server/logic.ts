@@ -42,6 +42,28 @@ export function isProfane(name: string): boolean {
   return words.some((w) => BLOCK_WORD.includes(w));
 }
 
+/**
+ * Chat's filter: words the name filter would refuse are masked to their first letter ("f•••"), so a message still
+ * goes through but nobody in the room reads the word. Latin-script words only; the original text is kept on the
+ * server for reports. Same lists and leetspeak folding as isProfane.
+ */
+/** Ordinary words that contain a filtered stem ("therapist" has "rapist"): never masked in chat. */
+const CHAT_ALLOW = ["therapist", "scunthorpe", "retardant", "shitake"];
+
+export function maskProfanity(text: string): string {
+  return text.replace(/[\p{L}\p{N}@$!*]+/gu, (token) => {
+    // A "!" at the end is punctuation, not a leetspeak "i".
+    const [, core, tail] = token.match(/^(.*?)(!*)$/u) ?? [token, token, ""];
+    const lower = core.toLowerCase().replace(/[013457@$!]/g, (c) => LEET[c] ?? c);
+    const squashed = lower.replace(/[^a-z]/g, "");
+    if (!squashed || CHAT_ALLOW.some((w) => squashed.startsWith(w))) return token;
+    const bad = BLOCK_SUBSTR.some((w) => squashed.includes(w)) || lower.split(/[^a-z]+/).some((w) => BLOCK_WORD.includes(w));
+    if (!bad) return token;
+    const chars = Array.from(core);
+    return chars[0] + "•".repeat(Math.max(2, chars.length - 1)) + tail;
+  });
+}
+
 export function validateDisplayName(raw: unknown): { ok: true; value: string } | { ok: false; error: string } {
   if (typeof raw !== "string") return { ok: false, error: "Display name is required." };
   const value = raw.replace(CONTROL_RE, "").replace(/\s+/g, " ").trim();

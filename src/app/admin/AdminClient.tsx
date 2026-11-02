@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useIntl } from "react-intl";
-import type { AdminBoardEntry, AdminCodeDTO } from "@/lib/types";
+import type { AdminBoardEntry, AdminChatReport, AdminCodeDTO } from "@/lib/types";
 import { ALL_GAMES, GAMES, formatDuration, gameTitle } from "@/lib/games";
 import { ATLAS_GAME_ID } from "@/lib/atlas/types";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
@@ -36,11 +36,11 @@ export function AdminClient() {
 
 function AdminTabs() {
   const t = useT();
-  const [tab, setTab] = useState<"codes" | "playtest" | "board">("codes");
+  const [tab, setTab] = useState<"codes" | "playtest" | "board" | "reports">("codes");
   return (
     <>
-      <div role="tablist" aria-label={t("admin.tabs.aria")} className="grid grid-cols-3 gap-2">
-        {(["codes", "playtest", "board"] as const).map((k) => (
+      <div role="tablist" aria-label={t("admin.tabs.aria")} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {(["codes", "playtest", "board", "reports"] as const).map((k) => (
           <button
             key={k}
             role="tab"
@@ -52,7 +52,7 @@ function AdminTabs() {
           </button>
         ))}
       </div>
-      {tab === "codes" ? <CodesPanel /> : tab === "playtest" ? <PlaytestPanel /> : <BoardPanel />}
+      {tab === "codes" ? <CodesPanel /> : tab === "playtest" ? <PlaytestPanel /> : tab === "board" ? <BoardPanel /> : <ReportsPanel />}
     </>
   );
 }
@@ -268,6 +268,72 @@ function BoardPanel() {
               className="min-h-11 shrink-0 rounded-lg border border-noir-line px-3 text-sm text-noir-ink-dim disabled:opacity-50"
             >
               {e.hidden ? t("admin.board.show") : t("admin.board.hide")}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Reported chat messages: read them, then mark each handled. Open ones first, oldest first. */
+function ReportsPanel() {
+  const t = useT();
+  const intl = useIntl();
+  const [reports, setReports] = useState<AdminChatReport[] | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      const res = await fetch("/api/admin/reports");
+      const data = (await res.json().catch(() => ({}))) as { reports?: AdminChatReport[]; error?: string };
+      if (!live) return;
+      if (!res.ok) setErr(data.error ?? t("admin.msg.loadFailed"));
+      setReports(data.reports ?? []);
+    })();
+    return () => {
+      live = false;
+    };
+  }, [t]);
+
+  async function setResolved(r: AdminChatReport, resolved: boolean) {
+    setBusy(r.id);
+    setErr(null);
+    const res = await fetch("/api/admin/reports", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: r.id, resolved }),
+    });
+    setBusy(null);
+    if (!res.ok) return setErr(((await res.json().catch(() => ({}))) as { error?: string }).error ?? t("admin.reports.failed"));
+    setReports((cur) => (cur ?? []).map((x) => (x.id === r.id ? { ...x, resolvedAt: resolved ? new Date().toISOString() : null } : x)));
+  }
+
+  const open = reports?.filter((r) => !r.resolvedAt) ?? [];
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-sm text-noir-ink-dim">{t("admin.reports.help")}</p>
+      {err && <p className="text-sm text-red-300">{err}</p>}
+      {!reports && <p className="text-noir-ink-faint">{t("common.loading")}</p>}
+      {reports && open.length === 0 && <p className="text-sm text-noir-ink-faint">{t("admin.reports.none")}</p>}
+      <ul className="flex flex-col gap-2">
+        {reports?.map((r) => (
+          <li key={r.id} className={`flex flex-col gap-2 rounded-xl border border-noir-line bg-noir-bg-2 p-3 ${r.resolvedAt ? "opacity-60" : ""}`}>
+            <p className="whitespace-pre-wrap break-words text-sm text-noir-ink">“{r.body}”</p>
+            <p className="text-xs text-noir-ink-faint">
+              {t("admin.reports.meta", { reported: r.reportedName, reporter: r.reporterName, reason: t(`room.chat.reason.${r.reason}`) })} · {gameTitle(r.gameId)} ·{" "}
+              {intl.formatDate(r.createdAt, { dateStyle: "medium", timeStyle: "short" })}
+              {r.repeat > 0 && <span className="text-red-300"> · {t("admin.reports.repeat", { n: r.repeat })}</span>}
+            </p>
+            <button
+              type="button"
+              disabled={busy === r.id}
+              onClick={() => void setResolved(r, !r.resolvedAt)}
+              className="min-h-11 self-start rounded-lg border border-noir-line px-3 text-sm text-noir-ink-dim disabled:opacity-50"
+            >
+              {r.resolvedAt ? t("admin.reports.reopen") : t("admin.reports.resolve")}
             </button>
           </li>
         ))}

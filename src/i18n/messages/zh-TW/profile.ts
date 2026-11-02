@@ -71,6 +71,17 @@ const messages: Record<keyof typeof en, string> = {
   "profile.ach.atlas-reroute.how": "讓每座界門都改道通往天文台：唯有祕密才能解鎖的結局。",
   "profile.ach.atlas-every-ending.name": "條條道路",
   "profile.ach.atlas-every-ending.how": "修復、斬斷、改道：看遍地圖集的全部三種結局。",
+  "profile.delete.title": "刪除帳號",
+  "profile.delete.open": "刪除我的帳號…",
+  "profile.delete.body": "這會永久刪除你的 Escape Escape 帳號，無法復原。",
+  "profile.delete.games": "你解鎖的遊戲，以及兌換過的代碼",
+  "profile.delete.history": "你的案件紀錄、時間與成就",
+  "profile.delete.signIn": "你的登入方式與通行金鑰",
+  "profile.delete.rooms": "你正在玩的房間會保留你的名字直到房間關閉，隊友不會因此卡住。排行榜上的紀錄會保留顯示的名字。",
+  "profile.delete.understand": "我了解此操作無法復原",
+  "profile.delete.confirm": "刪除我的帳號",
+  "profile.delete.deleting": "刪除中…",
+  "profile.delete.cancel": "保留帳號",
 };
 
 export default messages;

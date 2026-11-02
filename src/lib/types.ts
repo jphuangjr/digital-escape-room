@@ -126,7 +126,16 @@ export interface RoomState {
   gameId: string;
   status: RoomStatus;
   hostId: string | null;
-  me: { id: string; displayName: string; color: string; isHost: boolean; image: string | null; signedIn: boolean };
+  me: {
+    id: string;
+    displayName: string;
+    color: string;
+    isHost: boolean;
+    image: string | null;
+    signedIn: boolean;
+    /** Players whose chat this player has blocked (see src/server/chatSafety.ts). */
+    blocked: string[];
+  };
   players: PlayerPublic[];
   progress: RoomProgress;
   publicNotes: NoteDTO[];
@@ -288,6 +297,20 @@ export interface AdminBoardEntry {
 }
 
 /** One room chat message. Delivered live over the realtime channel as the `chat.message` payload. */
+/** A reported chat message, for the admin review list. */
+export interface AdminChatReport {
+  id: string;
+  gameId: string;
+  body: string;
+  reason: "abuse" | "spam" | "other";
+  reportedName: string;
+  reporterName: string;
+  /** Other open reports against the same signed-in account, or the same player in that room. */
+  repeat: number;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
 export interface ChatMessageDTO {
   id: string;
   playerId: string;
