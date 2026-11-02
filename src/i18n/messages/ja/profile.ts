@@ -71,6 +71,17 @@ const messages: Record<keyof typeof en, string> = {
   "profile.ach.atlas-reroute.how": "すべての門を天文台へ結び直してください。秘密を集めた者だけが開ける結末です。",
   "profile.ach.atlas-every-ending.name": "すべての道",
   "profile.ach.atlas-every-ending.how": "復元、断絶、再編。アトラスの三つのエンディングをすべて見てください。",
+  "profile.delete.title": "アカウントの削除",
+  "profile.delete.open": "アカウントを削除…",
+  "profile.delete.body": "Escape Escape のアカウントを完全に削除します。元に戻せません。",
+  "profile.delete.games": "アンロックしたゲームと引き換えたコード",
+  "profile.delete.history": "事件の記録、タイム、実績",
+  "profile.delete.signIn": "ログイン方法とパスキー",
+  "profile.delete.rooms": "いまプレイ中のルームでは、チームが困らないよう閉じるまで名前が残ります。ランキングの記録には表示中の名前が残ります。",
+  "profile.delete.understand": "元に戻せないことを理解しました",
+  "profile.delete.confirm": "アカウントを削除",
+  "profile.delete.deleting": "削除中…",
+  "profile.delete.cancel": "アカウントを残す",
 };
 
 export default messages;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { useIntl } from "react-intl";
 import type { ProfileResponse } from "@/lib/types";
@@ -173,7 +174,85 @@ function Profile({ data }: { data: ProfileResponse }) {
           </ul>
         )}
       </section>
+      <DeleteAccountSection />
     </>
+  );
+}
+
+/**
+ * Delete the account for good (required for the app stores). Two steps: open, then tick that you understand and
+ * confirm. Signs out and goes to the home page afterwards.
+ */
+function DeleteAccountSection() {
+  const t = useT();
+  const [open, setOpen] = useState(false);
+  const [understood, setUnderstood] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  async function remove() {
+    setBusy(true);
+    setMsg(null);
+    const res = await fetch("/api/account", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirm: true }) }).catch(() => null);
+    if (!res?.ok) {
+      setBusy(false);
+      setMsg(((await res?.json().catch(() => null)) as { error?: string } | null)?.error ?? t("auth.error.network"));
+      return;
+    }
+    await signOut({ callbackUrl: "/" });
+  }
+
+  return (
+    <section className="mt-4 border-t border-noir-line pt-6" aria-labelledby="profile-delete">
+      <h2 id="profile-delete" className="font-mono text-xs uppercase tracking-[0.3em] text-noir-ink-faint">
+        {t("profile.delete.title")}
+      </h2>
+      {!open ? (
+        <button type="button" onClick={() => setOpen(true)} className="mt-3 min-h-11 rounded-lg border border-red-900/60 px-4 text-sm text-red-300 active:bg-red-950/40">
+          {t("profile.delete.open")}
+        </button>
+      ) : (
+        <div className="mt-3 flex flex-col gap-3 rounded-xl border border-red-900/60 bg-red-950/20 p-4">
+          <p className="text-sm text-noir-ink">{t("profile.delete.body")}</p>
+          <ul className="list-disc space-y-1 pl-5 text-sm text-noir-ink-dim">
+            <li>{t("profile.delete.games")}</li>
+            <li>{t("profile.delete.history")}</li>
+            <li>{t("profile.delete.signIn")}</li>
+          </ul>
+          <p className="text-sm text-noir-ink-dim">{t("profile.delete.rooms")}</p>
+          <label className="flex min-h-11 items-center gap-3 text-sm text-noir-ink">
+            <input type="checkbox" checked={understood} onChange={(e) => setUnderstood(e.target.checked)} className="h-5 w-5 accent-red-500" />
+            {t("profile.delete.understand")}
+          </label>
+          {msg && (
+            <p role="alert" className="text-sm text-red-300">
+              {msg}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={!understood || busy}
+              onClick={() => void remove()}
+              className="min-h-11 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white active:bg-red-700 disabled:opacity-40"
+            >
+              {busy ? t("profile.delete.deleting") : t("profile.delete.confirm")}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setOpen(false);
+                setUnderstood(false);
+              }}
+              className="min-h-11 rounded-lg border border-noir-line px-4 text-sm text-noir-ink-dim"
+            >
+              {t("profile.delete.cancel")}
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 

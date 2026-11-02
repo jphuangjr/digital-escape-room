@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/i18n/client";
 import type { ChatMessageDTO } from "@/lib/types";
 import { apiFetch } from "./game";
@@ -27,8 +27,11 @@ export interface Chat {
   markRead: () => void;
 }
 
-/** Room chat: history on load, live appends from realtime, catch-up on poll ticks, unread tracking. */
-export function useChat(code: string, meId: string): Chat {
+/**
+ * Room chat: history on load, live appends from realtime, catch-up on poll ticks, unread tracking. Messages from
+ * `blocked` players (RoomState.me.blocked) are left out everywhere: the list, unread counts and toasts.
+ */
+export function useChat(code: string, meId: string, blocked: string[] = []): Chat {
   const t = useT();
   const [messages, setMessages] = useState<ChatMessageDTO[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -88,6 +91,21 @@ export function useChat(code: string, meId: string): Chat {
     });
   }, [code]);
 
-  const unread = messages.filter((m) => m.playerId !== meId && m.createdAt > readAt).length;
-  return { messages, loaded, unread, send, markRead };
+  // Unblocking someone: fetch the history again, since the server left their messages out.
+  const blockedKey = blocked.join(",");
+  const firstBlocked = useRef(true);
+  useEffect(() => {
+    if (firstBlocked.current) {
+      firstBlocked.current = false;
+      return;
+    }
+    void fetchMessages(null);
+  }, [blockedKey, fetchMessages]);
+  const visible = useMemo(
+    () => (blockedKey ? messages.filter((m) => !blockedKey.split(",").includes(m.playerId)) : messages),
+    [messages, blockedKey],
+  );
+
+  const unread = visible.filter((m) => m.playerId !== meId && m.createdAt > readAt).length;
+  return { messages: visible, loaded, unread, send, markRead };
 }

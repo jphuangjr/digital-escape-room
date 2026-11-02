@@ -76,7 +76,7 @@ export function GameShell({
       localStorage.setItem(`${TOUR_DONE_KEY}:${code}`, "1");
     } catch {}
   }, [code]);
-  const chat = useChat(code, state.me.id);
+  const chat = useChat(code, state.me.id, state.me.blocked);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [unreadEmails, setUnreadEmails] = useState(0);
   const toastId = useRef(0);

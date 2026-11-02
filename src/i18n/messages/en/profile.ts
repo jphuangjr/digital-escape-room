@@ -69,6 +69,17 @@ const messages = {
   "profile.ach.atlas-reroute.how": "Reroute every gate to the Observatory: the ending only the secrets unlock.",
   "profile.ach.atlas-every-ending.name": "Every road",
   "profile.ach.atlas-every-ending.how": "Restore, Sever and Reroute: see all three of the Atlas's endings.",
+  "profile.delete.title": "Delete account",
+  "profile.delete.open": "Delete my account…",
+  "profile.delete.body": "This permanently deletes your Escape Escape account. It can't be undone.",
+  "profile.delete.games": "Games you unlocked, and the codes you redeemed",
+  "profile.delete.history": "Your case history, times and achievements",
+  "profile.delete.signIn": "Your sign-in methods and passkeys",
+  "profile.delete.rooms": "Rooms you're playing in now keep your name until they close, so your team isn't left stuck. Leaderboard entries keep the names shown on them.",
+  "profile.delete.understand": "I understand this can't be undone",
+  "profile.delete.confirm": "Delete my account",
+  "profile.delete.deleting": "Deleting…",
+  "profile.delete.cancel": "Keep my account",
 };
 
 export default messages;

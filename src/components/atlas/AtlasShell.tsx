@@ -100,7 +100,7 @@ export function AtlasShell({ code, state, refresh }: { code: string; state: Room
   const [roomTab, setRoomTab] = useState<RoomTab>("people");
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const toastId = useRef(0);
-  const chat = useChat(code, state.me.id);
+  const chat = useChat(code, state.me.id, state.me.blocked);
 
   const canStand = useCallback((p: LocationId) => Boolean(scene.places.find((x) => x.id === p)?.reachable), [scene.places]);
   const setPlace = useCallback(

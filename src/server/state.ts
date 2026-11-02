@@ -20,6 +20,7 @@ import { adaChapter } from "./content/chapters";
 import { buildEnding, loadVoteState } from "./vote";
 import { sceneGame } from "./scene/games";
 import { siteHistory } from "./siteHistory";
+import { blockedPlayerIds } from "./chatSafety";
 
 export function isOnline(p: Pick<Player, "lastSeenAt">, now = new Date()): boolean {
   return now.getTime() - p.lastSeenAt.getTime() <= ONLINE_WINDOW_MS;
@@ -53,7 +54,7 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
   const now = new Date();
   const game = sceneGame(room.gameId);
   const loc = await getLocale();
-  const [players, notes, attempts, hintRows, vote, ending] = await Promise.all([
+  const [players, notes, attempts, hintRows, vote, ending, blocked] = await Promise.all([
     db.player.findMany({ where: { roomId: room.id }, orderBy: { createdAt: "asc" } }),
     db.note.findMany({
       where: { roomId: room.id, OR: [{ visibility: "PUBLIC" }, { authorId: player.id }] },
@@ -63,6 +64,7 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
     loadHints(room.id),
     loadVoteState(room),
     buildEnding(room),
+    blockedPlayerIds(room.id, player),
   ]);
 
   const byId = new Map(players.map((p) => [p.id, p]));
@@ -113,6 +115,7 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
       isHost: player.id === room.hostId,
       image: player.image,
       signedIn: player.userId !== null,
+      blocked,
     },
     players: playersPublic,
     progress,

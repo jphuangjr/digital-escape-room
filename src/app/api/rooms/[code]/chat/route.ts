@@ -1,7 +1,8 @@
 import type { ChatMessageDTO } from "@/lib/types";
 import { db } from "@/server/db";
 import { error, isResponse, json, readBody, requirePlayer, translateLogicError } from "@/server/http";
-import { CHAT_HISTORY, chatCooldownSec, cleanChatBody } from "@/server/logic";
+import { CHAT_HISTORY, chatCooldownSec, cleanChatBody, maskProfanity } from "@/server/logic";
+import { blockedPlayerIds } from "@/server/chatSafety";
 import { publish } from "@/server/realtime";
 import { touchRoom } from "@/server/session";
 import { getT } from "@/i18n/server";
@@ -15,12 +16,15 @@ function dto(m: Row, players: Map<string, { displayName: string; color: string }
     playerId: m.playerId,
     playerName: p?.displayName ?? someone,
     playerColor: p?.color ?? "#78716c",
-    body: m.body,
+    body: maskProfanity(m.body), // the original stays stored, for reports
     createdAt: m.createdAt.toISOString(),
   };
 }
 
-/** GET [?after=ISO] → up to the last 100 messages, oldest first (or only those newer than `after`). */
+/**
+ * GET [?after=ISO] → up to the last 100 messages, oldest first (or only those newer than `after`), without those
+ * from players you've blocked. Live messages reach everyone; the client drops blocked ones (RoomState.me.blocked).
+ */
 export async function GET(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const ctx = await requirePlayer((await params).code);
   if (isResponse(ctx)) return ctx;
@@ -29,9 +33,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
   const after = afterRaw ? new Date(afterRaw) : null;
   if (after && Number.isNaN(after.getTime())) return error(400, t("api.chat.badAfter"));
 
+  const blocked = await blockedPlayerIds(ctx.room.id, ctx.player);
   const [rows, players] = await Promise.all([
     db.chatMessage.findMany({
-      where: { roomId: ctx.room.id, ...(after ? { createdAt: { gt: after } } : {}) },
+      where: { roomId: ctx.room.id, ...(after ? { createdAt: { gt: after } } : {}), ...(blocked.length ? { playerId: { notIn: blocked } } : {}) },
       orderBy: { createdAt: "desc" },
       take: CHAT_HISTORY,
     }),
