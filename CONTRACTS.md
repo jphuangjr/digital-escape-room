@@ -95,6 +95,11 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   (or nothing for a relay address). Setup checklist (Apple developer site + Vercel): `docs/APPLE_SIGN_IN.md`.
 - Client: every "Sign in" button calls `openSignIn(callbackUrl)`; `SignInHost` (root layout) shows the enabled
   methods, or goes straight to Apple or Google when that's the only one.
+- **Deleting an account**: `DELETE /api/account {confirm: true}` (signed in) → `deleteAccount` (`src/server/accountDeletion.ts`).
+  Cascades remove identities, passkeys, purchases, redemptions, case records and blocks; pending email codes and
+  passkey challenges go too. Players in open rooms keep their name and color but lose `userId` and `image`. Codes an
+  admin made keep working (`createdById` → null); chat reports keep their copy without the account link. The client
+  then signs out (the old JWT points at no user, so it already counts as signed out). Profile page → Delete account.
 - Hosting (`POST /api/rooms`) requires sign-in when enabled → 401 `{signInRequired:true}`. Joining stays optional.
 - One open room per host: if the user already hosts non-expired rooms, `POST /api/rooms` → 409 `ReplaceRoomsRequired`
   listing them; resending with `replaceExisting: true` deletes them immediately (publishing `room.closed`) and creates
@@ -115,6 +120,17 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   Capacity is enforced with a conditional `UPDATE … WHERE useCount < maxUses`. If the user already owns the game,
   the code isn't consumed. Turned-off (`revokedAt`) or expired codes stop working; purchases already made stay.
 - Admin page `/admin`; APIs `GET|POST /api/admin/codes` (`kind: single|group`), `DELETE /api/admin/codes/[id]` (turn off).
+
+## Chat safety (`src/server/chatSafety.ts`)
+- **Filter**: chat text is stored as typed and masked on the way out (`maskProfanity`: same word lists as the name
+  filter, first letter + dots, with an allowlist for words like "therapist"). Display names are still refused by
+  `isProfane`. Latin-script only for now.
+- **Block**: `POST /api/rooms/[code]/block {playerId, block}` → `{blocked}`. A `PlayerBlock` hides that player's chat
+  for you in this room; if both players are signed in, a `UserBlock` carries it into future rooms. `RoomState.me.blocked`
+  lists blocked players here; `GET .../chat` leaves their messages out and `useChat` drops live ones. Unblock from People.
+- **Report**: `POST /api/rooms/[code]/chat/report {messageId, reason: "abuse"|"spam"|"other", block?}` keeps a
+  `ChatReport` with a copy of the original text (kept after the room expires). Admin → Reports lists open ones;
+  `GET/PATCH /api/admin/reports` (`{id, resolved}`).
 
 ## Case log (room-wide discoveries)
 - `RoomProgress.discoveries` (JSON, capped at 200): a first visit to a site host (`kind: "site"`) and every puzzle

@@ -226,3 +226,15 @@ describe("wrong-answer lockout", () => {
     expect(WRONG_ANSWER_LOCKOUT_MS["intranet-login"]).toBeUndefined();
   });
 });
+
+describe("maskProfanity", async () => {
+  const { maskProfanity } = await import("../logic");
+  it("masks filtered words, leetspeak too, and leaves the rest of the message", () => {
+    expect(maskProfanity("this is fucking hard")).toBe("this is f•••••• hard");
+    expect(maskProfanity("you b1tch!")).toBe("you b••••!");
+    expect(maskProfanity("Shit.")).toBe("S•••.");
+  });
+  it("leaves innocent words alone, including ones that contain a short filtered word", () => {
+    for (const ok of ["Dickens wrote it", "Hitchcock", "Scunthorpe? no: assess the class", "my therapist said so", "그냥 좋아요", "最初から"]) expect(maskProfanity(ok)).toBe(ok);
+  });
+});

@@ -71,6 +71,17 @@ const messages: Record<keyof typeof en, string> = {
   "profile.ach.atlas-reroute.how": "Redirige todas las puertas al Observatorio: el final que solo desbloquean los secretos.",
   "profile.ach.atlas-every-ending.name": "Todos los caminos",
   "profile.ach.atlas-every-ending.how": "Restaurar, Separar y Redirigir: descubre los tres finales del Atlas.",
+  "profile.delete.title": "Eliminar cuenta",
+  "profile.delete.open": "Eliminar mi cuenta…",
+  "profile.delete.body": "Esto elimina tu cuenta de Escape Escape para siempre. No se puede deshacer.",
+  "profile.delete.games": "Los juegos que desbloqueaste y los códigos que canjeaste",
+  "profile.delete.history": "Tu historial de casos, tiempos y logros",
+  "profile.delete.signIn": "Tus métodos de inicio de sesión y llaves de acceso",
+  "profile.delete.rooms": "Las salas en las que juegas ahora conservan tu nombre hasta que se cierren, para no dejar atascado a tu equipo. Las entradas de la clasificación conservan los nombres que muestran.",
+  "profile.delete.understand": "Entiendo que no se puede deshacer",
+  "profile.delete.confirm": "Eliminar mi cuenta",
+  "profile.delete.deleting": "Eliminando…",
+  "profile.delete.cancel": "Conservar mi cuenta",
 };
 
 export default messages;

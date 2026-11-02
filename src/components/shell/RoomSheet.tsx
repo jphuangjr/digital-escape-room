@@ -193,9 +193,25 @@ export function RoomSheet({
                       {p.id === state.me.id && <span className="text-xs text-stone-500">{t("room.people.you")}</span>}
                     </p>
                     <p className="truncate text-xs text-stone-500">
-                      {p.online ? t("room.people.viewing", { where: describeView(p.currentView, t) }) : t("room.people.offline")}
+                      {state.me.blocked.includes(p.id)
+                        ? t("room.people.blocked")
+                        : p.online
+                          ? t("room.people.viewing", { where: describeView(p.currentView, t) })
+                          : t("room.people.offline")}
                     </p>
                   </div>
+                  {state.me.blocked.includes(p.id) && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await ctx.api("/block", { body: { playerId: p.id, block: false } });
+                        void ctx.refresh();
+                      }}
+                      className="min-h-11 shrink-0 rounded-md border border-stone-700 px-3 text-xs text-stone-300 active:bg-stone-900"
+                    >
+                      {t("room.people.unblock")}
+                    </button>
+                  )}
                 </li>
               ))}
               </ul>

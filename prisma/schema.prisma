@@ -27,6 +27,7 @@ model Room {
   hints          HintRequest[]
   votes          EndingVote[]
   chat           ChatMessage[]
+  blocks         PlayerBlock[]
   events         AnalyticsEvent[]
 }
 
@@ -67,6 +68,10 @@ model User {
   purchases GamePurchase[]
   codesMade PurchaseCode[] @relation("CodeCreatedBy")
   redemptions CodeRedemption[]
+  blocking  UserBlock[]  @relation("Blocker")
+  blockedBy UserBlock[]  @relation("Blocked")
+  reportsMade ChatReport[] @relation("ReportedBy")
+  reportsAgainst ChatReport[] @relation("ReportedUser")
 }
 
 /// One sign-in account (Google today; Apple etc. later) linked to a User. A User can have several.
@@ -152,8 +157,9 @@ model PurchaseCode {
   useCount    Int              @default(0)
   expiresAt   DateTime?
   revokedAt   DateTime? // turned off by an admin; purchases already made stay
-  createdById String
-  createdBy   User             @relation("CodeCreatedBy", fields: [createdById], references: [id])
+  /// Null once the admin who made it deletes their account; the code keeps working.
+  createdById String?
+  createdBy   User?            @relation("CodeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   createdAt   DateTime         @default(now())
   redemptions CodeRedemption[]
 
@@ -265,6 +271,54 @@ model ChatMessage {
   createdAt DateTime @default(now())
 
   @@index([roomId, createdAt])
+}
+
+/// "Don't show me this player's chat" within one room. Anyone can block, signed in or not.
+model PlayerBlock {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  blockerId String // Player.id
+  blockedId String // Player.id
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([roomId])
+}
+
+/// A signed-in player's block that follows the other account into future rooms.
+model UserBlock {
+  id            String   @id @default(cuid())
+  blockerUserId String
+  blocker       User     @relation("Blocker", fields: [blockerUserId], references: [id], onDelete: Cascade)
+  blockedUserId String
+  blocked       User     @relation("Blocked", fields: [blockedUserId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+
+  @@unique([blockerUserId, blockedUserId])
+}
+
+/// A chat message a player reported, kept for admin review after the room expires (the text is copied here).
+model ChatReport {
+  id               String    @id @default(cuid())
+  roomRef          String // Room.id at the time
+  gameId           String
+  messageId        String
+  body             String
+  reason           String // "abuse" | "spam" | "other"
+  reportedPlayerId String
+  reportedName     String
+  reportedUserId   String?
+  reportedUser     User?     @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: SetNull)
+  reporterPlayerId String
+  reporterName     String
+  reporterUserId   String?
+  reporterUser     User?     @relation("ReportedBy", fields: [reporterUserId], references: [id], onDelete: SetNull)
+  resolvedAt       DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@unique([messageId, reporterPlayerId])
+  @@index([resolvedAt, createdAt])
 }
 
 /// One finished room on a game's public leaderboard. Written when the final puzzle is solved and kept
