@@ -61,12 +61,12 @@ export async function getProfile(user: User): Promise<ProfileResponse> {
     }
     if (c.badges.includes("atlas-secrets")) earn("atlas-secrets", at);
     if (c.badges.includes("atlas-reroute")) earn("atlas-reroute", at);
-    const live = GAMES.filter((g) => g.status === "live").map((g) => g.id);
+    const live = GAMES.filter((g) => g.status === "live" && g.kind !== "party").map((g) => g.id);
     if (live.length > 0 && live.every((g) => solvedGames.has(g))) earn("all-games", at);
   });
 
   const played = new Set(cases.map((c) => c.gameId));
-  const shownGames = GAMES.filter((g) => g.status === "live" || played.has(g.id)).map((g) => g.id);
+  const shownGames = GAMES.filter((g) => g.kind !== "party" && (g.status === "live" || played.has(g.id))).map((g) => g.id);
   const boardSizes = new Map(
     await Promise.all(shownGames.map(async (g) => [g, await db.leaderboardEntry.count({ where: boardWhere(g) })] as const)),
   );

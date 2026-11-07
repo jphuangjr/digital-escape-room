@@ -152,6 +152,8 @@ export interface RoomState {
   siteHistory?: SiteHistoryEntry[];
   /** Physical-room games only: the shared scene (narrow by gameId). */
   scene?: import("@/lib/train/types").SceneDTO | import("@/lib/atlas/types").AtlasSceneDTO;
+  /** Party games only: this player's own view of the table (see src/server/party). */
+  party?: import("@/lib/allhands/types").AllHandsView;
 }
 
 // ---------- Fake internet ----------

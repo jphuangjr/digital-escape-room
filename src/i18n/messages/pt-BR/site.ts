@@ -143,6 +143,21 @@ const messages: Record<keyof typeof en, string> = {
   "site.redeem.testerBody": "Enquanto esta chave estiver ativa, todas as salas de fuga, inclusive as que ainda não saíram, estão liberadas na sua conta ({account}).",
   "site.redeem.testerBrowse": "Ver os casos →",
   "site.account.tester": "Testador",
+  // All Hands and the Party games page
+  "site.game.all-hands.title": "All Hands",
+  "site.game.all-hands.tagline": "Tem um espião nesta startup. Encontre antes das demissões.",
+  "site.game.all-hands.blurb": "A Synergr tem dinheiro demais e confiança de menos. Toda noite alguns espiões fazem um colega ser demitido; toda manhã o time discute na reunião geral e demite alguém na avaliação de desempenho. Um anfitrião, cada um no seu celular, todos na mesma sala.",
+  "site.game.all-hands.players": "De 5 a 16 jogadores",
+  "site.game.all-hands.duration": "20–40 min",
+  "site.game.all-hands.difficulty": "Fácil",
+  "site.game.all-hands.tone": "Jogo de festa",
+  "site.directory.partyGames": "Jogos de festa",
+  "site.directory.partyGamesHint": "Jogos sociais para uma sala cheia de amigos",
+  "site.party.title": "Jogos de festa",
+  "site.party.intro": "Jogos para um grupo na mesma sala, cada um no seu celular. Uma pessoa cria a sala; os outros entram com o código.",
+  "site.party.back": "← Salas de fuga",
+  "site.party.play": "Jogar →",
+  "site.party.empty": "Os jogos de festa estão chegando.",
 };
 
 export default messages;

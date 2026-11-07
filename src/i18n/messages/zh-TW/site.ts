@@ -143,6 +143,21 @@ const messages: Record<keyof typeof en, string> = {
   "site.redeem.testerBody": "只要這把金鑰仍有效，你的帳號（{account}）就能玩所有密室逃脫，包括尚未推出的。",
   "site.redeem.testerBrowse": "瀏覽案件 →",
   "site.account.tester": "測試員",
+  // All Hands and the Party games page
+  "site.game.all-hands.title": "全員大會",
+  "site.game.all-hands.tagline": "這家新創公司裡藏著內鬼。在裁員找上你之前揪出他們。",
+  "site.game.all-hands.blurb": "Synergr 資金太多、信任太少。每晚內鬼會讓一位同事被裁員；每天早上團隊在全員大會上吵個明白，並在績效考核時開除一個人。一位主持人，每人用自己的手機，大家在同一個房間。",
+  "site.game.all-hands.players": "5 至 16 人",
+  "site.game.all-hands.duration": "20–40 分鐘",
+  "site.game.all-hands.difficulty": "簡單",
+  "site.game.all-hands.tone": "派對遊戲",
+  "site.directory.partyGames": "派對遊戲",
+  "site.directory.partyGamesHint": "適合一屋子朋友的社交遊戲",
+  "site.party.title": "派對遊戲",
+  "site.party.intro": "給同一個房間裡的一群人玩的遊戲，每人用自己的手機。一人開房，其他人用房間代碼加入。",
+  "site.party.back": "← 密室逃脫",
+  "site.party.play": "開始玩 →",
+  "site.party.empty": "派對遊戲即將推出。",
 };
 
 export default messages;

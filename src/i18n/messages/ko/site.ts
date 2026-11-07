@@ -143,6 +143,21 @@ const messages: Record<keyof typeof en, string> = {
   "site.redeem.testerBody": "이 키가 켜져 있는 동안 계정({account})에서 아직 공개되지 않은 방을 포함해 모든 방탈출이 열려 있어요.",
   "site.redeem.testerBrowse": "사건 둘러보기 →",
   "site.account.tester": "테스터",
+  // All Hands and the Party games page
+  "site.game.all-hands.title": "올핸즈",
+  "site.game.all-hands.tagline": "이 스타트업에 스파이가 있어요. 정리해고가 먼저 오기 전에 찾아내세요.",
+  "site.game.all-hands.blurb": "시너저는 투자금은 넘치고 신뢰는 부족해요. 매일 밤 스파이들이 동료 한 명을 해고시키고, 매일 아침 팀은 전체 회의에서 따져 묻고 인사 평가로 누군가를 해고해요. 호스트 한 명, 각자 자기 폰으로, 모두 한 방에서.",
+  "site.game.all-hands.players": "5~16명",
+  "site.game.all-hands.duration": "20~40분",
+  "site.game.all-hands.difficulty": "쉬움",
+  "site.game.all-hands.tone": "파티 게임",
+  "site.directory.partyGames": "파티 게임",
+  "site.directory.partyGamesHint": "친구들과 한 방에서 즐기는 소셜 게임",
+  "site.party.title": "파티 게임",
+  "site.party.intro": "한 방에 모인 사람들이 각자 폰으로 함께하는 게임이에요. 한 명이 방을 열고, 나머지는 방 코드로 들어와요.",
+  "site.party.back": "← 방탈출",
+  "site.party.play": "플레이 →",
+  "site.party.empty": "파티 게임이 곧 찾아와요.",
 };
 
 export default messages;
