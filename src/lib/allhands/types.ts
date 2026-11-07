@@ -7,8 +7,12 @@ export const ALL_HANDS_GAME_ID = "all-hands";
 export const MIN_PLAYERS = 5;
 export const MAX_PLAYERS = 16;
 
-export type Role = "employee" | "mole" | "it" | "hr";
-export type Team = "company" | "moles";
+export type Role = "employee" | "mole" | "it" | "hr" | "burnout";
+/** "burnout": the Burnt-out Employee plays for themselves. */
+export type Team = "company" | "moles" | "burnout";
+
+/** Tables this big (and bigger) get a Burnt-out Employee, if the host leaves it on. */
+export const BURNOUT_MIN_PLAYERS = 7;
 
 export type Phase =
   | "lobby" // waiting for the host to start
@@ -23,12 +27,14 @@ export type Phase =
 export interface Settings {
   /** Show a fired player's role at the exit interview. */
   revealOnFire: boolean;
+  /** Deal a Burnt-out Employee at tables of BURNOUT_MIN_PLAYERS or more. */
+  burnout: boolean;
   dayMs: number;
   nightMs: number;
   voteMs: number;
 }
 
-export const DEFAULT_SETTINGS: Settings = { revealOnFire: true, dayMs: 180_000, nightMs: 45_000, voteMs: 60_000 };
+export const DEFAULT_SETTINGS: Settings = { revealOnFire: true, burnout: true, dayMs: 180_000, nightMs: 45_000, voteMs: 60_000 };
 export const DAY_OPTIONS_MS = [120_000, 180_000, 300_000];
 
 /** A seat as everyone may see it. `role` is filled in only where this viewer is allowed to know it. */
@@ -187,6 +193,13 @@ export const ROLE_INFO: Record<Role, { name: string; classic: string; team: Team
     team: "company",
     blurb: "You have admin on everything. Everyone forgets that.",
     power: "After hours, read one person's DMs and learn whether they're a Mole.",
+  },
+  burnout: {
+    name: "Burnt-out Employee",
+    classic: "Jester",
+    team: "burnout",
+    blurb: "You haven't closed a Jira ticket since March. Severance is the dream.",
+    power: "Get yourself fired at performance review and you win alone. Getting laid off at night doesn't count. Act suspicious, but not too suspicious.",
   },
   hr: {
     name: "HR Rep",

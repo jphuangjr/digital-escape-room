@@ -1,6 +1,7 @@
 import "server-only";
 import {
   ALL_HANDS_GAME_ID,
+  BURNOUT_MIN_PLAYERS,
   DAY_OPTIONS_MS,
   DECOY_PROMPTS,
   DEFAULT_SETTINGS,
@@ -254,6 +255,8 @@ export function endPhase(s: AllHandsState, now: number): AllHandsState {
     case "vote":
       return resolveVote(s, now);
     case "exit": {
+      // The Burnt-out Employee got what they wanted: the game ends and they win alone.
+      if (s.exit?.fired && seatOf(s, s.exit.fired)?.role === "burnout") return gameOver(s, "burnout");
       const w = winnerOf(s);
       return w ? gameOver(s, w) : startNight(s, now);
     }
@@ -279,10 +282,13 @@ function maybeEarly(s: AllHandsState, now: number): AllHandsState {
 
 // ---------- actions ----------
 
-export function deal(roomPlayerIds: string[], rand: (n: number) => number): Seat[] {
+export function deal(roomPlayerIds: string[], rand: (n: number) => number, burnout = false): Seat[] {
   const ids = roomPlayerIds.slice(0, MAX_PLAYERS);
   const moles = molesFor(ids.length);
-  const roles: Role[] = ids.map((_, i) => (i < moles ? "mole" : i === moles ? "it" : i === moles + 1 ? "hr" : "employee"));
+  const withBurnout = burnout && ids.length >= BURNOUT_MIN_PLAYERS;
+  const roles: Role[] = ids.map((_, i) =>
+    i < moles ? "mole" : i === moles ? "it" : i === moles + 1 ? "hr" : withBurnout && i === moles + 2 ? "burnout" : "employee",
+  );
   const dealt = shuffle(roles, rand);
   const titles = shuffle(JOB_TITLES, rand);
   return ids.map((id, i) => ({ id, role: dealt[i], title: titles[i % titles.length], alive: true, ready: false }));
@@ -303,7 +309,7 @@ export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx):
       if (s.phase !== "lobby" && s.phase !== "over") return refuse(s, "The game is already running.");
       if (ctx.roomPlayerIds.length < MIN_PLAYERS) return refuse(s, `You need at least ${MIN_PLAYERS} players to start.`);
       const fresh = initialState(s.settings);
-      return done(timed({ ...fresh, seats: deal(ctx.roomPlayerIds, ctx.rand) }, "reveal", REVEAL_MS, now));
+      return done(timed({ ...fresh, seats: deal(ctx.roomPlayerIds, ctx.rand, s.settings.burnout) }, "reveal", REVEAL_MS, now));
     }
 
     case "settings": {
@@ -311,6 +317,7 @@ export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx):
       const next = { ...s.settings };
       const p = a.settings;
       if (typeof p.revealOnFire === "boolean") next.revealOnFire = p.revealOnFire;
+      if (typeof p.burnout === "boolean") next.burnout = p.burnout;
       if (typeof p.dayMs === "number" && DAY_OPTIONS_MS.includes(p.dayMs)) next.dayMs = p.dayMs;
       return done({ ...s, settings: next });
     }

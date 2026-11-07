@@ -7,7 +7,9 @@ import { apiFetch } from "@/lib/client/game";
 import { QrCode } from "@/components/site/QrCode";
 import { AllHandsChat } from "./AllHandsChat";
 import { TestBar } from "./TestBar";
+import { RulesButton } from "./RulesSheet";
 import {
+  BURNOUT_MIN_PLAYERS,
   DAY_OPTIONS_MS,
   ROLE_INFO,
   SKIP,
@@ -25,6 +27,7 @@ const ROLE_TONE: Record<Role, string> = {
   mole: "text-rose-300 border-rose-400/60 bg-rose-400/10",
   it: "text-sky-300 border-sky-300/50 bg-sky-300/10",
   hr: "text-amber-300 border-amber-300/50 bg-amber-300/10",
+  burnout: "text-violet-300 border-violet-300/50 bg-violet-300/10",
 };
 
 const PHASE_LABEL: Record<AllHandsView["phase"], string> = {
@@ -106,13 +109,16 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
         {busy && <div aria-hidden className="absolute inset-x-0 bottom-0 h-0.5 animate-pulse bg-lime-300" />}
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3 py-2">
           <div className="min-w-0">
-            <p className="text-11px font-semibold uppercase tracking-[0.25em] text-lime-300">All Hands · {code}</p>
+            <p className="truncate whitespace-nowrap text-11px font-semibold uppercase tracking-[0.2em] text-lime-300">All Hands · {code}</p>
             <p className="truncate text-lg font-bold">
               {PHASE_LABEL[party.phase]}
               {party.round > 0 && party.phase !== "over" && <span className="ml-2 text-sm font-normal text-slate-400">Round {party.round}</span>}
             </p>
           </div>
-          <Clock left={left} paused={party.paused} remainingMs={party.remainingMs} />
+          <div className="flex shrink-0 items-center gap-2">
+            <RulesButton players={party.seats.length || state.players.length} burnout={party.settings.burnout} />
+            <Clock left={left} paused={party.paused} remainingMs={party.remainingMs} />
+          </div>
         </div>
       </header>
 
@@ -382,7 +388,21 @@ function Lobby({
                 type="checkbox"
                 checked={party.settings.revealOnFire}
                 onChange={(e) => void act({ type: "settings", settings: { revealOnFire: e.target.checked } })}
-                className="h-6 w-6 accent-lime-300"
+                className="h-6 w-6 shrink-0 accent-lime-300"
+              />
+            </label>
+            <label className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900 px-3">
+              <span>
+                <span className="block font-semibold">Burnt-out Employee</span>
+                <span className="block text-xs text-slate-400">
+                  At tables of {BURNOUT_MIN_PLAYERS}+, one player secretly wants to get fired. If the team fires them, they win alone.
+                </span>
+              </span>
+              <input
+                type="checkbox"
+                checked={party.settings.burnout}
+                onChange={(e) => void act({ type: "settings", settings: { burnout: e.target.checked } })}
+                className="h-6 w-6 shrink-0 accent-lime-300"
               />
             </label>
             <div className="flex flex-col gap-2 rounded-xl border border-slate-800 bg-slate-900 p-3">
@@ -457,11 +477,14 @@ function Onboarding({ party, meId, act, busy, name }: { party: AllHandsView; meI
 
 // ---------- after hours ----------
 
+/** Who posted tonight's #random poll (the decoy question), one per round. */
+const POLL_AUTHORS = ["Brad (CEO)", "the Office Manager", "Chad from Sales", "the Founder's Nephew", "HR Bot", "the Growth Team"];
+
 const NIGHT_COPY: Record<NightKind, { title: string; body: string }> = {
   mole: { title: "Pick someone to lay off", body: "Agree with the other Moles. Your picks show up on each other's phones." },
   it: { title: "Whose DMs will you read?", body: "You'll find out in the morning whether they're a Mole." },
   hr: { title: "Who gets your paperwork?", body: "If the Moles go after them tonight, the layoff is blocked." },
-  decoy: { title: "", body: "Everyone taps something, so nobody can tell who has a power. Your answer is just for fun." },
+  decoy: { title: "", body: "Vote in the poll. Everyone taps a name after hours, so nobody can tell who has a power." },
 };
 
 function AfterHours({
@@ -490,8 +513,14 @@ function AfterHours({
   return (
     <>
       <div>
+        {n.kind === "decoy" && (
+          <p className="mb-2 flex items-center gap-2 text-sm text-slate-400">
+            <span className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-xs text-slate-300">#random</span>
+            <span aria-hidden>📊</span> Poll from {POLL_AUTHORS[(party.round - 1 + POLL_AUTHORS.length) % POLL_AUTHORS.length]}
+          </p>
+        )}
         <h1 className="text-3xl font-black">{n.kind === "decoy" ? n.prompt : copy.title}</h1>
-        <p className="mt-1 text-slate-300">{copy.body}</p>
+        <p className="mt-1 text-slate-300">{n.kind === "decoy" && n.myPick ? "Thanks for voting! 🙌" : copy.body}</p>
         <p className="mt-2 text-xs text-slate-500">Heads down. Keep your screen close. You can change your pick until time runs out.</p>
       </div>
       <ul className="grid grid-cols-2 gap-2">
@@ -749,12 +778,20 @@ function GameOver({
   people: Map<string, PlayerPublic>;
 }) {
   const company = party.winner === "company";
+  const burnout = party.winner === "burnout";
   const myTeam = party.me.role ? ROLE_INFO[party.me.role].team : null;
+  const burntOut = party.seats.find((x) => x.role === "burnout");
+  const banner = burnout
+    ? { tone: "border-violet-300/50 bg-violet-300/10", kicker: "Severance secured", title: `${name(burntOut?.id)} got fired and wins alone.` }
+    : company
+      ? { tone: "border-lime-300/50 bg-lime-300/10", kicker: "The company survives", title: "Every Mole is out." }
+      : { tone: "border-rose-400/60 bg-rose-400/10", kicker: "Synergr was acquired for parts", title: "The Moles win." };
   return (
     <>
-      <div className={`rounded-3xl border p-6 text-center ${company ? "border-lime-300/50 bg-lime-300/10" : "border-rose-400/60 bg-rose-400/10"}`}>
-        <p className="text-sm uppercase tracking-[0.25em] text-slate-300">{company ? "The company survives" : "Synergr was acquired for parts"}</p>
-        <p className="mt-1 text-4xl font-black">{company ? "Every Mole is out." : "The Moles win."}</p>
+      <div className={`rounded-3xl border p-6 text-center ${banner.tone}`}>
+        <p className="text-sm uppercase tracking-[0.25em] text-slate-300">{banner.kicker}</p>
+        <p className="mt-1 text-4xl font-black">{banner.title}</p>
+        {burnout && <p className="mt-2 text-slate-300">They were the Burnt-out Employee. Everyone else loses. Touch grass.</p>}
         {myTeam && <p className="mt-2 text-slate-200">{myTeam === party.winner ? "Your side won. Update your LinkedIn." : "Your side lost. Time to pivot."}</p>}
       </div>
       <Section title="Who was who">

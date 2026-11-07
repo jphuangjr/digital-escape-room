@@ -177,3 +177,6 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   builds the party view for that bot and seat actions (`ready`, `pick`, `vote`, `moleChat`) are made as it; host
   controls stay the admin's. `RoomState.partyTest` (every seat with its role) is sent only to that admin. Looking
   through a real player's eyes is never allowed.
+- Burnt-out Employee (`burnout`, a Jester): dealt in place of one Employee at tables of 7+ when `settings.burnout`
+  is on (default). Plays the decoy at night and counts as a non-Mole for the win check; fired at performance review,
+  the game ends after the exit interview with `winner: "burnout"`. A night layoff doesn't count.
