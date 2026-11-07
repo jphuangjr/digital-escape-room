@@ -40,21 +40,41 @@ const PHASE_LABEL: Record<AllHandsView["phase"], string> = {
 
 /** All Hands: one screen per phase, each phone showing only what its player may know. */
 export function AllHandsShell({ code, state, refresh }: { code: string; state: RoomState; refresh: () => Promise<void> }) {
-  const party = state.party!;
   const people = useMemo(() => new Map(state.players.map((p) => [p.id, p])), [state.players]);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // In an admin's test room the views are through the eyes of the bot they picked.
+  const meId = state.partyTest?.viewingAs ?? state.me.id;
+
+  // A tap shows at once: the screen is patched with what the tap will do, then replaced by the server's answer,
+  // then by the next full state. A new state from the server always wins, unless a tap is still on its way.
+  const [local, setLocal] = useState<AllHandsView | null>(null);
+  const inFlight = useRef(0);
+  useEffect(() => {
+    if (inFlight.current === 0) setLocal(null);
+  }, [state]);
+  const party = local ?? state.party!;
+  const partyRef = useRef(party);
+  partyRef.current = party;
 
   const act: Act = useCallback(
     async (body) => {
+      const tick = body.type === "tick";
+      if (!tick) {
+        setErr(null);
+        setLocal(optimistic(partyRef.current, body, meId));
+      }
+      inFlight.current++;
       setBusy(true);
-      setErr(null);
-      const res = await apiFetch<{ error?: string }>(code, "/party", { body });
-      if (!res.ok && body.type !== "tick") setErr(res.data?.error ?? "That didn't work. Try again.");
-      setBusy(false);
-      await refresh();
+      const res = await apiFetch<{ error?: string; party?: AllHandsView }>(code, "/party", { body });
+      inFlight.current--;
+      if (res.data?.party) setLocal(res.data.party);
+      else if (!res.ok) setLocal(null);
+      if (!res.ok && !tick) setErr(res.data?.error ?? "That didn't work. Try again.");
+      if (inFlight.current === 0) setBusy(false);
+      void refresh();
     },
-    [code, refresh],
+    [code, refresh, meId],
   );
 
   // Presence: a heartbeat keeps this player counted as here (and the host's controls with the host).
@@ -75,8 +95,6 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
   }, [left, party.endsAt, act]);
 
   const isHost = state.me.id === party.hostId;
-  // In an admin's test room the views are through the eyes of the bot they picked.
-  const meId = state.partyTest?.viewingAs ?? state.me.id;
   const name = (id: string | null | undefined) => (id ? (people.get(id)?.displayName ?? "Someone") : "Nobody");
 
   return (
@@ -85,6 +103,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
         className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/95 px-edge backdrop-blur"
         style={{ paddingTop: "max(env(safe-area-inset-top), 0.5rem)" }}
       >
+        {busy && <div aria-hidden className="absolute inset-x-0 bottom-0 h-0.5 animate-pulse bg-lime-300" />}
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3 py-2">
           <div className="min-w-0">
             <p className="text-11px font-semibold uppercase tracking-[0.25em] text-lime-300">All Hands · {code}</p>
@@ -111,9 +130,9 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
 
         {party.phase === "lobby" && <Lobby code={code} state={state} party={party} isHost={isHost} act={act} busy={busy} name={name} />}
         {party.phase === "reveal" && <Onboarding party={party} meId={meId} act={act} busy={busy} name={name} />}
-        {party.phase === "night" && <AfterHours party={party} act={act} busy={busy} name={name} people={people} />}
+        {party.phase === "night" && <AfterHours party={party} act={act} name={name} people={people} />}
         {(party.phase === "dawn" || party.phase === "day") && <Morning party={party} name={name} people={people} />}
-        {party.phase === "vote" && <Review party={party} act={act} busy={busy} name={name} people={people} me={meId} />}
+        {party.phase === "vote" && <Review party={party} act={act} name={name} people={people} me={meId} />}
         {party.phase === "exit" && <ExitInterview party={party} name={name} />}
         {party.phase === "over" && <GameOver party={party} isHost={isHost} act={act} busy={busy} name={name} people={people} />}
 
@@ -126,6 +145,35 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
       <AllHandsChat code={code} state={state} party={party} refresh={refresh} people={people} meId={meId} />
     </div>
   );
+}
+
+/** What a tap will do to this phone's screen, shown before the server answers. */
+function optimistic(p: AllHandsView, body: Record<string, unknown>, meId: string): AllHandsView {
+  const target = typeof body.target === "string" ? body.target : null;
+  switch (body.type) {
+    case "ready":
+      return { ...p, me: { ...p.me, ready: true }, seats: p.seats.map((x) => (x.id === meId ? { ...x, ready: true } : x)) };
+    case "pick":
+      if (!p.night || !target) return p;
+      return {
+        ...p,
+        night: {
+          ...p.night,
+          myPick: target,
+          acted: p.night.myPick ? p.night.acted : p.night.acted + 1,
+          team: p.night.team?.map((m) => (m.id === meId ? { ...m, pick: target } : m)) ?? null,
+        },
+      };
+    case "vote": {
+      if (!p.vote || !target) return p;
+      const tally: Record<string, string[]> = {};
+      for (const [k, ids] of Object.entries(p.vote.tally)) tally[k] = ids.filter((id) => id !== meId);
+      (tally[target] ??= []).push(meId);
+      return { ...p, vote: { ...p.vote, tally, myVote: target, voted: p.vote.myVote ? p.vote.voted : p.vote.voted + 1 } };
+    }
+    default:
+      return p;
+  }
 }
 
 // ---------- clock ----------
@@ -188,7 +236,7 @@ function PrimaryButton({ children, ...rest }: React.ButtonHTMLAttributes<HTMLBut
   return (
     <button
       {...rest}
-      className="min-h-12 w-full rounded-xl bg-lime-300 px-4 font-bold text-slate-950 active:bg-lime-200 disabled:cursor-not-allowed disabled:opacity-50"
+      className="min-h-12 w-full rounded-xl bg-lime-300 px-4 font-bold text-slate-950 transition-transform duration-75 enabled:active:scale-[0.98] active:bg-lime-200 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {children}
     </button>
@@ -419,13 +467,11 @@ const NIGHT_COPY: Record<NightKind, { title: string; body: string }> = {
 function AfterHours({
   party,
   act,
-  busy,
   name,
   people,
 }: {
   party: AllHandsView;
   act: Act;
-  busy: boolean;
   name: Name;
   people: Map<string, PlayerPublic>;
 }) {
@@ -458,10 +504,9 @@ function AfterHours({
               <li key={x.id}>
                 <button
                   type="button"
-                  disabled={busy}
                   aria-pressed={picked}
                   onClick={() => void act({ type: "pick", target: x.id })}
-                  className={`flex min-h-16 w-full flex-col items-start justify-center gap-1 rounded-2xl border px-3 py-2 text-left ${
+                  className={`flex min-h-16 w-full flex-col items-start justify-center gap-1 rounded-2xl border px-3 py-2 text-left transition-transform duration-75 active:scale-[0.97] ${
                     picked ? "border-lime-300 bg-lime-300/10" : "border-slate-800 bg-slate-900 active:bg-slate-800"
                   }`}
                 >
@@ -590,14 +635,12 @@ function Roster({ seats, name, people, showRoles = false }: { seats: SeatView[];
 function Review({
   party,
   act,
-  busy,
   name,
   people,
   me,
 }: {
   party: AllHandsView;
   act: Act;
-  busy: boolean;
   name: Name;
   people: Map<string, PlayerPublic>;
   me: string;
@@ -611,10 +654,10 @@ function Review({
       <li key={id}>
         <button
           type="button"
-          disabled={busy || !v.canVote || id === me}
+          disabled={!v.canVote || id === me}
           aria-pressed={mine}
           onClick={() => void act({ type: "vote", target: id })}
-          className={`flex min-h-14 w-full items-center gap-3 rounded-2xl border px-3 py-2 text-left disabled:cursor-default ${
+          className={`flex min-h-14 w-full items-center gap-3 rounded-2xl border px-3 py-2 text-left transition-transform duration-75 enabled:active:scale-[0.97] disabled:cursor-default ${
             mine ? "border-lime-300 bg-lime-300/10" : "border-slate-800 bg-slate-900 enabled:active:bg-slate-800"
           }`}
         >
@@ -807,14 +850,14 @@ function HostBar({ party, act, busy }: { party: AllHandsView; act: Act; busy: bo
     <section aria-label="Host controls" className="flex flex-col gap-2 rounded-2xl border border-dashed border-slate-700 p-3">
       <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">Host controls</p>
       <div className="flex flex-wrap gap-2">
-        <button type="button" disabled={busy} onClick={() => void act({ type: "skip", from: party.phase })} className="min-h-11 flex-1 rounded-lg border border-slate-700 px-3 text-sm font-semibold">
+        <button type="button" disabled={busy} onClick={() => void act({ type: "skip", from: party.phase })} className="min-h-11 flex-1 rounded-lg border border-slate-700 px-3 text-sm font-semibold transition-transform duration-75 enabled:active:scale-[0.97] enabled:active:bg-slate-800 disabled:opacity-50">
           {skipLabel[party.phase] ?? "Skip ahead"}
         </button>
         <button
           type="button"
           disabled={busy}
           onClick={() => void act({ type: party.paused ? "resume" : "pause" })}
-          className="min-h-11 rounded-lg border border-slate-700 px-3 text-sm font-semibold"
+          className="min-h-11 rounded-lg border border-slate-700 px-3 text-sm font-semibold transition-transform duration-75 enabled:active:scale-[0.97] enabled:active:bg-slate-800 disabled:opacity-50"
         >
           {party.paused ? "Resume" : "Pause"}
         </button>
@@ -822,7 +865,7 @@ function HostBar({ party, act, busy }: { party: AllHandsView; act: Act; busy: bo
           type="button"
           disabled={busy}
           onClick={() => window.confirm("End this game for everyone and go back to the lobby?") && void act({ type: "end" })}
-          className="min-h-11 rounded-lg border border-rose-400/50 px-3 text-sm font-semibold text-rose-300"
+          className="min-h-11 rounded-lg border border-rose-400/50 px-3 text-sm font-semibold text-rose-300 transition-transform duration-75 enabled:active:scale-[0.97] disabled:opacity-50"
         >
           End game
         </button>
