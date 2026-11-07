@@ -32,14 +32,15 @@ export function Dock({
   return (
     <nav
       aria-label={t("shell.dock.label")}
-      className="relative z-10 shrink-0 border-t border-stone-800 bg-stone-950/95 backdrop-blur md:hidden"
+      className="rail-bar relative z-10 shrink-0 border-t border-stone-800 bg-stone-950/95 backdrop-blur md:hidden"
       style={{
         paddingBottom: "env(safe-area-inset-bottom)",
         paddingLeft: "env(safe-area-inset-left)",
         paddingRight: "env(safe-area-inset-right)",
       }}
     >
-      <ul className="flex items-stretch justify-around">
+      {/* rail-*: on the folded iPhone Duo this becomes a column in the right strip (globals.css, "Side rail"). */}
+      <ul className="rail-list flex items-stretch justify-around">
         {APP_ORDER.map((app) => {
           const { Icon } = APP_META[app];
           const label = t(`shell.app.${app}`);

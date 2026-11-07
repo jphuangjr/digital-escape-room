@@ -244,7 +244,7 @@ export function GameShell({
 
   return (
     <GameContext.Provider value={ctx}>
-      <div className="fixed inset-0 flex flex-col overflow-hidden bg-[#0b0a08] text-stone-200" onClickCapture={motion.onClickCapture}>
+      <div className="rail-pad-bottom fixed inset-0 flex flex-col overflow-hidden bg-[#0b0a08] text-stone-200" onClickCapture={motion.onClickCapture}>
         <Grain />
         <StatusBar
           ctx={ctx}
@@ -256,7 +256,8 @@ export function GameShell({
           onSound={toggleSound}
         />
 
-        <div className="relative flex min-h-0 flex-1">
+        {/* Clear of the side insets (notch in landscape, the Duo's right strip); the status bar and dock pad their own. */}
+        <div className="relative flex min-h-0 flex-1 pl-safe pr-safe">
           {/* Desktop icons (≥768px) */}
           <nav
             aria-label={t("shell.desktop.label")}
