@@ -516,6 +516,26 @@ export function viewFor(s: AllHandsState, viewerId: string, ctx: { hostId: strin
   };
 }
 
+/** What a bot in a test room does now: tap Ready, make a night pick (Moles back each other up), or vote. */
+export function botMove(s: AllHandsState, id: string, rand: (n: number) => number): AllHandsAction | null {
+  const seat = seatOf(s, id);
+  if (!seat) return null;
+  const any = <T>(xs: T[]): T | null => (xs.length ? xs[rand(xs.length)] : null);
+  if (s.phase === "reveal") return seat.ready ? null : { type: "ready" };
+  if (!seat.alive) return null;
+  if (s.phase === "night" && !s.picks[id]) {
+    const targets = nightTargets(s, seat);
+    const teammate = seat.role === "mole" ? s.seats.find((x) => x.role === "mole" && x.alive && s.picks[x.id]) : undefined;
+    const target = teammate && targets.includes(s.picks[teammate.id]) ? s.picks[teammate.id] : any(targets);
+    return target ? { type: "pick", target } : null;
+  }
+  if (s.phase === "vote" && !s.votes[id]) {
+    const target = any([...living(s).filter((x) => x.id !== id).map((x) => x.id), SKIP]);
+    return target ? { type: "vote", target } : null;
+  }
+  return null;
+}
+
 export const allHandsGame = definePartyGame<AllHandsState, Record<string, unknown>, AllHandsView>({
   id: ALL_HANDS_GAME_ID,
   parse: parseState,
@@ -529,4 +549,6 @@ export const allHandsGame = definePartyGame<AllHandsState, Record<string, unknow
   view: viewFor,
   isOver: (s) => s.phase === "over",
   canChat: canTeamChat,
+  botMove: (s, id, rand) => botMove(s, id, rand) as Record<string, unknown> | null,
+  roles: (s) => new Map(s.seats.map((x) => [x.id, x.role])),
 });

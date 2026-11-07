@@ -6,6 +6,7 @@ import type { PlayerPublic, RoomState } from "@/lib/types";
 import { apiFetch } from "@/lib/client/game";
 import { QrCode } from "@/components/site/QrCode";
 import { AllHandsChat } from "./AllHandsChat";
+import { TestBar } from "./TestBar";
 import {
   DAY_OPTIONS_MS,
   ROLE_INFO,
@@ -74,6 +75,8 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
   }, [left, party.endsAt, act]);
 
   const isHost = state.me.id === party.hostId;
+  // In an admin's test room the views are through the eyes of the bot they picked.
+  const meId = state.partyTest?.viewingAs ?? state.me.id;
   const name = (id: string | null | undefined) => (id ? (people.get(id)?.displayName ?? "Someone") : "Nobody");
 
   return (
@@ -95,6 +98,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
       </header>
 
       <main className="mx-auto flex max-w-xl flex-col gap-5 px-edge pb-24 pt-5">
+        {state.partyTest && <TestBar code={code} test={state.partyTest} party={party} refresh={refresh} meId={state.me.id} />}
         {party.me.seated && !party.me.alive && party.phase !== "over" && <LinkedInBanner />}
         {!party.me.seated && party.phase !== "lobby" && party.phase !== "over" && (
           <Banner>The game started before you joined. You&apos;re watching this round and get dealt in next game.</Banner>
@@ -106,20 +110,20 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
         )}
 
         {party.phase === "lobby" && <Lobby code={code} state={state} party={party} isHost={isHost} act={act} busy={busy} name={name} />}
-        {party.phase === "reveal" && <Onboarding party={party} meId={state.me.id} act={act} busy={busy} name={name} />}
+        {party.phase === "reveal" && <Onboarding party={party} meId={meId} act={act} busy={busy} name={name} />}
         {party.phase === "night" && <AfterHours party={party} act={act} busy={busy} name={name} people={people} />}
         {(party.phase === "dawn" || party.phase === "day") && <Morning party={party} name={name} people={people} />}
-        {party.phase === "vote" && <Review party={party} act={act} busy={busy} name={name} people={people} me={state.me.id} />}
+        {party.phase === "vote" && <Review party={party} act={act} busy={busy} name={name} people={people} me={meId} />}
         {party.phase === "exit" && <ExitInterview party={party} name={name} />}
         {party.phase === "over" && <GameOver party={party} isHost={isHost} act={act} busy={busy} name={name} people={people} />}
 
         {party.me.seated && party.phase !== "lobby" && party.phase !== "over" && party.phase !== "reveal" && (
-          <BadgeCard party={party} meId={state.me.id} name={name} compact />
+          <BadgeCard party={party} meId={meId} name={name} compact />
         )}
         {isHost && party.phase !== "lobby" && party.phase !== "over" && <HostBar party={party} act={act} busy={busy} />}
         {party.phase !== "lobby" && <History history={party.history} name={name} />}
       </main>
-      <AllHandsChat code={code} state={state} party={party} refresh={refresh} people={people} />
+      <AllHandsChat code={code} state={state} party={party} refresh={refresh} people={people} meId={meId} />
     </div>
   );
 }

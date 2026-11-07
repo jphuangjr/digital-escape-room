@@ -6,6 +6,7 @@ import {
   REVEAL_MS,
   applyAction,
   advanceState,
+  botMove,
   canTeamChat,
   deal,
   initialState,
@@ -339,5 +340,36 @@ describe("chat", () => {
     expect(canTeamChat(dead, "watcher")).toBe(true);
     expect(canTeamChat({ ...dead, phase: "over" }, "p5")).toBe(true);
     expect(viewFor(dead, "p5", { hostId: "p1" }).canTeamChat).toBe(false);
+  });
+});
+
+describe("test-room bots", () => {
+  const roles: Role[] = ["mole", "mole", "it", "hr", "employee", "employee", "employee"];
+  const room = ids(7);
+  const run = (s: AllHandsState, skip: string[] = []) => {
+    for (const id of room) {
+      if (skip.includes(id)) continue;
+      const m = botMove(s, id, seq());
+      if (m) s = act(s, id, m, 2000, room);
+    }
+    return s;
+  };
+
+  it("plays a whole round with legal moves, Moles backing each other up", () => {
+    let s = run(table(7, roles));
+    expect(s.phase).toBe("night");
+    s = act(s, "p1", { type: "pick", target: "p5" }, 2000, room);
+    s = run(s, ["p1"]);
+    expect(s.phase).toBe("dawn"); // everyone picked and the Moles agreed
+    expect(s.nights[0].moleTarget).toBe("p5");
+    s = act(act(s, "p1", { type: "skip", from: "dawn" }, 3000, room), "p1", { type: "skip", from: "day" }, 3000, room);
+    s = run(s);
+    expect(["exit", "over"]).toContain(s.phase);
+  });
+
+  it("has nothing to do outside its turn", () => {
+    expect(botMove(initialState(), "p1", seq())).toBeNull();
+    const s = table(7, roles);
+    expect(botMove(s, "nobody", seq())).toBeNull();
   });
 });
