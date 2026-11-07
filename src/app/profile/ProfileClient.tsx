@@ -36,7 +36,7 @@ export function ProfileClient() {
   }, []);
 
   return (
-    <main className="noir-vignette min-h-dvh px-4 pb-12 pt-8">
+    <main className="noir-vignette min-h-dvh px-edge pt-edge pb-12">
       <div className="mx-auto flex max-w-xl flex-col gap-6">
         <div className="flex items-center justify-between">
           <Link href="/" className="text-sm text-noir-ink-faint">
@@ -54,6 +54,10 @@ export function ProfileClient() {
           </section>
         )}
         {load.kind === "ready" && <Profile data={load.data} />}
+        {/* The home-screen app has no address bar: this is the way to the diagnostics page. */}
+        <Link href="/device" className="self-center py-2 text-xs text-noir-ink-faint underline-offset-4 hover:underline">
+          {t("device.link")}
+        </Link>
       </div>
     </main>
   );
