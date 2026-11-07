@@ -5,6 +5,7 @@ import { getPlayerInRoom, getRoom, newPlayerToken, setPlayerCookie, touchRoom } 
 import { publish } from "@/server/realtime";
 import { getSessionUser } from "@/server/auth";
 import { getT } from "@/i18n/server";
+import { colorAvailable } from "@/lib/avatarColors";
 
 const MAX_PLAYERS = 16;
 
@@ -24,6 +25,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
 
   // Rejoin (by cookie, or by Google account on a new device): keep identity, refresh name/color.
   const existing = await getPlayerInRoom(room);
+
+  // Each player's color is their own: refuse one another player in the room already has.
+  const others = await db.player.findMany({
+    where: { roomId: room.id, ...(existing ? { id: { not: existing.id } } : {}) },
+    select: { color: true, displayName: true },
+  });
+  if (!colorAvailable(color, others.map((p) => p.color))) {
+    return error(409, t("api.player.colorTaken"), {
+      colorTaken: true,
+      taken: others.map((p) => ({ color: p.color.toLowerCase(), name: p.displayName })),
+    });
+  }
   if (existing) {
     // Signing in after joining anonymously links this player to the account, unless the account
     // already has a different player in this room.
