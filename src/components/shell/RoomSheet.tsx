@@ -101,7 +101,7 @@ export function RoomSheet({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center md:items-stretch md:justify-end" role="dialog" aria-modal="true" aria-label={t("room.sheet.label")}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center px-safe md:items-stretch md:justify-end" role="dialog" aria-modal="true" aria-label={t("room.sheet.label")}>
       <button aria-label={t("room.sheet.closeBackdrop")} className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div
         className="relative flex max-h-[88dvh] w-full flex-col overflow-hidden rounded-t-2xl border-t border-stone-700 bg-stone-950 md:max-h-none md:w-[420px] md:rounded-none md:border-l md:border-t-0"
@@ -127,7 +127,7 @@ export function RoomSheet({
         </div>
 
         {/* Scrolls sideways rather than wrapping labels when the text size is large. */}
-        <div role="tablist" className="mt-3 flex overflow-x-auto border-b border-stone-800 px-2 [scrollbar-width:none]">
+        <div role="tablist" className="mt-3 flex shrink-0 overflow-x-auto border-b border-stone-800 px-2 [scrollbar-width:none]">
           {(
             [
               ["people", t("room.tab.people", { count: state.players.filter((p) => p.online).length })],

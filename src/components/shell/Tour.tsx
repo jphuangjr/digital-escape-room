@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { useT } from "@/i18n/client";
 import type { AppId } from "@/lib/types";
 import type { RoomTab } from "./RoomSheet";
+import { sideInsets } from "@/lib/client/safeArea";
 
 /**
  * First-run guided tour. Dims the screen, spotlights the real control for each step (found by its
@@ -75,6 +76,7 @@ export function Tour({
   const [rect, setRect] = useState<Rect | null>(null);
   const [vh, setVh] = useState(0);
   const [vw, setVw] = useState(0);
+  const [side, setSide] = useState({ left: 0, right: 0 });
   const step = STEPS[i];
   const last = i === STEPS.length - 1;
 
@@ -87,6 +89,7 @@ export function Tour({
   const measure = useCallback(() => {
     setVh(window.innerHeight);
     setVw(window.innerWidth);
+    setSide(sideInsets());
     if (!step.target) return setRect(null);
     const el = findTarget(step.target);
     if (!el) return setRect(null);
@@ -123,12 +126,16 @@ export function Tour({
   const spot = rect && { top: rect.top - pad, left: rect.left - pad, width: rect.width + pad * 2, height: rect.height + pad * 2 };
   // Card goes on whichever side of the target has more room, lined up with it horizontally (kept on
   // screen), with an arrow pointing at the target like a tooltip. Centred when there's no target.
-  const cardW = Math.min(vw * 0.92, CARD_MAX_W);
+  // Kept inside the side safe areas (e.g. clear of the folded iPhone Duo's clock pill on the right).
+  const usable = vw - side.left - side.right;
+  const cardW = Math.min(usable * 0.92, CARD_MAX_W);
   const spaceAbove = spot ? spot.top : 0;
   const spaceBelow = spot ? vh - (spot.top + spot.height) : 0;
   const below = spot ? spaceBelow >= spaceAbove : false;
   const targetX = spot ? spot.left + spot.width / 2 : vw / 2;
-  const cardLeft = spot ? Math.min(Math.max(targetX - cardW / 2, EDGE), vw - cardW - EDGE) : (vw - cardW) / 2;
+  const cardLeft = spot
+    ? Math.min(Math.max(targetX - cardW / 2, side.left + EDGE), vw - side.right - cardW - EDGE)
+    : side.left + (usable - cardW) / 2;
   const arrowX = Math.min(Math.max(targetX - cardLeft, 22), cardW - 22);
   // A target that fills most of the screen (a whole wall) leaves no room on either side: the card then
   // sits at the bottom, over the target, with no arrow.

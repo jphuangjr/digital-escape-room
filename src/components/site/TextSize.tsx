@@ -99,7 +99,7 @@ function TextSizeCard({ onDone }: { onDone: () => void }) {
   const t = useT();
   const [size, setSize] = useTextSize();
   return (
-    <div className="fixed inset-0 z-[110] flex items-end justify-center bg-black/70 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:items-center" role="dialog" aria-modal="true" aria-labelledby="textsize-title">
+    <div className="fixed inset-0 z-[110] flex items-end justify-center bg-black/70 px-edge pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:items-center" role="dialog" aria-modal="true" aria-labelledby="textsize-title">
       <div className="max-h-full w-full max-w-sm overflow-y-auto rounded-2xl border border-stone-700 bg-stone-950 p-5 shadow-2xl">
         <h2 id="textsize-title" className="font-serif text-2xl text-stone-100">
           {t("textSize.title")}

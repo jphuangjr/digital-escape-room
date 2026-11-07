@@ -47,7 +47,7 @@ export function RoomLoader({ gameId }: { gameId: string }) {
   const train = gameId === TRAIN_GAME_ID;
   const atlas = gameId === ATLAS_GAME_ID;
   return (
-    <div role="status" className="flex min-h-[100dvh] flex-col items-center justify-center px-6 text-center">
+    <div role="status" className="flex min-h-[100dvh] flex-col items-center justify-center px-edge-lg text-center">
       {train ? <Departures /> : atlas ? <TurningCompass /> : <Boot />}
       <p className="mt-5 font-mono text-sm tracking-wide text-stone-400">
         {t(train ? "train.room.boarding" : atlas ? "atlas.loading" : "site.room.booting")}
