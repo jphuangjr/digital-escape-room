@@ -575,7 +575,7 @@ function Sheet({
     </div>
   );
   return (
-    <div ref={zoom?.root} className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={title}>
+    <div ref={zoom?.root} className="fixed inset-0 z-40 flex items-end justify-center px-safe" role="dialog" aria-modal="true" aria-label={title}>
       <button ref={zoom?.backdrop} aria-label={t("train.close")} className="absolute inset-0 bg-black/60" onClick={onClose} />
       {side ? (
         <div
@@ -847,7 +847,7 @@ function VotePanel({ state, scene, busy, act }: { state: RoomState; scene: Scene
   const voters = state.players.filter((p) => p.online || vote.votes[p.id]);
   const count = (s: Suspect) => Object.values(vote.votes).filter((v) => v === s).length;
   return (
-    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#120c07] px-4 pb-8" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label={t("train.vote.aria")}>
+    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#120c07] px-edge pb-8" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label={t("train.vote.aria")}>
       <div className="mx-auto w-full max-w-md space-y-4">
         <p className="pt-4 text-center font-mono text-11px uppercase tracking-[0.3em] text-[#c9a227]">{t("train.vote.eyebrow")}</p>
         <h1 className="text-center font-serif text-3xl text-[#ecd27a]">{t("train.vote.title")}</h1>
@@ -928,7 +928,7 @@ function EndingPanel({ scene, code, signedIn }: { scene: SceneDTO; code: string;
   const t = useT();
   const e = scene.ending!;
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#120c07] px-4 pb-14" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label={e.title}>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#120c07] px-edge pb-14" style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }} role="dialog" aria-modal="true" aria-label={e.title}>
       <article className="mx-auto max-w-md pt-6">
         <ResultReveal
           code={code}
@@ -963,7 +963,7 @@ function EndingPanel({ scene, code, signedIn }: { scene: SceneDTO; code: string;
 function IntroCard({ onClose }: { onClose: () => void }) {
   const t = useT();
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4" role="dialog" aria-modal="true" aria-label={t("site.game.nightingale-express.title")}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-edge" role="dialog" aria-modal="true" aria-label={t("site.game.nightingale-express.title")}>
       <div className="w-full max-w-sm space-y-3 rounded-2xl border border-[#c9a227]/50 bg-[#1b120b] p-5">
         <p className="font-mono text-11px uppercase tracking-[0.3em] text-[#c9a227]">{t("train.intro.when")}</p>
         <h2 className="font-serif text-2xl text-[#ecd27a]">{t("train.intro.title")}</h2>

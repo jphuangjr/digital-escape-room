@@ -112,7 +112,7 @@ export function VotePanel({ state, scene, busy, act }: { state: RoomState; scene
   const name = (c: AtlasEnding) => vote.choices.find((x) => x.id === c)?.name ?? c;
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#071015] px-4 pb-8"
+      className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#071015] px-edge pb-8"
       style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
       role="dialog"
       aria-modal="true"
@@ -192,7 +192,7 @@ export function EndingPanel({ scene, code, signedIn }: { scene: AtlasSceneDTO; c
   const e = scene.ending!;
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-[#071015] px-4 pb-14"
+      className="fixed inset-0 z-50 overflow-y-auto bg-[#071015] px-edge pb-14"
       style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
       role="dialog"
       aria-modal="true"

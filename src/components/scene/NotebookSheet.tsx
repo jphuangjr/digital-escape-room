@@ -18,7 +18,7 @@ export function NotebookSheet({ ctx, onClose, closeLabel }: { ctx: GameCtx; onCl
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={t("shell.app.notes")}>
+    <div className="fixed inset-0 z-40 flex items-end justify-center px-safe" role="dialog" aria-modal="true" aria-label={t("shell.app.notes")}>
       <button aria-label={closeLabel} className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div
         className="relative flex h-[86dvh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl border-t border-zinc-700 bg-zinc-950"

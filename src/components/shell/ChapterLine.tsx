@@ -102,7 +102,7 @@ function ChapterSheet({ chapter, theme, onClose }: { chapter: ChapterDTO; theme:
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={t("shell.chapter.title")}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center px-safe" role="dialog" aria-modal="true" aria-label={t("shell.chapter.title")}>
       <button type="button" aria-label={t("shell.chapter.close")} className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div
         className={`relative w-full max-w-md rounded-t-2xl border-t px-4 pt-3 ${c.panel}`}

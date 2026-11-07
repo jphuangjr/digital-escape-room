@@ -36,7 +36,7 @@ export function ReplaceRoomDialog({
   }, [busy, onCancel]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 px-4 pb-safe pt-safe sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 px-edge pb-safe pt-safe sm:items-center">
       <div
         role="alertdialog"
         aria-modal="true"

@@ -147,7 +147,7 @@ function QrScanner({ onCode, onClose }: { onCode: (code: string) => void; onClos
           : t("site.scan.hint");
 
   return (
-    <div role="dialog" aria-modal="true" aria-label={t("site.scan.button")} className="fixed inset-0 z-50 flex flex-col bg-black">
+    <div role="dialog" aria-modal="true" aria-label={t("site.scan.button")} className="fixed inset-0 z-50 flex flex-col bg-black px-safe">
       <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover" />
       {/* Viewfinder: a clear square with brass corners over a dimmed frame. */}
       {status === "scanning" && (

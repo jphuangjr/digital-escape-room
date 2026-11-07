@@ -96,6 +96,10 @@
   padding-left: max(1rem, var(--safe-left));
   padding-right: max(1rem, var(--safe-right));
 }
+@utility px-edge-lg {
+  padding-left: max(1.5rem, var(--safe-left));
+  padding-right: max(1.5rem, var(--safe-right));
+}
 @utility pt-edge {
   padding-top: max(2rem, var(--safe-top));
 }

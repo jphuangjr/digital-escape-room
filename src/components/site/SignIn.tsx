@@ -153,7 +153,7 @@ function SignInSheet({ callbackUrl, providers, onClose }: { callbackUrl: string;
   const input = "min-h-12 w-full rounded-lg border border-noir-line bg-noir-bg-3 px-4 text-noir-ink placeholder:text-noir-ink-faint focus:border-noir-brass focus:outline-none";
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-labelledby="signin-title">
+    <div className="fixed inset-0 z-[150] flex items-end justify-center px-safe sm:items-center" role="dialog" aria-modal="true" aria-labelledby="signin-title">
       <button type="button" aria-label={t("auth.close")} className="absolute inset-0 bg-black/70" onClick={() => !busy && onClose()} />
       <div className="relative w-full max-w-md rounded-t-2xl border border-noir-line bg-noir-bg-2 px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5 shadow-2xl sm:rounded-2xl">
         <div className="mb-4 flex items-start justify-between gap-3">
