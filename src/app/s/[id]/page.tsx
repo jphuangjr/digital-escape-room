@@ -41,7 +41,7 @@ export default async function SharedResultPage({ params }: Props) {
     { label: t("result.stat.hints"), value: String(r.hintsUsed) },
   ];
   return (
-    <main className="noir-vignette min-h-dvh px-4 pb-12" style={{ paddingTop: "max(2rem, env(safe-area-inset-top))" }}>
+    <main className="noir-vignette min-h-dvh px-edge pt-edge pb-12">
       <article className="mx-auto max-w-md space-y-6">
         <header className="space-y-2 text-center">
           <p className="font-mono text-11px uppercase tracking-[0.3em] text-noir-ink-faint">{t("result.page.eyebrow")}</p>

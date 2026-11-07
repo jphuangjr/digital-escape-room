@@ -234,7 +234,12 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
         {/* The header owns the strip under the status bar and paints it solid, so iOS doesn't fade it as page content. */}
         <header
           className="relative z-10 flex shrink-0 items-center gap-2 border-b border-[#3d2615] bg-[#120c07] px-3"
-          style={{ paddingTop: "env(safe-area-inset-top)", height: "calc(3rem + env(safe-area-inset-top))" }}
+          style={{
+            paddingTop: "env(safe-area-inset-top)",
+            paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+            paddingRight: "max(0.75rem, env(safe-area-inset-right))",
+            height: "calc(3rem + env(safe-area-inset-top))",
+          }}
         >
           <div className="min-w-0 flex-1">
             <p className="truncate font-serif text-base text-[#ecd27a]">
@@ -254,8 +259,11 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
         </header>
 
         {/* the wall */}
+        {/* Margins, not padding: the art and its buttons are absolutely placed, and must stay inside the side insets
+            (a notch in landscape; on the folded iPhone Duo, the right strip where the tab rail sits). */}
         <main
           className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden"
+          style={{ marginLeft: "var(--safe-left)", marginRight: "var(--safe-right)" }}
           onPointerDown={(e) => (swipe.current = { x: e.clientX, y: e.clientY })}
           onPointerUp={(e) => {
             const s = swipe.current;
@@ -369,7 +377,11 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
         </main>
 
         {/* the tab bar, with the team's things in a tray above it */}
-        <footer className="shrink-0 border-t border-[#3d2615] bg-[#1b120b]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+        {/* rail-*: on the folded iPhone Duo the tabs move into the right strip (globals.css, "Side rail"); the tray stays here. */}
+        <footer
+          className="rail-footer shrink-0 border-t border-[#3d2615] bg-[#1b120b]"
+          style={{ paddingBottom: "env(safe-area-inset-bottom)", paddingLeft: "env(safe-area-inset-left)", paddingRight: "env(safe-area-inset-right)" }}
+        >
           {itemsOpen && (
             <div id="nx-items" className="at-tray border-b border-[#3d2615] px-2 pt-1.5">
               <p className="px-1 font-mono text-10px uppercase tracking-[0.25em] text-stone-500">{t("train.things")}</p>
@@ -390,7 +402,7 @@ export function TrainShell({ code, state, refresh }: { code: string; state: Room
               </div>
             </div>
           )}
-          <nav className="grid grid-cols-4" aria-label={t("train.tab.aria")}>
+          <nav className="rail-bar rail-list grid grid-cols-4" aria-label={t("train.tab.aria")}>
             <TabButton
               icon="🧳"
               label={t("train.tab.items")}

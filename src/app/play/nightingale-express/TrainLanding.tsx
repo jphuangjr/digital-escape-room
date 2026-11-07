@@ -86,7 +86,7 @@ export function TrainLanding({
   }
 
   return (
-    <main className="noir-vignette min-h-dvh px-4 pb-10 pt-8">
+    <main className="noir-vignette min-h-dvh px-edge pt-edge pb-10">
       <div className="mx-auto flex max-w-md flex-col gap-6">
         <div className="flex items-center justify-between">
           <Link href="/" className="text-sm text-noir-ink-faint">
