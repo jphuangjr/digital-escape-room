@@ -15,6 +15,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.player.nameTooLong": "表示名は{max}文字以内で入力してください。",
   "api.player.nameRejected": "別の表示名を選んでください。",
   "api.player.badColor": "色は #c9a227 のような16進数で指定してください。",
+  "api.player.colorTaken": "その色はルームの他の人がすでに使っています。別の色を選んでください。",
   "api.admin.signIn": "先にログインしてください。",
   "api.admin.only": "管理者専用です。",
   "api.admin.expiryRange": "有効期限は1〜365日で指定してください。",

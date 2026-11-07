@@ -15,6 +15,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.player.nameTooLong": "표시 이름은 {max}자 이하로 입력해 주세요.",
   "api.player.nameRejected": "다른 표시 이름을 골라 주세요.",
   "api.player.badColor": "색상은 #c9a227 같은 16진수 값이어야 해요.",
+  "api.player.colorTaken": "방에 이미 그 색을 쓰는 사람이 있어요. 다른 색을 골라 주세요.",
   "api.admin.signIn": "먼저 로그인해 주세요.",
   "api.admin.only": "관리자만 이용할 수 있어요.",
   "api.admin.expiryRange": "만료 기간은 1~365일 사이여야 해요.",

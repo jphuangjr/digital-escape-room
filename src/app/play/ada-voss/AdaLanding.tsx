@@ -14,8 +14,11 @@ import { LanguageSwitcher, useT } from "@/i18n/client";
 import { getGame, gameText } from "@/lib/games";
 import { FormattedMessage } from "react-intl";
 import { QrScanButton } from "@/components/site/QrScanner";
+import { ADA_COLORS, colorAvailable, freeColor, type TakenColor } from "@/lib/avatarColors";
+import { useTakenColors } from "@/lib/client/takenColors";
+import { TakenMark } from "@/components/site/TakenMark";
 
-const COLORS = ["#c9a227", "#a3302a", "#3d8c88", "#6b7fd7", "#b56cc4", "#d9824b", "#7fae4e", "#d8d2c4"];
+const COLORS = ADA_COLORS;
 const PREF_KEY = "ada.profile";
 const GAME_ID = "ada-voss";
 
@@ -38,6 +41,14 @@ export function AdaLanding() {
   const [err, setErr] = useState<string | null>(null);
   const [me, setMe] = useState<MeResponse | null>(null);
   const [replaceRooms, setReplaceRooms] = useState<OpenHostedRoom[] | null>(null);
+  // Joining: colors the room's other players already have are crossed out (a new room has none to avoid).
+  const joinTarget = mode === "join" && /^ADA-[A-Z0-9]{4}$/.test(normalizeCode(joinCode)) ? normalizeCode(joinCode) : null;
+  const { taken, set: setTaken } = useTakenColors(joinTarget);
+  const takenColors = taken.map((x) => x.color);
+  const takenKey = takenColors.join(",");
+  useEffect(() => {
+    setColor((c) => freeColor(COLORS, takenKey ? takenKey.split(",") : [], c));
+  }, [takenKey]);
 
   useEffect(() => {
     let cancelled = false;
@@ -109,7 +120,15 @@ export function AdaLanding() {
         replaceRequired?: boolean;
         purchaseRequired?: boolean;
         openRooms?: OpenHostedRoom[];
+        colorTaken?: boolean;
+        taken?: TakenColor[];
       };
+      if (data.colorTaken) {
+        setTaken(data.taken ?? []);
+        setErr(data.error ?? t("site.form.colorTaken"));
+        setBusy(false);
+        return;
+      }
       if (data.purchaseRequired) {
         setMe((m) => (m ? { ...m, ownedGames: m.ownedGames.filter((g) => g !== GAME_ID) } : m));
         setErr(t("site.ada.errPurchase"));
@@ -254,21 +273,29 @@ export function AdaLanding() {
           <fieldset className="flex flex-col gap-2">
             <legend className="mb-1.5 text-xs uppercase tracking-widest text-noir-ink-faint">{t("site.form.avatarColor")}</legend>
             <div className="grid grid-cols-8 gap-1">
-              {COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  aria-label={t("site.form.colorAria", { color: c })}
-                  aria-pressed={color === c}
-                  onClick={() => setColor(c)}
-                  className="flex min-h-11 items-center justify-center rounded-full"
-                >
-                  <span
-                    className={`block h-8 w-8 rounded-full border-2 ${color === c ? "border-noir-ink scale-110" : "border-transparent"}`}
-                    style={{ backgroundColor: c }}
-                  />
-                </button>
-              ))}
+              {COLORS.map((c) => {
+                const owner = taken.find((x) => x.color === c.toLowerCase());
+                const off = !colorAvailable(c, takenColors);
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    disabled={off}
+                    aria-label={off && owner ? t("site.form.colorTakenAria", { color: c, name: owner.name }) : t("site.form.colorAria", { color: c })}
+                    title={off && owner ? t("site.form.colorTakenBy", { name: owner.name }) : undefined}
+                    aria-pressed={color === c}
+                    onClick={() => setColor(c)}
+                    className="flex min-h-11 items-center justify-center rounded-full disabled:cursor-not-allowed"
+                  >
+                    <span
+                      className={`relative block h-8 w-8 rounded-full border-2 ${off ? "opacity-30" : ""} ${color === c ? "border-noir-ink scale-110" : "border-transparent"}`}
+                      style={{ backgroundColor: c }}
+                    >
+                      {off && <TakenMark />}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </fieldset>
 

@@ -15,6 +15,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.player.nameTooLong": "顯示名稱最多 {max} 個字元。",
   "api.player.nameRejected": "請換一個顯示名稱。",
   "api.player.badColor": "顏色必須是像 #c9a227 這樣的十六進位值。",
+  "api.player.colorTaken": "房間裡已經有人用這個顏色了，請選別的顏色。",
   "api.admin.signIn": "請先登入。",
   "api.admin.only": "僅限管理員。",
   "api.admin.expiryRange": "到期天數必須介於 1–365 天。",

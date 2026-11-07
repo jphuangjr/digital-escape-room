@@ -14,6 +14,7 @@ const messages = {
   "api.player.nameTooLong": "Display name must be {max} characters or fewer.",
   "api.player.nameRejected": "Please choose a different display name.",
   "api.player.badColor": "Color must be a hex value like #c9a227.",
+  "api.player.colorTaken": "Someone in the room already has that color. Pick another.",
   "api.admin.signIn": "Sign in first.",
   "api.admin.only": "Admins only.",
   "api.admin.expiryRange": "Expiry must be 1–365 days.",

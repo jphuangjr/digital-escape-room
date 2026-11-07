@@ -16,6 +16,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.player.nameTooLong": "O nome de exibição deve ter no máximo {max} caracteres.",
   "api.player.nameRejected": "Escolha outro nome de exibição, por favor.",
   "api.player.badColor": "A cor deve ser um valor hexadecimal como #c9a227.",
+  "api.player.colorTaken": "Alguém na sala já tem essa cor. Escolha outra.",
   "api.admin.signIn": "Entre primeiro.",
   "api.admin.only": "Só para administradores.",
   "api.admin.expiryRange": "A validade deve ser de 1 a 365 dias.",
