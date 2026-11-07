@@ -34,7 +34,7 @@ export function ViewSource({ address, source, onClose }: { address: string; sour
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-black/70 px-safe md:items-center md:justify-center md:p-8" role="dialog" aria-modal="true" aria-label={t("browser.source.dialog")}>
+    <div className="fixed inset-0 z-50 flex flex-col bg-black/70 px-safe md:items-center md:justify-center md:py-8 md:pl-[max(2rem,var(--safe-left))] md:pr-[max(2rem,var(--safe-right))]" role="dialog" aria-modal="true" aria-label={t("browser.source.dialog")}>
       <div
         className="flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-[#0d1117] text-stone-200 md:max-w-4xl md:flex-none md:rounded-xl md:border md:border-stone-700 md:max-h-[85dvh]"
         style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}

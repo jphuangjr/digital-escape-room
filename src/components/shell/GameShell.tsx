@@ -258,10 +258,10 @@ export function GameShell({
 
         {/* Clear of the side insets (notch in landscape, the Duo's right strip); the status bar and dock pad their own. */}
         <div className="relative flex min-h-0 flex-1 pl-safe pr-safe">
-          {/* Desktop icons (≥768px) */}
+          {/* Desktop icons (≥768px), on the right. On the iPhone Duo they stand in its right strip (rail-wide). */}
           <nav
             aria-label={t("shell.desktop.label")}
-            className="hidden w-28 shrink-0 flex-col items-center gap-3 overflow-y-auto py-6 md:flex"
+            className="rail-wide hidden w-28 shrink-0 flex-col items-center gap-3 overflow-y-auto py-6 md:order-last md:flex"
           >
             {APP_ORDER.map((app) => (
               <AppTile
@@ -278,9 +278,9 @@ export function GameShell({
             ))}
           </nav>
 
-          <main className="relative flex min-h-0 min-w-0 flex-1 md:p-5 md:pl-1">
+          <main className="relative flex min-h-0 min-w-0 flex-1 md:p-5 md:pr-1">
             {(active === null || motion.homeBehind) && (
-              <div className={motion.homeBehind ? "absolute inset-0 flex md:inset-5 md:left-1" : "contents"} inert={active !== null}>
+              <div className={motion.homeBehind ? "absolute inset-0 flex md:inset-5 md:right-1" : "contents"} inert={active !== null}>
                 <HomeScreen isUnlocked={isUnlocked} badges={badges} glowing={glowing} people={people} openApp={openApp} />
               </div>
             )}
