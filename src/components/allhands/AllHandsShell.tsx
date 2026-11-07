@@ -7,6 +7,7 @@ import { apiFetch } from "@/lib/client/game";
 import { QrCode } from "@/components/site/QrCode";
 import { AllHandsChat } from "./AllHandsChat";
 import { TestBar } from "./TestBar";
+import { RulesButton } from "./RulesSheet";
 import {
   DAY_OPTIONS_MS,
   ROLE_INFO,
@@ -106,13 +107,16 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
         {busy && <div aria-hidden className="absolute inset-x-0 bottom-0 h-0.5 animate-pulse bg-lime-300" />}
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3 py-2">
           <div className="min-w-0">
-            <p className="text-11px font-semibold uppercase tracking-[0.25em] text-lime-300">All Hands · {code}</p>
+            <p className="truncate whitespace-nowrap text-11px font-semibold uppercase tracking-[0.2em] text-lime-300">All Hands · {code}</p>
             <p className="truncate text-lg font-bold">
               {PHASE_LABEL[party.phase]}
               {party.round > 0 && party.phase !== "over" && <span className="ml-2 text-sm font-normal text-slate-400">Round {party.round}</span>}
             </p>
           </div>
-          <Clock left={left} paused={party.paused} remainingMs={party.remainingMs} />
+          <div className="flex shrink-0 items-center gap-2">
+            <RulesButton players={party.seats.length || state.players.length} />
+            <Clock left={left} paused={party.paused} remainingMs={party.remainingMs} />
+          </div>
         </div>
       </header>
 
@@ -457,11 +461,14 @@ function Onboarding({ party, meId, act, busy, name }: { party: AllHandsView; meI
 
 // ---------- after hours ----------
 
+/** Who posted tonight's #random poll (the decoy question), one per round. */
+const POLL_AUTHORS = ["Brad (CEO)", "the Office Manager", "Chad from Sales", "the Founder's Nephew", "HR Bot", "the Growth Team"];
+
 const NIGHT_COPY: Record<NightKind, { title: string; body: string }> = {
   mole: { title: "Pick someone to lay off", body: "Agree with the other Moles. Your picks show up on each other's phones." },
   it: { title: "Whose DMs will you read?", body: "You'll find out in the morning whether they're a Mole." },
   hr: { title: "Who gets your paperwork?", body: "If the Moles go after them tonight, the layoff is blocked." },
-  decoy: { title: "", body: "Everyone taps something, so nobody can tell who has a power. Your answer is just for fun." },
+  decoy: { title: "", body: "Vote in the poll. Everyone taps a name after hours, so nobody can tell who has a power." },
 };
 
 function AfterHours({
@@ -490,8 +497,14 @@ function AfterHours({
   return (
     <>
       <div>
+        {n.kind === "decoy" && (
+          <p className="mb-2 flex items-center gap-2 text-sm text-slate-400">
+            <span className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-xs text-slate-300">#random</span>
+            <span aria-hidden>📊</span> Poll from {POLL_AUTHORS[(party.round - 1 + POLL_AUTHORS.length) % POLL_AUTHORS.length]}
+          </p>
+        )}
         <h1 className="text-3xl font-black">{n.kind === "decoy" ? n.prompt : copy.title}</h1>
-        <p className="mt-1 text-slate-300">{copy.body}</p>
+        <p className="mt-1 text-slate-300">{n.kind === "decoy" && n.myPick ? "Thanks for voting! 🙌" : copy.body}</p>
         <p className="mt-2 text-xs text-slate-500">Heads down. Keep your screen close. You can change your pick until time runs out.</p>
       </div>
       <ul className="grid grid-cols-2 gap-2">
