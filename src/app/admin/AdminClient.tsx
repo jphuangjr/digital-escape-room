@@ -11,6 +11,7 @@ import type { PlaytestReport } from "@/server/playtest";
 import { useMe } from "@/components/site/Account";
 import { QrCode } from "@/components/site/QrCode";
 import { useT } from "@/i18n/client";
+import { clampInt } from "@/lib/numbers";
 
 export function AdminClient() {
   const me = useMe();
@@ -382,8 +383,13 @@ function CodesPanel() {
   const [gameId, setGameId] = useState(GAMES[0].id);
   const [codes, setCodes] = useState<AdminCodeDTO[] | null>(null);
   const [kind, setKind] = useState<Kind>("single");
-  const [count, setCount] = useState(5);
-  const [maxUses, setMaxUses] = useState<number | null>(10);
+  // Number fields hold what's typed (even empty, mid-edit) and are only clamped on blur and on submit: clamping
+  // each keystroke made them impossible to clear, so typing "5" over "2" gave "25".
+  const [countText, setCountText] = useState("5");
+  const [usesText, setUsesText] = useState("10");
+  const [unlimited, setUnlimited] = useState(false);
+  const count = clampInt(countText, 1, 50, 5);
+  const maxUses = unlimited ? null : clampInt(usesText, 2, 10_000, 10);
   const [expiresInDays, setExpiresInDays] = useState<number | null>(null);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
@@ -405,6 +411,8 @@ function CodesPanel() {
 
   async function generate(e: React.FormEvent) {
     e.preventDefault();
+    setCountText(String(count));
+    if (!unlimited) setUsesText(String(maxUses));
     setBusy(true);
     setMsg(null);
     const res = await fetch("/api/admin/codes", {
@@ -516,10 +524,12 @@ function CodesPanel() {
               <span className="text-xs text-noir-ink-faint">{t("admin.form.count")}</span>
               <input
                 type="number"
+                inputMode="numeric"
                 min={1}
                 max={50}
-                value={count}
-                onChange={(e) => setCount(Math.max(1, Math.min(50, Number(e.target.value) || 1)))}
+                value={countText}
+                onChange={(e) => setCountText(e.target.value)}
+                onBlur={() => setCountText(String(count))}
                 className="min-h-12 w-24 rounded-lg border border-noir-line bg-noir-bg-3 px-3 text-noir-ink"
               />
             </label>
@@ -529,19 +539,21 @@ function CodesPanel() {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
+                  inputMode="numeric"
                   min={2}
                   max={10000}
-                  value={maxUses ?? ""}
-                  disabled={maxUses === null}
+                  value={unlimited ? "" : usesText}
+                  disabled={unlimited}
                   aria-label={t("admin.form.usesAllowed")}
-                  onChange={(e) => setMaxUses(Math.max(2, Math.min(10000, Number(e.target.value) || 2)))}
+                  onChange={(e) => setUsesText(e.target.value)}
+                  onBlur={() => setUsesText(String(clampInt(usesText, 2, 10_000, 10)))}
                   className="min-h-12 w-24 rounded-lg border border-noir-line bg-noir-bg-3 px-3 text-noir-ink disabled:opacity-40"
                 />
                 <label className="flex min-h-11 items-center gap-2 text-sm text-noir-ink-dim">
                   <input
                     type="checkbox"
-                    checked={maxUses === null}
-                    onChange={(e) => setMaxUses(e.target.checked ? null : 10)}
+                    checked={unlimited}
+                    onChange={(e) => setUnlimited(e.target.checked)}
                     className="h-5 w-5 accent-[var(--color-noir-brass,#c9a227)]"
                   />
                   {t("admin.form.unlimited")}
