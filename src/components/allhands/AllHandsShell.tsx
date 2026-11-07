@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { PlayerPublic, RoomState } from "@/lib/types";
 import { apiFetch } from "@/lib/client/game";
 import { QrCode } from "@/components/site/QrCode";
+import { AllHandsChat } from "./AllHandsChat";
 import {
   DAY_OPTIONS_MS,
   ROLE_INFO,
@@ -93,7 +94,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-xl flex-col gap-5 px-edge py-5">
+      <main className="mx-auto flex max-w-xl flex-col gap-5 px-edge pb-24 pt-5">
         {party.me.seated && !party.me.alive && party.phase !== "over" && <LinkedInBanner />}
         {!party.me.seated && party.phase !== "lobby" && party.phase !== "over" && (
           <Banner>The game started before you joined. You&apos;re watching this round and get dealt in next game.</Banner>
@@ -118,6 +119,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
         {isHost && party.phase !== "lobby" && party.phase !== "over" && <HostBar party={party} act={act} busy={busy} />}
         {party.phase !== "lobby" && <History history={party.history} name={name} />}
       </main>
+      <AllHandsChat code={code} state={state} party={party} refresh={refresh} people={people} />
     </div>
   );
 }

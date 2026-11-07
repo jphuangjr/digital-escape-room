@@ -4,6 +4,7 @@ import { error, isResponse, json, readBody, requirePlayer, translateLogicError }
 import { CHAT_HISTORY, chatCooldownSec, cleanChatBody, maskProfanity } from "@/server/logic";
 import { blockedPlayerIds } from "@/server/chatSafety";
 import { publish } from "@/server/realtime";
+import { partyGame } from "@/server/party/games";
 import { touchRoom } from "@/server/session";
 import { getT } from "@/i18n/server";
 
@@ -52,6 +53,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   if (isResponse(ctx)) return ctx;
   const { room, player } = ctx;
   const t = await getT();
+  const party = partyGame(room.gameId);
+  if (party?.canChat && !party.canChat(party.parse(room.scene), player.id)) return error(403, t("api.chat.benched"));
   const cleaned = cleanChatBody((await readBody(req))?.body);
   if (!cleaned.ok) return error(400, translateLogicError(t, cleaned.error));
 

@@ -54,6 +54,7 @@ const messages = {
   "api.admin.badReport": "No such report.",
   "api.chat.empty": "Message is empty.",
   "api.chat.tooLong": "Messages can be up to {max} characters.",
+  "api.chat.benched": "You're out of this game, so you can read the chat but not post until it ends.",
   "api.chat.slowDown": "Slow down a little.",
   "api.attempt.unknownPuzzle": "Unknown puzzle.",
   "api.attempt.missingInput": "Missing input.",

@@ -129,8 +129,26 @@ export interface AllHandsView {
   winner: Team | null;
   /** Every night's secret actions: for the laid-off and fired (on "LinkedIn") and for everyone at game over. */
   nights: NightRecord[] | null;
+  /** The Moles' private back channel: for Moles, the laid-off and fired, and everyone at game over. Null otherwise. */
+  moleChat: MoleChatMessage[] | null;
+  /** Whether this player may post in the Mole channel right now. */
+  canMoleChat: boolean;
+  /** Whether this player may post in the team chat (the laid-off and fired can only read during a game). */
+  canTeamChat: boolean;
   minPlayers: number;
 }
+
+/** One message on the Moles' back channel. Never broadcast: it travels only in the HTTP responses of those allowed to read it. */
+export interface MoleChatMessage {
+  id: string;
+  from: string;
+  body: string;
+  /** ISO time. */
+  at: string;
+}
+
+/** How many Mole messages a game keeps. */
+export const MOLE_CHAT_MAX = 100;
 
 export type AllHandsAction =
   | { type: "start" }
@@ -143,7 +161,8 @@ export type AllHandsAction =
   | { type: "pause" }
   | { type: "resume" }
   | { type: "end" } // host: back to the lobby
-  | { type: "kick"; playerId: string };
+  | { type: "kick"; playerId: string }
+  | { type: "moleChat"; body: string }; // a living Mole: post on the back channel
 
 export const SKIP = "skip";
 

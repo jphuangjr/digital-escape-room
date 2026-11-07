@@ -55,6 +55,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.admin.badReport": "해당 신고가 없어요.",
   "api.chat.empty": "메시지가 비어 있어요.",
   "api.chat.tooLong": "메시지는 {max}자까지 보낼 수 있어요.",
+  "api.chat.benched": "이번 게임에서 탈락해서 게임이 끝날 때까지 채팅은 읽기만 할 수 있어요.",
   "api.chat.slowDown": "조금 천천히 보내 주세요.",
   "api.attempt.unknownPuzzle": "알 수 없는 퍼즐이에요.",
   "api.attempt.missingInput": "입력값이 없어요.",

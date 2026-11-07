@@ -42,6 +42,8 @@ export interface PartyGame<S = unknown, A = unknown, V = unknown> {
   view(state: S, viewerId: string, ctx: { hostId: string | null }): V;
   /** Whether the game is over (the room counts as finished). */
   isOver(state: S): boolean;
+  /** Whether this player may post in the room's public chat (say, not once they're out). Missing: always. */
+  canChat?(state: S, playerId: string): boolean;
 }
 
 export function definePartyGame<S, A, V>(game: PartyGame<S, A, V>): PartyGame<S, A, V> {
