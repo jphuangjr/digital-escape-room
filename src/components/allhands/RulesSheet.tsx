@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { MAX_PLAYERS, MIN_PLAYERS, ROLE_INFO, molesFor, type Role } from "@/lib/allhands/types";
+import { BURNOUT_MIN_PLAYERS, MAX_PLAYERS, MIN_PLAYERS, ROLE_INFO, molesFor, type Role } from "@/lib/allhands/types";
 
-const ROLES: Role[] = ["employee", "mole", "it", "hr"];
+const ROLES: Role[] = ["employee", "mole", "it", "hr", "burnout"];
 
 const ROLE_TONE: Record<Role, string> = {
   employee: "border-lime-300/40 text-lime-300",
   mole: "border-rose-400/50 text-rose-300",
   it: "border-sky-300/40 text-sky-300",
   hr: "border-amber-300/40 text-amber-300",
+  burnout: "border-violet-300/40 text-violet-300",
 };
 
 const PHASES: { name: string; what: string }[] = [
@@ -23,9 +24,10 @@ const PHASES: { name: string; what: string }[] = [
 ];
 
 /** A quick reference anyone can open mid-game: who's who, what happens when, and how each side wins. */
-export function RulesButton({ players }: { players: number }) {
+export function RulesButton({ players, burnout }: { players: number; burnout: boolean }) {
   const [open, setOpen] = useState(false);
   const n = Math.min(MAX_PLAYERS, Math.max(MIN_PLAYERS, players));
+  const hasBurnout = burnout && n >= BURNOUT_MIN_PLAYERS;
   return (
     <>
       <button
@@ -63,8 +65,14 @@ export function RulesButton({ players }: { players: number }) {
                 <p>
                   <span className="font-semibold text-rose-300">The Moles</span> win when there are as many Moles as everyone else still employed.
                 </p>
+                <p>
+                  <span className="font-semibold text-violet-300">The Burnt-out Employee</span> wins alone, and the game ends, if
+                  they get fired at performance review.
+                </p>
                 <p className="text-slate-400">
-                  This table of {players} has {molesFor(n)} {molesFor(n) === 1 ? "Mole" : "Moles"}, one IT Guy and one HR Rep.
+                  This table of {players} has {molesFor(n)} {molesFor(n) === 1 ? "Mole" : "Moles"}, one IT Guy, one HR Rep
+                  {hasBurnout ? " and one Burnt-out Employee" : ""}.
+                  {!hasBurnout && (burnout ? ` (The Burnt-out Employee joins at ${BURNOUT_MIN_PLAYERS}+ players.)` : " (No Burnt-out Employee this game.)")}
                 </p>
               </section>
 

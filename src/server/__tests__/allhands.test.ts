@@ -373,3 +373,45 @@ describe("test-room bots", () => {
     expect(botMove(s, "nobody", seq())).toBeNull();
   });
 });
+
+describe("the Burnt-out Employee", () => {
+  const roles: Role[] = ["mole", "mole", "it", "hr", "burnout", "employee", "employee"];
+  const room = ids(7);
+
+  it("is dealt at 7+ when the setting is on, and never below", () => {
+    expect(deal(ids(7), seq(), true).filter((x) => x.role === "burnout")).toHaveLength(1);
+    expect(deal(ids(16), seq(), true).filter((x) => x.role === "burnout")).toHaveLength(1);
+    expect(deal(ids(6), seq(), true).some((x) => x.role === "burnout")).toBe(false);
+    expect(deal(ids(9), seq(), false).some((x) => x.role === "burnout")).toBe(false);
+    for (let n = 7; n <= 16; n++) expect(deal(ids(n), seq(), true).filter((x) => x.role === "mole")).toHaveLength(molesFor(n));
+  });
+
+  it("wins alone when fired at performance review", () => {
+    let s: AllHandsState = { ...table(7, roles), phase: "vote", round: 1, votes: {}, endsAt: 5000 };
+    for (const v of ["p1", "p2", "p3", "p4", "p6", "p7"]) s = act(s, v, { type: "vote", target: "p5" }, 2000, room);
+    s = act(s, "p5", { type: "vote", target: "p1" }, 2000, room);
+    expect(s.phase).toBe("exit");
+    s = advanceState(s, s.endsAt! + 1).state;
+    expect(s.phase).toBe("over");
+    expect(s.winner).toBe("burnout");
+    expect(viewFor(s, "p6", { hostId: "p1" }).winner).toBe("burnout");
+  });
+
+  it("gets nothing for a night layoff, and looks like a decoy to everyone", () => {
+    let s = toNight(table(7, roles));
+    expect(viewFor(s, "p5", { hostId: "p1" }).night?.kind).toBe("decoy");
+    expect(viewFor(s, "p1", { hostId: "p1" }).seats.find((x) => x.id === "p5")?.role).toBeNull();
+    s = act(s, "p1", { type: "pick", target: "p5" }, 2000, room);
+    s = act(s, "p2", { type: "pick", target: "p5" }, 2000, room);
+    s = advanceState(s, s.endsAt! + 1).state;
+    expect(s.seats.find((x) => x.id === "p5")?.alive).toBe(false);
+    expect(s.winner).toBeNull();
+  });
+
+  it("can be switched off between games", () => {
+    const s = act(initialState(), "p1", { type: "settings", settings: { burnout: false } });
+    expect(s.settings.burnout).toBe(false);
+    const started = act(s, "p1", { type: "start" }, 1000, ids(8));
+    expect(started.seats.some((x) => x.role === "burnout")).toBe(false);
+  });
+});
