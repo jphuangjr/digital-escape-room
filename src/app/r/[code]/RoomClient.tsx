@@ -12,10 +12,11 @@ import { TrainShell } from "@/components/train/TrainShell";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
 import { AtlasShell } from "@/components/atlas/AtlasShell";
 import { ATLAS_GAME_ID } from "@/lib/atlas/types";
+import { AllHandsShell } from "@/components/allhands/AllHandsShell";
 import { CompassMark } from "@/components/shell/icons";
 import { FormattedMessage } from "react-intl";
 import { LanguageSwitcher, useT } from "@/i18n/client";
-import { getGame, gameText } from "@/lib/games";
+import { getGame, gameText, isPartyGame } from "@/lib/games";
 import { RoomLoader } from "@/components/site/RoomLoader";
 import { AVATAR_COLORS, colorAvailable, freeColor, type TakenColor } from "@/lib/avatarColors";
 import { useTakenColors } from "@/lib/client/takenColors";
@@ -54,7 +55,7 @@ export function RoomClient({ code, gameId = "ada-voss" }: { code: string; gameId
 
   return (
     <div className="min-h-[100dvh] bg-[#0b0a08] text-stone-200">
-      {phase.kind === "loading" && <RoomLoader gameId={gameId} />}
+      {phase.kind === "loading" && (isPartyGame(getGame(gameId) ?? {}) ? <Splash text="Loading the room…" /> : <RoomLoader gameId={gameId} />)}
       {phase.kind === "notfound" && <NotFound />}
       {phase.kind === "error" && (
         <Splash text={phase.status ? t("site.room.serverError", { status: phase.status }) : t("site.room.networkError")}>
@@ -99,6 +100,7 @@ function LiveRoom({ code, state, load }: { code: string; state: RoomState; load:
   useRoomChannel(code, onEvent);
   if (state.gameId === TRAIN_GAME_ID && state.scene) return <TrainShell code={code} state={state} refresh={load} />;
   if (state.gameId === ATLAS_GAME_ID && state.scene) return <AtlasShell code={code} state={state} refresh={load} />;
+  if (state.party) return <AllHandsShell code={code} state={state} refresh={load} />;
   return <GameShell code={code} state={state} refresh={load} />;
 }
 
@@ -143,6 +145,7 @@ function JoinForm({
   onNotFound: () => void;
 }) {
   const t = useT();
+  const party = isPartyGame(getGame(gameId) ?? {});
   const [name, setName] = useState("");
   const [color, setColor] = useState(AVATAR_COLORS[0]);
   const [busy, setBusy] = useState(false);
@@ -225,7 +228,7 @@ function JoinForm({
         <div className="flex items-center gap-3">
           <CompassMark className="h-10 w-10 text-amber-500" />
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-amber-500/80">{t("site.room.caseFile")}</p>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-amber-500/80">{party ? t("site.directory.partyGames") : t("site.room.caseFile")}</p>
             <h1 className="font-serif text-xl text-stone-100">{gameText(t, getGame(gameId) ?? getGame("ada-voss")!, "title")}</h1>
           </div>
         </div>
@@ -288,7 +291,7 @@ function JoinForm({
           disabled={busy}
           className="mt-6 h-12 w-full rounded-md bg-amber-500 font-semibold text-black active:bg-amber-400 disabled:opacity-60"
         >
-          {busy ? t("site.room.joining") : t("site.form.joinInvestigation")}
+          {busy ? t("site.room.joining") : party ? "Join the team" : t("site.form.joinInvestigation")}
         </button>
 
         {me?.googleEnabled && !me.user && (

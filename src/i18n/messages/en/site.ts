@@ -152,6 +152,21 @@ const messages = {
   "site.redeem.testerBody": "Every escape room, including ones that aren't out yet, is unlocked on your account ({account}) for as long as this key stays on.",
   "site.redeem.testerBrowse": "Browse the cases →",
   "site.account.tester": "Tester",
+  // All Hands and the Party games page
+  "site.game.all-hands.title": "All Hands",
+  "site.game.all-hands.tagline": "Someone at this startup is a Mole. Find them before the layoffs do.",
+  "site.game.all-hands.blurb": "Synergr has too much funding and not enough trust. Every night a few Moles get a coworker laid off; every morning the team argues it out at all-hands and fires someone at performance review. One host, everyone on their own phone, all in the same room.",
+  "site.game.all-hands.players": "5 to 16 players",
+  "site.game.all-hands.duration": "20–40 min",
+  "site.game.all-hands.difficulty": "Easy",
+  "site.game.all-hands.tone": "Party game",
+  "site.directory.partyGames": "Party games",
+  "site.directory.partyGamesHint": "Social games for a room full of friends",
+  "site.party.title": "Party games",
+  "site.party.intro": "Games for a group in the same room, each on their own phone. One person hosts; everyone else joins with the room code.",
+  "site.party.back": "← Escape rooms",
+  "site.party.play": "Play →",
+  "site.party.empty": "Party games are on their way.",
 } as const;
 
 export default messages;

@@ -21,6 +21,8 @@ import { buildEnding, loadVoteState } from "./vote";
 import { sceneGame } from "./scene/games";
 import { siteHistory } from "./siteHistory";
 import { blockedPlayerIds } from "./chatSafety";
+import { partyGame } from "./party/games";
+import { effectiveHostId } from "./party/server";
 
 export function isOnline(p: Pick<Player, "lastSeenAt">, now = new Date()): boolean {
   return now.getTime() - p.lastSeenAt.getTime() <= ONLINE_WINDOW_MS;
@@ -53,6 +55,7 @@ export function hintDTO(h: { puzzleId: string; tier: number; createdAt: Date }, 
 export async function buildRoomState(room: Room, player: Player): Promise<RoomState> {
   const now = new Date();
   const game = sceneGame(room.gameId);
+  const party = partyGame(room.gameId);
   const loc = await getLocale();
   const [players, notes, attempts, hintRows, vote, ending, blocked] = await Promise.all([
     db.player.findMany({ where: { roomId: room.id }, orderBy: { createdAt: "asc" } }),
@@ -127,10 +130,11 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
     hints,
     hintCooldowns,
     emails:
-      game ? [] : [...baseEmails(loc), ...voicemailsFor(progress, hints, loc), ...bonusEmails(progress, loc)],
+      game || party ? [] : [...baseEmails(loc), ...voicemailsFor(progress, hints, loc), ...bonusEmails(progress, loc)],
     vote,
     ending,
     chapter: game ? game.chapter(scene, loc) : adaChapter(progress, loc),
+    ...(party ? { party: party.view(party.parse(room.scene), player.id, { hostId: effectiveHostId(room, players, now.getTime()) }) as RoomState["party"] } : {}),
     ...(game ? { scene: game.dto(scene, { startedAt: room.createdAt, now, loc }) as RoomState["scene"] } : { siteHistory: siteHistory(progress, loc) }),
   };
 }

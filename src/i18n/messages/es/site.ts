@@ -143,6 +143,21 @@ const messages: Record<keyof typeof en, string> = {
   "site.redeem.testerBody": "Mientras esta llave siga activa, todos los escape rooms, incluso los que aún no salen, están desbloqueados en tu cuenta ({account}).",
   "site.redeem.testerBrowse": "Ver los casos →",
   "site.account.tester": "Tester",
+  // All Hands and the Party games page
+  "site.game.all-hands.title": "All Hands",
+  "site.game.all-hands.tagline": "Hay un topo en esta startup. Encuéntralo antes que los despidos.",
+  "site.game.all-hands.blurb": "Synergr tiene demasiada financiación y muy poca confianza. Cada noche unos topos consiguen que despidan a un compañero; cada mañana el equipo lo discute en la reunión general y despide a alguien en la evaluación de desempeño. Un anfitrión, cada uno con su móvil, todos en la misma sala.",
+  "site.game.all-hands.players": "De 5 a 16 jugadores",
+  "site.game.all-hands.duration": "20–40 min",
+  "site.game.all-hands.difficulty": "Fácil",
+  "site.game.all-hands.tone": "Juego de fiesta",
+  "site.directory.partyGames": "Juegos de fiesta",
+  "site.directory.partyGamesHint": "Juegos sociales para una sala llena de amigos",
+  "site.party.title": "Juegos de fiesta",
+  "site.party.intro": "Juegos para un grupo en la misma sala, cada uno con su móvil. Una persona crea la sala y los demás entran con el código.",
+  "site.party.back": "← Salas de escape",
+  "site.party.play": "Jugar →",
+  "site.party.empty": "Los juegos de fiesta están en camino.",
 };
 
 export default messages;

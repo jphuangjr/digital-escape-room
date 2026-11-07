@@ -146,3 +146,22 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   `GET /state` includes `scene` for scene games; case badges and solved-ness come from the game too.
 - To add one: implement `SceneGame` in `src/server/<game>/game.ts` (via `defineSceneGame`) and list it in
   `src/server/scene/games.ts`.
+
+## Party games (All Hands)
+- Social games with hidden information for a group in one room. Listed on `/party`, reached from the home page's
+  "Party games" button; the home page lists escape rooms only (`GameInfo.kind === "party"` keeps a game off it).
+- Engine: `src/server/party/registry.ts` (the `PartyGame` interface: pure `apply`, `advance`, per-player `view`),
+  `src/server/party/games.ts` (every party game by id), `src/server/party/server.ts` (row-locked changes, lazy
+  phase advance, stand-in host). All Hands lives in `src/server/allhands/game.ts`; client-safe shapes and copy in
+  `src/lib/allhands/types.ts`. State is stored in `Room.scene`.
+- `POST /api/rooms/[code]/party {type, ...}` → `{ok, party}` (409 `{error, party}` when refused). Actions: `start`,
+  `settings`, `ready`, `pick {target}`, `vote {target|"skip"}`, `tick`, `skip {from?}`, `pause`, `resume`, `end`,
+  `kick {playerId}` (lobby only). Host actions are allowed for the host, or a stand-in while the host has been away
+  90s (`effectiveHostId`).
+- `GET /state` includes `party` (an `AllHandsView` built for the caller). **Roles never leave the server except in
+  that player's own view**: broadcasts are `progress.updated` with no game data. Laid-off and fired players, and
+  everyone at game over, see every role.
+- No server clock: `endsAt` is stored and any request after it (state reads, or the client's `tick` when its
+  countdown hits zero) advances one phase, with a fresh clock.
+- Party games skip leaderboards, case records and badges. Hosting needs sign-in and a purchase, like escape rooms.
+- UI text for All Hands is English only for now; the directory button and game card are translated.
