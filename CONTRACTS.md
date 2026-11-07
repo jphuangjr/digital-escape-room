@@ -165,3 +165,8 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   countdown hits zero) advances one phase, with a fresh clock.
 - Party games skip leaderboards, case records and badges. Hosting needs sign-in and a purchase, like escape rooms.
 - UI text for All Hands is English only for now; the directory button and game card are translated.
+- Chat: the room's ordinary chat (`/api/rooms/[code]/chat`) is the team chat. `PartyGame.canChat` lets a game mute
+  players; All Hands mutes the laid-off and fired until the game ends (403 `api.chat.benched`). The Moles' back
+  channel is the `moleChat {body}` party action: stored in the game state (last 100, reset each game), posted only by
+  living Moles mid-game, and shown in `AllHandsView.moleChat` only to Moles, the laid-off and fired, and everyone at
+  game over. It is never broadcast; Moles see new messages through the usual `progress.updated` refetch.

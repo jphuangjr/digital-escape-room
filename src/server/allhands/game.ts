@@ -7,6 +7,7 @@ import {
   JOB_TITLES,
   MAX_PLAYERS,
   MIN_PLAYERS,
+  MOLE_CHAT_MAX,
   SKIP,
   molesFor,
   type AllHandsAction,
@@ -20,6 +21,7 @@ import {
   type Settings,
   type Team,
 } from "@/lib/allhands/types";
+import { CHAT_MIN_INTERVAL_MS, cleanChatBody, maskProfanity } from "../logic";
 import { definePartyGame, type PartyCtx, type PartyResult } from "../party/registry";
 
 /** How long the untimed-by-setting phases last. */
@@ -61,6 +63,8 @@ export interface AllHandsState {
   history: { round: number; kind: HistoryEntry["kind"]; playerId: string | null }[];
   nights: NightRecord[];
   winner: Team | null;
+  /** The Moles' back channel for this game (original text; masked in views). */
+  moleChat: { id: string; from: string; body: string; at: number }[];
 }
 
 export function initialState(settings: Settings = DEFAULT_SETTINGS): AllHandsState {
@@ -81,6 +85,7 @@ export function initialState(settings: Settings = DEFAULT_SETTINGS): AllHandsSta
     history: [],
     nights: [],
     winner: null,
+    moleChat: [],
   };
 }
 
@@ -358,7 +363,35 @@ export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx):
       if (s.phase !== "lobby" && s.phase !== "over") return refuse(s, "Players can only be removed between games.");
       if (a.playerId === me) return refuse(s, "You can't remove yourself.");
       return { state: s, changed: false, ok: true };
+
+    case "moleChat": {
+      if (!canMoleChat(s, me)) return refuse(s, "Only Moles still on the team can use this channel.");
+      const cleaned = cleanChatBody(a.body);
+      if (!cleaned.ok) return refuse(s, cleaned.error);
+      const last = [...s.moleChat].reverse().find((m) => m.from === me);
+      if (last && now - last.at < CHAT_MIN_INTERVAL_MS) return refuse(s, "Slow down a little.");
+      const id = `${now.toString(36)}${ctx.rand(36 ** 4).toString(36)}`;
+      const moleChat = [...s.moleChat, { id, from: me, body: cleaned.body, at: now }].slice(-MOLE_CHAT_MAX);
+      return done({ ...s, moleChat });
+    }
   }
+}
+
+/** A game is running: dealt and not over. */
+function inGame(s: AllHandsState): boolean {
+  return s.phase !== "lobby" && s.phase !== "over";
+}
+
+/** Living Moles may use the back channel at any point in a running game. */
+export function canMoleChat(s: AllHandsState, playerId: string): boolean {
+  const seat = seatOf(s, playerId);
+  return inGame(s) && seat?.role === "mole" && seat.alive;
+}
+
+/** Everyone may use the team chat, except the laid-off and fired while the game runs (no help from beyond). */
+export function canTeamChat(s: AllHandsState, playerId: string): boolean {
+  const seat = seatOf(s, playerId);
+  return !inGame(s) || !seat || seat.alive;
 }
 
 export function isDue(s: AllHandsState, now: number): boolean {
@@ -393,6 +426,10 @@ export function parseAction(body: Record<string, unknown>): AllHandsAction | nul
     case "kick": {
       const playerId = str("playerId");
       return playerId ? { type: "kick", playerId } : null;
+    }
+    case "moleChat": {
+      const body = str("body");
+      return body !== null ? { type: "moleChat", body } : null;
     }
     default:
       return null;
@@ -469,6 +506,12 @@ export function viewFor(s: AllHandsState, viewerId: string, ctx: { hostId: strin
     }),
     winner: over ? s.winner : null,
     nights: knowsAll ? s.nights : null,
+    moleChat:
+      knowsAll || me?.role === "mole"
+        ? s.moleChat.map((m) => ({ id: m.id, from: m.from, body: maskProfanity(m.body), at: new Date(m.at).toISOString() }))
+        : null,
+    canMoleChat: canMoleChat(s, viewerId),
+    canTeamChat: canTeamChat(s, viewerId),
     minPlayers: MIN_PLAYERS,
   };
 }
@@ -485,4 +528,5 @@ export const allHandsGame = definePartyGame<AllHandsState, Record<string, unknow
   advance: advanceState,
   view: viewFor,
   isOver: (s) => s.phase === "over",
+  canChat: canTeamChat,
 });

@@ -6,6 +6,7 @@ import {
   REVEAL_MS,
   applyAction,
   advanceState,
+  canTeamChat,
   deal,
   initialState,
   moleChoice,
@@ -282,5 +283,61 @@ describe("parsing", () => {
     expect(parseAction({ type: "pick" })).toBeNull();
     expect(parseAction({ type: "nope" })).toBeNull();
     expect(parseAction({ type: "vote", target: "skip" })).toEqual({ type: "vote", target: "skip" });
+  });
+});
+
+describe("chat", () => {
+  const roles: Role[] = ["mole", "mole", "it", "hr", "employee", "employee", "employee"];
+  const room = ids(7);
+
+  it("keeps the Mole channel to Moles, and out of everyone else's view", () => {
+    let s = table(7, roles);
+    s = act(s, "p1", { type: "moleChat", body: "  go for p3  " }, 2000, room);
+    s = act(s, "p2", { type: "moleChat", body: "ok" }, 2100, room);
+    expect(viewFor(s, "p1", { hostId: "p1" }).moleChat?.map((m) => [m.from, m.body])).toEqual([
+      ["p1", "go for p3"],
+      ["p2", "ok"],
+    ]);
+    expect(viewFor(s, "p2", { hostId: "p1" }).canMoleChat).toBe(true);
+    for (const id of ["p3", "p4", "p5"]) {
+      const v = viewFor(s, id, { hostId: "p1" });
+      expect(v.moleChat).toBeNull();
+      expect(v.canMoleChat).toBe(false);
+      expect(JSON.stringify(v)).not.toContain("go for p3");
+    }
+    expect(viewFor(s, "late-joiner", { hostId: "p1" }).moleChat).toBeNull();
+  });
+
+  it("refuses posts from non-Moles, the laid-off, and outside a game", () => {
+    const s = table(7, roles);
+    expect(applyAction(s, { type: "moleChat", body: "hi" }, ctx("p3", 2000, room)).ok).toBe(false);
+    const dead = { ...s, seats: s.seats.map((x) => (x.id === "p2" ? { ...x, alive: false } : x)) };
+    expect(applyAction(dead, { type: "moleChat", body: "hi" }, ctx("p2", 2000, room)).ok).toBe(false);
+    expect(viewFor(dead, "p2", { hostId: "p1" }).moleChat).not.toBeNull(); // can still read
+    expect(applyAction(initialState(), { type: "moleChat", body: "hi" }, ctx("p1", 2000, room)).ok).toBe(false);
+    expect(applyAction(s, { type: "moleChat", body: "   " }, ctx("p1", 2000, room)).ok).toBe(false);
+  });
+
+  it("rate limits, caps the log, and starts fresh each game", () => {
+    let s = table(7, roles);
+    s = act(s, "p1", { type: "moleChat", body: "one" }, 2000, room);
+    expect(applyAction(s, { type: "moleChat", body: "two" }, ctx("p1", 2500, room)).ok).toBe(false);
+    for (let i = 0; i < 120; i++) s = act(s, "p1", { type: "moleChat", body: `m${i}` }, 4000 + i * 1000, room);
+    expect(s.moleChat).toHaveLength(100);
+    expect(s.moleChat.at(-1)?.body).toBe("m119");
+    const over = { ...s, phase: "over" as const, winner: "company" as const };
+    expect(viewFor(over, "p5", { hostId: "p1" }).moleChat).toHaveLength(100); // everyone reads it at game over
+    const next = act(over, "p1", { type: "start" }, 300_000, room);
+    expect(next.moleChat).toEqual([]);
+  });
+
+  it("mutes the laid-off in the team chat until the game ends", () => {
+    const s = table(7, roles);
+    const dead = { ...s, seats: s.seats.map((x) => (x.id === "p5" ? { ...x, alive: false } : x)) };
+    expect(canTeamChat(dead, "p5")).toBe(false);
+    expect(canTeamChat(dead, "p4")).toBe(true);
+    expect(canTeamChat(dead, "watcher")).toBe(true);
+    expect(canTeamChat({ ...dead, phase: "over" }, "p5")).toBe(true);
+    expect(viewFor(dead, "p5", { hostId: "p1" }).canTeamChat).toBe(false);
   });
 });

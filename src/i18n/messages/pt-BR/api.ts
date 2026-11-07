@@ -56,6 +56,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.admin.badReport": "Essa denúncia não existe.",
   "api.chat.empty": "A mensagem está vazia.",
   "api.chat.tooLong": "As mensagens podem ter até {max} caracteres.",
+  "api.chat.benched": "Você está fora desta partida: pode ler o chat, mas só poderá escrever quando ela acabar.",
   "api.chat.slowDown": "Vá um pouco mais devagar.",
   "api.attempt.unknownPuzzle": "Enigma desconhecido.",
   "api.attempt.missingInput": "Falta a resposta.",
