@@ -863,50 +863,53 @@ a:active > .lb-card {
   }
 }
 
-/* ---------- Side rail (folded iPhone Duo; see src/lib/sideRail.ts) ----------
- * With html.side-rail at phone widths, a game's tab bar (.rail-bar, its tabs in .rail-list) leaves the bottom and
- * stands in the right safe-area strip, anchored to the bottom so it stays clear of the clock pill at the top.
- * Everything else at phone widths keeps the bottom bar; wide layouts (unfolded Duo, tablets) are untouched.
+/* ---------- Side rail (iPhone Duo; see src/lib/sideRail.ts) ----------
+ * The Duo, folded and unfolded, keeps an empty safe-area strip down the right edge with the clock pill at its top.
+ * With html.side-rail, a game's tabs (.rail-bar, tabs in .rail-list) leave the bottom and stand in that strip,
+ * anchored to the bottom so they stay clear of the pill. On wide layouts Ada's app-icon column (.rail-wide) moves
+ * there too. Devices without that strip never get the class, so nothing here applies to them.
  */
-@media (width < 48rem) {
-  html.side-rail .rail-bar {
-    position: fixed;
-    top: auto;
-    right: 0;
-    bottom: 0;
-    left: auto;
-    z-index: 30;
-    width: env(safe-area-inset-right);
-    max-height: calc(100dvh - 10rem); /* never up into the pill (~160px folded) */
-    overflow-y: auto;
-    padding: 0 0 env(safe-area-inset-bottom) 0 !important; /* beats the bars' inline inset padding */
-    border-top-width: 0;
-    background: transparent;
-    backdrop-filter: none;
-  }
-  html.side-rail .rail-list {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: 0.25rem;
-  }
-  html.side-rail .rail-list > * {
-    flex: none;
-    width: 100%;
-    min-width: 0;
-  }
-  /* The bar no longer takes the bottom: the view keeps only the home-indicator inset there. */
-  html.side-rail .rail-pad-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  /* With the tabs gone and no tray open, the footer is just the home-indicator inset: no band, no line. */
-  html.side-rail .rail-footer:not(:has(.at-tray)) {
-    border-top-width: 0;
-    background: transparent;
-  }
-  html.side-rail .rail-toast {
-    bottom: calc(env(safe-area-inset-bottom) + 12px) !important;
-    padding-right: calc(1rem + env(safe-area-inset-right)); /* clear of the rail */
-  }
+html.side-rail .rail-bar,
+html.side-rail .rail-wide {
+  position: fixed;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  z-index: 30;
+  width: env(safe-area-inset-right);
+  max-height: calc(100dvh - 10rem); /* never up into the pill (~160px) */
+  overflow-y: auto;
+  padding: 0 0 env(safe-area-inset-bottom) 0 !important; /* beats the bars' inline inset padding */
+  border-top-width: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+html.side-rail .rail-list,
+html.side-rail .rail-wide {
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+html.side-rail .rail-list {
+  display: flex;
+}
+html.side-rail .rail-list > * {
+  flex: none;
+  width: 100%;
+  min-width: 0;
+}
+/* The bar no longer takes the bottom: the view keeps only the home-indicator inset there. */
+html.side-rail .rail-pad-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+/* With the tabs gone and no tray open, the footer is just the home-indicator inset: no band, no line. */
+html.side-rail .rail-footer:not(:has(.at-tray)) {
+  border-top-width: 0;
+  background: transparent;
+}
+html.side-rail .rail-toast {
+  bottom: calc(env(safe-area-inset-bottom) + 12px) !important;
+  padding-right: calc(1rem + env(safe-area-inset-right)); /* clear of the rail */
 }
 
