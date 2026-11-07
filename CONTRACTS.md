@@ -170,3 +170,10 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   channel is the `moleChat {body}` party action: stored in the game state (last 100, reset each game), posted only by
   living Moles mid-game, and shown in `AllHandsView.moleChat` only to Moles, the laid-off and fired, and everyone at
   game over. It is never broadcast; Moles see new messages through the usual `progress.updated` refetch.
+- Admin test rooms: an admin hosting a party room may `POST /api/rooms/[code]/party/test` with `{action: "fill",
+  total}` (add bots between games), `{action: "viewAs", playerId|null}` (sets the `pv_<CODE>` cookie) or
+  `{action: "botsAct"}` (each bot makes its move via `PartyGame.botMove`, except the one being viewed). Bots are
+  Player rows whose token starts with `bot_` (`src/server/party/test.ts`). While viewing as a bot, `GET /state`
+  builds the party view for that bot and seat actions (`ready`, `pick`, `vote`, `moleChat`) are made as it; host
+  controls stay the admin's. `RoomState.partyTest` (every seat with its role) is sent only to that admin. Looking
+  through a real player's eyes is never allowed.

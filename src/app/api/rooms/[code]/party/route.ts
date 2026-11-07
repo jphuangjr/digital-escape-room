@@ -3,6 +3,10 @@ import { error, isResponse, json, readBody, requirePlayer } from "@/server/http"
 import { publish } from "@/server/realtime";
 import { partyGame } from "@/server/party/games";
 import { changeParty, effectiveHostId, rand } from "@/server/party/server";
+import { viewerId } from "@/server/party/test";
+
+/** In an admin's test room these are made as the bot being looked through; host controls stay the admin's. */
+const SEAT_ACTIONS = new Set(["ready", "pick", "vote", "moleChat"]);
 
 /**
  * One action in a party game: start, settings, ready, pick, vote, tick, skip, pause, resume, end or kick.
@@ -20,17 +24,23 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
 
   const now = new Date();
   await db.player.update({ where: { id: player.id }, data: { lastSeenAt: now } });
-  const players = await db.player.findMany({ where: { roomId: room.id }, orderBy: { createdAt: "asc" }, select: { id: true, lastSeenAt: true } });
+  const players = await db.player.findMany({
+    where: { roomId: room.id },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, lastSeenAt: true, token: true },
+  });
   const hostId = effectiveHostId(room, players.map((p) => (p.id === player.id ? { ...p, lastSeenAt: now } : p)), now.getTime());
-  const partyCtx = { playerId: player.id, hostId, roomPlayerIds: players.map((p) => p.id), now: now.getTime(), rand };
+  const as = await viewerId(room, player, players);
+  const actor = SEAT_ACTIONS.has(String(body.type)) ? as : player.id;
+  const partyCtx = { playerId: actor, hostId, roomPlayerIds: players.map((p) => p.id), now: now.getTime(), rand };
 
   const res = await changeParty(room, game, (cur) => game.apply(cur, body, partyCtx));
-  if (!res.ok) return error(409, res.error ?? "That didn't work.", { party: game.view(res.state, player.id, { hostId }) });
+  if (!res.ok) return error(409, res.error ?? "That didn't work.", { party: game.view(res.state, as, { hostId }) });
 
   // Removing a player between games: the game has checked it's allowed.
   if (body.type === "kick" && typeof body.playerId === "string" && body.playerId !== room.hostId) {
     const gone = await db.player.deleteMany({ where: { id: body.playerId, roomId: room.id } });
     if (gone.count) await publish(room.code, "presence.updated", { playerId: body.playerId, left: true });
   }
-  return json({ ok: true, party: game.view(res.state, player.id, { hostId }) });
+  return json({ ok: true, party: game.view(res.state, as, { hostId }) });
 }

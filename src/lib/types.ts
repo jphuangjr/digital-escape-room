@@ -154,6 +154,8 @@ export interface RoomState {
   scene?: import("@/lib/train/types").SceneDTO | import("@/lib/atlas/types").AtlasSceneDTO;
   /** Party games only: this player's own view of the table (see src/server/party). */
   party?: import("@/lib/allhands/types").AllHandsView;
+  /** Admin test rooms only (an admin hosting): every seat, and whose eyes the party view is through. */
+  partyTest?: PartyTestInfo;
 }
 
 // ---------- Fake internet ----------
@@ -364,4 +366,10 @@ export interface ProfileResponse {
     hintsUsed: number | null;
     wrongAttempts: number | null;
   }[];
+}
+
+/** An admin's test room: the table, roles included, and which player's view they're looking at. */
+export interface PartyTestInfo {
+  viewingAs: string;
+  players: { id: string; name: string; bot: boolean; role: import("@/lib/allhands/types").Role | null }[];
 }

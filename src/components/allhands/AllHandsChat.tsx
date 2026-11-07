@@ -22,15 +22,17 @@ export function AllHandsChat({
   party,
   refresh,
   people,
+  meId,
 }: {
+  /** Whose seat this phone is showing (a bot's, in an admin's test room). */
+  meId: string;
   code: string;
   state: RoomState;
   party: AllHandsView;
   refresh: () => Promise<void>;
   people: Map<string, PlayerPublic>;
 }) {
-  const meId = state.me.id;
-  const chat = useChat(code, meId, state.me.blocked);
+  const chat = useChat(code, state.me.id, state.me.blocked);
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("team");
   const moles = party.moleChat;

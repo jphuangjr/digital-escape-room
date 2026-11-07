@@ -23,6 +23,7 @@ import { siteHistory } from "./siteHistory";
 import { blockedPlayerIds } from "./chatSafety";
 import { partyGame } from "./party/games";
 import { effectiveHostId } from "./party/server";
+import { canTest, testInfo, viewerId } from "./party/test";
 
 export function isOnline(p: Pick<Player, "lastSeenAt">, now = new Date()): boolean {
   return now.getTime() - p.lastSeenAt.getTime() <= ONLINE_WINDOW_MS;
@@ -134,7 +135,17 @@ export async function buildRoomState(room: Room, player: Player): Promise<RoomSt
     vote,
     ending,
     chapter: game ? game.chapter(scene, loc) : adaChapter(progress, loc),
-    ...(party ? { party: party.view(party.parse(room.scene), player.id, { hostId: effectiveHostId(room, players, now.getTime()) }) as RoomState["party"] } : {}),
+    ...(party ? await partyFields(room, player, players, now) : {}),
     ...(game ? { scene: game.dto(scene, { startedAt: room.createdAt, now, loc }) as RoomState["scene"] } : { siteHistory: siteHistory(progress, loc) }),
   };
+}
+
+/** A party game's view for this player (or, in an admin's test room, for the bot they're looking through). */
+async function partyFields(room: Room, player: Player, players: Player[], now: Date): Promise<Pick<RoomState, "party" | "partyTest">> {
+  const game = partyGame(room.gameId)!;
+  const state = game.parse(room.scene);
+  const as = await viewerId(room, player, players);
+  const party = game.view(state, as, { hostId: effectiveHostId(room, players, now.getTime()) }) as RoomState["party"];
+  if (!(await canTest(room, player))) return { party };
+  return { party, partyTest: testInfo(as, players, game.roles?.(state) ?? new Map()) };
 }

@@ -35,7 +35,7 @@ export function AllHandsLanding() {
     } catch {}
   }, []);
 
-  async function start(replaceExisting = false): Promise<void> {
+  async function start(replaceExisting = false, test = false): Promise<void> {
     const displayName = name.trim();
     if (!displayName) return setErr(t("train.landing.errName"));
     setBusy(true);
@@ -62,7 +62,7 @@ export function AllHandsLanding() {
     }
     if (res.status === 409 && data.replaceRequired) {
       const codes = (data.openRooms ?? []).map((r) => r.code).join(", ");
-      if (window.confirm(t("train.landing.replace", { codes }))) return start(true);
+      if (window.confirm(t("train.landing.replace", { codes }))) return start(true, test);
       setBusy(false);
       return;
     }
@@ -74,6 +74,14 @@ export function AllHandsLanding() {
     try {
       localStorage.setItem("ada_name", displayName);
     } catch {}
+    // Admin test room: a full table of bots, ready to start.
+    if (test) {
+      await fetch(`/api/rooms/${encodeURIComponent(data.code)}/party/test`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "fill", total: 8 }),
+      }).catch(() => null);
+    }
     router.push(`/r/${data.code}`);
   }
 
@@ -157,6 +165,16 @@ export function AllHandsLanding() {
           ) : (
             <button type="submit" disabled={busy} className="min-h-12 rounded-xl bg-lime-300 font-bold text-slate-950 active:bg-lime-200 disabled:opacity-60">
               {busy ? "Booking the meeting room…" : "Host a room"}
+            </button>
+          )}
+          {me?.isAdmin && signedIn && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void start(false, true)}
+              className="min-h-12 rounded-xl border border-amber-300/60 font-semibold text-amber-200 active:bg-amber-300/10 disabled:opacity-60"
+            >
+              Admin: create a test room with 7 bots
             </button>
           )}
           <p className="text-xs text-slate-500">Friends join with the room code, the invite link or the QR code. No account needed to play.</p>

@@ -44,6 +44,10 @@ export interface PartyGame<S = unknown, A = unknown, V = unknown> {
   isOver(state: S): boolean;
   /** Whether this player may post in the room's public chat (say, not once they're out). Missing: always. */
   canChat?(state: S, playerId: string): boolean;
+  /** Test rooms: a move a bot in this seat would make now, if any (a raw action body for `apply`). */
+  botMove?(state: S, playerId: string, rand: (n: number) => number): Record<string, unknown> | null;
+  /** Test rooms: each seated player's role, for the admin's test bar. */
+  roles?(state: S): Map<string, string>;
 }
 
 export function definePartyGame<S, A, V>(game: PartyGame<S, A, V>): PartyGame<S, A, V> {
