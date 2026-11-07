@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SITE_NAME, gameText, visibleGames, type GameInfo, type Translate } from "@/lib/games";
+import { SITE_NAME, gameText, isPartyGame, visibleGames, type GameInfo, type Translate } from "@/lib/games";
 import { getSessionUser } from "@/server/auth";
 import { seesStaging } from "@/server/purchases";
 import { Compass } from "@/components/site/Compass";
@@ -65,7 +65,10 @@ const step = (i: number) => ({ "--i": i }) as React.CSSProperties;
 
 export default async function Directory() {
   const t = await getT();
-  const games = visibleGames(await seesStaging(await getSessionUser().catch(() => null)));
+  const visible = visibleGames(await seesStaging(await getSessionUser().catch(() => null)));
+  // Escape rooms are the heart of the site; party games live one tap away, on their own page.
+  const games = visible.filter((g) => !isPartyGame(g));
+  const hasParty = visible.some(isPartyGame);
   return (
     <main className="noir-vignette min-h-dvh pt-safe pb-safe px-safe">
       <VaultIntro />
@@ -102,6 +105,21 @@ export default async function Directory() {
             </div>
           </div>
         </section>
+
+        {hasParty && (
+          <div className="lb-in mx-auto w-full max-w-md" style={step(4 + games.length)}>
+            <Link
+              href="/party"
+              className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-noir-line bg-noir-bg-2/90 px-4 py-3 active:border-noir-brass"
+            >
+              <span className="min-w-0">
+                <span className="block font-semibold text-noir-ink">{t("site.directory.partyGames")}</span>
+                <span className="block text-xs text-noir-ink-faint">{t("site.directory.partyGamesHint")}</span>
+              </span>
+              <span aria-hidden className="shrink-0 text-noir-brass">→</span>
+            </Link>
+          </div>
+        )}
 
         <div className="lb-in mx-auto w-full max-w-md" style={step(4 + games.length)}>
           <DirectoryCases />

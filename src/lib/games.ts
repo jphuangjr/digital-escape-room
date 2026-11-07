@@ -20,6 +20,11 @@ export interface GameInfo {
   status: "live" | "soon" | "staging";
   /** The game's own landing page (create/join a room). */
   href: string;
+  /**
+   * "escape" (the default): an online escape room, listed on the home page. "party": a social game for a table
+   * of friends, listed on the Party games page (/party) behind the home page's Party games button.
+   */
+  kind?: "escape" | "party";
 }
 
 /**
@@ -66,7 +71,25 @@ export const GAMES: GameInfo[] = [
     status: "live",
     href: "/play/atlas-silent-worlds",
   },
+  {
+    id: "all-hands",
+    title: "All Hands",
+    tagline: "Someone at this startup is a Mole. Find them before the layoffs do.",
+    blurb:
+      "Synergr has too much funding and not enough trust. Every night a few Moles get a coworker laid off; every morning the team argues it out at all-hands and fires someone at performance review. One host, everyone on their own phone, all in the same room.",
+    players: "5 to 16 players",
+    duration: "20–40 min",
+    difficulty: "Easy",
+    tone: "Party game",
+    status: "staging",
+    href: "/play/all-hands",
+    kind: "party",
+  },
 ];
+
+export function isPartyGame(game: Pick<GameInfo, "kind">): boolean {
+  return game.kind === "party";
+}
 
 /** A purchase code's gameId for a tester key: every game, staging included, while the key is on. */
 export const ALL_GAMES = "all";

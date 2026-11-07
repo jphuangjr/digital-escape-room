@@ -143,6 +143,21 @@ const messages: Record<keyof typeof en, string> = {
   "site.redeem.testerBody": "このキーが有効な間、まだ公開されていないものも含め、すべての脱出ゲームがアカウント（{account}）で遊べます。",
   "site.redeem.testerBrowse": "事件を見る →",
   "site.account.tester": "テスター",
+  // All Hands and the Party games page
+  "site.game.all-hands.title": "オールハンズ",
+  "site.game.all-hands.tagline": "このスタートアップにはスパイがいる。リストラされる前に見つけ出せ。",
+  "site.game.all-hands.blurb": "Synergr は資金が多すぎて信頼が足りない。毎晩スパイが同僚をひとりリストラさせ、毎朝チームは全体会議で議論して人事評価で誰かをクビにする。ホストはひとり、全員が自分のスマホで、同じ部屋で遊ぶ。",
+  "site.game.all-hands.players": "5〜16人",
+  "site.game.all-hands.duration": "20〜40分",
+  "site.game.all-hands.difficulty": "やさしい",
+  "site.game.all-hands.tone": "パーティーゲーム",
+  "site.directory.partyGames": "パーティーゲーム",
+  "site.directory.partyGamesHint": "友だちが集まった部屋で遊ぶソーシャルゲーム",
+  "site.party.title": "パーティーゲーム",
+  "site.party.intro": "同じ部屋にいる仲間と、それぞれのスマホで遊ぶゲーム。ひとりがルームを作り、ほかの人はルームコードで参加します。",
+  "site.party.back": "← 脱出ゲーム",
+  "site.party.play": "遊ぶ →",
+  "site.party.empty": "パーティーゲームは準備中です。",
 };
 
 export default messages;
