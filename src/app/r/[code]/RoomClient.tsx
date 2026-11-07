@@ -17,6 +17,9 @@ import { FormattedMessage } from "react-intl";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { getGame, gameText } from "@/lib/games";
 import { RoomLoader } from "@/components/site/RoomLoader";
+import { AVATAR_COLORS, colorAvailable, freeColor, type TakenColor } from "@/lib/avatarColors";
+import { useTakenColors } from "@/lib/client/takenColors";
+import { TakenMark } from "@/components/site/TakenMark";
 
 type Phase =
   | { kind: "loading" }
@@ -25,16 +28,6 @@ type Phase =
   | { kind: "error"; status: number }
   | { kind: "ready"; state: RoomState };
 
-export const AVATAR_COLORS = [
-  "#f59e0b",
-  "#ef4444",
-  "#10b981",
-  "#3b82f6",
-  "#a855f7",
-  "#ec4899",
-  "#14b8a6",
-  "#eab308",
-];
 
 export function RoomClient({ code, gameId = "ada-voss" }: { code: string; gameId?: string }) {
   const t = useT();
@@ -155,6 +148,13 @@ function JoinForm({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [me, setMe] = useState<MeResponse | null>(null);
+  // Colors other players already have: shown crossed out, and never sent (the server refuses them too).
+  const { taken, set: setTaken } = useTakenColors(code);
+  const takenColors = taken.map((x) => x.color);
+  const takenKey = takenColors.join(",");
+  useEffect(() => {
+    setColor((c) => freeColor(AVATAR_COLORS, takenKey ? takenKey.split(",") : [], c));
+  }, [takenKey]);
 
   useEffect(() => {
     fetch("/api/me")
@@ -185,10 +185,17 @@ function JoinForm({
     }
     setBusy(true);
     setError(null);
-    const res = await apiFetch<{ code?: string; error?: string }>(code, "/join", {
+    const res = await apiFetch<{ code?: string; error?: string; colorTaken?: boolean; taken?: TakenColor[] }>(code, "/join", {
       method: "POST",
       body: { displayName, color },
     });
+    if (res.status === 409 && res.data?.colorTaken) {
+      // Someone took it a moment ago: show who, move to a free color, let them confirm.
+      setTaken(res.data.taken ?? []);
+      setBusy(false);
+      setError(res.data.error ?? t("site.form.colorTaken"));
+      return;
+    }
     if (res.status === 404) {
       onNotFound();
       return;
@@ -250,19 +257,27 @@ function JoinForm({
         <fieldset className="mt-5">
           <legend className="text-xs font-semibold uppercase tracking-wider text-stone-400">{t("site.form.avatarColor")}</legend>
           <div className="mt-2 flex flex-wrap gap-2">
-            {AVATAR_COLORS.map((c) => (
-              <button
-                type="button"
-                key={c}
-                onClick={() => setColor(c)}
-                aria-pressed={color === c}
-                aria-label={t("site.form.colorAria", { color: c })}
-                className={`h-11 w-11 rounded-full border-2 transition ${
-                  color === c ? "scale-105 border-white" : "border-transparent"
-                }`}
-                style={{ backgroundColor: c }}
-              />
-            ))}
+            {AVATAR_COLORS.map((c) => {
+              const owner = taken.find((x) => x.color === c.toLowerCase());
+              const off = !colorAvailable(c, takenColors);
+              return (
+                <button
+                  type="button"
+                  key={c}
+                  onClick={() => setColor(c)}
+                  disabled={off}
+                  aria-pressed={color === c}
+                  aria-label={off && owner ? t("site.form.colorTakenAria", { color: c, name: owner.name }) : t("site.form.colorAria", { color: c })}
+                  title={off && owner ? t("site.form.colorTakenBy", { name: owner.name }) : undefined}
+                  className={`relative h-11 w-11 rounded-full border-2 transition disabled:cursor-not-allowed disabled:opacity-30 ${
+                    color === c ? "scale-105 border-white" : "border-transparent"
+                  }`}
+                  style={{ backgroundColor: c }}
+                >
+                  {off && <TakenMark />}
+                </button>
+              );
+            })}
           </div>
         </fieldset>
 
@@ -297,3 +312,4 @@ function JoinForm({
     </div>
   );
 }
+

@@ -8,7 +8,7 @@ import { AccountBar, ContinueRooms, SignInButton, MyCases, useMe } from "@/compo
 import { RedeemBox } from "@/components/site/RedeemBox";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { TRAIN_GAME_ID } from "@/lib/train/types";
-import { AVATAR_COLORS } from "@/app/r/[code]/RoomClient";
+import { AVATAR_COLORS } from "@/lib/avatarColors";
 import { Leaderboard } from "@/components/site/Leaderboard";
 import { GameTrailer } from "@/components/site/GameTrailer";
 
