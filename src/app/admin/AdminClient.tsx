@@ -732,7 +732,7 @@ function CodeQrDialog({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 pb-safe pt-safe" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-edge pb-safe pt-safe" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"

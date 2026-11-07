@@ -111,7 +111,7 @@ function LiveRoom({ code, state, load }: { code: string; state: RoomState; load:
 
 function Splash({ text, children }: { text: string; children?: React.ReactNode }) {
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center px-6 text-center">
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center px-edge-lg text-center">
       <CompassMark className="h-16 w-16 animate-pulse text-amber-500/80" />
       <p className="mt-4 font-mono text-sm tracking-wide text-stone-400">{text}</p>
       {children}
@@ -122,7 +122,7 @@ function Splash({ text, children }: { text: string; children?: React.ReactNode }
 function NotFound() {
   const t = useT();
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center px-6 text-center">
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center px-edge-lg text-center">
       <CompassMark className="h-16 w-16 text-stone-600" />
       <h1 className="mt-6 font-serif text-2xl text-stone-100">{t("site.room.closedTitle")}</h1>
       <p className="mt-2 max-w-sm text-sm text-stone-400">
@@ -207,7 +207,7 @@ function JoinForm({
 
   return (
     <div
-      className="flex min-h-[100dvh] flex-col items-center justify-center px-4"
+      className="flex min-h-[100dvh] flex-col items-center justify-center px-edge"
       style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <LanguageSwitcher tone="shell" className="mb-2 w-full max-w-sm justify-end" />

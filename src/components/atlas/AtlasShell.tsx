@@ -620,7 +620,7 @@ function Sheet({
     </div>
   );
   return (
-    <div ref={zoom?.root} className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={title}>
+    <div ref={zoom?.root} className="fixed inset-0 z-40 flex items-end justify-center px-safe" role="dialog" aria-modal="true" aria-label={title}>
       <button ref={zoom?.backdrop} aria-label={t("atlas.close")} className="absolute inset-0 bg-black/60" onClick={onClose} />
       {side ? (
         <div
@@ -871,7 +871,7 @@ function PlacesSheet({
 function IntroCard({ onClose }: { onClose: () => void }) {
   const t = useT();
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4" role="dialog" aria-modal="true" aria-label={t("atlas.intro.title")}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-edge" role="dialog" aria-modal="true" aria-label={t("atlas.intro.title")}>
       <div className="w-full max-w-sm space-y-3 rounded-2xl border border-[#9fd3c7]/40 bg-[#0b161b] p-5">
         <p className="font-mono text-11px uppercase tracking-[0.3em] text-[#9fd3c7]">{t("atlas.intro.when")}</p>
         <h2 className="font-serif text-2xl text-[#f4e7b5]">{t("atlas.intro.title")}</h2>
