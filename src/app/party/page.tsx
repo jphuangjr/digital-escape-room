@@ -5,6 +5,7 @@ import { getSessionUser } from "@/server/auth";
 import { seesStaging } from "@/server/purchases";
 import { LanguageSwitcher } from "@/i18n/client";
 import { getT } from "@/i18n/server";
+import { JoinBox } from "../DirectoryClient";
 
 export const metadata: Metadata = { title: `Party games — ${SITE_NAME}` };
 
@@ -25,6 +26,9 @@ export default async function PartyGames() {
           <h1 className="font-serif text-5xl leading-tight text-noir-ink">{t("site.party.title")}</h1>
           <p className="max-w-md font-serif text-noir-ink-dim">{t("site.party.intro")}</p>
         </header>
+        <div className="mx-auto w-full max-w-md">
+          <JoinBox />
+        </div>
         {games.length === 0 ? (
           <p className="text-center text-noir-ink-dim">{t("site.party.empty")}</p>
         ) : (
