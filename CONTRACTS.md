@@ -190,3 +190,9 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   `"blocked"` if HR protected the target, `"refused"` (silently) on IT, HR or a Mole, otherwise `"hired"`: the
   target becomes a Mole (`me.recruited`, `dawn.recruited` for them only) and joins the Mole chat.
   `isMoleRole` covers mole and recruiter.
+- #random poll: `DECOY_PROMPTS` are "most likely to" questions; `pollPrompt(s)` picks one per round from a per-game
+  offset. At dawn, `dawn.poll = {prompt, winners}` holds the most-picked player(s) among the decoy picks only (ties
+  share it, at most three). It has no vote counts, so the poll's size can't hint at how many players have powers.
+- Rules sheet: `goneRoles(counts, seats)` (src/lib/allhands/gone.ts) marks IT, HR, Intern, Burnt-out or Nephew as out
+  of the game once every seat dealt that role has departed with its role shown on this phone. With reveals off, a living
+  player sees nothing marked. A spared Nephew's role chip shows on the after-hours and review lists.

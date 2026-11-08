@@ -97,6 +97,8 @@ export interface DawnView {
   recruited: boolean;
   /** Anonymous coworkers gossiping about the layoff. */
   chatter?: Chatter;
+  /** Last night's #random poll, if anyone answered it. */
+  poll?: PollResult;
 }
 
 export interface VoteView {
@@ -295,17 +297,33 @@ export const JOB_TITLES = [
   "Full-Stack Ninja",
 ];
 
-/** The decoy question for employees, one per round so it stays fresh. */
+/** The #random poll for players without a night power: "most likely to" questions about the people at the table. */
 export const DECOY_PROMPTS = [
-  "Who is using AI to write their Slack messages?",
-  "Who has the most browser tabs open right now?",
-  "Who would pivot the company to crypto?",
-  "Who replies-all to everything?",
-  "Who books meetings that could have been an email?",
-  "Who says \"let's take this offline\" the most?",
-  "Who has a podcast nobody asked for?",
-  "Who is secretly on their phone during standup?",
+  "Who's most likely to fall asleep at work?",
+  "Who's most likely to reply-all to the whole company?",
+  "Who's most likely to pivot the company to crypto?",
+  "Who's most likely to use AI to write their Slack messages?",
+  "Who's most likely to book a meeting that could have been an email?",
+  "Who's most likely to say \"let's take this offline\"?",
+  "Who's most likely to start a podcast nobody asked for?",
+  "Who's most likely to have 200 browser tabs open?",
+  "Who's most likely to microwave fish in the office kitchen?",
+  "Who's most likely to join a call from their bed?",
+  "Who's most likely to put \"visionary\" in their LinkedIn headline?",
+  "Who's most likely to forget they're not on mute?",
+  "Who's most likely to expense a $40 sandwich?",
+  "Who's most likely to bring a ring light to standup?",
+  "Who's most likely to quit to become a life coach?",
+  "Who's most likely to steal someone's lunch from the fridge?",
 ];
+
+/** Last night's #random poll result. Only the winner is shown, never the vote count, so the size of the poll
+ *  can't tell anyone how many players had a night power. */
+export interface PollResult {
+  prompt: string;
+  /** The most-voted players (several on a tie, at most three). */
+  winners: string[];
+}
 
 /** The special roles a table of this size gets with these house rules, in the order they're added. */
 export function specialsFor(players: number, s: Pick<Settings, "burnout" | "intern" | "nephew" | "recruiter">): Role[] {
