@@ -12,6 +12,8 @@ import {
   type Settings,
 } from "@/lib/allhands/types";
 import { lineupFor, type RoleCounts } from "@/lib/allhands/lineup";
+import { goneRoles } from "@/lib/allhands/gone";
+import type { SeatView } from "@/lib/allhands/types";
 
 const ROLES: Role[] = ["employee", "mole", "it", "hr", "recruiter", "intern", "burnout", "nephew"];
 
@@ -43,7 +45,18 @@ const PHASES: { name: string; what: string }[] = [
 ];
 
 /** A quick reference anyone can open mid-game: who's who, what happens when, and how each side wins. */
-export function RulesButton({ players, settings, lineup = null }: { players: number; settings: Settings; lineup?: RoleCounts | null }) {
+export function RulesButton({
+  players,
+  settings,
+  lineup = null,
+  seats = [],
+}: {
+  players: number;
+  settings: Settings;
+  lineup?: RoleCounts | null;
+  /** This phone's view of the table, mid-game: departed seats with a shown role mark that role as gone. */
+  seats?: SeatView[];
+}) {
   const [open, setOpen] = useState(false);
   const { counts } = lineupFor(players, settings, lineup);
   const moleSide = counts.mole + counts.recruiter;
@@ -56,6 +69,8 @@ export function RulesButton({ players, settings, lineup = null }: { players: num
   ].filter((x): x is string => Boolean(x));
   const tableLine = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}` : (parts[0] ?? "no special roles");
   const off = (r: Role) => r !== "employee" && r !== "mole" && counts[r] === 0;
+  const gone = goneRoles(counts, seats);
+  const goneLine = gone.length > 0 ? gone.map((r) => ROLE_INFO[r].name) : null;
   return (
     <>
       <button
@@ -101,14 +116,24 @@ export function RulesButton({ players, settings, lineup = null }: { players: num
                   <span className="font-semibold text-teal-300">The Intern</span> wins with whichever side their mentor is on.
                 </p>
                 <p className="text-slate-400">This table of {players} has {tableLine}. Everyone else is an Employee.</p>
+                {goneLine && (
+                  <p className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-200">
+                    <span aria-hidden>🪦</span> No longer with the company:{" "}
+                    <span className="font-semibold">
+                      {goneLine.length > 1 ? `${goneLine.slice(0, -1).join(", ")} and ${goneLine[goneLine.length - 1]}` : goneLine[0]}
+                    </span>
+                    .
+                  </p>
+                )}
               </section>
 
               <section className="flex flex-col gap-2">
                 <h2 className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Who&apos;s who</h2>
                 {ROLES.map((r) => (
-                  <div key={r} className={`rounded-xl border bg-slate-900 p-3 ${ROLE_TONE[r]} ${off(r) ? "opacity-50" : ""}`}>
+                  <div key={r} className={`rounded-xl border bg-slate-900 p-3 ${ROLE_TONE[r]} ${off(r) || gone.includes(r) ? "opacity-50" : ""}`}>
                     <p className="font-bold">
                       {ROLE_INFO[r].name} <span className="font-normal text-slate-500">({ROLE_INFO[r].classic})</span>
+                      {gone.includes(r) && <span className="ml-1 text-xs font-normal text-slate-400">· out of the game</span>}
                       {off(r) && (
                         <span className="ml-1 text-xs font-normal text-slate-500">
                           · not in this game{MIN_FOR[r] ? ` (suggested at ${MIN_FOR[r]}+ players)` : ""}

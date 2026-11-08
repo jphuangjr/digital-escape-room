@@ -21,6 +21,7 @@ import {
   type AllHandsView,
   type HistoryEntry,
   type NightKind,
+  type PollResult,
   type Role,
   type SeatView,
 } from "@/lib/allhands/types";
@@ -142,7 +143,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <RulesButton players={party.seats.length || state.players.length} settings={party.settings} lineup={party.lineup} />
+            <RulesButton players={party.seats.length || state.players.length} settings={party.settings} lineup={party.lineup} seats={party.phase === "lobby" ? [] : party.seats} />
             <TourButton />
             <Clock left={left} paused={party.paused} remainingMs={party.remainingMs} />
           </div>
@@ -268,7 +269,7 @@ function Dot({ p, size = "h-3 w-3" }: { p: PlayerPublic | undefined; size?: stri
 }
 
 function RoleChip({ role }: { role: Role }) {
-  return <span className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${ROLE_TONE[role]}`}>{ROLE_INFO[role].name}</span>;
+  return <span className={`shrink-0 rounded-full border px-2 py-0.5 text-xs font-semibold ${ROLE_TONE[role]}`}>{ROLE_INFO[role].name}</span>;
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -636,6 +637,7 @@ function AfterHours({
                     <Dot p={people.get(x.id)} />
                     <span className="truncate">{name(x.id)}</span>
                     {x.id === party.me.mentor && <MentorTag />}
+                    {x.role === "nephew" && <RoleChip role="nephew" />}
                   </span>
                   <span className="text-xs text-slate-400">{x.title}</span>
                   {teammates.length > 0 && (
@@ -677,7 +679,7 @@ function Checks({ party, name }: { party: AllHandsView; name: Name }) {
 
 // ---------- morning and all-hands ----------
 
-function SlackPost({ children }: { children: React.ReactNode }) {
+function SlackPost({ children, channel = "#general" }: { children: React.ReactNode; channel?: string }) {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
       <div className="flex items-center gap-2">
@@ -686,7 +688,7 @@ function SlackPost({ children }: { children: React.ReactNode }) {
           <p className="text-sm font-bold">
             Synergr Bot <span className="ml-1 rounded bg-slate-800 px-1 text-11px font-normal text-slate-400">APP</span>
           </p>
-          <p className="text-xs text-slate-500">#general</p>
+          <p className="text-xs text-slate-500">{channel}</p>
         </div>
       </div>
       <div className="mt-3 text-slate-200">{children}</div>
@@ -745,6 +747,7 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
           )}
         </SlackPost>
       )}
+      {d?.poll && <PollResults poll={d.poll} name={name} people={people} />}
       {party.phase === "day" && (
         <>
           <div>
@@ -758,6 +761,31 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
         </>
       )}
     </>
+  );
+}
+
+/** Last night's #random poll. Just the winner, never a vote count: the poll's size would hint at how many have powers. */
+function PollResults({ poll, name, people }: { poll: PollResult; name: Name; people: Map<string, PlayerPublic> }) {
+  const tie = poll.winners.length > 1;
+  const names = poll.winners.map(name);
+  const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0];
+  return (
+    <SlackPost channel="#random">
+      <p className="text-sm text-slate-400">📊 Poll results are in</p>
+      <p className="mt-1 font-semibold">{poll.prompt}</p>
+      <ul className="mt-3 flex flex-wrap gap-2">
+        {poll.winners.map((id) => (
+          <li key={id} className="flex items-center gap-2 rounded-full border border-lime-300/40 bg-lime-300/10 px-3 py-1.5 font-semibold">
+            <span aria-hidden>🏆</span>
+            <Dot p={people.get(id)} />
+            {name(id)}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-sm text-slate-300">
+        {tie ? `It's a tie: ${list}. Nobody's surprised. 🙃` : `The people have spoken. Congrats, ${list}. 🎉`}
+      </p>
+    </SlackPost>
   );
 }
 
@@ -863,6 +891,7 @@ function Review({
               {name(x.id)}
               {x.id === me && <span className="font-normal text-slate-400">(you)</span>}
               {x.id === party.me.mentor && <MentorTag />}
+              {x.role === "nephew" && <RoleChip role="nephew" />}
             </span>,
             x.title,
           ),

@@ -21,6 +21,7 @@ import {
   type Seat,
 } from "../allhands/game";
 import type { PartyCtx } from "../party/registry";
+import { goneRoles } from "@/lib/allhands/gone";
 import { CHATTER, chatterLines, pickChatter, reviewChatterPool } from "@/lib/allhands/chatter";
 
 const ids = (n: number) => Array.from({ length: n }, (_, i) => `p${i + 1}`);
@@ -624,5 +625,49 @@ describe("coworker chatter", () => {
     expect(s.exit?.fired).toBe("p1");
     expect(s.exit?.chatter?.pool).toBe("mystery");
     expect(viewFor(s, "p4", { hostId: "p1" }).exit?.chatter?.pool).toBe("mystery");
+  });
+});
+
+describe("the #random poll", () => {
+  it("counts only the poll answers and shows the winner, with no vote counts, the next morning", () => {
+    let s = toNight(table());
+    const prompt = viewFor(s, "p4", { hostId: "p1" }).night!.prompt;
+    expect(prompt).toMatch(/^Who's most likely to/);
+    s = act(s, "p1", { type: "pick", target: "p6" }); // the Mole's layoff pick doesn't count as a poll vote
+    s = act(s, "p2", { type: "pick", target: "p6" });
+    s = act(s, "p3", { type: "pick", target: "p5" });
+    s = act(s, "p4", { type: "pick", target: "p5" });
+    s = act(s, "p5", { type: "pick", target: "p4" });
+    s = act(s, "p6", { type: "pick", target: "p5" });
+    expect(s.phase).toBe("dawn");
+    expect(s.dawn?.poll).toEqual({ prompt, winners: ["p5"] });
+    expect(viewFor(s, "p3", { hostId: "p1" }).dawn?.poll).toEqual({ prompt, winners: ["p5"] });
+  });
+
+  it("shares a tie and skips the post when nobody answered", () => {
+    let s = toNight(table());
+    s = act(s, "p4", { type: "pick", target: "p5" });
+    s = act(s, "p5", { type: "pick", target: "p4" });
+    s = advanceState(s, 1000 + 60_000).state;
+    expect(s.dawn?.poll?.winners).toEqual(["p4", "p5"]);
+
+    let t = toNight(table());
+    t = act(t, "p1", { type: "pick", target: "p4" });
+    t = advanceState(t, 1000 + 60_000).state;
+    expect(t.dawn?.poll).toBeUndefined();
+  });
+});
+
+describe("roles out of the game (Rules sheet)", () => {
+  it("marks a role gone only once every seat dealt it has left with its role shown", () => {
+    let s = toNight(table());
+    s = act(s, "p1", { type: "pick", target: "p2" }); // the Mole lays off the IT Guy
+    s = advanceState(s, 1000 + 60_000).state;
+    const counts = { mole: 1, it: 1, hr: 1, employee: 3 };
+    // Reveals on: everyone sees it.
+    expect(goneRoles(counts, viewFor(s, "p4", { hostId: "p1" }).seats)).toEqual(["it"]);
+    // Reveals off: a living player sees nothing.
+    const hidden = { ...s, settings: { ...s.settings, revealOnFire: false } };
+    expect(goneRoles(counts, viewFor(hidden, "p4", { hostId: "p1" }).seats)).toEqual([]);
   });
 });

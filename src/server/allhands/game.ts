@@ -5,6 +5,7 @@ import {
   specialsFor,
   DAY_OPTIONS_MS,
   DECOY_PROMPTS,
+  type PollResult,
   DEFAULT_SETTINGS,
   JOB_TITLES,
   MAX_PLAYERS,
@@ -70,7 +71,7 @@ export interface AllHandsState {
   votes: Record<string, string>;
   /** What the IT Guy has learned. */
   checks: { round: number; target: string; isMole: boolean }[];
-  dawn: { round: number; laidOff: string | null; saved: boolean; chatter?: Chatter } | null;
+  dawn: { round: number; laidOff: string | null; saved: boolean; chatter?: Chatter; poll?: PollResult } | null;
   exit: { fired: string | null; votes: number; survived?: boolean; chatter?: Chatter } | null;
   /** This game's random seed for coworker chatter (absent in games started before chatter existed). */
   seed?: number;
@@ -214,6 +215,26 @@ function startNight(s: AllHandsState, now: number): AllHandsState {
   return timed({ ...s, round: s.round + 1, picks: {}, votes: {}, offer: null, dawn: null, exit: null }, "night", s.settings.nightMs, now);
 }
 
+/** Tonight's #random question. The game's seats pick where the list starts, so each game opens on a different one. */
+export function pollPrompt(s: Pick<AllHandsState, "round" | "seats">): string {
+  let h = 0;
+  for (const x of s.seats) for (let i = 0; i < x.id.length; i++) h = (h * 31 + x.id.charCodeAt(i)) >>> 0;
+  return DECOY_PROMPTS[(h + s.round - 1) % DECOY_PROMPTS.length];
+}
+
+/** Who won tonight's poll: the most-picked among the poll answers (ties share it, up to three, in seat order). */
+function pollResult(s: AllHandsState): PollResult | undefined {
+  const counts = new Map<string, number>();
+  for (const x of living(s)) {
+    const pick = s.picks[x.id];
+    if (pick && nightKind(s, x) === "decoy") counts.set(pick, (counts.get(pick) ?? 0) + 1);
+  }
+  if (counts.size === 0) return undefined;
+  const top = Math.max(...counts.values());
+  const winners = s.seats.filter((x) => counts.get(x.id) === top).map((x) => x.id).slice(0, 3);
+  return { prompt: pollPrompt(s), winners };
+}
+
 function resolveNight(s: AllHandsState, now: number): AllHandsState {
   const alive = living(s);
   const it = alive.find((x) => x.role === "it");
@@ -256,6 +277,7 @@ function resolveNight(s: AllHandsState, now: number): AllHandsState {
   });
   // The Moles can't lay off one of their own, so a layoff is always an innocent coworker: "framed".
   const chatter = outcome === "laidoff" ? drawChatter(s, "framed") : undefined;
+  const poll = pollResult(s);
   const next: AllHandsState = {
     ...s,
     ...(chatter ? { chatterUsed: [...(s.chatterUsed ?? []), chatterKey(chatter)] } : {}),
@@ -264,7 +286,7 @@ function resolveNight(s: AllHandsState, now: number): AllHandsState {
     offer: null,
     lastProtected: hrTarget,
     checks: itTarget ? [...s.checks, { round: s.round, target: itTarget, isMole: Boolean(itResult) }] : s.checks,
-    dawn: { round: s.round, laidOff: outcome === "laidoff" ? target : null, saved: outcome === "saved", ...(chatter ? { chatter } : {}) },
+    dawn: { round: s.round, laidOff: outcome === "laidoff" ? target : null, saved: outcome === "saved", ...(chatter ? { chatter } : {}), ...(poll ? { poll } : {}) },
     history: [...s.history, { round: s.round, kind: outcome, playerId: outcome === "laidoff" ? target : null }],
     nights: [...s.nights, { round: s.round, moleTarget: target, itTarget, itResult, hrTarget, offerTarget, offerResult, outcome }],
   };
@@ -608,7 +630,7 @@ export function viewFor(s: AllHandsState, viewerId: string, ctx: { hostId: strin
     const alive = living(s);
     night = {
       kind,
-      prompt: DECOY_PROMPTS[(s.round - 1 + DECOY_PROMPTS.length) % DECOY_PROMPTS.length],
+      prompt: pollPrompt(s),
       targets: nightTargets(s, me),
       myPick: s.picks[me.id] ?? null,
       team: kind === "mole" ? alive.filter((x) => isMoleRole(x.role)).map((x) => ({ id: x.id, pick: s.picks[x.id] ?? null })) : null,
