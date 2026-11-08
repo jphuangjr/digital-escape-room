@@ -2,9 +2,28 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { BURNOUT_MIN_PLAYERS, MAX_PLAYERS, MIN_PLAYERS, ROLE_INFO, molesFor, type Role } from "@/lib/allhands/types";
+import {
+  BURNOUT_MIN_PLAYERS,
+  INTERN_MIN_PLAYERS,
+  MAX_PLAYERS,
+  MIN_PLAYERS,
+  NEPHEW_MIN_PLAYERS,
+  RECRUITER_MIN_PLAYERS,
+  ROLE_INFO,
+  molesFor,
+  specialsFor,
+  type Role,
+  type Settings,
+} from "@/lib/allhands/types";
 
-const ROLES: Role[] = ["employee", "mole", "it", "hr", "burnout"];
+const ROLES: Role[] = ["employee", "mole", "it", "hr", "recruiter", "intern", "burnout", "nephew"];
+
+const MIN_FOR: Partial<Record<Role, number>> = {
+  intern: INTERN_MIN_PLAYERS,
+  burnout: BURNOUT_MIN_PLAYERS,
+  nephew: NEPHEW_MIN_PLAYERS,
+  recruiter: RECRUITER_MIN_PLAYERS,
+};
 
 const ROLE_TONE: Record<Role, string> = {
   employee: "border-lime-300/40 text-lime-300",
@@ -12,6 +31,9 @@ const ROLE_TONE: Record<Role, string> = {
   it: "border-sky-300/40 text-sky-300",
   hr: "border-amber-300/40 text-amber-300",
   burnout: "border-violet-300/40 text-violet-300",
+  intern: "border-teal-300/40 text-teal-300",
+  nephew: "border-orange-300/40 text-orange-300",
+  recruiter: "border-fuchsia-400/50 text-fuchsia-300",
 };
 
 const PHASES: { name: string; what: string }[] = [
@@ -24,10 +46,19 @@ const PHASES: { name: string; what: string }[] = [
 ];
 
 /** A quick reference anyone can open mid-game: who's who, what happens when, and how each side wins. */
-export function RulesButton({ players, burnout }: { players: number; burnout: boolean }) {
+export function RulesButton({ players, settings }: { players: number; settings: Settings }) {
   const [open, setOpen] = useState(false);
   const n = Math.min(MAX_PLAYERS, Math.max(MIN_PLAYERS, players));
-  const hasBurnout = burnout && n >= BURNOUT_MIN_PLAYERS;
+  const specials = specialsFor(n, settings);
+  const moles = molesFor(n);
+  const parts = [
+    specials.includes("recruiter") ? `${moles} Moles (one of them the Recruiter)` : `${moles} ${moles === 1 ? "Mole" : "Moles"}`,
+    "one IT Guy",
+    "one HR Rep",
+    ...specials.filter((r) => r !== "recruiter").map((r) => `one ${ROLE_INFO[r].name}`),
+  ];
+  const tableLine = `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
+  const off = (r: Role) => MIN_FOR[r] !== undefined && !specials.includes(r);
   return (
     <>
       <button
@@ -69,19 +100,23 @@ export function RulesButton({ players, burnout }: { players: number; burnout: bo
                   <span className="font-semibold text-violet-300">The Burnt-out Employee</span> wins alone, and the game ends, if
                   they get fired at performance review.
                 </p>
-                <p className="text-slate-400">
-                  This table of {players} has {molesFor(n)} {molesFor(n) === 1 ? "Mole" : "Moles"}, one IT Guy, one HR Rep
-                  {hasBurnout ? " and one Burnt-out Employee" : ""}.
-                  {!hasBurnout && (burnout ? ` (The Burnt-out Employee joins at ${BURNOUT_MIN_PLAYERS}+ players.)` : " (No Burnt-out Employee this game.)")}
+                <p>
+                  <span className="font-semibold text-teal-300">The Intern</span> wins with whichever side their mentor is on.
                 </p>
+                <p className="text-slate-400">This table of {players} has {tableLine}. Everyone else is an Employee.</p>
               </section>
 
               <section className="flex flex-col gap-2">
                 <h2 className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Who&apos;s who</h2>
                 {ROLES.map((r) => (
-                  <div key={r} className={`rounded-xl border bg-slate-900 p-3 ${ROLE_TONE[r]}`}>
+                  <div key={r} className={`rounded-xl border bg-slate-900 p-3 ${ROLE_TONE[r]} ${off(r) ? "opacity-50" : ""}`}>
                     <p className="font-bold">
                       {ROLE_INFO[r].name} <span className="font-normal text-slate-500">({ROLE_INFO[r].classic})</span>
+                      {off(r) && (
+                        <span className="ml-1 text-xs font-normal text-slate-500">
+                          · {settings[r as "intern"] ? `${MIN_FOR[r]}+ players` : "off this game"}
+                        </span>
+                      )}
                     </p>
                     <p className="mt-1 text-slate-200">{ROLE_INFO[r].power}</p>
                   </div>

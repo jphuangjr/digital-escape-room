@@ -7,12 +7,21 @@ export const ALL_HANDS_GAME_ID = "all-hands";
 export const MIN_PLAYERS = 5;
 export const MAX_PLAYERS = 16;
 
-export type Role = "employee" | "mole" | "it" | "hr" | "burnout";
+export type Role = "employee" | "mole" | "it" | "hr" | "burnout" | "intern" | "nephew" | "recruiter";
 /** "burnout": the Burnt-out Employee plays for themselves. */
 export type Team = "company" | "moles" | "burnout";
 
-/** Tables this big (and bigger) get a Burnt-out Employee, if the host leaves it on. */
+/** The smallest table each special role is dealt at (if the host leaves it on). Each takes an Employee's seat. */
+export const INTERN_MIN_PLAYERS = 6;
 export const BURNOUT_MIN_PLAYERS = 7;
+export const NEPHEW_MIN_PLAYERS = 8;
+/** The Recruiter is one of the Moles, not an extra one. */
+export const RECRUITER_MIN_PLAYERS = 9;
+
+/** Moles and the Recruiter: the Moles' side, who see each other and share the back channel. */
+export function isMoleRole(role: Role | null | undefined): boolean {
+  return role === "mole" || role === "recruiter";
+}
 
 export type Phase =
   | "lobby" // waiting for the host to start
@@ -29,12 +38,18 @@ export interface Settings {
   revealOnFire: boolean;
   /** Deal a Burnt-out Employee at tables of BURNOUT_MIN_PLAYERS or more. */
   burnout: boolean;
+  /** Deal an Intern at tables of INTERN_MIN_PLAYERS or more. */
+  intern: boolean;
+  /** Deal the Founder's Nephew at tables of NEPHEW_MIN_PLAYERS or more. */
+  nephew: boolean;
+  /** Make one Mole the Recruiter at tables of RECRUITER_MIN_PLAYERS or more. */
+  recruiter: boolean;
   dayMs: number;
   nightMs: number;
   voteMs: number;
 }
 
-export const DEFAULT_SETTINGS: Settings = { revealOnFire: true, burnout: true, dayMs: 180_000, nightMs: 45_000, voteMs: 60_000 };
+export const DEFAULT_SETTINGS: Settings = { revealOnFire: true, burnout: true, intern: true, nephew: true, recruiter: true, dayMs: 180_000, nightMs: 45_000, voteMs: 60_000 };
 export const DAY_OPTIONS_MS = [120_000, 180_000, 300_000];
 
 /** A seat as everyone may see it. `role` is filled in only where this viewer is allowed to know it. */
@@ -47,7 +62,7 @@ export interface SeatView {
   role: Role | null;
 }
 
-export type NightKind = "mole" | "it" | "hr" | "decoy";
+export type NightKind = "mole" | "it" | "hr" | "intern" | "decoy";
 
 export interface NightView {
   kind: NightKind;
@@ -61,6 +76,11 @@ export interface NightView {
   team: { id: string; pick: string | null }[] | null;
   /** HR only: who they protected last night (can't be picked twice running). */
   lastProtected: string | null;
+  /** Moles' side: who the Recruiter is making an offer to tonight (instead of a layoff), if anyone. */
+  offer: string | null;
+  /** The Recruiter only: whether they can still make their one offer, and who they can make it to. */
+  canOffer: boolean;
+  offerTargets: string[];
   acted: number;
   total: number;
 }
@@ -71,6 +91,8 @@ export interface DawnView {
   laidOff: string | null;
   /** HR blocked the layoff (nobody is named). */
   saved: boolean;
+  /** Only on the phone of the player the Recruiter hired last night: you're a Mole now. */
+  recruited: boolean;
 }
 
 export interface VoteView {
@@ -84,6 +106,8 @@ export interface VoteView {
 
 export interface ExitView {
   fired: string | null;
+  /** The Founder's Nephew was voted out and survived it (once per game); their role is now public. */
+  survived: boolean;
   /** Null when the host turned role reveals off and the game isn't over. */
   role: Role | null;
   votes: number;
@@ -91,7 +115,7 @@ export interface ExitView {
 
 export interface HistoryEntry {
   round: number;
-  kind: "laidoff" | "saved" | "quiet" | "fired" | "kept";
+  kind: "laidoff" | "saved" | "quiet" | "fired" | "kept" | "spared";
   playerId: string | null;
   /** Shown for fired players when reveals are on, and for everyone once the game is over. */
   role: Role | null;
@@ -103,6 +127,9 @@ export interface NightRecord {
   itTarget: string | null;
   itResult: boolean | null;
   hrTarget: string | null;
+  /** The Recruiter's offer that night, and how it went. */
+  offerTarget: string | null;
+  offerResult: "hired" | "refused" | "blocked" | null;
   outcome: "laidoff" | "saved" | "quiet";
 }
 
@@ -124,6 +151,10 @@ export interface AllHandsView {
     role: Role | null;
     title: string | null;
     ready: boolean;
+    /** The Intern only: the mentor they picked (they never learn the mentor's role). */
+    mentor: string | null;
+    /** Was turned into a Mole by the Recruiter. */
+    recruited: boolean;
   };
   night: NightView | null;
   /** IT Guy only: everything they've learned. */
@@ -133,6 +164,8 @@ export interface AllHandsView {
   exit: ExitView | null;
   history: HistoryEntry[];
   winner: Team | null;
+  /** At game over: every player who won (the Intern goes with their mentor's side). */
+  winners: string[];
   /** Every night's secret actions: for the laid-off and fired (on "LinkedIn") and for everyone at game over. */
   nights: NightRecord[] | null;
   /** The Moles' private back channel: for Moles, the laid-off and fired, and everyone at game over. Null otherwise. */
@@ -160,7 +193,7 @@ export type AllHandsAction =
   | { type: "start" }
   | { type: "settings"; settings: Partial<Settings> }
   | { type: "ready" }
-  | { type: "pick"; target: string }
+  | { type: "pick"; target: string; offer?: boolean } // offer: the Recruiter makes their one offer instead of a layoff
   | { type: "vote"; target: string } // a player id or "skip"
   | { type: "tick" }
   | { type: "skip"; from?: Phase } // host: end the current phase now (`from`: the phase the host saw, so a stale tap can't skip two)
@@ -200,6 +233,27 @@ export const ROLE_INFO: Record<Role, { name: string; classic: string; team: Team
     team: "burnout",
     blurb: "You haven't closed a Jira ticket since March. Severance is the dream.",
     power: "Get yourself fired at performance review and you win alone. Getting laid off at night doesn't count. Act suspicious, but not too suspicious.",
+  },
+  intern: {
+    name: "Intern",
+    classic: "Apprentice",
+    team: "company",
+    blurb: "Unpaid, eager, and very easily influenced.",
+    power: "On your first night, pick a mentor. You never learn their role, but you win if their side wins. Work out which side that is.",
+  },
+  nephew: {
+    name: "Founder's Nephew",
+    classic: "Tough Guy",
+    team: "company",
+    blurb: "You've never shipped anything. You also can't be fired. Probably.",
+    power: "The first time the team votes you out, you survive and your role is revealed. A layoff at night still gets you.",
+  },
+  recruiter: {
+    name: "Recruiter",
+    classic: "Godfather",
+    team: "moles",
+    blurb: "A Mole with a LinkedIn Premium account.",
+    power: "You're a Mole. Once per game, after hours, make an offer instead of a layoff: your target secretly becomes a Mole. It fails on the IT Guy and HR Rep, and HR can block it.",
   },
   hr: {
     name: "HR Rep",
@@ -243,6 +297,16 @@ export const DECOY_PROMPTS = [
   "Who has a podcast nobody asked for?",
   "Who is secretly on their phone during standup?",
 ];
+
+/** The special roles a table of this size gets with these house rules, in the order they're added. */
+export function specialsFor(players: number, s: Pick<Settings, "burnout" | "intern" | "nephew" | "recruiter">): Role[] {
+  const out: Role[] = [];
+  if (s.recruiter && players >= RECRUITER_MIN_PLAYERS) out.push("recruiter");
+  if (s.intern && players >= INTERN_MIN_PLAYERS) out.push("intern");
+  if (s.burnout && players >= BURNOUT_MIN_PLAYERS) out.push("burnout");
+  if (s.nephew && players >= NEPHEW_MIN_PLAYERS) out.push("nephew");
+  return out;
+}
 
 /** How many Moles a table gets. */
 export function molesFor(players: number): number {
