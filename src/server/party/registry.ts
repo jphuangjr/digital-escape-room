@@ -30,6 +30,8 @@ export interface PartyResult<S> {
 
 export interface PartyGame<S = unknown, A = unknown, V = unknown> {
   id: string;
+  /** The most players a table seats (test rooms fill bots up to this). */
+  maxPlayers?: number;
   /** Room.scene as stored, tolerating a missing or old value. */
   parse(raw: unknown): S;
   isAction(body: Record<string, unknown>): boolean;

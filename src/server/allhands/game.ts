@@ -760,6 +760,7 @@ export function botMove(s: AllHandsState, id: string, rand: (n: number) => numbe
 
 export const allHandsGame = definePartyGame<AllHandsState, Record<string, unknown>, AllHandsView>({
   id: ALL_HANDS_GAME_ID,
+  maxPlayers: MAX_PLAYERS,
   parse: parseState,
   isAction: (body) => parseAction(body) !== null,
   apply: (state, body, ctx) => {

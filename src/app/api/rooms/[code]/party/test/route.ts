@@ -5,7 +5,6 @@ import { partyGame } from "@/server/party/games";
 import { changeParty, effectiveHostId, rand } from "@/server/party/server";
 import type { PartyResult } from "@/server/party/registry";
 import { addBots, canTest, isBot, setViewer, viewerId } from "@/server/party/test";
-import { MAX_PLAYERS } from "@/lib/allhands/types";
 
 /**
  * Admin test rooms (the admin must be hosting):
@@ -27,7 +26,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     case "fill": {
       const phase = (game.parse(room.scene) as { phase?: string }).phase;
       if (phase !== "lobby" && phase !== "over") return error(409, "Add bots between games.");
-      const total = typeof body.total === "number" ? Math.min(MAX_PLAYERS, Math.max(1, Math.floor(body.total))) : 8;
+      const total = typeof body.total === "number" ? Math.min(game.maxPlayers ?? 16, Math.max(1, Math.floor(body.total))) : 8;
       const added = await addBots(room, total);
       if (added) await publish(room.code, "presence.updated", { reason: "bots" });
       return json({ ok: true, added });

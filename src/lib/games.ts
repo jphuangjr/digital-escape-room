@@ -88,6 +88,21 @@ export const GAMES: GameInfo[] = [
     kind: "party",
     tags: ["Mafia"],
   },
+  {
+    id: "reply-all",
+    title: "Reply All",
+    tagline: "Every thread needs a reply. Yours should be the worst one.",
+    blurb:
+      "Each round Synergr's all-staff thread gets a new prompt and you answer it with a reply card from your hand. Replies stay anonymous until a rotating Manager, or the whole table, pins the funniest. First to five pins wins.",
+    players: "3 to 12 players",
+    duration: "20–45 min",
+    difficulty: "Easy",
+    tone: "Party game",
+    status: "staging",
+    href: "/play/reply-all",
+    kind: "party",
+    tags: ["Fill in the blank"],
+  },
 ];
 
 export function isPartyGame(game: Pick<GameInfo, "kind">): boolean {
