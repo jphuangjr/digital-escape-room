@@ -635,6 +635,7 @@ function AfterHours({
                   <span className="flex w-full items-center gap-2 font-semibold">
                     <Dot p={people.get(x.id)} />
                     <span className="truncate">{name(x.id)}</span>
+                    {x.id === party.me.mentor && <MentorTag />}
                   </span>
                   <span className="text-xs text-slate-400">{x.title}</span>
                   {teammates.length > 0 && (
@@ -752,7 +753,7 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
           </div>
           {party.checks.length > 0 && <Checks party={party} name={name} />}
           <Section title={`Still employed (${alive.length})`}>
-            <Roster seats={alive} name={name} people={people} />
+            <Roster seats={alive} name={name} people={people} mentor={party.me.mentor} />
           </Section>
         </>
       )}
@@ -760,7 +761,26 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
   );
 }
 
-function Roster({ seats, name, people, showRoles = false }: { seats: SeatView[]; name: Name; people: Map<string, PlayerPublic>; showRoles?: boolean }) {
+/** Marks the Intern's mentor on the Intern's own phone. `me.mentor` is only ever set for the Intern, so nobody else sees it. */
+function MentorTag() {
+  return (
+    <span className="shrink-0 rounded-full border border-teal-300/50 px-1.5 py-0.5 text-[11px] font-semibold text-teal-200">🎓 Your mentor</span>
+  );
+}
+
+function Roster({
+  seats,
+  name,
+  people,
+  showRoles = false,
+  mentor = null,
+}: {
+  seats: SeatView[];
+  name: Name;
+  people: Map<string, PlayerPublic>;
+  showRoles?: boolean;
+  mentor?: string | null;
+}) {
   return (
     <ul className="flex flex-col gap-2">
       {seats.map((x) => (
@@ -773,6 +793,7 @@ function Roster({ seats, name, people, showRoles = false }: { seats: SeatView[];
             <span className={`block truncate font-semibold ${x.alive ? "" : "line-through"}`}>{name(x.id)}</span>
             <span className="block text-xs text-slate-400">{x.title}</span>
           </span>
+          {x.id === mentor && <MentorTag />}
           {(showRoles || x.role) && x.role && <RoleChip role={x.role} />}
         </li>
       ))}
@@ -841,6 +862,7 @@ function Review({
               <Dot p={people.get(x.id)} />
               {name(x.id)}
               {x.id === me && <span className="font-normal text-slate-400">(you)</span>}
+              {x.id === party.me.mentor && <MentorTag />}
             </span>,
             x.title,
           ),
@@ -935,7 +957,7 @@ function GameOver({
         {won !== null && <p className="mt-2 text-slate-200">{won ? "You won. Update your LinkedIn." : "You lost. Time to pivot."}</p>}
       </div>
       <Section title="Who was who">
-        <Roster seats={party.seats} name={name} people={people} showRoles />
+        <Roster seats={party.seats} name={name} people={people} showRoles mentor={party.me.mentor} />
       </Section>
       {party.nights && <NightLog nights={party.nights} name={name} />}
       {isHost ? (
