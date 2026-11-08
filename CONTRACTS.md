@@ -199,3 +199,7 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
 - Each `NightRecord` also stores who held the powers that night (`moles`, `it`, `hr`, `recruiter`; optional for older
   saved games). The game-over recap names them via `nightLines` (src/lib/allhands/recap.ts) and leaves out a power
   whose holder was already gone, instead of saying "Nobody".
+- Onboarding: once every seat is ready, the reveal phase's `endsAt` moves to now + `READY_COUNTDOWN_MS` (10s, never
+  later than it was), and the screen shows a countdown. After hours then starts on the normal phase timeout.
+- Performance review on the IT Guy's phone: each checked player gets a "🔍 Mole" / "🔍 Not a Mole" tag, and the
+  "DMs you've read" list shows below. `checks` are still only sent to the IT Guy (and to everyone at game over).

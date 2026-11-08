@@ -4,6 +4,7 @@ import {
   DAWN_MS,
   EXIT_MS,
   REVEAL_MS,
+  READY_COUNTDOWN_MS,
   applyAction,
   advanceState,
   botMove,
@@ -51,6 +52,11 @@ function table(n = 6, roles?: Role[]): AllHandsState {
 
 function toNight(s: AllHandsState): AllHandsState {
   for (const x of s.seats) s = act(s, x.id, { type: "ready" }, 1000, s.seats.map((y) => y.id));
+  // Everyone's ready: a 10-second countdown, then after hours. Later steps in these tests run at t=1000.
+  expect(s.phase).toBe("reveal");
+  expect(s.endsAt).toBe(1000 + READY_COUNTDOWN_MS);
+  s = { ...advanceState(s, 1000 + READY_COUNTDOWN_MS).state };
+  s = { ...s, endsAt: s.endsAt === null ? null : s.endsAt - READY_COUNTDOWN_MS };
   expect(s.phase).toBe("night");
   return s;
 }
@@ -363,6 +369,8 @@ describe("test-room bots", () => {
 
   it("plays a whole round with legal moves, Moles backing each other up", () => {
     let s = run(table(7, roles));
+    expect(s.phase).toBe("reveal"); // all ready: the 10-second countdown
+    s = advanceState(s, 2000 + READY_COUNTDOWN_MS).state;
     expect(s.phase).toBe("night");
     s = act(s, "p1", { type: "pick", target: "p5" }, 2000, room);
     s = run(s, ["p1"]);

@@ -172,7 +172,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
         )}
 
         {party.phase === "lobby" && <Lobby code={code} state={state} party={party} isHost={isHost} act={act} busy={busy} name={name} />}
-        {party.phase === "reveal" && <Onboarding party={party} meId={meId} act={act} busy={busy} name={name} />}
+        {party.phase === "reveal" && <Onboarding party={party} meId={meId} act={act} busy={busy} name={name} left={left} />}
         {party.phase === "night" && <AfterHours party={party} act={act} name={name} people={people} />}
         {(party.phase === "dawn" || party.phase === "day") && <Morning party={party} name={name} people={people} />}
         {party.phase === "vote" && <Review party={party} act={act} name={name} people={people} me={meId} />}
@@ -514,9 +514,36 @@ function TourButton() {
 
 // ---------- onboarding ----------
 
-function Onboarding({ party, meId, act, busy, name }: { party: AllHandsView; meId: string; act: Act; busy: boolean; name: Name }) {
+function Onboarding({
+  party,
+  meId,
+  act,
+  busy,
+  name,
+  left,
+}: {
+  party: AllHandsView;
+  meId: string;
+  act: Act;
+  busy: boolean;
+  name: Name;
+  left: number | null;
+}) {
   const ready = party.seats.filter((x) => x.ready).length;
   const waiting = party.seats.filter((x) => !x.ready).map((x) => name(x.id));
+  const allReady = party.seats.length > 0 && waiting.length === 0;
+  if (allReady && !party.paused) {
+    const secs = left === null ? null : Math.ceil(left / 1000);
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-3xl border border-lime-300/40 bg-lime-300/10 p-8 text-center">
+        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-lime-300">Everyone&apos;s read their badge</p>
+        <p className="text-7xl font-black tabular-nums" aria-live="polite">
+          {secs ?? "…"}
+        </p>
+        <p className="text-slate-200">After hours starts in {secs === 1 ? "1 second" : `${secs ?? 10} seconds`}. Heads down, screens close.</p>
+      </div>
+    );
+  }
   return (
     <>
       <div>
@@ -790,6 +817,17 @@ function PollResults({ poll, name, people }: { poll: PollResult; name: Name; peo
   );
 }
 
+/** The IT Guy's own read on someone: `party.checks` is only ever filled on the IT Guy's phone (and at game over). */
+function CheckTag({ party, id }: { party: AllHandsView; id: string }) {
+  const c = [...party.checks].reverse().find((x) => x.target === id);
+  if (!c || party.phase === "over") return null;
+  return c.isMole ? (
+    <span className="shrink-0 rounded-full border border-rose-400/60 px-1.5 py-0.5 text-[11px] font-semibold text-rose-300">🔍 Mole</span>
+  ) : (
+    <span className="shrink-0 rounded-full border border-sky-300/50 px-1.5 py-0.5 text-[11px] font-semibold text-sky-200">🔍 Not a Mole</span>
+  );
+}
+
 /** Marks the Intern's mentor on the Intern's own phone. `me.mentor` is only ever set for the Intern, so nobody else sees it. */
 function MentorTag() {
   return (
@@ -893,12 +931,14 @@ function Review({
               {x.id === me && <span className="font-normal text-slate-400">(you)</span>}
               {x.id === party.me.mentor && <MentorTag />}
               {x.role === "nephew" && <RoleChip role="nephew" />}
+              <CheckTag party={party} id={x.id} />
             </span>,
             x.title,
           ),
         )}
         {option(SKIP, "Let's circle back", "Nobody gets fired today")}
       </ul>
+      {party.checks.length > 0 && <Checks party={party} name={name} />}
       <p className="text-sm text-slate-400">
         {v.voted} of {v.total} have voted.
       </p>

@@ -31,6 +31,8 @@ import { definePartyGame, type PartyCtx, type PartyResult } from "../party/regis
 
 /** How long the untimed-by-setting phases last. */
 export const REVEAL_MS = 90_000;
+/** Once everyone has read their badge, after hours starts this long later (a countdown, so phones can go face down). */
+export const READY_COUNTDOWN_MS = 10_000;
 export const DAWN_MS = 8_000;
 export const EXIT_MS = 7_000;
 
@@ -393,7 +395,10 @@ export function endPhase(s: AllHandsState, now: number): AllHandsState {
 function maybeEarly(s: AllHandsState, now: number): AllHandsState {
   if (s.pausedLeft !== null) return s;
   const alive = living(s);
-  if (s.phase === "reveal" && s.seats.every((x) => x.ready)) return endPhase(s, now);
+  if (s.phase === "reveal" && s.seats.every((x) => x.ready)) {
+    const at = now + READY_COUNTDOWN_MS;
+    return s.endsAt !== null && s.endsAt <= at ? s : { ...s, endsAt: at };
+  }
   if (s.phase === "night") {
     const allPicked = alive.every((x) => s.picks[x.id]);
     const moles = alive.filter((x) => isMoleRole(x.role));
