@@ -414,6 +414,9 @@ function Lobby({
   const blocked = lineupIssues(tableLineup(party, count)).some((x) => x.level === "block");
   return (
     <>
+      <Link href="/party" className="-my-2 inline-flex min-h-11 items-center self-start text-sm text-slate-400 active:text-slate-200">
+        ← Back to Party games
+      </Link>
       <section className="flex flex-col items-center gap-3 rounded-3xl border border-slate-800 bg-slate-900 p-5 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Room code</p>
         <p className="font-mono text-5xl font-black tracking-widest text-lime-300">{code}</p>
