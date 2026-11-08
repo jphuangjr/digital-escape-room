@@ -175,6 +175,8 @@ export interface AllHandsView {
   /** Whether this player may post in the team chat (the laid-off and fired can only read during a game). */
   canTeamChat: boolean;
   minPlayers: number;
+  /** The table's custom role lineup (public), or null when it plays the recommended one. See lineup.ts. */
+  lineup: Partial<Record<Role, number>> | null;
 }
 
 /** One message on the Moles' back channel. Never broadcast: it travels only in the HTTP responses of those allowed to read it. */
@@ -201,6 +203,7 @@ export type AllHandsAction =
   | { type: "resume" }
   | { type: "end" } // host: back to the lobby
   | { type: "kick"; playerId: string }
+  | { type: "lineup"; from?: Role; to?: Role; reset?: boolean } // anyone, between games: swap one seat's role, or reset to recommended
   | { type: "moleChat"; body: string }; // a living Mole: post on the back channel
 
 export const SKIP = "skip";
