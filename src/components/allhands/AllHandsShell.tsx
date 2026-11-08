@@ -109,6 +109,22 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
     void act({ type: "tick" });
   }, [left, party.endsAt, act]);
 
+  // The last five seconds of any timer: a buzz each second where the phone supports it (Android browsers; iPhones
+  // don't), plus a pulsing edge on every phone. Every phone does the same thing, so it gives nothing away.
+  const finalSecond = !party.paused && left !== null && left > 0 && left <= 5_000 ? Math.ceil(left / 1000) : null;
+  const buzzed = useRef<string | null>(null);
+  useEffect(() => {
+    if (finalSecond === null || !party.endsAt) return;
+    const key = `${party.endsAt}:${finalSecond}`;
+    if (buzzed.current === key) return;
+    buzzed.current = key;
+    try {
+      if (typeof navigator !== "undefined" && "vibrate" in navigator && document.visibilityState === "visible") {
+        navigator.vibrate(finalSecond === 1 ? 250 : 80);
+      }
+    } catch {}
+  }, [finalSecond, party.endsAt]);
+
   // First-time help: the tour opens by itself the first time this phone reaches a lobby, and tips run through the first game.
   const [tourOpen, setTourOpen] = useState(false);
   const [tipsOn, setTipsOn] = useState(false);
@@ -151,6 +167,10 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
         </div>
       </header>
 
+      {finalSecond !== null && (
+        // A flash on each of the last five seconds, for phones that can't vibrate. Keyed so it restarts every second.
+        <div key={finalSecond} aria-hidden className="ah-final-flash pointer-events-none fixed inset-0 z-50 rounded-[inherit] ring-[6px] ring-inset ring-rose-400" />
+      )}
       <main className="mx-auto flex max-w-xl flex-col gap-5 px-edge pb-24 pt-5">
         {state.partyTest && <TestBar code={code} test={state.partyTest} party={party} refresh={refresh} meId={state.me.id} />}
         {party.me.seated && !party.me.alive && party.phase !== "over" && <LinkedInBanner />}

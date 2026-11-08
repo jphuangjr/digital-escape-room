@@ -203,3 +203,5 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   later than it was), and the screen shows a countdown. After hours then starts on the normal phase timeout.
 - Performance review on the IT Guy's phone: each checked player gets a "🔍 Mole" / "🔍 Not a Mole" tag, and the
   "DMs you've read" list shows below. `checks` are still only sent to the IT Guy (and to everyone at game over).
+- Last five seconds of any All Hands timer (not while paused): `navigator.vibrate` once a second where supported
+  (Android browsers; iOS Safari has no Vibration API), and a fading red edge flash (`.ah-final-flash`) on every phone.
