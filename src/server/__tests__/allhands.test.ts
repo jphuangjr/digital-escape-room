@@ -570,6 +570,9 @@ describe("the Recruiter", () => {
     // Only the Recruiter hears it was turned down.
     expect(viewFor(s, "p1", { hostId: "p1" }).dawn?.offer).toEqual({ target: "p3", result: "refused" });
     for (const p of ["p2", "p3", "p4", "p5"]) expect(viewFor(s, p, { hostId: "p1" }).dawn?.offer).toBeNull();
+    // ...and the IT Guy who said no learns who the Recruiter is. Nobody else does.
+    expect(viewFor(s, "p3", { hostId: "p1" }).dawn?.approachedBy).toBe("p1");
+    for (const p of ["p1", "p2", "p4", "p5"]) expect(viewFor(s, p, { hostId: "p1" }).dawn?.approachedBy).toBeNull();
 
     let t = night();
     t = act(t, "p1", { type: "pick", target: "p6", offer: true }, 2000, room);
@@ -580,6 +583,7 @@ describe("the Recruiter", () => {
     expect(t.dawn?.saved).toBe(false); // looks like any quiet night
     expect(viewFor(t, "p1", { hostId: "p1" }).dawn?.offer).toEqual({ target: "p6", result: "blocked" });
     for (const p of ["p2", "p4", "p6"]) expect(viewFor(t, p, { hostId: "p1" }).dawn?.offer).toBeNull();
+    expect(viewFor(t, "p6", { hostId: "p1" }).dawn?.approachedBy).toBeNull(); // a blocked target isn't told
   });
 
   it("takes back an offer by making a plain pick", () => {

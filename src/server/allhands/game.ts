@@ -572,6 +572,13 @@ function offerFor(s: AllHandsState, round: number, me: Seat | undefined): DawnVi
   return { target: n.offerTarget, result: n.offerResult };
 }
 
+/** The Recruiter's id, for the player who turned down their offer on night `round` (a blocked offer tells the target nothing). */
+function approachedBy(s: AllHandsState, round: number, me: Seat | undefined): string | null {
+  const n = s.nights.find((x) => x.round === round);
+  if (!me || n?.offerResult !== "refused" || n.offerTarget !== me.id) return null;
+  return n.recruiter ?? s.seats.find((x) => x.role === "recruiter")?.id ?? null;
+}
+
 export function canMoleChat(s: AllHandsState, playerId: string): boolean {
   const seat = seatOf(s, playerId);
   return inGame(s) && isMoleRole(seat?.role) && Boolean(seat?.alive);
@@ -709,7 +716,7 @@ export function viewFor(s: AllHandsState, viewerId: string, ctx: { hostId: strin
     checks: me?.role === "it" || over ? s.checks : [],
     dawn:
       (s.phase === "dawn" || s.phase === "day") && s.dawn
-        ? { ...s.dawn, recruited: me?.recruitedRound === s.dawn.round, offer: offerFor(s, s.dawn.round, me) }
+        ? { ...s.dawn, recruited: me?.recruitedRound === s.dawn.round, offer: offerFor(s, s.dawn.round, me), approachedBy: approachedBy(s, s.dawn.round, me) }
         : null,
     vote,
     exit: s.phase === "exit" && s.exit ? { ...s.exit, survived: Boolean(s.exit.survived), role: exitSeat ? roleFor(exitSeat) : null } : null,

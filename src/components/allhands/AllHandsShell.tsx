@@ -772,6 +772,25 @@ function OfferDm({ offer, name }: { offer: NonNullable<DawnView["offer"]>; name:
   );
 }
 
+/** A private DM to the IT Guy or HR Rep who turned the Recruiter down: now they know who the Recruiter is. */
+function ApproachedDm({ recruiter }: { recruiter: string }) {
+  return (
+    <div className="rounded-2xl border border-fuchsia-400/50 bg-fuchsia-400/10 p-4">
+      <div className="flex items-center gap-2">
+        <span aria-hidden className="grid h-9 w-9 place-items-center rounded-lg bg-fuchsia-400 text-lg text-slate-950">💼</span>
+        <div>
+          <p className="text-sm font-bold">{recruiter}</p>
+          <p className="text-xs text-fuchsia-200/70">🔒 Direct message · only you see this</p>
+        </div>
+      </div>
+      <p className="mt-3 text-fuchsia-50">
+        &quot;Hey! Quick question, are you open to new opportunities? 👀&quot; {recruiter} tried to recruit you to the Moles last night.
+        You turned them down. They&apos;re the Recruiter, and they know you said no.
+      </p>
+    </div>
+  );
+}
+
 /** Anonymous coworkers gossiping in a Slack thread under an announcement. */
 function ChatterThread({ chatter, who }: { chatter: Chatter; who: string }) {
   const lines = chatterLines(chatter, who);
@@ -806,6 +825,7 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
         </div>
       )}
       {d?.offer && <OfferDm offer={d.offer} name={name} />}
+      {d?.approachedBy && <ApproachedDm recruiter={name(d.approachedBy)} />}
       {d?.poll && <PollResults poll={d.poll} name={name} people={people} />}
       {d && (
         <SlackPost>

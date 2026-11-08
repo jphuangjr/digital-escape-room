@@ -98,6 +98,8 @@ export interface DawnView {
   /** Last night's offer, as a private DM: the other Moles see it only when it was accepted; the Recruiter also
    *  sees a turned-down or blocked one. Null for everyone else (and for the hire, who gets `recruited`). */
   offer: { target: string; result: "hired" | "refused" | "blocked" } | null;
+  /** Only on the phone of the IT Guy or HR Rep who turned the Recruiter down last night: who the Recruiter is. */
+  approachedBy: string | null;
   /** Anonymous coworkers gossiping about the layoff. */
   chatter?: Chatter;
   /** Last night's #random poll, if anyone answered it. */
