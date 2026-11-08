@@ -858,6 +858,11 @@ function MentorTag() {
   );
 }
 
+/** A fellow Mole's badge. The server only sends Mole-side roles of living players to other Moles, so nobody else sees it. */
+function FellowMoleTag({ seat, me }: { seat: SeatView; me: string }) {
+  return seat.id !== me && isMoleRole(seat.role) ? <RoleChip role={seat.role!} /> : null;
+}
+
 function Roster({
   seats,
   name,
@@ -953,6 +958,7 @@ function Review({
               {name(x.id)}
               {x.id === me && <span className="font-normal text-slate-400">(you)</span>}
               {x.id === party.me.mentor && <MentorTag />}
+              <FellowMoleTag seat={x} me={me} />
               {x.role === "nephew" && <RoleChip role="nephew" />}
               <CheckTag party={party} id={x.id} />
             </span>,
