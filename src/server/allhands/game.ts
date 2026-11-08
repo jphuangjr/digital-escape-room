@@ -23,6 +23,7 @@ import {
   type Settings,
   type Team,
 } from "@/lib/allhands/types";
+import { lineupFor, lineupIssues, lineupRoles, parseLineup, swapRole, type RoleCounts } from "@/lib/allhands/lineup";
 import { CHAT_MIN_INTERVAL_MS, cleanChatBody, maskProfanity } from "../logic";
 import { definePartyGame, type PartyCtx, type PartyResult } from "../party/registry";
 
@@ -77,6 +78,8 @@ export interface AllHandsState {
   offer: string | null;
   /** The Moles' back channel for this game (original text; masked in views). */
   moleChat: { id: string; from: string; body: string; at: number }[];
+  /** The table's custom role lineup, if anyone in the lobby changed it; null deals the recommended one. Kept between games. */
+  lineup?: RoleCounts | null;
 }
 
 export function initialState(settings: Settings = DEFAULT_SETTINGS): AllHandsState {
@@ -99,6 +102,7 @@ export function initialState(settings: Settings = DEFAULT_SETTINGS): AllHandsSta
     winner: null,
     moleChat: [],
     offer: null,
+    lineup: null,
   };
 }
 
@@ -106,7 +110,7 @@ export function parseState(raw: unknown): AllHandsState {
   if (!raw || typeof raw !== "object" || (raw as { v?: unknown }).v !== 1) return initialState();
   const s = raw as Partial<AllHandsState>;
   const base = initialState({ ...DEFAULT_SETTINGS, ...(s.settings ?? {}) });
-  return { ...base, ...s, settings: base.settings } as AllHandsState;
+  return { ...base, ...s, settings: base.settings, lineup: parseLineup(s.lineup) } as AllHandsState;
 }
 
 // ---------- helpers ----------
@@ -373,6 +377,14 @@ export function deal(roomPlayerIds: string[], rand: (n: number) => number, opts:
   return ids.map((id, i) => ({ id, role: dealt[i], title: titles[i % titles.length], alive: true, ready: false }));
 }
 
+/** Deal exactly these roles (one per player, as many as there are players) in a random order. */
+export function dealRoles(roomPlayerIds: string[], roles: Role[], rand: (n: number) => number): Seat[] {
+  const ids = roomPlayerIds.slice(0, MAX_PLAYERS);
+  const dealt = shuffle(roles.slice(0, ids.length), rand);
+  const titles = shuffle(JOB_TITLES, rand);
+  return ids.map((id, i) => ({ id, role: dealt[i] ?? "employee", title: titles[i % titles.length], alive: true, ready: false }));
+}
+
 const HOST_ONLY = new Set(["start", "settings", "skip", "pause", "resume", "end"]);
 
 export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx): PartyResult<AllHandsState> {
@@ -387,8 +399,12 @@ export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx):
     case "start": {
       if (s.phase !== "lobby" && s.phase !== "over") return refuse(s, "The game is already running.");
       if (ctx.roomPlayerIds.length < MIN_PLAYERS) return refuse(s, `You need at least ${MIN_PLAYERS} players to start.`);
-      const fresh = initialState(s.settings);
-      return done(timed({ ...fresh, seats: deal(ctx.roomPlayerIds, ctx.rand, s.settings) }, "reveal", REVEAL_MS, now));
+      const fresh = { ...initialState(s.settings), lineup: s.lineup ?? null };
+      const lineup = lineupFor(ctx.roomPlayerIds.length, s.settings, s.lineup ?? null);
+      const blocked = lineupIssues(lineup).find((x) => x.level === "block");
+      const roles = lineupRoles(lineup);
+      if (blocked || !roles) return refuse(s, blocked?.text ?? "The lineup doesn't fit this table.");
+      return done(timed({ ...fresh, seats: dealRoles(ctx.roomPlayerIds, roles, ctx.rand) }, "reveal", REVEAL_MS, now));
     }
 
     case "settings": {
@@ -449,7 +465,17 @@ export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx):
     }
 
     case "end":
-      return done(initialState(s.settings));
+      return done({ ...initialState(s.settings), lineup: s.lineup ?? null });
+
+    case "lineup": {
+      // Anyone at the table may change the lineup between games (it's public), not just the host.
+      if (s.phase !== "lobby" && s.phase !== "over") return refuse(s, "The lineup can only change between games.");
+      if (a.reset) return s.lineup ? done({ ...s, lineup: null }) : { state: s, changed: false, ok: true };
+      if (!a.from || !a.to) return refuse(s, "Pick a role to swap.");
+      const r = swapRole(lineupFor(ctx.roomPlayerIds.length, s.settings, s.lineup ?? null), a.from, a.to);
+      if (!r.ok) return refuse(s, r.error);
+      return done({ ...s, lineup: r.lineup });
+    }
 
     case "kick":
       // Removing a player is the route's job (it deletes their Player row); the game only checks it's allowed.
@@ -523,6 +549,12 @@ export function parseAction(body: Record<string, unknown>): AllHandsAction | nul
     case "kick": {
       const playerId = str("playerId");
       return playerId ? { type: "kick", playerId } : null;
+    }
+    case "lineup": {
+      if (body.reset === true) return { type: "lineup", reset: true };
+      const from = str("from");
+      const to = str("to");
+      return from && to ? { type: "lineup", from: from as Role, to: to as Role } : null;
     }
     case "moleChat": {
       const body = str("body");
@@ -626,6 +658,7 @@ export function viewFor(s: AllHandsState, viewerId: string, ctx: { hostId: strin
     canMoleChat: canMoleChat(s, viewerId),
     canTeamChat: canTeamChat(s, viewerId),
     minPlayers: MIN_PLAYERS,
+    lineup: s.lineup ?? null,
   };
 }
 
