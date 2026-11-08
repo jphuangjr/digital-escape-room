@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { PartyTestInfo } from "@/lib/types";
 import { apiFetch } from "@/lib/client/game";
-import { ROLE_INFO, type AllHandsView } from "@/lib/allhands/types";
+import { ROLE_INFO } from "@/lib/allhands/types";
 
 const SIZES = [5, 8, 12, 16];
 
@@ -17,12 +17,19 @@ export function TestBar({
   party,
   refresh,
   meId,
+  sizes = SIZES,
+  hint = "You play as whoever you pick: their badge, their after-hours move, their vote and the Moles' channel. The host controls stay yours.",
 }: {
   meId: string;
   code: string;
   test: PartyTestInfo;
-  party: AllHandsView;
+  /** Any party game's view: only the phase is read ("lobby" and "over" are between games). */
+  party: { phase: string };
   refresh: () => Promise<void>;
+  /** Table sizes the fill buttons offer. */
+  sizes?: number[];
+  /** What looking through a bot's eyes lets you do, in this game. */
+  hint?: string;
 }) {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -53,7 +60,7 @@ export function TestBar({
         <div className="flex flex-col gap-1.5">
           <p className="text-sm text-amber-100">Fill the table with bots, up to:</p>
           <div className="flex gap-2">
-            {SIZES.map((n) => (
+            {sizes.map((n) => (
               <button
                 key={n}
                 type="button"
@@ -83,10 +90,7 @@ export function TestBar({
               </option>
             ))}
           </select>
-          <span className="text-xs text-amber-100/70">
-            You play as whoever you pick: their badge, their after-hours move, their vote and the Moles&apos; channel. The
-            host controls stay yours.
-          </span>
+          <span className="text-xs text-amber-100/70">{hint}</span>
         </label>
       )}
 

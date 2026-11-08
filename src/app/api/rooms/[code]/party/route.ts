@@ -6,10 +6,11 @@ import { changeParty, effectiveHostId, rand } from "@/server/party/server";
 import { viewerId } from "@/server/party/test";
 
 /** In an admin's test room these are made as the bot being looked through; host controls stay the admin's. */
-const SEAT_ACTIONS = new Set(["ready", "pick", "vote", "moleChat"]);
+const SEAT_ACTIONS = new Set(["ready", "pick", "vote", "moleChat", "play", "choose", "mulligan", "join"]);
 
 /**
- * One action in a party game: start, settings, ready, pick, vote, tick, skip, pause, resume, end or kick.
+ * One action in a party game (All Hands: start, settings, ready, pick, vote, tick, skip, pause, resume, end or kick;
+ * Reply All adds play, choose, mulligan, join).
  * Returns the caller's own view, which is the only place their secrets ever travel.
  */
 export async function POST(req: Request, { params }: { params: Promise<{ code: string }> }) {

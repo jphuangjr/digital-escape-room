@@ -153,7 +153,7 @@ export interface RoomState {
   /** Physical-room games only: the shared scene (narrow by gameId). */
   scene?: import("@/lib/train/types").SceneDTO | import("@/lib/atlas/types").AtlasSceneDTO;
   /** Party games only: this player's own view of the table (see src/server/party). */
-  party?: import("@/lib/allhands/types").AllHandsView;
+  party?: import("@/lib/allhands/types").AllHandsView | import("@/lib/replyall/types").ReplyAllView;
   /** Admin test rooms only (an admin hosting): every seat, and whose eyes the party view is through. */
   partyTest?: PartyTestInfo;
 }

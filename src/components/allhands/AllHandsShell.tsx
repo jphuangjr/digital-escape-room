@@ -67,7 +67,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
   useEffect(() => {
     if (inFlight.current === 0) setLocal(null);
   }, [state]);
-  const party = local ?? state.party!;
+  const party = local ?? (state.party as AllHandsView);
   const partyRef = useRef(party);
   partyRef.current = party;
   const playersRef = useRef(state.players.length);
