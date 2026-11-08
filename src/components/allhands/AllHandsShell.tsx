@@ -10,6 +10,8 @@ import { TestBar } from "./TestBar";
 import { RulesButton } from "./RulesSheet";
 import { LineupPanel, tableLineup } from "./LineupPanel";
 import { lineupIssues, swapRole } from "@/lib/allhands/lineup";
+import { FirstGameTip, HowToPlayTour } from "./HowToPlayTour";
+import { OPEN_TOUR_EVENT, markFirstGameDone, openTour, tipFor, tipsWanted, tourSeen } from "@/lib/allhands/tutorial";
 import {
   DAY_OPTIONS_MS,
   ROLE_INFO,
@@ -104,6 +106,22 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
     void act({ type: "tick" });
   }, [left, party.endsAt, act]);
 
+  // First-time help: the tour opens by itself the first time this phone reaches a lobby, and tips run through the first game.
+  const [tourOpen, setTourOpen] = useState(false);
+  const [tipsOn, setTipsOn] = useState(false);
+  const [closedTips, setClosedTips] = useState<string[]>([]);
+  useEffect(() => {
+    setTipsOn(tipsWanted());
+    if (!tourSeen() && partyRef.current.phase === "lobby") setTourOpen(true);
+    const open = () => setTourOpen(true);
+    window.addEventListener(OPEN_TOUR_EVENT, open);
+    return () => window.removeEventListener(OPEN_TOUR_EVENT, open);
+  }, []);
+  useEffect(() => {
+    if (party.phase === "over" && party.me.seated) markFirstGameDone();
+  }, [party.phase, party.me.seated]);
+  const tip = tipsOn ? tipFor(party) : null;
+
   const isHost = state.me.id === party.hostId;
   const name = (id: string | null | undefined) => (id ? (people.get(id)?.displayName ?? "Someone") : "Nobody");
 
@@ -124,6 +142,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <RulesButton players={party.seats.length || state.players.length} settings={party.settings} lineup={party.lineup} />
+            <TourButton />
             <Clock left={left} paused={party.paused} remainingMs={party.remainingMs} />
           </div>
         </div>
@@ -141,6 +160,14 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
           </p>
         )}
 
+        {tip && !closedTips.includes(tip.id) && (
+          <FirstGameTip
+            tip={tip}
+            onClose={() => (tipsWanted() ? setClosedTips((c) => [...c, tip.id]) : setTipsOn(false))}
+            onTour={openTour}
+          />
+        )}
+
         {party.phase === "lobby" && <Lobby code={code} state={state} party={party} isHost={isHost} act={act} busy={busy} name={name} />}
         {party.phase === "reveal" && <Onboarding party={party} meId={meId} act={act} busy={busy} name={name} />}
         {party.phase === "night" && <AfterHours party={party} act={act} name={name} people={people} />}
@@ -156,6 +183,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
         {party.phase !== "lobby" && <History history={party.history} name={name} />}
       </main>
       <AllHandsChat code={code} state={state} party={party} refresh={refresh} people={people} meId={meId} />
+      {tourOpen && <HowToPlayTour onClose={() => setTourOpen(false)} />}
     </div>
   );
 }
@@ -452,16 +480,32 @@ function Lobby({
 
 function HowToPlay() {
   return (
-    <details className="rounded-xl border border-slate-800 bg-slate-900 p-3 text-sm text-slate-300">
-      <summary className="min-h-8 cursor-pointer font-semibold text-slate-100">How to play</summary>
-      <ol className="mt-2 list-decimal space-y-1 pl-5">
-        <li>Everyone gets a secret badge. A few of you are Moles.</li>
-        <li>After hours, everyone taps something on their phone. The Moles pick someone to lay off; IT and HR use their powers.</li>
-        <li>In the morning the app tells you who got laid off. Then talk it out at all-hands.</li>
-        <li>At performance review, vote to fire a suspect, or circle back.</li>
-        <li>The company wins when every Mole is gone. The Moles win when they match everyone else.</li>
-      </ol>
-    </details>
+    <button
+      type="button"
+      onClick={openTour}
+      className="flex min-h-14 items-center gap-3 rounded-xl border border-slate-800 bg-slate-900 px-3 text-left active:bg-slate-800"
+    >
+      <span aria-hidden className="text-2xl">🎓</span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold">New to All Hands?</span>
+        <span className="block text-sm text-slate-400">Take the one-minute tour of how to play</span>
+      </span>
+      <span aria-hidden className="text-slate-500">›</span>
+    </button>
+  );
+}
+
+/** Replays the how-to-play tour from the top bar. */
+function TourButton() {
+  return (
+    <button
+      type="button"
+      onClick={openTour}
+      aria-label="How to play"
+      className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 text-sm font-bold text-slate-200 transition-transform duration-75 active:scale-95 active:bg-slate-800"
+    >
+      ?
+    </button>
   );
 }
 
