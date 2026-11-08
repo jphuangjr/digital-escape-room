@@ -8,6 +8,7 @@ import {
   advanceState,
   botMove,
   canTeamChat,
+  teamOf,
   deal,
   initialState,
   moleChoice,
@@ -176,7 +177,7 @@ describe("performance review", () => {
     expect(s.phase).toBe("vote");
     s = act(s, "p1", { type: "vote", target: "p2" });
     expect(s.phase).toBe("exit");
-    expect(s.exit).toEqual({ fired: "p1", votes: 5 });
+    expect(s.exit).toEqual({ fired: "p1", votes: 5, survived: false });
     // The only Mole is gone: the company wins after the exit interview.
     s = advanceState(s, 1000 + EXIT_MS).state;
     expect(s.phase).toBe("over");
@@ -379,11 +380,11 @@ describe("the Burnt-out Employee", () => {
   const room = ids(7);
 
   it("is dealt at 7+ when the setting is on, and never below", () => {
-    expect(deal(ids(7), seq(), true).filter((x) => x.role === "burnout")).toHaveLength(1);
-    expect(deal(ids(16), seq(), true).filter((x) => x.role === "burnout")).toHaveLength(1);
-    expect(deal(ids(6), seq(), true).some((x) => x.role === "burnout")).toBe(false);
-    expect(deal(ids(9), seq(), false).some((x) => x.role === "burnout")).toBe(false);
-    for (let n = 7; n <= 16; n++) expect(deal(ids(n), seq(), true).filter((x) => x.role === "mole")).toHaveLength(molesFor(n));
+    expect(deal(ids(7), seq(), { burnout: true }).filter((x) => x.role === "burnout")).toHaveLength(1);
+    expect(deal(ids(16), seq(), { burnout: true }).filter((x) => x.role === "burnout")).toHaveLength(1);
+    expect(deal(ids(6), seq(), { burnout: true }).some((x) => x.role === "burnout")).toBe(false);
+    expect(deal(ids(9), seq(), { burnout: false }).some((x) => x.role === "burnout")).toBe(false);
+    for (let n = 7; n <= 16; n++) expect(deal(ids(n), seq(), { burnout: true }).filter((x) => x.role === "mole")).toHaveLength(molesFor(n));
   });
 
   it("wins alone when fired at performance review", () => {
@@ -413,5 +414,160 @@ describe("the Burnt-out Employee", () => {
     expect(s.settings.burnout).toBe(false);
     const started = act(s, "p1", { type: "start" }, 1000, ids(8));
     expect(started.seats.some((x) => x.role === "burnout")).toBe(false);
+  });
+});
+
+describe("special roles at bigger tables", () => {
+  it("deals each one only from its table size, keeping the Mole count", () => {
+    const all = { burnout: true, intern: true, nephew: true, recruiter: true };
+    for (let n = MIN_PLAYERS; n <= 16; n++) {
+      const seats = deal(ids(n), seq(), all);
+      const has = (r: Role) => seats.filter((x) => x.role === r).length;
+      expect(has("mole") + has("recruiter")).toBe(molesFor(n));
+      expect(has("recruiter")).toBe(n >= 9 ? 1 : 0);
+      expect(has("intern")).toBe(n >= 6 ? 1 : 0);
+      expect(has("nephew")).toBe(n >= 8 ? 1 : 0);
+      expect(has("employee")).toBeGreaterThanOrEqual(1);
+    }
+    expect(deal(ids(12), seq(), {}).some((x) => ["intern", "nephew", "recruiter", "burnout"].includes(x.role))).toBe(false);
+  });
+});
+
+describe("the Founder's Nephew", () => {
+  const roles: Role[] = ["mole", "it", "hr", "nephew", "employee", "employee"];
+  const room = ids(6);
+  const review = (s: AllHandsState, target: string) => {
+    s = { ...s, phase: "vote", votes: {}, endsAt: 99_999 };
+    for (const x of s.seats.filter((y) => y.alive)) s = act(s, x.id, { type: "vote", target: x.id === target ? "p1" : target }, 2000, room);
+    return s;
+  };
+
+  it("survives the first firing, is outed, and goes the second time", () => {
+    let s = review({ ...table(6, roles), round: 1 }, "p4");
+    expect(s.phase).toBe("exit");
+    expect(s.exit?.survived).toBe(true);
+    expect(s.seats.find((x) => x.id === "p4")?.alive).toBe(true);
+    const v = viewFor(s, "p5", { hostId: "p1" });
+    expect(v.exit?.survived).toBe(true);
+    expect(v.seats.find((x) => x.id === "p4")?.role).toBe("nephew");
+    expect(v.history.at(-1)?.kind).toBe("spared");
+    s = advanceState(s, s.endsAt! + 1).state;
+    expect(s.phase).toBe("night");
+    s = review(s, "p4");
+    expect(s.exit?.survived).toBe(false);
+    expect(s.seats.find((x) => x.id === "p4")?.alive).toBe(false);
+  });
+
+  it("still gets laid off at night", () => {
+    let s = toNight(table(6, roles));
+    s = act(s, "p1", { type: "pick", target: "p4" }, 2000, room);
+    s = advanceState(s, s.endsAt! + 1).state;
+    expect(s.seats.find((x) => x.id === "p4")?.alive).toBe(false);
+  });
+});
+
+describe("the Intern", () => {
+  const roles: Role[] = ["mole", "it", "hr", "intern", "employee", "employee"];
+  const room = ids(6);
+
+  it("picks a mentor on the first night, then gets the poll, and never learns the mentor's role", () => {
+    let s = toNight(table(6, roles));
+    const v = viewFor(s, "p4", { hostId: "p1" });
+    expect(v.night?.kind).toBe("intern");
+    expect(v.night?.targets).not.toContain("p4");
+    s = act(s, "p4", { type: "pick", target: "p1" }, 2000, room);
+    s = advanceState(s, s.endsAt! + 1).state;
+    expect(s.seats.find((x) => x.id === "p4")?.mentor).toBe("p1");
+    const after = viewFor(s, "p4", { hostId: "p1" });
+    expect(after.me.mentor).toBe("p1");
+    expect(after.seats.find((x) => x.id === "p1")?.role).toBeNull();
+    s = { ...s, phase: "exit", exit: { fired: null, votes: 0 }, endsAt: 1 };
+    s = advanceState(s, 2).state;
+    expect(viewFor(s, "p4", { hostId: "p1" }).night?.kind).toBe("decoy");
+  });
+
+  it("wins with the mentor's side, and gets a mentor even without picking", () => {
+    let s = toNight(table(6, roles));
+    s = advanceState(s, s.endsAt! + 1).state;
+    expect(s.seats.find((x) => x.id === "p4")?.mentor).toBe("p5"); // the next coworker along
+    const molesMentor = { ...s, seats: s.seats.map((x) => (x.id === "p4" ? { ...x, mentor: "p1" } : x)) };
+    expect(teamOf(molesMentor, molesMentor.seats[3])).toBe("moles");
+    const over = { ...molesMentor, phase: "over" as const, winner: "moles" as const };
+    expect(viewFor(over, "p4", { hostId: "p1" }).winners.sort()).toEqual(["p1", "p4"]);
+    expect(viewFor({ ...over, winner: "company" }, "p4", { hostId: "p1" }).winners).not.toContain("p4");
+  });
+
+  it("is clean to the IT Guy", () => {
+    let s = toNight(table(6, roles));
+    s = act(s, "p2", { type: "pick", target: "p4" }, 2000, room);
+    s = advanceState(s, s.endsAt! + 1).state;
+    expect(s.checks.at(-1)).toEqual({ round: 1, target: "p4", isMole: false });
+  });
+});
+
+describe("the Recruiter", () => {
+  const roles: Role[] = ["recruiter", "mole", "it", "hr", "employee", "employee", "employee", "employee", "employee"];
+  const room = ids(9);
+  const night = () => toNight(table(9, roles));
+
+  it("is a Mole to the other Moles, the IT Guy and the win check", () => {
+    const s = night();
+    expect(viewFor(s, "p2", { hostId: "p1" }).seats.find((x) => x.id === "p1")?.role).toBe("recruiter");
+    expect(viewFor(s, "p1", { hostId: "p1" }).canMoleChat).toBe(true);
+    expect(viewFor(s, "p1", { hostId: "p1" }).night?.canOffer).toBe(true);
+    expect(viewFor(s, "p2", { hostId: "p1" }).night?.canOffer).toBe(false);
+    expect(viewFor(s, "p5", { hostId: "p1" }).seats.find((x) => x.id === "p1")?.role).toBeNull();
+  });
+
+  it("hires instead of laying off; the hire becomes a Mole, sees the team, and nobody else is told", () => {
+    let s = night();
+    s = act(s, "p2", { type: "pick", target: "p6" }, 2000, room);
+    s = act(s, "p1", { type: "pick", target: "p5", offer: true }, 2000, room);
+    expect(viewFor(s, "p2", { hostId: "p1" }).night?.offer).toBe("p5");
+    expect(viewFor(s, "p5", { hostId: "p1" }).night?.offer).toBeNull();
+    s = advanceState(s, s.endsAt! + 1).state;
+    expect(s.seats.find((x) => x.id === "p5")?.role).toBe("mole");
+    expect(s.seats.every((x) => x.alive)).toBe(true); // no layoff that night
+    expect(s.dawn).toEqual({ round: 1, laidOff: null, saved: false });
+    const hired = viewFor(s, "p5", { hostId: "p1" });
+    expect(hired.dawn?.recruited).toBe(true);
+    expect(hired.me.recruited).toBe(true);
+    expect(hired.seats.find((x) => x.id === "p2")?.role).toBe("mole");
+    expect(hired.canMoleChat).toBe(true);
+    expect(viewFor(s, "p6", { hostId: "p1" }).dawn?.recruited).toBe(false);
+    expect(s.nights[0]).toMatchObject({ offerTarget: "p5", offerResult: "hired", outcome: "quiet" });
+    expect(viewFor(s, "p1", { hostId: "p1" }).night).toBeNull();
+    // The offer is spent.
+    s = { ...s, phase: "exit", exit: { fired: null, votes: 0 }, endsAt: 1 };
+    s = advanceState(s, 2).state;
+    expect(viewFor(s, "p1", { hostId: "p1" }).night?.canOffer).toBe(false);
+    expect(applyAction(s, { type: "pick", target: "p6", offer: true }, ctx("p1", 3000, room)).ok).toBe(false);
+  });
+
+  it("fails on the IT Guy and HR Rep, and HR's paperwork blocks it", () => {
+    let s = night();
+    s = act(s, "p1", { type: "pick", target: "p3", offer: true }, 2000, room);
+    s = advanceState(s, s.endsAt! + 1).state;
+    expect(s.seats.find((x) => x.id === "p3")?.role).toBe("it");
+    expect(s.nights[0].offerResult).toBe("refused");
+
+    let t = night();
+    t = act(t, "p1", { type: "pick", target: "p6", offer: true }, 2000, room);
+    t = act(t, "p4", { type: "pick", target: "p6" }, 2000, room);
+    t = advanceState(t, t.endsAt! + 1).state;
+    expect(t.seats.find((x) => x.id === "p6")?.role).toBe("employee");
+    expect(t.nights[0].offerResult).toBe("blocked");
+    expect(t.dawn?.saved).toBe(false); // looks like any quiet night
+  });
+
+  it("takes back an offer by making a plain pick", () => {
+    let s = night();
+    s = act(s, "p1", { type: "pick", target: "p5", offer: true }, 2000, room);
+    s = act(s, "p1", { type: "pick", target: "p6" }, 2000, room);
+    expect(s.offer).toBeNull();
+    s = act(s, "p2", { type: "pick", target: "p6" }, 2000, room);
+    s = advanceState(s, s.endsAt! + 1).state;
+    expect(s.seats.find((x) => x.id === "p6")?.alive).toBe(false);
+    expect(s.seats.find((x) => x.id === "p1")?.offered).toBeFalsy();
   });
 });

@@ -10,9 +10,13 @@ import { TestBar } from "./TestBar";
 import { RulesButton } from "./RulesSheet";
 import {
   BURNOUT_MIN_PLAYERS,
+  INTERN_MIN_PLAYERS,
+  NEPHEW_MIN_PLAYERS,
+  RECRUITER_MIN_PLAYERS,
   DAY_OPTIONS_MS,
   ROLE_INFO,
   SKIP,
+  isMoleRole,
   type AllHandsView,
   type HistoryEntry,
   type NightKind,
@@ -28,6 +32,9 @@ const ROLE_TONE: Record<Role, string> = {
   it: "text-sky-300 border-sky-300/50 bg-sky-300/10",
   hr: "text-amber-300 border-amber-300/50 bg-amber-300/10",
   burnout: "text-violet-300 border-violet-300/50 bg-violet-300/10",
+  intern: "text-teal-300 border-teal-300/50 bg-teal-300/10",
+  nephew: "text-orange-300 border-orange-300/50 bg-orange-300/10",
+  recruiter: "text-fuchsia-300 border-fuchsia-400/60 bg-fuchsia-400/10",
 };
 
 const PHASE_LABEL: Record<AllHandsView["phase"], string> = {
@@ -116,7 +123,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <RulesButton players={party.seats.length || state.players.length} burnout={party.settings.burnout} />
+            <RulesButton players={party.seats.length || state.players.length} settings={party.settings} />
             <Clock left={left} paused={party.paused} remainingMs={party.remainingMs} />
           </div>
         </div>
@@ -140,7 +147,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
         {(party.phase === "dawn" || party.phase === "day") && <Morning party={party} name={name} people={people} />}
         {party.phase === "vote" && <Review party={party} act={act} name={name} people={people} me={meId} />}
         {party.phase === "exit" && <ExitInterview party={party} name={name} />}
-        {party.phase === "over" && <GameOver party={party} isHost={isHost} act={act} busy={busy} name={name} people={people} />}
+        {party.phase === "over" && <GameOver party={party} isHost={isHost} act={act} busy={busy} name={name} people={people} meId={meId} />}
 
         {party.me.seated && party.phase !== "lobby" && party.phase !== "over" && party.phase !== "reveal" && (
           <BadgeCard party={party} meId={meId} name={name} compact />
@@ -166,6 +173,7 @@ function optimistic(p: AllHandsView, body: Record<string, unknown>, meId: string
         night: {
           ...p.night,
           myPick: target,
+          offer: body.offer ? target : p.night.canOffer ? null : p.night.offer,
           acted: p.night.myPick ? p.night.acted : p.night.acted + 1,
           team: p.night.team?.map((m) => (m.id === meId ? { ...m, pick: target } : m)) ?? null,
         },
@@ -267,7 +275,7 @@ function BadgeCard({ party, meId, name, compact = false }: { party: AllHandsView
   const role = party.me.role;
   if (!role) return null;
   const info = ROLE_INFO[role];
-  const fellowMoles = role === "mole" ? party.seats.filter((x) => x.role === "mole" && x.id !== meId) : [];
+  const fellowMoles = isMoleRole(role) ? party.seats.filter((x) => isMoleRole(x.role) && x.id !== meId) : [];
   const show = () => setShown(true);
   const hide = () => setShown(false);
   return (
@@ -292,10 +300,22 @@ function BadgeCard({ party, meId, name, compact = false }: { party: AllHandsView
           <p className={`${compact ? "text-2xl" : "text-4xl"} mt-1 font-black`}>{info.name}</p>
           {!compact && <p className="mt-3 text-slate-200">{info.blurb}</p>}
           <p className="mt-2 text-sm text-slate-300">{info.power}</p>
+          {party.me.recruited && <p className="mt-3 text-sm text-rose-200">You took the Recruiter&apos;s offer. You win with the Moles now.</p>}
           {fellowMoles.length > 0 && (
-            <p className="mt-3 text-sm text-rose-200">Your fellow Moles: {fellowMoles.map((x) => name(x.id)).join(", ")}</p>
+            <p className="mt-3 text-sm text-rose-200">
+              Your fellow Moles:{" "}
+              {fellowMoles.map((x) => `${name(x.id)}${x.role === "recruiter" ? " (Recruiter)" : ""}`).join(", ")}
+            </p>
           )}
-          {role === "mole" && fellowMoles.length === 0 && <p className="mt-3 text-sm text-rose-200">You&apos;re the only Mole. Good luck.</p>}
+          {isMoleRole(role) && fellowMoles.length === 0 && <p className="mt-3 text-sm text-rose-200">You&apos;re the only Mole. Good luck.</p>}
+          {role === "intern" && (
+            <p className="mt-3 text-sm text-teal-200">
+              {party.me.mentor ? `Your mentor: ${name(party.me.mentor)}. You win if their side wins.` : "You'll pick a mentor after hours tonight."}
+            </p>
+          )}
+          {role === "nephew" && party.history.some((h) => h.kind === "spared" && h.playerId === meId) && (
+            <p className="mt-3 text-sm text-orange-200">You&apos;ve used your get-out-of-firing card. Next time is real.</p>
+          )}
         </div>
       ) : (
         <div className="flex items-center gap-4">
@@ -391,20 +411,26 @@ function Lobby({
                 className="h-6 w-6 shrink-0 accent-lime-300"
               />
             </label>
-            <label className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900 px-3">
-              <span>
-                <span className="block font-semibold">Burnt-out Employee</span>
-                <span className="block text-xs text-slate-400">
-                  At tables of {BURNOUT_MIN_PLAYERS}+, one player secretly wants to get fired. If the team fires them, they win alone.
-                </span>
-              </span>
-              <input
-                type="checkbox"
-                checked={party.settings.burnout}
-                onChange={(e) => void act({ type: "settings", settings: { burnout: e.target.checked } })}
-                className="h-6 w-6 shrink-0 accent-lime-300"
-              />
-            </label>
+            <div className="flex flex-col gap-1 rounded-xl border border-slate-800 bg-slate-900 p-3">
+              <span className="font-semibold">Special roles</span>
+              <span className="text-xs text-slate-400">Each takes an Employee&apos;s seat once the table is big enough.</span>
+              {SPECIALS.map((r) => (
+                <label key={r.key} className="flex min-h-12 items-center justify-between gap-3 border-t border-slate-800 pt-1">
+                  <span>
+                    <span className="block text-sm font-semibold">
+                      {ROLE_INFO[r.key].name} <span className="font-normal text-slate-500">· {r.min}+ players</span>
+                    </span>
+                    <span className="block text-xs text-slate-400">{r.hint}</span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={party.settings[r.key]}
+                    onChange={(e) => void act({ type: "settings", settings: { [r.key]: e.target.checked } })}
+                    className="h-6 w-6 shrink-0 accent-lime-300"
+                  />
+                </label>
+              ))}
+            </div>
             <div className="flex flex-col gap-2 rounded-xl border border-slate-800 bg-slate-900 p-3">
               <span className="font-semibold">All-hands length</span>
               <div className="flex gap-2">
@@ -477,6 +503,14 @@ function Onboarding({ party, meId, act, busy, name }: { party: AllHandsView; meI
 
 // ---------- after hours ----------
 
+/** The house-rule switches for the special roles, smallest table first. */
+const SPECIALS: { key: "intern" | "burnout" | "nephew" | "recruiter"; min: number; hint: string }[] = [
+  { key: "intern", min: INTERN_MIN_PLAYERS, hint: "Picks a mentor and wins with their side, without knowing it." },
+  { key: "burnout", min: BURNOUT_MIN_PLAYERS, hint: "Secretly wants to get fired. If the team fires them, they win alone." },
+  { key: "nephew", min: NEPHEW_MIN_PLAYERS, hint: "Survives the first time the team votes him out." },
+  { key: "recruiter", min: RECRUITER_MIN_PLAYERS, hint: "One Mole can turn a coworker into a Mole, once per game." },
+];
+
 /** Who posted tonight's #random poll (the decoy question), one per round. */
 const POLL_AUTHORS = ["Brad (CEO)", "the Office Manager", "Chad from Sales", "the Founder's Nephew", "HR Bot", "the Growth Team"];
 
@@ -484,6 +518,7 @@ const NIGHT_COPY: Record<NightKind, { title: string; body: string }> = {
   mole: { title: "Pick someone to lay off", body: "Agree with the other Moles. Your picks show up on each other's phones." },
   it: { title: "Whose DMs will you read?", body: "You'll find out in the morning whether they're a Mole." },
   hr: { title: "Who gets your paperwork?", body: "If the Moles go after them tonight, the layoff is blocked." },
+  intern: { title: "Pick a mentor", body: "You win if their side wins. They won't know, and you won't learn their role. Choose wisely." },
   decoy: { title: "", body: "Vote in the poll. Everyone taps a name after hours, so nobody can tell who has a power." },
 };
 
@@ -499,6 +534,7 @@ function AfterHours({
   people: Map<string, PlayerPublic>;
 }) {
   const n = party.night;
+  const [offerMode, setOfferMode] = useState(Boolean(n?.offer && n.canOffer));
   if (!n) {
     return (
       <>
@@ -509,7 +545,16 @@ function AfterHours({
     );
   }
   const solo = n.kind === "mole" && (n.team?.length ?? 0) <= 1;
-  const copy = solo ? { ...NIGHT_COPY.mole, body: "You're the only Mole. Pick who gets laid off tonight." } : NIGHT_COPY[n.kind];
+  const offering = n.canOffer && offerMode;
+  const copy = offering
+    ? {
+        title: "Make an offer",
+        body: "Once per game. Your pick secretly becomes a Mole, and nobody is laid off tonight. It fails on the IT Guy and HR Rep, and HR can block it.",
+      }
+    : solo
+      ? { ...NIGHT_COPY.mole, body: "You're the only Mole. Pick who gets laid off tonight." }
+      : NIGHT_COPY[n.kind];
+  const targets = offering ? n.offerTargets : n.targets;
   return (
     <>
       <div>
@@ -523,18 +568,41 @@ function AfterHours({
         <p className="mt-1 text-slate-300">{n.kind === "decoy" && n.myPick ? "Thanks for voting! 🙌" : copy.body}</p>
         <p className="mt-2 text-xs text-slate-500">Heads down. Keep your screen close. You can change your pick until time runs out.</p>
       </div>
+      {n.canOffer && (
+        <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-900 p-1" role="group" aria-label="Tonight's move">
+          {[
+            { on: false, label: "Lay someone off" },
+            { on: true, label: "💼 Make an offer" },
+          ].map((o) => (
+            <button
+              key={o.label}
+              type="button"
+              aria-pressed={offerMode === o.on}
+              onClick={() => setOfferMode(o.on)}
+              className={`min-h-11 rounded-lg text-sm font-semibold ${offerMode === o.on ? (o.on ? "bg-fuchsia-500/25 text-fuchsia-100" : "bg-slate-700") : "text-slate-400"}`}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
+      {n.kind === "mole" && !n.canOffer && n.offer && (
+        <p className="rounded-xl border border-fuchsia-400/40 bg-fuchsia-400/10 px-3 py-2 text-sm text-fuchsia-100">
+          The Recruiter is making {name(n.offer)} an offer tonight, so there&apos;s no layoff.
+        </p>
+      )}
       <ul className="grid grid-cols-2 gap-2">
         {party.seats
-          .filter((x) => x.alive && n.targets.includes(x.id))
+          .filter((x) => x.alive && targets.includes(x.id))
           .map((x) => {
-            const picked = n.myPick === x.id;
+            const picked = offering ? n.offer === x.id : n.myPick === x.id && !(n.canOffer && n.offer);
             const teammates = n.team?.filter((m) => m.pick === x.id) ?? [];
             return (
               <li key={x.id}>
                 <button
                   type="button"
                   aria-pressed={picked}
-                  onClick={() => void act({ type: "pick", target: x.id })}
+                  onClick={() => void act(offering ? { type: "pick", target: x.id, offer: true } : { type: "pick", target: x.id })}
                   className={`flex min-h-16 w-full flex-col items-start justify-center gap-1 rounded-2xl border px-3 py-2 text-left transition-transform duration-75 active:scale-[0.97] ${
                     picked ? "border-lime-300 bg-lime-300/10" : "border-slate-800 bg-slate-900 active:bg-slate-800"
                   }`}
@@ -606,6 +674,14 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
   const alive = party.seats.filter((x) => x.alive);
   return (
     <>
+      {d?.recruited && (
+        <div className="rounded-2xl border border-rose-400/60 bg-rose-400/10 p-4">
+          <p className="font-bold text-rose-200">You accepted the offer. 🤝</p>
+          <p className="mt-1 text-sm text-rose-100/80">
+            You&apos;re a Mole now. You win with the Moles, you can see them on your badge, and you&apos;re in their chat. Act normal.
+          </p>
+        </div>
+      )}
       {d && (
         <SlackPost>
           {d.laidOff ? (
@@ -740,7 +816,16 @@ function ExitInterview({ party, name }: { party: AllHandsView; name: Name }) {
   if (!e) return null;
   return (
     <div className="flex flex-col items-center gap-3 rounded-3xl border border-slate-800 bg-slate-900 p-6 text-center">
-      {e.fired ? (
+      {e.fired && e.survived ? (
+        <>
+          <p className="text-sm uppercase tracking-[0.25em] text-slate-400">Voted out with {e.votes} votes</p>
+          <p className="text-4xl font-black">{name(e.fired)}</p>
+          <p className="text-lg">
+            is the <RoleChip role="nephew" />
+          </p>
+          <p className="text-slate-400">A call from the Founder later, they still work here. That only works once.</p>
+        </>
+      ) : e.fired ? (
         <>
           <p className="text-sm uppercase tracking-[0.25em] text-slate-400">Fired with {e.votes} votes</p>
           <p className="text-4xl font-black">{name(e.fired)}</p>
@@ -769,6 +854,7 @@ function GameOver({
   busy,
   name,
   people,
+  meId,
 }: {
   party: AllHandsView;
   isHost: boolean;
@@ -776,10 +862,11 @@ function GameOver({
   busy: boolean;
   name: Name;
   people: Map<string, PlayerPublic>;
+  meId: string;
 }) {
   const company = party.winner === "company";
   const burnout = party.winner === "burnout";
-  const myTeam = party.me.role ? ROLE_INFO[party.me.role].team : null;
+  const won = party.me.seated ? party.winners.includes(meId) : null;
   const burntOut = party.seats.find((x) => x.role === "burnout");
   const banner = burnout
     ? { tone: "border-violet-300/50 bg-violet-300/10", kicker: "Severance secured", title: `${name(burntOut?.id)} got fired and wins alone.` }
@@ -792,7 +879,7 @@ function GameOver({
         <p className="text-sm uppercase tracking-[0.25em] text-slate-300">{banner.kicker}</p>
         <p className="mt-1 text-4xl font-black">{banner.title}</p>
         {burnout && <p className="mt-2 text-slate-300">They were the Burnt-out Employee. Everyone else loses. Touch grass.</p>}
-        {myTeam && <p className="mt-2 text-slate-200">{myTeam === party.winner ? "Your side won. Update your LinkedIn." : "Your side lost. Time to pivot."}</p>}
+        {won !== null && <p className="mt-2 text-slate-200">{won ? "You won. Update your LinkedIn." : "You lost. Time to pivot."}</p>}
       </div>
       <Section title="Who was who">
         <Roster seats={party.seats} name={name} people={people} showRoles />
@@ -825,6 +912,12 @@ function NightLog({ nights, name, live = false }: { nights: NonNullable<AllHands
         {nights.map((n) => (
           <li key={n.round} className="rounded-xl border border-slate-800 bg-slate-900 px-3 py-2">
             <p className="font-semibold">Night {n.round}</p>
+            {n.offerTarget && (
+              <p className="text-fuchsia-200">
+                The Recruiter made {name(n.offerTarget)} an offer:{" "}
+                {n.offerResult === "hired" ? "accepted. They became a Mole." : n.offerResult === "blocked" ? "HR blocked it." : "turned down."}
+              </p>
+            )}
             <p className="text-slate-300">
               Moles went after {name(n.moleTarget)}. HR covered {name(n.hrTarget)}. IT read {name(n.itTarget)}&apos;s DMs
               {n.itResult !== null && (n.itResult ? " (a Mole!)" : " (clean)")}.
@@ -853,6 +946,8 @@ function History({ history, name }: { history: HistoryEntry[]; name: Name }) {
         return `${name(h.playerId)} was fired`;
       case "kept":
         return "The team circled back";
+      case "spared":
+        return `${name(h.playerId)} was voted out, and survived`;
     }
   };
   return (
