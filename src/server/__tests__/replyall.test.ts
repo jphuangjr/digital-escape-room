@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { PROMPTS, REPLIES } from "@/lib/replyall/cards";
 import { AFTER_HOURS_PROMPTS, AFTER_HOURS_REPLIES } from "@/lib/replyall/afterHours";
-import { isAfterHours, replyText } from "@/lib/replyall/deck";
+import { isAfterHours, promptKind, replyKind, replyText } from "@/lib/replyall/deck";
+import { OFFICE_PROMPT_COUNT, OFFICE_REPLY_COUNT } from "@/lib/replyall/cards";
 import { HAND_SIZE, fillText, type ReplyAllAction } from "@/lib/replyall/types";
 import { RESULT_MS, advanceState, applyAction, botMove, initialState, managerOf, parseAction, parseState, viewFor, type ReplyAllState } from "../replyall/game";
 import type { PartyCtx } from "../party/registry";
@@ -254,6 +255,39 @@ describe("Reply All", () => {
     expect(prompts.filter(isAfterHours).length / prompts.length).toBeGreaterThan(0.5);
     // Never a repeat while the deck lasts.
     expect(new Set(prompts).size).toBe(prompts.length);
+  });
+
+  it("keeps office cards to about a fifth of the regular deck", () => {
+    // The office/general boundary sits where the general cards start.
+    expect(PROMPTS[OFFICE_PROMPT_COUNT]).toBe("My grandma's secret ingredient is ____.");
+    expect(PROMPTS.length - OFFICE_PROMPT_COUNT).toBeGreaterThanOrEqual(100);
+    expect(REPLIES.length - OFFICE_REPLY_COUNT).toBeGreaterThanOrEqual(280);
+    let office = 0;
+    let total = 0;
+    let officePrompts = 0;
+    let prompts = 0;
+    let s = started(12, { target: 7 });
+    let before: number[] = [];
+    for (let i = 0; i < 400 && s.phase !== "over"; i++) {
+      // Count each card as it's dealt: whatever is in a hand now that wasn't a step ago.
+      const now = s.seats.flatMap((x) => x.hand);
+      const was = new Set(before);
+      for (const c of now) {
+        if (was.has(c)) continue;
+        total++;
+        if (replyKind(c) === "office") office++;
+      }
+      before = now;
+      if (s.phase === "pick") {
+        prompts++;
+        if (promptKind(s.prompt!) === "office") officePrompts++;
+      }
+      s = must(s, "p1", { type: "skip" }, 1000, ids(12));
+    }
+    expect(total).toBeGreaterThan(300);
+    expect(office / total).toBeGreaterThan(0.12);
+    expect(office / total).toBeLessThan(0.28);
+    expect(officePrompts / prompts).toBeLessThan(0.35);
   });
 
   it("parses actions and tolerates an empty or foreign scene", () => {
