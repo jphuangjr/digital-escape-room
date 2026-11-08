@@ -643,6 +643,8 @@ describe("the #random poll", () => {
     expect(s.phase).toBe("dawn");
     expect(s.dawn?.poll).toEqual({ prompt, winners: ["p5"] });
     expect(viewFor(s, "p3", { hostId: "p1" }).dawn?.poll).toEqual({ prompt, winners: ["p5"] });
+    // The chat keeps showing it for the rest of the round, for everyone.
+    expect(viewFor(s, "p1", { hostId: "p1" }).polls).toEqual([{ round: 1, prompt, winners: ["p5"] }]);
   });
 
   it("shares a tie and skips the post when nobody answered", () => {

@@ -199,3 +199,5 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
 - Each `NightRecord` also stores who held the powers that night (`moles`, `it`, `hr`, `recruiter`; optional for older
   saved games). The game-over recap names them via `nightLines` (src/lib/allhands/recap.ts) and leaves out a power
   whose holder was already gone, instead of saying "Nobody".
+- `AllHandsView.polls` lists every poll result this game (`{round, prompt, winners}`, from `AllHandsState.polls`). The
+  chat sheet pins the latest one above #general as a Synergr Bot post. As with the morning card, there are no counts.

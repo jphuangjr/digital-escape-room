@@ -183,6 +183,8 @@ export interface AllHandsView {
   nights: NightRecord[] | null;
   /** The Moles' private back channel: for Moles, the laid-off and fired, and everyone at game over. Null otherwise. */
   moleChat: MoleChatMessage[] | null;
+  /** Every #random poll result so far this game, oldest first: the chat shows them as Synergr Bot posts. */
+  polls: (PollResult & { round: number })[];
   /** Whether this player may post in the Mole channel right now. */
   canMoleChat: boolean;
   /** Whether this player may post in the team chat (the laid-off and fired can only read during a game). */
