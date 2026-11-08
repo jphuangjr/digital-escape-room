@@ -81,7 +81,7 @@ export const GAMES: GameInfo[] = [
     duration: "20–40 min",
     difficulty: "Easy",
     tone: "Party game",
-    status: "staging",
+    status: "live",
     href: "/play/all-hands",
     kind: "party",
   },
