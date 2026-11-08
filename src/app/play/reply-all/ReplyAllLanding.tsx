@@ -194,6 +194,14 @@ export function ReplyAllLanding() {
               Admin: create a test room with 4 bots
             </button>
           )}
+          {me?.isAdmin && signedIn && (
+            <Link
+              href="/play/reply-all/deck"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-amber-300/60 font-semibold text-amber-200 active:bg-amber-300/10"
+            >
+              Admin: review the deck
+            </Link>
+          )}
           <p className="text-xs text-slate-500">Friends join with the room code, the invite link or the QR code. No account needed to play.</p>
         </form>
       </div>
