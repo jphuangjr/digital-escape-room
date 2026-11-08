@@ -180,3 +180,13 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
 - Burnt-out Employee (`burnout`, a Jester): dealt in place of one Employee at tables of 7+ when `settings.burnout`
   is on (default). Plays the decoy at night and counts as a non-Mole for the win check; fired at performance review,
   the game ends after the exit interview with `winner: "burnout"`. A night layoff doesn't count.
+- Intern (`intern`, 6+ players, `settings.intern`): the first night they pick a mentor (night kind `"intern"`;
+  no pick means the next living seat). They win with the mentor's team (`teamOf`), never learn the mentor's role,
+  and IT sees them as not a Mole. `AllHandsView.winners` lists every winning seat.
+- Founder's Nephew (`nephew`, 8+, `settings.nephew`): the first time he's fired he stays in, his role is revealed
+  to everyone, and history logs `"spared"` (`exit.survived`).
+- Recruiter (`recruiter`, 9+, `settings.recruiter`): replaces one Mole. Once per game sends
+  `{type: "pick", target, offer: true}` instead of a layoff; that night nobody is laid off. The offer is
+  `"blocked"` if HR protected the target, `"refused"` (silently) on IT, HR or a Mole, otherwise `"hired"`: the
+  target becomes a Mole (`me.recruited`, `dawn.recruited` for them only) and joins the Mole chat.
+  `isMoleRole` covers mole and recruiter.
