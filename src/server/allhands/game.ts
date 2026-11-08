@@ -288,7 +288,20 @@ function resolveNight(s: AllHandsState, now: number): AllHandsState {
     checks: itTarget ? [...s.checks, { round: s.round, target: itTarget, isMole: Boolean(itResult) }] : s.checks,
     dawn: { round: s.round, laidOff: outcome === "laidoff" ? target : null, saved: outcome === "saved", ...(chatter ? { chatter } : {}), ...(poll ? { poll } : {}) },
     history: [...s.history, { round: s.round, kind: outcome, playerId: outcome === "laidoff" ? target : null }],
-    nights: [...s.nights, { round: s.round, moleTarget: target, itTarget, itResult, hrTarget, offerTarget, offerResult, outcome }],
+    nights: [...s.nights, {
+        round: s.round,
+        moleTarget: target,
+        itTarget,
+        itResult,
+        hrTarget,
+        offerTarget,
+        offerResult,
+        outcome,
+        moles: alive.filter((x) => isMoleRole(x.role)).map((x) => x.id),
+        it: it?.id ?? null,
+        hr: hr?.id ?? null,
+        recruiter: recruiter?.id ?? null,
+      },],
   };
   return timed(next, "dawn", DAWN_MS, now);
 }

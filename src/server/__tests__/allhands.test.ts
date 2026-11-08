@@ -22,6 +22,7 @@ import {
 } from "../allhands/game";
 import type { PartyCtx } from "../party/registry";
 import { goneRoles } from "@/lib/allhands/gone";
+import { nightLines } from "@/lib/allhands/recap";
 import { CHATTER, chatterLines, pickChatter, reviewChatterPool } from "@/lib/allhands/chatter";
 
 const ids = (n: number) => Array.from({ length: n }, (_, i) => `p${i + 1}`);
@@ -669,5 +670,26 @@ describe("roles out of the game (Rules sheet)", () => {
     // Reveals off: a living player sees nothing.
     const hidden = { ...s, settings: { ...s.settings, revealOnFire: false } };
     expect(goneRoles(counts, viewFor(hidden, "p4", { hostId: "p1" }).seats)).toEqual([]);
+  });
+});
+
+describe("after-hours recap", () => {
+  const nm = (id: string | null) => (id ? id.toUpperCase() : "Nobody");
+  it("names who held each power and skips the ones who didn't act", () => {
+    let s = toNight(table());
+    s = act(s, "p1", { type: "pick", target: "p4" });
+    s = act(s, "p3", { type: "pick", target: "p4" });
+    s = advanceState(s, 1000 + 60_000).state;
+    const n = s.nights[0];
+    expect(n).toMatchObject({ moles: ["p1"], it: "p2", hr: "p3" });
+    expect(nightLines(n, nm)).toEqual(["The Mole (P1) went after P4.", "HR (P3) covered P4.", "IT (P2) didn't read anyone's DMs."]);
+  });
+
+  it("leaves out powers whose holder is gone and never says Nobody", () => {
+    const lines = nightLines(
+      { round: 3, moleTarget: null, itTarget: null, itResult: null, hrTarget: null, offerTarget: null, offerResult: null, outcome: "quiet", moles: ["a", "b"], it: null, hr: null, recruiter: null },
+      nm,
+    );
+    expect(lines).toEqual(["The Moles (A and B) didn't pick anyone."]);
   });
 });
