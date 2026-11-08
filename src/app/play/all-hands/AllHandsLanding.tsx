@@ -8,6 +8,7 @@ import { AccountBar, ContinueRooms, SignInButton, useMe } from "@/components/sit
 import { RedeemBox } from "@/components/site/RedeemBox";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { AVATAR_COLORS } from "@/lib/avatarColors";
+import { PartyCodeField, PartyModeTabs, joinRoom, normalizeRoomCode, type PartyMode } from "@/components/site/PartyJoin";
 import { HowToPlayTour } from "@/components/allhands/HowToPlayTour";
 import { ALL_HANDS_GAME_ID, MAX_PLAYERS, MIN_PLAYERS, ROLE_INFO, type Role } from "@/lib/allhands/types";
 
@@ -28,6 +29,8 @@ export function AllHandsLanding() {
   const [color, setColor] = useState(AVATAR_COLORS[0]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [mode, setMode] = useState<PartyMode>("host");
+  const [joinCode, setJoinCode] = useState("");
   const [tour, setTour] = useState(false);
 
   useEffect(() => {
@@ -35,6 +38,11 @@ export function AllHandsLanding() {
       const n = localStorage.getItem("ada_name");
       if (n) setName(n);
     } catch {}
+    const join = new URLSearchParams(window.location.search).get("join");
+    if (join) {
+      setJoinCode(normalizeRoomCode(join));
+      setMode("join");
+    }
   }, []);
 
   async function start(replaceExisting = false, test = false): Promise<void> {
@@ -42,6 +50,19 @@ export function AllHandsLanding() {
     if (!displayName) return setErr(t("train.landing.errName"));
     setBusy(true);
     setErr(null);
+    if (mode === "join") {
+      const joined = await joinRoom(joinCode, displayName, color, t);
+      if ("error" in joined) {
+        setErr(joined.error);
+        setBusy(false);
+        return;
+      }
+      try {
+        localStorage.setItem("ada_name", displayName);
+      } catch {}
+      router.push(`/r/${joined.code}`);
+      return;
+    }
     const res = await fetch("/api/rooms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -148,6 +169,15 @@ export function AllHandsLanding() {
           }}
           className="flex flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-900 p-4"
         >
+          <PartyModeTabs
+            mode={mode}
+            onChange={(m) => {
+              setMode(m);
+              setErr(null);
+            }}
+            activeClass="bg-lime-300 text-slate-950"
+          />
+          {mode === "join" && <PartyCodeField value={joinCode} onChange={setJoinCode} focusClass="focus:border-lime-300" />}
           <label className="flex flex-col gap-1.5">
             <span className="text-xs uppercase tracking-widest text-slate-400">{t("train.landing.name")}</span>
             <input
@@ -174,7 +204,11 @@ export function AllHandsLanding() {
             ))}
           </fieldset>
           {err && <p className="text-sm text-rose-300">{err}</p>}
-          {mustSignIn ? (
+          {mode === "join" ? (
+            <button type="submit" disabled={busy} className="min-h-12 rounded-xl bg-lime-300 text-slate-950 font-bold active:opacity-80 disabled:opacity-60">
+              {busy ? "Joining the meeting…" : t("site.join.button")}
+            </button>
+          ) : mustSignIn ? (
             <div className="flex flex-col gap-2">
               <SignInButton label={t("site.ada.signInToHost")} callbackUrl={game.href} />
               <p className="text-center text-xs text-slate-500">{t("site.ada.hostsSignIn")}</p>
@@ -186,7 +220,7 @@ export function AllHandsLanding() {
               {busy ? "Booking the meeting room…" : "Host a room"}
             </button>
           )}
-          {me?.isAdmin && signedIn && (
+          {mode === "host" && me?.isAdmin && signedIn && (
             <button
               type="button"
               disabled={busy}
@@ -196,7 +230,7 @@ export function AllHandsLanding() {
               Admin: create a test room with 7 bots
             </button>
           )}
-          <p className="text-xs text-slate-500">Friends join with the room code, the invite link or the QR code. No account needed to play.</p>
+          {mode === "host" && <p className="text-xs text-slate-500">Friends join with the room code, the invite link or the QR code. No account needed to play.</p>}
         </form>
       </div>
     </main>
