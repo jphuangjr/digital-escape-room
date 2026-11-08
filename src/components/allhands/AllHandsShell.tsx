@@ -8,6 +8,7 @@ import { QrCode } from "@/components/site/QrCode";
 import { AllHandsChat } from "./AllHandsChat";
 import { TestBar } from "./TestBar";
 import { RulesButton } from "./RulesSheet";
+import { nightLines } from "@/lib/allhands/recap";
 import { LineupPanel, tableLineup } from "./LineupPanel";
 import { lineupIssues, swapRole } from "@/lib/allhands/lineup";
 import { chatterLines, type Chatter } from "@/lib/allhands/chatter";
@@ -1018,14 +1019,11 @@ function NightLog({ nights, name, live = false }: { nights: NonNullable<AllHands
             <p className="font-semibold">Night {n.round}</p>
             {n.offerTarget && (
               <p className="text-fuchsia-200">
-                The Recruiter made {name(n.offerTarget)} an offer:{" "}
+                The Recruiter{n.recruiter ? ` (${name(n.recruiter)})` : ""} made {name(n.offerTarget)} an offer:{" "}
                 {n.offerResult === "hired" ? "accepted. They became a Mole." : n.offerResult === "blocked" ? "HR blocked it." : "turned down."}
               </p>
             )}
-            <p className="text-slate-300">
-              Moles went after {name(n.moleTarget)}. HR covered {name(n.hrTarget)}. IT read {name(n.itTarget)}&apos;s DMs
-              {n.itResult !== null && (n.itResult ? " (a Mole!)" : " (clean)")}.
-            </p>
+            <p className="text-slate-300">{nightLines(n, name).join(" ")}</p>
             <p className="text-xs text-slate-500">
               {n.outcome === "laidoff" ? `${name(n.moleTarget)} was laid off.` : n.outcome === "saved" ? "HR blocked the layoff." : "Nobody was laid off."}
             </p>

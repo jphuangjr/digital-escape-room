@@ -139,6 +139,11 @@ export interface NightRecord {
   offerTarget: string | null;
   offerResult: "hired" | "refused" | "blocked" | null;
   outcome: "laidoff" | "saved" | "quiet";
+  /** Who held each power that night (still employed). Missing in games saved before these were recorded. */
+  moles?: string[];
+  it?: string | null;
+  hr?: string | null;
+  recruiter?: string | null;
 }
 
 export interface AllHandsView {

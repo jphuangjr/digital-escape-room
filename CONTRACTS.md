@@ -196,3 +196,6 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
 - Rules sheet: `goneRoles(counts, seats)` (src/lib/allhands/gone.ts) marks IT, HR, Intern, Burnt-out or Nephew as out
   of the game once every seat dealt that role has departed with its role shown on this phone. With reveals off, a living
   player sees nothing marked. A spared Nephew's role chip shows on the after-hours and review lists.
+- Each `NightRecord` also stores who held the powers that night (`moles`, `it`, `hr`, `recruiter`; optional for older
+  saved games). The game-over recap names them via `nightLines` (src/lib/allhands/recap.ts) and leaves out a power
+  whose holder was already gone, instead of saying "Nobody".
