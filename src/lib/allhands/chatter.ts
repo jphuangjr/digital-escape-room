@@ -165,8 +165,8 @@ export const CHATTER: Record<ChatterPool, readonly (readonly string[])[]> = {
     ],
     ["Officially, {name} 'lacked synergy'.", "What does that even mean?", "It means somebody wanted them gone."],
     [
-      "Heard {name} took credit for the intern's deck.",
-      "The intern's deck was 3 slides of clip art.",
+      "Heard {name} took credit for the new hire's deck.",
+      "The new hire's deck was 3 slides of clip art.",
       "Nobody would take credit for that on purpose.",
     ],
     ["Someone used {name}'s Venmo to request money from the whole company.", "Memo: 'pizza??'", "I paid it honestly."],
@@ -250,7 +250,7 @@ export const CHATTER: Record<ChatterPool, readonly (readonly string[])[]> = {
     ],
     ["{name} was caught live-tweeting the board meeting.", "From the board meeting?", "From under the board meeting table."],
     ["They found {name}'s 'Who to Lay Off' spreadsheet.", "Who was on it?", "All of us. Color coded."],
-    ["{name} got caught leaving fake 1-star Glassdoor reviews.", "How many?", "Four hundred. From 'a former intern'."],
+    ["{name} got caught leaving fake 1-star Glassdoor reviews.", "How many?", "Four hundred. From 'a former employee'."],
     ["Apparently {name} had been CC'ing a Gmail on every single email.", "Whose Gmail?", "'moles.unite@gmail.com'."],
     ["{name} was caught training an AI on our Slack.", "To do what?", "To be more annoying than the PM. It's winning."],
     [
@@ -292,7 +292,7 @@ export const CHATTER: Record<ChatterPool, readonly (readonly string[])[]> = {
       "Yep. ? was {name}.",
     ],
     ["{name} was caught during the fire drill. Going IN.", "Toward the server room?", "Toward the server room."],
-    ["The recruiter's notes said {name} 'already works at three of our competitors'.", "At the same time?", "Hybrid, apparently."],
+    ["The background check said {name} 'already works at three of our competitors'.", "At the same time?", "Hybrid, apparently."],
     ["{name} got caught editing the 'Values' poster.", "What did it say?", "'Integrity' was crossed out. 'Vibes' was written in."],
     ["Someone caught {name} talking to a pigeon on the balcony.", "Just talking?", "Handing it a tiny envelope."],
     [
