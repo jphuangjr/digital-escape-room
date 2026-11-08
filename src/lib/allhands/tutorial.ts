@@ -47,6 +47,7 @@ const NIGHT_TIPS: Partial<Record<NightKind, string>> = {
     "You have no secret power, but answer the poll anyway. Everyone taps something after hours, so nobody can tell who has a power by who's tapping.",
   mole: "Pick who gets laid off. Agree with the other Moles without talking: your picks show on each other's phones. If you split, the most-picked name goes.",
   it: "Pick someone to check. Only you see the answer. Choose when to share it at all-hands: the Moles will go after a loud IT Guy.",
+  intern: "Pick your mentor. You'll never learn their role, but you win if their side wins, so pick someone you trust.",
   hr: "Pick someone to protect, yourself included. If the Moles go after them tonight, nobody gets laid off. You can't cover the same person two nights running.",
 };
 

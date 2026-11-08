@@ -20,8 +20,8 @@ describe("first-game tips", () => {
   });
 
   it("gives each night role its own advice, so a tip never gives a role away to the player's own eyes only", () => {
-    const ids = (["decoy", "mole", "it", "hr"] as NightKind[]).map((kind) => tipFor(party("night", { kind }))!);
-    expect(new Set(ids.map((t) => t.text)).size).toBe(4);
+    const ids = (["decoy", "mole", "it", "hr", "intern"] as NightKind[]).map((kind) => tipFor(party("night", { kind }))!);
+    expect(new Set(ids.map((t) => t.text)).size).toBe(5);
     expect(ids[0].text).toMatch(/poll/);
   });
 

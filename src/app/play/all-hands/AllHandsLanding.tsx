@@ -11,7 +11,7 @@ import { AVATAR_COLORS } from "@/lib/avatarColors";
 import { HowToPlayTour } from "@/components/allhands/HowToPlayTour";
 import { ALL_HANDS_GAME_ID, MAX_PLAYERS, MIN_PLAYERS, ROLE_INFO, type Role } from "@/lib/allhands/types";
 
-const ROLES: Role[] = ["employee", "mole", "it", "hr", "burnout"];
+const ROLES: Role[] = ["employee", "mole", "it", "hr", "recruiter", "intern", "burnout", "nephew"];
 
 /** All Hands' page: the rules, and hosting a room. Hosting needs sign-in and a purchase code; joining is free. */
 export function AllHandsLanding() {

@@ -1,7 +1,8 @@
 import "server-only";
 import {
   ALL_HANDS_GAME_ID,
-  BURNOUT_MIN_PLAYERS,
+  isMoleRole,
+  specialsFor,
   DAY_OPTIONS_MS,
   DECOY_PROMPTS,
   DEFAULT_SETTINGS,
@@ -36,6 +37,14 @@ export interface Seat {
   title: string;
   alive: boolean;
   ready: boolean;
+  /** The Intern: who they picked as their mentor. */
+  mentor?: string;
+  /** The Founder's Nephew: survived being voted out (once), and their role is public. */
+  spared?: boolean;
+  /** The Recruiter: made their one offer. */
+  offered?: boolean;
+  /** Was hired by the Recruiter, in this round. */
+  recruitedRound?: number;
 }
 
 /** The whole game, roles included. Stored in Room.scene; never sent to a client as is. */
@@ -60,10 +69,12 @@ export interface AllHandsState {
   /** What the IT Guy has learned. */
   checks: { round: number; target: string; isMole: boolean }[];
   dawn: { round: number; laidOff: string | null; saved: boolean } | null;
-  exit: { fired: string | null; votes: number } | null;
+  exit: { fired: string | null; votes: number; survived?: boolean } | null;
   history: { round: number; kind: HistoryEntry["kind"]; playerId: string | null }[];
   nights: NightRecord[];
   winner: Team | null;
+  /** Tonight's offer from the Recruiter (instead of a layoff), if they're making one. */
+  offer: string | null;
   /** The Moles' back channel for this game (original text; masked in views). */
   moleChat: { id: string; from: string; body: string; at: number }[];
 }
@@ -87,6 +98,7 @@ export function initialState(settings: Settings = DEFAULT_SETTINGS): AllHandsSta
     nights: [],
     winner: null,
     moleChat: [],
+    offer: null,
   };
 }
 
@@ -122,22 +134,43 @@ function done(state: AllHandsState): PartyResult<AllHandsState> {
 /** Which side has won, if any: the company once every Mole is gone, the Moles once they match the rest. */
 export function winnerOf(s: AllHandsState): Team | null {
   const alive = living(s);
-  const moles = alive.filter((x) => x.role === "mole").length;
+  const moles = alive.filter((x) => isMoleRole(x.role)).length;
   if (moles === 0) return "company";
   if (moles >= alive.length - moles) return "moles";
   return null;
 }
 
-function nightKind(role: Role): NightKind {
-  return role === "mole" ? "mole" : role === "it" ? "it" : role === "hr" ? "hr" : "decoy";
+function nightKind(s: AllHandsState, seat: Seat): NightKind {
+  if (isMoleRole(seat.role)) return "mole";
+  if (seat.role === "it" || seat.role === "hr") return seat.role;
+  // The Intern picks a mentor on their first night (or the first night they haven't got one); then it's the poll.
+  if (seat.role === "intern" && !seat.mentor) return "intern";
+  return "decoy";
+}
+
+/** Who the Recruiter could make an offer to: any living player not on the Moles' side. */
+function offerTargets(s: AllHandsState): string[] {
+  return living(s)
+    .filter((x) => !isMoleRole(x.role))
+    .map((x) => x.id);
+}
+
+/** Which side a player plays for: the Intern's is their mentor's (a departed mentor still counts). */
+export function teamOf(s: AllHandsState, seat: Seat): Team {
+  if (isMoleRole(seat.role)) return "moles";
+  if (seat.role === "burnout") return "burnout";
+  if (seat.role === "intern") {
+    const mentor = seat.mentor ? seatOf(s, seat.mentor) : undefined;
+    return mentor && mentor.role !== "intern" ? teamOf(s, mentor) : "company";
+  }
+  return "company";
 }
 
 /** Who a living player may pick tonight. */
 export function nightTargets(s: AllHandsState, seat: Seat): string[] {
   const alive = living(s);
+  if (isMoleRole(seat.role)) return alive.filter((x) => !isMoleRole(x.role)).map((x) => x.id);
   switch (seat.role) {
-    case "mole":
-      return alive.filter((x) => x.role !== "mole").map((x) => x.id);
     case "hr":
       return alive.filter((x) => x.id !== s.lastProtected).map((x) => x.id);
     default:
@@ -147,7 +180,7 @@ export function nightTargets(s: AllHandsState, seat: Seat): string[] {
 
 /** The Moles' choice: the most-picked target; a tie goes to the pick of the Mole seated first. */
 export function moleChoice(s: AllHandsState): string | null {
-  const moles = living(s).filter((x) => x.role === "mole");
+  const moles = living(s).filter((x) => isMoleRole(x.role));
   const counts = new Map<string, number>();
   for (const m of moles) {
     const p = s.picks[m.id];
@@ -169,27 +202,59 @@ function timed(s: AllHandsState, phase: Phase, ms: number | null, now: number): 
 // ---------- phase transitions ----------
 
 function startNight(s: AllHandsState, now: number): AllHandsState {
-  return timed({ ...s, round: s.round + 1, picks: {}, votes: {}, dawn: null, exit: null }, "night", s.settings.nightMs, now);
+  return timed({ ...s, round: s.round + 1, picks: {}, votes: {}, offer: null, dawn: null, exit: null }, "night", s.settings.nightMs, now);
 }
 
 function resolveNight(s: AllHandsState, now: number): AllHandsState {
-  const target = moleChoice(s);
-  const it = living(s).find((x) => x.role === "it");
-  const hr = living(s).find((x) => x.role === "hr");
+  const alive = living(s);
+  const it = alive.find((x) => x.role === "it");
+  const hr = alive.find((x) => x.role === "hr");
+  const recruiter = alive.find((x) => x.role === "recruiter");
   const itTarget = it ? (s.picks[it.id] ?? null) : null;
   const hrTarget = hr ? (s.picks[hr.id] ?? null) : null;
-  const itResult = itTarget ? seatOf(s, itTarget)?.role === "mole" : null;
+  // IT reads tonight's DMs before any offer is signed.
+  const itResult = itTarget ? isMoleRole(seatOf(s, itTarget)?.role) : null;
+
+  // The Recruiter's offer replaces tonight's layoff. It fails on IT and HR, and HR's paperwork blocks it.
+  const offerTarget = recruiter && !recruiter.offered && s.offer && isAliveId(s, s.offer) ? s.offer : null;
+  const offerSeat = offerTarget ? seatOf(s, offerTarget) : undefined;
+  const offerResult: NightRecord["offerResult"] = !offerSeat
+    ? null
+    : offerSeat.id === hrTarget
+      ? "blocked"
+      : offerSeat.role === "it" || offerSeat.role === "hr" || isMoleRole(offerSeat.role)
+        ? "refused"
+        : "hired";
+  const target = offerTarget ? null : moleChoice(s);
   const outcome: NightRecord["outcome"] = !target ? "quiet" : target === hrTarget ? "saved" : "laidoff";
-  const seats = s.seats.map((x) => (outcome === "laidoff" && x.id === target ? { ...x, alive: false } : x));
+
+  // A layoff, and a hire if the offer went through.
+  const seats = s.seats.map((x) => {
+    let y = x;
+    if (outcome === "laidoff" && x.id === target) y = { ...y, alive: false };
+    if (offerTarget && x.id === recruiter?.id) y = { ...y, offered: true };
+    if (offerResult === "hired" && x.id === offerTarget) {
+      y = { ...y, role: "mole", recruitedRound: s.round, mentor: undefined, spared: undefined };
+    }
+    return y;
+  });
+  // An Intern picks their mentor on their first night; one who didn't gets the first coworker beside them.
+  const withMentor = seats.map((x) => {
+    if (x.role !== "intern" || x.mentor || !x.alive) return x;
+    const pick = s.picks[x.id];
+    const fallback = seats.find((y, i) => y.id !== x.id && y.alive && i > seats.indexOf(x)) ?? seats.find((y) => y.id !== x.id && y.alive);
+    return { ...x, mentor: pick ?? fallback?.id };
+  });
   const next: AllHandsState = {
     ...s,
-    seats,
+    seats: withMentor,
     picks: {},
+    offer: null,
     lastProtected: hrTarget,
     checks: itTarget ? [...s.checks, { round: s.round, target: itTarget, isMole: Boolean(itResult) }] : s.checks,
     dawn: { round: s.round, laidOff: outcome === "laidoff" ? target : null, saved: outcome === "saved" },
     history: [...s.history, { round: s.round, kind: outcome, playerId: outcome === "laidoff" ? target : null }],
-    nights: [...s.nights, { round: s.round, moleTarget: target, itTarget, itResult, hrTarget, outcome }],
+    nights: [...s.nights, { round: s.round, moleTarget: target, itTarget, itResult, hrTarget, offerTarget, offerResult, outcome }],
   };
   return timed(next, "dawn", DAWN_MS, now);
 }
@@ -219,13 +284,16 @@ export function reviewResult(s: AllHandsState): { fired: string | null; votes: n
 
 function resolveVote(s: AllHandsState, now: number): AllHandsState {
   const r = reviewResult(s);
-  const seats = s.seats.map((x) => (x.id === r.fired ? { ...x, alive: false } : x));
+  const firedSeat = r.fired ? seatOf(s, r.fired) : undefined;
+  // The Founder's Nephew survives his first firing, and everyone learns who he is.
+  const survived = firedSeat?.role === "nephew" && !firedSeat.spared;
+  const seats = s.seats.map((x) => (x.id !== r.fired ? x : survived ? { ...x, spared: true } : { ...x, alive: false }));
   return timed(
     {
       ...s,
       seats,
-      exit: r,
-      history: [...s.history, { round: s.round, kind: r.fired ? "fired" : "kept", playerId: r.fired }],
+      exit: { ...r, survived },
+      history: [...s.history, { round: s.round, kind: survived ? "spared" : r.fired ? "fired" : "kept", playerId: r.fired }],
     },
     "exit",
     EXIT_MS,
@@ -256,7 +324,7 @@ export function endPhase(s: AllHandsState, now: number): AllHandsState {
       return resolveVote(s, now);
     case "exit": {
       // The Burnt-out Employee got what they wanted: the game ends and they win alone.
-      if (s.exit?.fired && seatOf(s, s.exit.fired)?.role === "burnout") return gameOver(s, "burnout");
+      if (s.exit?.fired && !s.exit.survived && seatOf(s, s.exit.fired)?.role === "burnout") return gameOver(s, "burnout");
       const w = winnerOf(s);
       return w ? gameOver(s, w) : startNight(s, now);
     }
@@ -272,8 +340,9 @@ function maybeEarly(s: AllHandsState, now: number): AllHandsState {
   if (s.phase === "reveal" && s.seats.every((x) => x.ready)) return endPhase(s, now);
   if (s.phase === "night") {
     const allPicked = alive.every((x) => s.picks[x.id]);
-    const moles = alive.filter((x) => x.role === "mole");
-    const agreed = new Set(moles.map((m) => s.picks[m.id])).size <= 1;
+    const moles = alive.filter((x) => isMoleRole(x.role));
+    // With an offer on the table there's no layoff to agree on.
+    const agreed = s.offer !== null || new Set(moles.map((m) => s.picks[m.id])).size <= 1;
     if (allPicked && agreed) return endPhase(s, now);
   }
   if (s.phase === "vote" && alive.every((x) => s.votes[x.id])) return endPhase(s, now);
@@ -282,14 +351,24 @@ function maybeEarly(s: AllHandsState, now: number): AllHandsState {
 
 // ---------- actions ----------
 
-export function deal(roomPlayerIds: string[], rand: (n: number) => number, burnout = false): Seat[] {
+export interface DealOptions {
+  burnout?: boolean;
+  intern?: boolean;
+  nephew?: boolean;
+  recruiter?: boolean;
+}
+
+export function deal(roomPlayerIds: string[], rand: (n: number) => number, opts: DealOptions = {}): Seat[] {
   const ids = roomPlayerIds.slice(0, MAX_PLAYERS);
-  const moles = molesFor(ids.length);
-  const withBurnout = burnout && ids.length >= BURNOUT_MIN_PLAYERS;
-  const roles: Role[] = ids.map((_, i) =>
-    i < moles ? "mole" : i === moles ? "it" : i === moles + 1 ? "hr" : withBurnout && i === moles + 2 ? "burnout" : "employee",
-  );
-  const dealt = shuffle(roles, rand);
+  const n = ids.length;
+  const moles = molesFor(n);
+  const specials = specialsFor(n, { burnout: false, intern: false, nephew: false, recruiter: false, ...opts });
+  const roles: Role[] = [];
+  // The Recruiter is one of the Moles; the others take Employees' seats.
+  for (let i = 0; i < moles; i++) roles.push(i === 0 && specials.includes("recruiter") ? "recruiter" : "mole");
+  roles.push("it", "hr", ...specials.filter((r) => r !== "recruiter"));
+  while (roles.length < n) roles.push("employee");
+  const dealt = shuffle(roles.slice(0, n), rand);
   const titles = shuffle(JOB_TITLES, rand);
   return ids.map((id, i) => ({ id, role: dealt[i], title: titles[i % titles.length], alive: true, ready: false }));
 }
@@ -309,7 +388,7 @@ export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx):
       if (s.phase !== "lobby" && s.phase !== "over") return refuse(s, "The game is already running.");
       if (ctx.roomPlayerIds.length < MIN_PLAYERS) return refuse(s, `You need at least ${MIN_PLAYERS} players to start.`);
       const fresh = initialState(s.settings);
-      return done(timed({ ...fresh, seats: deal(ctx.roomPlayerIds, ctx.rand, s.settings.burnout) }, "reveal", REVEAL_MS, now));
+      return done(timed({ ...fresh, seats: deal(ctx.roomPlayerIds, ctx.rand, s.settings) }, "reveal", REVEAL_MS, now));
     }
 
     case "settings": {
@@ -317,7 +396,7 @@ export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx):
       const next = { ...s.settings };
       const p = a.settings;
       if (typeof p.revealOnFire === "boolean") next.revealOnFire = p.revealOnFire;
-      if (typeof p.burnout === "boolean") next.burnout = p.burnout;
+      for (const k of ["burnout", "intern", "nephew", "recruiter"] as const) if (typeof p[k] === "boolean") next[k] = p[k];
       if (typeof p.dayMs === "number" && DAY_OPTIONS_MS.includes(p.dayMs)) next.dayMs = p.dayMs;
       return done({ ...s, settings: next });
     }
@@ -333,8 +412,16 @@ export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx):
       if (s.phase !== "night") return refuse(s, "It's not after hours.");
       if (!seat?.alive) return refuse(s, "You're not on the team anymore.");
       if (!nightTargets(s, seat).includes(a.target)) return refuse(s, "You can't pick them.");
-      if (s.picks[me] === a.target) return { state: s, changed: false, ok: true };
-      return done(maybeEarly({ ...s, picks: { ...s.picks, [me]: a.target } }, now));
+      if (a.offer) {
+        if (seat.role !== "recruiter" || seat.offered) return refuse(s, "You don't have an offer to make.");
+        if (!offerTargets(s).includes(a.target)) return refuse(s, "You can't make them an offer.");
+        if (s.offer === a.target && s.picks[me] === a.target) return { state: s, changed: false, ok: true };
+        return done(maybeEarly({ ...s, offer: a.target, picks: { ...s.picks, [me]: a.target } }, now));
+      }
+      // A plain pick from the Recruiter takes back any offer.
+      const offer = seat.role === "recruiter" ? null : s.offer;
+      if (s.picks[me] === a.target && offer === s.offer) return { state: s, changed: false, ok: true };
+      return done(maybeEarly({ ...s, offer, picks: { ...s.picks, [me]: a.target } }, now));
     }
 
     case "vote": {
@@ -392,7 +479,7 @@ function inGame(s: AllHandsState): boolean {
 /** Living Moles may use the back channel at any point in a running game. */
 export function canMoleChat(s: AllHandsState, playerId: string): boolean {
   const seat = seatOf(s, playerId);
-  return inGame(s) && seat?.role === "mole" && seat.alive;
+  return inGame(s) && isMoleRole(seat?.role) && Boolean(seat?.alive);
 }
 
 /** Everyone may use the team chat, except the laid-off and fired while the game runs (no help from beyond). */
@@ -425,10 +512,13 @@ export function parseAction(body: Record<string, unknown>): AllHandsAction | nul
       return { type: body.type };
     case "settings":
       return body.settings && typeof body.settings === "object" ? { type: "settings", settings: body.settings as Partial<Settings> } : null;
-    case "pick":
+    case "pick": {
+      const target = str("target");
+      return target ? { type: "pick", target, ...(body.offer === true ? { offer: true } : {}) } : null;
+    }
     case "vote": {
       const target = str("target");
-      return target ? { type: body.type, target } : null;
+      return target ? { type: "vote", target } : null;
     }
     case "kick": {
       const playerId = str("playerId");
@@ -455,7 +545,8 @@ export function viewFor(s: AllHandsState, viewerId: string, ctx: { hostId: strin
 
   const roleFor = (x: Seat): Role | null => {
     if (knowsAll || x.id === viewerId) return x.role;
-    if (me?.role === "mole" && x.role === "mole") return "mole";
+    if (isMoleRole(me?.role) && isMoleRole(x.role)) return x.role;
+    if (x.spared) return x.role; // the Nephew outed himself by surviving
     if (departedRole(x)) return x.role;
     return null;
   };
@@ -463,15 +554,18 @@ export function viewFor(s: AllHandsState, viewerId: string, ctx: { hostId: strin
 
   let night: AllHandsView["night"] = null;
   if (s.phase === "night" && me?.alive) {
-    const kind = nightKind(me.role);
+    const kind = nightKind(s, me);
     const alive = living(s);
     night = {
       kind,
       prompt: DECOY_PROMPTS[(s.round - 1 + DECOY_PROMPTS.length) % DECOY_PROMPTS.length],
       targets: nightTargets(s, me),
       myPick: s.picks[me.id] ?? null,
-      team: kind === "mole" ? alive.filter((x) => x.role === "mole").map((x) => ({ id: x.id, pick: s.picks[x.id] ?? null })) : null,
+      team: kind === "mole" ? alive.filter((x) => isMoleRole(x.role)).map((x) => ({ id: x.id, pick: s.picks[x.id] ?? null })) : null,
       lastProtected: kind === "hr" ? s.lastProtected : null,
+      offer: kind === "mole" ? s.offer : null,
+      canOffer: me.role === "recruiter" && !me.offered,
+      offerTargets: me.role === "recruiter" && !me.offered ? offerTargets(s) : [],
       acted: alive.filter((x) => s.picks[x.id]).length,
       total: alive.length,
     };
@@ -501,20 +595,32 @@ export function viewFor(s: AllHandsState, viewerId: string, ctx: { hostId: strin
     settings: s.settings,
     hostId: ctx.hostId,
     seats,
-    me: { seated: Boolean(me), alive: Boolean(me?.alive), role: me?.role ?? null, title: me?.title ?? null, ready: Boolean(me?.ready) },
+    me: {
+      seated: Boolean(me),
+      alive: Boolean(me?.alive),
+      role: me?.role ?? null,
+      title: me?.title ?? null,
+      ready: Boolean(me?.ready),
+      mentor: me?.mentor ?? null,
+      recruited: me?.recruitedRound !== undefined,
+    },
     night,
     checks: me?.role === "it" || over ? s.checks : [],
-    dawn: s.phase === "dawn" || s.phase === "day" ? s.dawn : null,
+    dawn:
+      (s.phase === "dawn" || s.phase === "day") && s.dawn
+        ? { ...s.dawn, recruited: me?.recruitedRound === s.dawn.round }
+        : null,
     vote,
-    exit: s.phase === "exit" && s.exit ? { ...s.exit, role: exitSeat ? roleFor(exitSeat) : null } : null,
+    exit: s.phase === "exit" && s.exit ? { ...s.exit, survived: Boolean(s.exit.survived), role: exitSeat ? roleFor(exitSeat) : null } : null,
     history: s.history.map((h) => {
       const x = h.playerId ? seatOf(s, h.playerId) : undefined;
       return { ...h, role: x ? roleFor(x) : null };
     }),
     winner: over ? s.winner : null,
+    winners: over && s.winner ? s.seats.filter((x) => teamOf(s, x) === s.winner).map((x) => x.id) : [],
     nights: knowsAll ? s.nights : null,
     moleChat:
-      knowsAll || me?.role === "mole"
+      knowsAll || isMoleRole(me?.role)
         ? s.moleChat.map((m) => ({ id: m.id, from: m.from, body: maskProfanity(m.body), at: new Date(m.at).toISOString() }))
         : null,
     canMoleChat: canMoleChat(s, viewerId),
@@ -532,7 +638,7 @@ export function botMove(s: AllHandsState, id: string, rand: (n: number) => numbe
   if (!seat.alive) return null;
   if (s.phase === "night" && !s.picks[id]) {
     const targets = nightTargets(s, seat);
-    const teammate = seat.role === "mole" ? s.seats.find((x) => x.role === "mole" && x.alive && s.picks[x.id]) : undefined;
+    const teammate = isMoleRole(seat.role) ? s.seats.find((x) => isMoleRole(x.role) && x.alive && s.picks[x.id]) : undefined;
     const target = teammate && targets.includes(s.picks[teammate.id]) ? s.picks[teammate.id] : any(targets);
     return target ? { type: "pick", target } : null;
   }
