@@ -101,6 +101,15 @@ export function AllHandsLanding() {
           <p className="mt-2 text-xs font-semibold uppercase tracking-[0.3em] text-lime-300">A Synergr party game</p>
           <h1 className="mt-1 text-5xl font-black tracking-tight">{gameText(t, game, "title")}</h1>
           <p className="mt-2 text-slate-300">{gameText(t, game, "tagline")}</p>
+          {game.tags && game.tags.length > 0 && (
+            <ul className="mt-3 flex flex-wrap justify-center gap-2">
+              {game.tags.map((tag) => (
+                <li key={tag} className="rounded-full border border-lime-300/60 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-lime-300">
+                  {tag}
+                </li>
+              ))}
+            </ul>
+          )}
         </header>
         <p className="leading-relaxed text-slate-300">{gameText(t, game, "blurb")}</p>
 

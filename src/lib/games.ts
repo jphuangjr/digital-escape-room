@@ -25,6 +25,8 @@ export interface GameInfo {
    * of friends, listed on the Party games page (/party) behind the home page's Party games button.
    */
   kind?: "escape" | "party";
+  /** Genre tags shown as pills on the game's card and page, e.g. "Mafia" so players know how it plays. */
+  tags?: string[];
 }
 
 /**
@@ -84,6 +86,7 @@ export const GAMES: GameInfo[] = [
     status: "live",
     href: "/play/all-hands",
     kind: "party",
+    tags: ["Mafia"],
   },
 ];
 
