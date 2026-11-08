@@ -189,6 +189,10 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   `{type: "pick", target, offer: true}` instead of a layoff; that night nobody is laid off. The offer is
   `"blocked"` if HR protected the target, `"refused"` (silently) on IT, HR or a Mole, otherwise `"hired"`: the
   target becomes a Mole (`me.recruited`, `dawn.recruited` for them only) and joins the Mole chat.
+  `dawn.offer = {target, result}` drives a private "Recruiting" DM on the morning screen: every Mole-side player
+  but the hire gets it on a hire, only the Recruiter gets it on `"refused"`/`"blocked"`, null for everyone else.
+  On `"refused"`, the IT Guy/HR Rep who said no gets `dawn.approachedBy = recruiterId` (a DM naming the Recruiter);
+  a blocked target is told nothing.
   `isMoleRole` covers mole and recruiter.
 - #random poll: `DECOY_PROMPTS` are "most likely to" questions; `pollPrompt(s)` picks one per round from a per-game
   offset. At dawn, `dawn.poll = {prompt, winners}` holds the most-picked player(s) among the decoy picks only (ties

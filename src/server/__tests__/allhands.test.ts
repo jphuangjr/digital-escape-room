@@ -548,6 +548,10 @@ describe("the Recruiter", () => {
     expect(hired.seats.find((x) => x.id === "p2")?.role).toBe("mole");
     expect(hired.canMoleChat).toBe(true);
     expect(viewFor(s, "p6", { hostId: "p1" }).dawn?.recruited).toBe(false);
+    // The Moles get a private DM that the offer was accepted; nobody else does.
+    expect(viewFor(s, "p1", { hostId: "p1" }).dawn?.offer).toEqual({ target: "p5", result: "hired" });
+    expect(viewFor(s, "p2", { hostId: "p1" }).dawn?.offer).toEqual({ target: "p5", result: "hired" });
+    for (const p of ["p3", "p4", "p5", "p6"]) expect(viewFor(s, p, { hostId: "p1" }).dawn?.offer).toBeNull();
     expect(s.nights[0]).toMatchObject({ offerTarget: "p5", offerResult: "hired", outcome: "quiet" });
     expect(viewFor(s, "p1", { hostId: "p1" }).night).toBeNull();
     // The offer is spent.
@@ -563,6 +567,12 @@ describe("the Recruiter", () => {
     s = advanceState(s, s.endsAt! + 1).state;
     expect(s.seats.find((x) => x.id === "p3")?.role).toBe("it");
     expect(s.nights[0].offerResult).toBe("refused");
+    // Only the Recruiter hears it was turned down.
+    expect(viewFor(s, "p1", { hostId: "p1" }).dawn?.offer).toEqual({ target: "p3", result: "refused" });
+    for (const p of ["p2", "p3", "p4", "p5"]) expect(viewFor(s, p, { hostId: "p1" }).dawn?.offer).toBeNull();
+    // ...and the IT Guy who said no learns who the Recruiter is. Nobody else does.
+    expect(viewFor(s, "p3", { hostId: "p1" }).dawn?.approachedBy).toBe("p1");
+    for (const p of ["p1", "p2", "p4", "p5"]) expect(viewFor(s, p, { hostId: "p1" }).dawn?.approachedBy).toBeNull();
 
     let t = night();
     t = act(t, "p1", { type: "pick", target: "p6", offer: true }, 2000, room);
@@ -571,6 +581,9 @@ describe("the Recruiter", () => {
     expect(t.seats.find((x) => x.id === "p6")?.role).toBe("employee");
     expect(t.nights[0].offerResult).toBe("blocked");
     expect(t.dawn?.saved).toBe(false); // looks like any quiet night
+    expect(viewFor(t, "p1", { hostId: "p1" }).dawn?.offer).toEqual({ target: "p6", result: "blocked" });
+    for (const p of ["p2", "p4", "p6"]) expect(viewFor(t, p, { hostId: "p1" }).dawn?.offer).toBeNull();
+    expect(viewFor(t, "p6", { hostId: "p1" }).dawn?.approachedBy).toBeNull(); // a blocked target isn't told
   });
 
   it("takes back an offer by making a plain pick", () => {

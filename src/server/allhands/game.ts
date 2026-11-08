@@ -15,6 +15,7 @@ import {
   molesFor,
   type AllHandsAction,
   type AllHandsView,
+  type DawnView,
   type HistoryEntry,
   type NightKind,
   type NightRecord,
@@ -561,6 +562,23 @@ function inGame(s: AllHandsState): boolean {
 }
 
 /** Living Moles may use the back channel at any point in a running game. */
+/** Night `round`'s offer for this viewer's private DM: every Mole-side player but the hire learns of a hire, and only
+ *  the Recruiter learns of a turned-down or blocked offer. Null for everyone else. */
+function offerFor(s: AllHandsState, round: number, me: Seat | undefined): DawnView["offer"] {
+  if (!me || !isMoleRole(me.role) || me.recruitedRound === round) return null;
+  const n = s.nights.find((x) => x.round === round);
+  if (!n?.offerTarget || !n.offerResult) return null;
+  if (n.offerResult !== "hired" && me.role !== "recruiter") return null;
+  return { target: n.offerTarget, result: n.offerResult };
+}
+
+/** The Recruiter's id, for the player who turned down their offer on night `round` (a blocked offer tells the target nothing). */
+function approachedBy(s: AllHandsState, round: number, me: Seat | undefined): string | null {
+  const n = s.nights.find((x) => x.round === round);
+  if (!me || n?.offerResult !== "refused" || n.offerTarget !== me.id) return null;
+  return n.recruiter ?? s.seats.find((x) => x.role === "recruiter")?.id ?? null;
+}
+
 export function canMoleChat(s: AllHandsState, playerId: string): boolean {
   const seat = seatOf(s, playerId);
   return inGame(s) && isMoleRole(seat?.role) && Boolean(seat?.alive);
@@ -698,7 +716,7 @@ export function viewFor(s: AllHandsState, viewerId: string, ctx: { hostId: strin
     checks: me?.role === "it" || over ? s.checks : [],
     dawn:
       (s.phase === "dawn" || s.phase === "day") && s.dawn
-        ? { ...s.dawn, recruited: me?.recruitedRound === s.dawn.round }
+        ? { ...s.dawn, recruited: me?.recruitedRound === s.dawn.round, offer: offerFor(s, s.dawn.round, me), approachedBy: approachedBy(s, s.dawn.round, me) }
         : null,
     vote,
     exit: s.phase === "exit" && s.exit ? { ...s.exit, survived: Boolean(s.exit.survived), role: exitSeat ? roleFor(exitSeat) : null } : null,

@@ -24,6 +24,7 @@ import {
   type NightKind,
   type PollResult,
   type Role,
+  type DawnView,
   type SeatView,
 } from "@/lib/allhands/types";
 
@@ -747,6 +748,49 @@ function SlackPost({ children, channel = "#general" }: { children: React.ReactNo
   );
 }
 
+/** A private DM about last night's offer: a hire goes to every other Mole, a turned-down or blocked offer to the Recruiter only. */
+function OfferDm({ offer, name }: { offer: NonNullable<DawnView["offer"]>; name: Name }) {
+  const who = name(offer.target);
+  const hired = offer.result === "hired";
+  return (
+    <div className="rounded-2xl border border-fuchsia-400/50 bg-fuchsia-400/10 p-4">
+      <div className="flex items-center gap-2">
+        <span aria-hidden className="grid h-9 w-9 place-items-center rounded-lg bg-fuchsia-400 text-lg text-slate-950">💼</span>
+        <div>
+          <p className="text-sm font-bold">Recruiting</p>
+          <p className="text-xs text-fuchsia-200/70">🔒 Direct message · {hired ? "only Moles see this" : "only you see this"}</p>
+        </div>
+      </div>
+      <p className="mt-3 text-fuchsia-50">
+        {hired
+          ? `🤝 ${who} accepted the offer. They're one of you now, and they can see the team and the back channel. Act normal.`
+          : offer.result === "blocked"
+            ? `🚫 HR blocked your offer to ${who}. Their paperwork was "lost". Your one offer is used up.`
+            : `🙅 ${who} turned down your offer. Your one offer is used up.`}
+      </p>
+    </div>
+  );
+}
+
+/** A private DM to the IT Guy or HR Rep who turned the Recruiter down: now they know who the Recruiter is. */
+function ApproachedDm({ recruiter }: { recruiter: string }) {
+  return (
+    <div className="rounded-2xl border border-fuchsia-400/50 bg-fuchsia-400/10 p-4">
+      <div className="flex items-center gap-2">
+        <span aria-hidden className="grid h-9 w-9 place-items-center rounded-lg bg-fuchsia-400 text-lg text-slate-950">💼</span>
+        <div>
+          <p className="text-sm font-bold">{recruiter}</p>
+          <p className="text-xs text-fuchsia-200/70">🔒 Direct message · only you see this</p>
+        </div>
+      </div>
+      <p className="mt-3 text-fuchsia-50">
+        &quot;Hey! Quick question, are you open to new opportunities? 👀&quot; {recruiter} tried to recruit you to the Moles last night.
+        You turned them down. They&apos;re the Recruiter, and they know you said no.
+      </p>
+    </div>
+  );
+}
+
 /** Anonymous coworkers gossiping in a Slack thread under an announcement. */
 function ChatterThread({ chatter, who }: { chatter: Chatter; who: string }) {
   const lines = chatterLines(chatter, who);
@@ -780,6 +824,8 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
           </p>
         </div>
       )}
+      {d?.offer && <OfferDm offer={d.offer} name={name} />}
+      {d?.approachedBy && <ApproachedDm recruiter={name(d.approachedBy)} />}
       {d?.poll && <PollResults poll={d.poll} name={name} people={people} />}
       {d && (
         <SlackPost>
