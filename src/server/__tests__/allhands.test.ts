@@ -21,6 +21,7 @@ import {
   type Seat,
 } from "../allhands/game";
 import type { PartyCtx } from "../party/registry";
+import { CHATTER, chatterLines, pickChatter, reviewChatterPool } from "@/lib/allhands/chatter";
 
 const ids = (n: number) => Array.from({ length: n }, (_, i) => `p${i + 1}`);
 /** A fixed "random" source so deals are reproducible. */
@@ -120,7 +121,8 @@ describe("after hours", () => {
     expect(s.phase).toBe("night");
     s = act(s, "p6", { type: "pick", target: "p2" });
     expect(s.phase).toBe("dawn");
-    expect(s.dawn).toEqual({ round: 1, laidOff: "p4", saved: false });
+    expect(s.dawn).toMatchObject({ round: 1, laidOff: "p4", saved: false });
+    expect(s.dawn?.chatter?.pool).toBe("framed");
     expect(s.seats.find((x) => x.id === "p4")!.alive).toBe(false);
     expect(s.checks).toEqual([{ round: 1, target: "p1", isMole: true }]);
     // Only the IT Guy sees the result.
@@ -177,7 +179,8 @@ describe("performance review", () => {
     expect(s.phase).toBe("vote");
     s = act(s, "p1", { type: "vote", target: "p2" });
     expect(s.phase).toBe("exit");
-    expect(s.exit).toEqual({ fired: "p1", votes: 5, survived: false });
+    expect(s.exit).toMatchObject({ fired: "p1", votes: 5, survived: false });
+    expect(s.exit?.chatter?.pool).toBe("caught"); // reveals are on, so the role is public anyway
     // The only Mole is gone: the company wins after the exit interview.
     s = advanceState(s, 1000 + EXIT_MS).state;
     expect(s.phase).toBe("over");
@@ -569,5 +572,57 @@ describe("the Recruiter", () => {
     s = advanceState(s, s.endsAt! + 1).state;
     expect(s.seats.find((x) => x.id === "p6")?.alive).toBe(false);
     expect(s.seats.find((x) => x.id === "p1")?.offered).toBeFalsy();
+  });
+});
+
+describe("coworker chatter", () => {
+  it("keeps every pool big, and every line short enough to read", () => {
+    expect(CHATTER.framed.length).toBeGreaterThanOrEqual(40);
+    expect(CHATTER.caught.length).toBeGreaterThanOrEqual(30);
+    for (const pool of Object.values(CHATTER)) {
+      expect(pool.length).toBeGreaterThanOrEqual(10);
+      for (const entry of pool) {
+        expect(entry.length).toBeGreaterThanOrEqual(2);
+        expect(entry.some((l) => l.includes("{name}"))).toBe(true);
+      }
+    }
+  });
+
+  it("never says Mole-specific things when the role is hidden", () => {
+    expect(reviewChatterPool("mole", false, false)).toBe("mystery");
+    expect(reviewChatterPool("employee", false, false)).toBe("mystery");
+    expect(reviewChatterPool("recruiter", true, false)).toBe("caught");
+    expect(reviewChatterPool("it", true, false)).toBe("wronged");
+    expect(reviewChatterPool("burnout", true, false)).toBe("burnout");
+    expect(reviewChatterPool("nephew", false, true)).toBe("nephew");
+  });
+
+  it("is the same for everyone, varies by game, and doesn't repeat within a game", () => {
+    expect(pickChatter("framed", 42, 0, [])).toEqual(pickChatter("framed", 42, 0, []));
+    const firsts = new Set(Array.from({ length: 20 }, (_, seed) => pickChatter("framed", seed, 0, []).i));
+    expect(firsts.size).toBeGreaterThan(5);
+    const used: string[] = [];
+    for (let k = 0; k < CHATTER.framed.length; k++) {
+      const c = pickChatter("framed", 7, k, used);
+      expect(used).not.toContain(`framed:${c.i}`);
+      used.push(`framed:${c.i}`);
+      expect(new Set(c.who).size).toBe(c.who.length);
+    }
+    const lines = chatterLines(pickChatter("caught", 1, 0, []), "Dana")!;
+    expect(lines.some((l) => l.text.includes("Dana"))).toBe(true);
+    expect(lines.every((l) => l.who.startsWith("Anonymous "))).toBe(true);
+  });
+
+  it("hides the role behind neutral chatter at the review when reveals are off", () => {
+    let s = toNight({ ...table(), settings: { ...initialState().settings, revealOnFire: false }, seed: 3 });
+    s = advanceState(s, 1000 + 60_000).state; // quiet night
+    expect(s.dawn?.chatter).toBeUndefined();
+    s = advanceState(s, 1000 + 60_000 + DAWN_MS).state; // day
+    s = act(s, "p1", { type: "skip" }); // vote
+    for (const id of ["p2", "p3", "p4", "p5", "p6"]) s = act(s, id, { type: "vote", target: "p1" });
+    s = act(s, "p1", { type: "vote", target: "p2" });
+    expect(s.exit?.fired).toBe("p1");
+    expect(s.exit?.chatter?.pool).toBe("mystery");
+    expect(viewFor(s, "p4", { hostId: "p1" }).exit?.chatter?.pool).toBe("mystery");
   });
 });

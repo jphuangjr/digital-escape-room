@@ -23,6 +23,7 @@ import {
   type Settings,
   type Team,
 } from "@/lib/allhands/types";
+import { chatterKey, pickChatter, reviewChatterPool, type Chatter, type ChatterPool } from "@/lib/allhands/chatter";
 import { lineupFor, lineupIssues, lineupRoles, parseLineup, swapRole, type RoleCounts } from "@/lib/allhands/lineup";
 import { CHAT_MIN_INTERVAL_MS, cleanChatBody, maskProfanity } from "../logic";
 import { definePartyGame, type PartyCtx, type PartyResult } from "../party/registry";
@@ -69,8 +70,12 @@ export interface AllHandsState {
   votes: Record<string, string>;
   /** What the IT Guy has learned. */
   checks: { round: number; target: string; isMole: boolean }[];
-  dawn: { round: number; laidOff: string | null; saved: boolean } | null;
-  exit: { fired: string | null; votes: number; survived?: boolean } | null;
+  dawn: { round: number; laidOff: string | null; saved: boolean; chatter?: Chatter } | null;
+  exit: { fired: string | null; votes: number; survived?: boolean; chatter?: Chatter } | null;
+  /** This game's random seed for coworker chatter (absent in games started before chatter existed). */
+  seed?: number;
+  /** Chatter threads this game already showed (see chatterKey), so it doesn't repeat one. */
+  chatterUsed?: string[];
   history: { round: number; kind: HistoryEntry["kind"]; playerId: string | null }[];
   nights: NightRecord[];
   winner: Team | null;
@@ -249,18 +254,27 @@ function resolveNight(s: AllHandsState, now: number): AllHandsState {
     const fallback = seats.find((y, i) => y.id !== x.id && y.alive && i > seats.indexOf(x)) ?? seats.find((y) => y.id !== x.id && y.alive);
     return { ...x, mentor: pick ?? fallback?.id };
   });
+  // The Moles can't lay off one of their own, so a layoff is always an innocent coworker: "framed".
+  const chatter = outcome === "laidoff" ? drawChatter(s, "framed") : undefined;
   const next: AllHandsState = {
     ...s,
+    ...(chatter ? { chatterUsed: [...(s.chatterUsed ?? []), chatterKey(chatter)] } : {}),
     seats: withMentor,
     picks: {},
     offer: null,
     lastProtected: hrTarget,
     checks: itTarget ? [...s.checks, { round: s.round, target: itTarget, isMole: Boolean(itResult) }] : s.checks,
-    dawn: { round: s.round, laidOff: outcome === "laidoff" ? target : null, saved: outcome === "saved" },
+    dawn: { round: s.round, laidOff: outcome === "laidoff" ? target : null, saved: outcome === "saved", ...(chatter ? { chatter } : {}) },
     history: [...s.history, { round: s.round, kind: outcome, playerId: outcome === "laidoff" ? target : null }],
     nights: [...s.nights, { round: s.round, moleTarget: target, itTarget, itResult, hrTarget, offerTarget, offerResult, outcome }],
   };
   return timed(next, "dawn", DAWN_MS, now);
+}
+
+/** The next coworker chatter thread from a pool, seeded per game so every phone shows the same one. */
+function drawChatter(s: AllHandsState, pool: ChatterPool): Chatter {
+  const used = s.chatterUsed ?? [];
+  return pickChatter(pool, s.seed ?? s.round * 7919, used.length, used);
 }
 
 /** The review's result: the most-voted player, if they beat every other player and "let's circle back". */
@@ -292,11 +306,14 @@ function resolveVote(s: AllHandsState, now: number): AllHandsState {
   // The Founder's Nephew survives his first firing, and everyone learns who he is.
   const survived = firedSeat?.role === "nephew" && !firedSeat.spared;
   const seats = s.seats.map((x) => (x.id !== r.fired ? x : survived ? { ...x, spared: true } : { ...x, alive: false }));
+  // Role-specific chatter only when everyone sees the role anyway (see reviewChatterPool).
+  const chatter = firedSeat ? drawChatter(s, reviewChatterPool(firedSeat.role, s.settings.revealOnFire, survived)) : undefined;
   return timed(
     {
       ...s,
       seats,
-      exit: { ...r, survived },
+      ...(chatter ? { chatterUsed: [...(s.chatterUsed ?? []), chatterKey(chatter)] } : {}),
+      exit: { ...r, survived, ...(chatter ? { chatter } : {}) },
       history: [...s.history, { round: s.round, kind: survived ? "spared" : r.fired ? "fired" : "kept", playerId: r.fired }],
     },
     "exit",
@@ -404,7 +421,8 @@ export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx):
       const blocked = lineupIssues(lineup).find((x) => x.level === "block");
       const roles = lineupRoles(lineup);
       if (blocked || !roles) return refuse(s, blocked?.text ?? "The lineup doesn't fit this table.");
-      return done(timed({ ...fresh, seats: dealRoles(ctx.roomPlayerIds, roles, ctx.rand) }, "reveal", REVEAL_MS, now));
+      const seats = dealRoles(ctx.roomPlayerIds, roles, ctx.rand);
+      return done(timed({ ...fresh, seats, seed: ctx.rand(2 ** 31), chatterUsed: [] }, "reveal", REVEAL_MS, now));
     }
 
     case "settings": {
