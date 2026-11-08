@@ -8,6 +8,7 @@ import { AccountBar, ContinueRooms, SignInButton, useMe } from "@/components/sit
 import { RedeemBox } from "@/components/site/RedeemBox";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { AVATAR_COLORS } from "@/lib/avatarColors";
+import { HowToPlayTour } from "@/components/allhands/HowToPlayTour";
 import { ALL_HANDS_GAME_ID, MAX_PLAYERS, MIN_PLAYERS, ROLE_INFO, type Role } from "@/lib/allhands/types";
 
 const ROLES: Role[] = ["employee", "mole", "it", "hr", "burnout"];
@@ -27,6 +28,7 @@ export function AllHandsLanding() {
   const [color, setColor] = useState(AVATAR_COLORS[0]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [tour, setTour] = useState(false);
 
   useEffect(() => {
     try {
@@ -118,7 +120,15 @@ export function AllHandsLanding() {
             {MIN_PLAYERS} to {MAX_PLAYERS} players in the same room, talking out loud. Every phone is a secret badge; the app runs
             the clock and the narration.
           </p>
+          <button
+            type="button"
+            onClick={() => setTour(true)}
+            className="min-h-11 self-start rounded-xl border border-slate-700 px-4 text-sm font-semibold active:bg-slate-800"
+          >
+            🎓 How to play
+          </button>
         </section>
+        {tour && <HowToPlayTour onClose={() => setTour(false)} />}
 
         <ContinueRooms me={me} gameId={ALL_HANDS_GAME_ID} />
         <AccountBar me={me} callbackUrl={game.href} />
