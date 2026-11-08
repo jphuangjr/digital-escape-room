@@ -747,6 +747,24 @@ function SlackPost({ children, channel = "#general" }: { children: React.ReactNo
   );
 }
 
+/** A private DM, only on the other Mole-side phones, that last night's offer was accepted. */
+function OfferAcceptedDm({ hire }: { hire: string }) {
+  return (
+    <div className="rounded-2xl border border-fuchsia-400/50 bg-fuchsia-400/10 p-4">
+      <div className="flex items-center gap-2">
+        <span aria-hidden className="grid h-9 w-9 place-items-center rounded-lg bg-fuchsia-400 text-lg text-slate-950">💼</span>
+        <div>
+          <p className="text-sm font-bold">Recruiting</p>
+          <p className="text-xs text-fuchsia-200/70">🔒 Direct message · only Moles see this</p>
+        </div>
+      </div>
+      <p className="mt-3 text-fuchsia-50">
+        🤝 {hire} accepted the offer. They&apos;re one of you now, and they can see the team and the back channel. Act normal.
+      </p>
+    </div>
+  );
+}
+
 /** Anonymous coworkers gossiping in a Slack thread under an announcement. */
 function ChatterThread({ chatter, who }: { chatter: Chatter; who: string }) {
   const lines = chatterLines(chatter, who);
@@ -780,6 +798,7 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
           </p>
         </div>
       )}
+      {d?.hired && <OfferAcceptedDm hire={name(d.hired)} />}
       {d?.poll && <PollResults poll={d.poll} name={name} people={people} />}
       {d && (
         <SlackPost>

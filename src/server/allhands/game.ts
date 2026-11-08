@@ -561,6 +561,13 @@ function inGame(s: AllHandsState): boolean {
 }
 
 /** Living Moles may use the back channel at any point in a running game. */
+/** Who accepted the Recruiter's offer on night `round`, for a Mole-side viewer other than the hire. Null for everyone else. */
+function hiredFor(s: AllHandsState, round: number, me: Seat | undefined): string | null {
+  if (!me || !isMoleRole(me.role) || me.recruitedRound === round) return null;
+  const n = s.nights.find((x) => x.round === round);
+  return n?.offerResult === "hired" ? n.offerTarget : null;
+}
+
 export function canMoleChat(s: AllHandsState, playerId: string): boolean {
   const seat = seatOf(s, playerId);
   return inGame(s) && isMoleRole(seat?.role) && Boolean(seat?.alive);
@@ -698,7 +705,7 @@ export function viewFor(s: AllHandsState, viewerId: string, ctx: { hostId: strin
     checks: me?.role === "it" || over ? s.checks : [],
     dawn:
       (s.phase === "dawn" || s.phase === "day") && s.dawn
-        ? { ...s.dawn, recruited: me?.recruitedRound === s.dawn.round }
+        ? { ...s.dawn, recruited: me?.recruitedRound === s.dawn.round, hired: hiredFor(s, s.dawn.round, me) }
         : null,
     vote,
     exit: s.phase === "exit" && s.exit ? { ...s.exit, survived: Boolean(s.exit.survived), role: exitSeat ? roleFor(exitSeat) : null } : null,

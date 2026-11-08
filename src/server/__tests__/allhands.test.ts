@@ -548,6 +548,10 @@ describe("the Recruiter", () => {
     expect(hired.seats.find((x) => x.id === "p2")?.role).toBe("mole");
     expect(hired.canMoleChat).toBe(true);
     expect(viewFor(s, "p6", { hostId: "p1" }).dawn?.recruited).toBe(false);
+    // The Moles get a private DM that the offer was accepted; nobody else does.
+    expect(viewFor(s, "p1", { hostId: "p1" }).dawn?.hired).toBe("p5");
+    expect(viewFor(s, "p2", { hostId: "p1" }).dawn?.hired).toBe("p5");
+    for (const p of ["p3", "p4", "p5", "p6"]) expect(viewFor(s, p, { hostId: "p1" }).dawn?.hired).toBeNull();
     expect(s.nights[0]).toMatchObject({ offerTarget: "p5", offerResult: "hired", outcome: "quiet" });
     expect(viewFor(s, "p1", { hostId: "p1" }).night).toBeNull();
     // The offer is spent.
@@ -563,6 +567,7 @@ describe("the Recruiter", () => {
     s = advanceState(s, s.endsAt! + 1).state;
     expect(s.seats.find((x) => x.id === "p3")?.role).toBe("it");
     expect(s.nights[0].offerResult).toBe("refused");
+    expect(viewFor(s, "p1", { hostId: "p1" }).dawn?.hired).toBeNull();
 
     let t = night();
     t = act(t, "p1", { type: "pick", target: "p6", offer: true }, 2000, room);

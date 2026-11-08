@@ -95,6 +95,8 @@ export interface DawnView {
   saved: boolean;
   /** Only on the phone of the player the Recruiter hired last night: you're a Mole now. */
   recruited: boolean;
+  /** Only on the other Mole-side phones: who accepted the Recruiter's offer last night (a private DM). */
+  hired: string | null;
   /** Anonymous coworkers gossiping about the layoff. */
   chatter?: Chatter;
   /** Last night's #random poll, if anyone answered it. */
