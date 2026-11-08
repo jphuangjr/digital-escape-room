@@ -1,5 +1,5 @@
 import "server-only";
-import { promptIds, promptText, replyIds, replyText } from "@/lib/replyall/deck";
+import { promptIds, promptKind, promptText, replyIds, replyKind, replyText, type CardKind } from "@/lib/replyall/deck";
 import {
   DEFAULT_SETTINGS,
   HAND_SIZE,
@@ -136,14 +136,42 @@ const sittingOut = (s: ReplyAllState, seat: Seat) => seat.skippedRound === s.rou
 const answering = (s: ReplyAllState) => repliers(s).filter((x) => !sittingOut(s, x));
 const inGame = (s: ReplyAllState) => s.phase !== "lobby" && s.phase !== "over";
 
-/** Draw one reply card, reshuffling every card nobody holds when the deck runs out. */
-function drawReply(s: ReplyAllState): number | null {
-  if (!s.replyDeck.length) {
-    const held = new Set(s.seats.flatMap((x) => x.hand));
-    for (const p of Object.values(s.plays)) held.add(p.card);
-    s.replyDeck = shuffle(s, replyIds(s.settings.afterHours).filter((c) => !held.has(c)));
+/**
+ * How often (in percent) a draw comes from each pile. Office cards are kept to about a fifth of the regular deck;
+ * with After Hours on, the 18+ cards take 70% and the rest split the same way.
+ */
+export const DRAW_SHARES: Record<"regular" | "afterHours", Record<CardKind, number>> = {
+  regular: { general: 80, office: 20, adult: 0 },
+  afterHours: { adult: 70, general: 24, office: 6 },
+};
+
+/**
+ * Take a card off `deck`, picking its pile by DRAW_SHARES. When the pile it wants has run out, that pile is reshuffled
+ * back in from every card of it nobody holds; if it has none left at all, the next pile is tried.
+ */
+function drawFrom(s: ReplyAllState, deck: number[], all: number[], held: Set<number>, kind: (id: number) => CardKind): number | null {
+  const shares = DRAW_SHARES[s.settings.afterHours ? "afterHours" : "regular"];
+  const kinds = (Object.keys(shares) as CardKind[]).filter((k) => shares[k] > 0);
+  let roll = rand(s, 100);
+  const first = kinds.find((k) => (roll -= shares[k]) < 0) ?? kinds[0];
+  for (const want of [first, ...kinds.filter((k) => k !== first)]) {
+    const find = () => deck.findLastIndex((c) => kind(c) === want);
+    let at = find();
+    if (at < 0) {
+      const inDeck = new Set(deck);
+      deck.unshift(...shuffle(s, all.filter((c) => kind(c) === want && !held.has(c) && !inDeck.has(c))));
+      at = find();
+    }
+    if (at >= 0) return deck.splice(at, 1)[0];
   }
-  return s.replyDeck.pop() ?? null;
+  return deck.pop() ?? null;
+}
+
+/** Draw one reply card. */
+function drawReply(s: ReplyAllState): number | null {
+  const held = new Set(s.seats.flatMap((x) => x.hand));
+  for (const p of Object.values(s.plays)) held.add(p.card);
+  return drawFrom(s, s.replyDeck, replyIds(s.settings.afterHours), held, replyKind);
 }
 
 function fillHand(s: ReplyAllState, seat: Seat): void {
@@ -155,8 +183,7 @@ function fillHand(s: ReplyAllState, seat: Seat): void {
 }
 
 function drawPrompt(s: ReplyAllState): number {
-  if (!s.promptDeck.length) s.promptDeck = shuffle(s, promptIds(s.settings.afterHours).filter((p) => p !== s.prompt));
-  return s.promptDeck.pop()!;
+  return drawFrom(s, s.promptDeck, promptIds(s.settings.afterHours), new Set(s.prompt === null ? [] : [s.prompt]), promptKind)!;
 }
 
 function timed(s: ReplyAllState, phase: Phase, ms: number | null, now: number): ReplyAllState {
