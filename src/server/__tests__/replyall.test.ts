@@ -240,6 +240,22 @@ describe("Reply All", () => {
     expect(act(adult, "p2", { type: "settings", settings: { afterHours: false } }).ok).toBe(false);
   });
 
+  it("deals mostly 18+ cards when After Hours is on", () => {
+    let s = started(12, { afterHours: true });
+    const hands = s.seats.flatMap((x) => x.hand);
+    const share = hands.filter(isAfterHours).length / hands.length;
+    expect(share).toBeGreaterThan(0.55);
+    expect(share).toBeLessThan(0.9);
+    const prompts: number[] = [s.prompt!];
+    for (let i = 0; i < 30 && s.phase !== "over"; i++) {
+      s = must(s, "p1", { type: "skip" }, 1000, ids(12));
+      if (s.phase === "pick") prompts.push(s.prompt!);
+    }
+    expect(prompts.filter(isAfterHours).length / prompts.length).toBeGreaterThan(0.5);
+    // Never a repeat while the deck lasts.
+    expect(new Set(prompts).size).toBe(prompts.length);
+  });
+
   it("parses actions and tolerates an empty or foreign scene", () => {
     expect(parseAction({ type: "play", card: 3 })).toEqual({ type: "play", card: 3 });
     expect(parseAction({ type: "play", card: "3" })).toBeNull();

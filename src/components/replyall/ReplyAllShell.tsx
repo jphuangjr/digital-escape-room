@@ -391,7 +391,7 @@ function Lobby({
                   After Hours cards <span className="ml-1 rounded-full border border-rose-400/60 px-1.5 text-11px text-rose-300">18+</span>
                 </span>
                 <span className="block text-xs text-slate-400">
-                  Mixes crude, boozy, innuendo-heavy cards into the deck. Only for a table where everyone is an adult and up for it.
+                  Makes most of the deck crude, sexual 18+ cards (about 7 in 10). Only for a table where everyone is an adult and up for it.
                 </span>
               </span>
               <input
