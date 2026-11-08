@@ -5,16 +5,13 @@ import { createPortal } from "react-dom";
 import {
   BURNOUT_MIN_PLAYERS,
   INTERN_MIN_PLAYERS,
-  MAX_PLAYERS,
-  MIN_PLAYERS,
   NEPHEW_MIN_PLAYERS,
   RECRUITER_MIN_PLAYERS,
   ROLE_INFO,
-  molesFor,
-  specialsFor,
   type Role,
   type Settings,
 } from "@/lib/allhands/types";
+import { lineupFor, type RoleCounts } from "@/lib/allhands/lineup";
 
 const ROLES: Role[] = ["employee", "mole", "it", "hr", "recruiter", "intern", "burnout", "nephew"];
 
@@ -46,19 +43,19 @@ const PHASES: { name: string; what: string }[] = [
 ];
 
 /** A quick reference anyone can open mid-game: who's who, what happens when, and how each side wins. */
-export function RulesButton({ players, settings }: { players: number; settings: Settings }) {
+export function RulesButton({ players, settings, lineup = null }: { players: number; settings: Settings; lineup?: RoleCounts | null }) {
   const [open, setOpen] = useState(false);
-  const n = Math.min(MAX_PLAYERS, Math.max(MIN_PLAYERS, players));
-  const specials = specialsFor(n, settings);
-  const moles = molesFor(n);
+  const { counts } = lineupFor(players, settings, lineup);
+  const moleSide = counts.mole + counts.recruiter;
+  const count = (k: number, one: string, many = `${one}s`) => `${k === 1 ? "one" : k} ${k === 1 ? one : many}`;
   const parts = [
-    specials.includes("recruiter") ? `${moles} Moles (one of them the Recruiter)` : `${moles} ${moles === 1 ? "Mole" : "Moles"}`,
-    "one IT Guy",
-    "one HR Rep",
-    ...specials.filter((r) => r !== "recruiter").map((r) => `one ${ROLE_INFO[r].name}`),
-  ];
-  const tableLine = `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
-  const off = (r: Role) => MIN_FOR[r] !== undefined && !specials.includes(r);
+    moleSide > 0 && (counts.recruiter ? `${count(moleSide, "Mole")} (one of them the Recruiter)` : count(moleSide, "Mole")),
+    counts.it > 0 && "one IT Guy",
+    counts.hr > 0 && "one HR Rep",
+    ...ROLES.filter((r) => MIN_FOR[r] !== undefined && r !== "recruiter" && counts[r] > 0).map((r) => `one ${ROLE_INFO[r].name}`),
+  ].filter((x): x is string => Boolean(x));
+  const tableLine = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}` : (parts[0] ?? "no special roles");
+  const off = (r: Role) => r !== "employee" && r !== "mole" && counts[r] === 0;
   return (
     <>
       <button
@@ -114,7 +111,7 @@ export function RulesButton({ players, settings }: { players: number; settings: 
                       {ROLE_INFO[r].name} <span className="font-normal text-slate-500">({ROLE_INFO[r].classic})</span>
                       {off(r) && (
                         <span className="ml-1 text-xs font-normal text-slate-500">
-                          · {settings[r as "intern"] ? `${MIN_FOR[r]}+ players` : "off this game"}
+                          · not in this game{MIN_FOR[r] ? ` (suggested at ${MIN_FOR[r]}+ players)` : ""}
                         </span>
                       )}
                     </p>

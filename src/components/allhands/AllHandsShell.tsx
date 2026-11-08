@@ -8,11 +8,9 @@ import { QrCode } from "@/components/site/QrCode";
 import { AllHandsChat } from "./AllHandsChat";
 import { TestBar } from "./TestBar";
 import { RulesButton } from "./RulesSheet";
+import { LineupPanel, tableLineup } from "./LineupPanel";
+import { lineupIssues, swapRole } from "@/lib/allhands/lineup";
 import {
-  BURNOUT_MIN_PLAYERS,
-  INTERN_MIN_PLAYERS,
-  NEPHEW_MIN_PLAYERS,
-  RECRUITER_MIN_PLAYERS,
   DAY_OPTIONS_MS,
   ROLE_INFO,
   SKIP,
@@ -66,13 +64,15 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
   const party = local ?? state.party!;
   const partyRef = useRef(party);
   partyRef.current = party;
+  const playersRef = useRef(state.players.length);
+  playersRef.current = state.players.length;
 
   const act: Act = useCallback(
     async (body) => {
       const tick = body.type === "tick";
       if (!tick) {
         setErr(null);
-        setLocal(optimistic(partyRef.current, body, meId));
+        setLocal(optimistic(partyRef.current, body, meId, playersRef.current));
       }
       inFlight.current++;
       setBusy(true);
@@ -123,7 +123,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <RulesButton players={party.seats.length || state.players.length} settings={party.settings} />
+            <RulesButton players={party.seats.length || state.players.length} settings={party.settings} lineup={party.lineup} />
             <Clock left={left} paused={party.paused} remainingMs={party.remainingMs} />
           </div>
         </div>
@@ -161,7 +161,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
 }
 
 /** What a tap will do to this phone's screen, shown before the server answers. */
-function optimistic(p: AllHandsView, body: Record<string, unknown>, meId: string): AllHandsView {
+function optimistic(p: AllHandsView, body: Record<string, unknown>, meId: string, players: number): AllHandsView {
   const target = typeof body.target === "string" ? body.target : null;
   switch (body.type) {
     case "ready":
@@ -184,6 +184,11 @@ function optimistic(p: AllHandsView, body: Record<string, unknown>, meId: string
       for (const [k, ids] of Object.entries(p.vote.tally)) tally[k] = ids.filter((id) => id !== meId);
       (tally[target] ??= []).push(meId);
       return { ...p, vote: { ...p.vote, tally, myVote: target, voted: p.vote.myVote ? p.vote.voted : p.vote.voted + 1 } };
+    }
+    case "lineup": {
+      if (body.reset) return { ...p, lineup: null };
+      const r = swapRole(tableLineup(p, players), body.from as Role, body.to as Role);
+      return r.ok ? { ...p, lineup: r.lineup } : p;
     }
     default:
       return p;
@@ -355,6 +360,7 @@ function Lobby({
   const url = `${origin}/r/${code}`;
   const count = state.players.length;
   const need = Math.max(0, party.minPlayers - count);
+  const blocked = lineupIssues(tableLineup(party, count)).some((x) => x.level === "block");
   return (
     <>
       <section className="flex flex-col items-center gap-3 rounded-3xl border border-slate-800 bg-slate-900 p-5 text-center">
@@ -396,6 +402,8 @@ function Lobby({
         </ul>
       </Section>
 
+      <LineupPanel party={party} players={count} act={act} />
+
       {isHost ? (
         <>
           <Section title="House rules">
@@ -411,26 +419,6 @@ function Lobby({
                 className="h-6 w-6 shrink-0 accent-lime-300"
               />
             </label>
-            <div className="flex flex-col gap-1 rounded-xl border border-slate-800 bg-slate-900 p-3">
-              <span className="font-semibold">Special roles</span>
-              <span className="text-xs text-slate-400">Each takes an Employee&apos;s seat once the table is big enough.</span>
-              {SPECIALS.map((r) => (
-                <label key={r.key} className="flex min-h-12 items-center justify-between gap-3 border-t border-slate-800 pt-1">
-                  <span>
-                    <span className="block text-sm font-semibold">
-                      {ROLE_INFO[r.key].name} <span className="font-normal text-slate-500">· {r.min}+ players</span>
-                    </span>
-                    <span className="block text-xs text-slate-400">{r.hint}</span>
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={party.settings[r.key]}
-                    onChange={(e) => void act({ type: "settings", settings: { [r.key]: e.target.checked } })}
-                    className="h-6 w-6 shrink-0 accent-lime-300"
-                  />
-                </label>
-              ))}
-            </div>
             <div className="flex flex-col gap-2 rounded-xl border border-slate-800 bg-slate-900 p-3">
               <span className="font-semibold">All-hands length</span>
               <div className="flex gap-2">
@@ -450,8 +438,8 @@ function Lobby({
               </div>
             </div>
           </Section>
-          <PrimaryButton disabled={busy || need > 0} onClick={() => void act({ type: "start" })}>
-            {need > 0 ? `Waiting for ${need} more ${need === 1 ? "player" : "players"}` : "Start the game"}
+          <PrimaryButton disabled={busy || need > 0 || blocked} onClick={() => void act({ type: "start" })}>
+            {need > 0 ? `Waiting for ${need} more ${need === 1 ? "player" : "players"}` : blocked ? "Fix the lineup to start" : "Start the game"}
           </PrimaryButton>
         </>
       ) : (
@@ -502,14 +490,6 @@ function Onboarding({ party, meId, act, busy, name }: { party: AllHandsView; meI
 }
 
 // ---------- after hours ----------
-
-/** The house-rule switches for the special roles, smallest table first. */
-const SPECIALS: { key: "intern" | "burnout" | "nephew" | "recruiter"; min: number; hint: string }[] = [
-  { key: "intern", min: INTERN_MIN_PLAYERS, hint: "Picks a mentor and wins with their side, without knowing it." },
-  { key: "burnout", min: BURNOUT_MIN_PLAYERS, hint: "Secretly wants to get fired. If the team fires them, they win alone." },
-  { key: "nephew", min: NEPHEW_MIN_PLAYERS, hint: "Survives the first time the team votes him out." },
-  { key: "recruiter", min: RECRUITER_MIN_PLAYERS, hint: "One Mole can turn a coworker into a Mole, once per game." },
-];
 
 /** Who posted tonight's #random poll (the decoy question), one per round. */
 const POLL_AUTHORS = ["Brad (CEO)", "the Office Manager", "Chad from Sales", "the Founder's Nephew", "HR Bot", "the Growth Team"];
