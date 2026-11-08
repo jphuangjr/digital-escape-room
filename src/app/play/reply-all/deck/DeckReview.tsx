@@ -4,13 +4,22 @@ import { useState } from "react";
 import Link from "next/link";
 import { capitalize } from "@/lib/replyall/types";
 
-type Tab = "prompts" | "replies";
+export interface Deck {
+  key: string;
+  label: string;
+  kind: "prompt" | "reply";
+  cards: string[];
+  /** The 18+ After Hours add-on. */
+  adult?: boolean;
+}
 
-/** The whole Reply All deck, numbered by card index (the number a game stores), with a search box. */
-export function DeckReview({ prompts, replies }: { prompts: string[]; replies: string[] }) {
-  const [tab, setTab] = useState<Tab>("prompts");
+/** The whole Reply All deck, one tab per list, numbered by position (what a game stores), with a search box. */
+export function DeckReview({ decks }: { decks: Deck[] }) {
+  const [tabKey, setTab] = useState(decks[0].key);
   const [q, setQ] = useState("");
-  const cards = tab === "prompts" ? prompts : replies;
+  const deck = decks.find((d) => d.key === tabKey) ?? decks[0];
+  const tab = deck.kind === "prompt" ? "prompts" : "replies";
+  const cards = deck.cards;
   const needle = q.trim().toLowerCase();
   const shown = cards.map((text, i) => ({ i, text })).filter((c) => !needle || c.text.toLowerCase().includes(needle));
 
@@ -24,25 +33,31 @@ export function DeckReview({ prompts, replies }: { prompts: string[]; replies: s
           <p className="font-mono text-11px uppercase tracking-[0.3em] text-amber-300">Admin · deck review</p>
           <h1 className="mt-1 text-4xl font-black tracking-tight">The Reply All deck</h1>
           <p className="mt-2 text-sm text-slate-400">
-            {prompts.length} prompts and {replies.length} replies. Numbers are the card&apos;s position in the deck: new cards go at
+            {decks.filter((d) => !d.adult).map((d) => `${d.cards.length} ${d.label.toLowerCase()}`).join(" and ")}, plus the 18+
+            After Hours add-on ({decks.filter((d) => d.adult).map((d) => `${d.cards.length} ${d.kind === "prompt" ? "prompts" : "replies"}`).join(", ")}),
+            which hosts can switch on in the lobby. Numbers are the card&apos;s position in the deck: new cards go at
             the end, and changing the wording of a card is safe, but removing one shifts every number after it.
           </p>
         </header>
 
         <div className="sticky top-0 z-10 -mx-edge flex flex-col gap-3 bg-slate-950/95 px-edge py-3 backdrop-blur">
-          <div className="flex gap-2" role="tablist">
-            {(["prompts", "replies"] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                role="tab"
-                aria-selected={tab === t}
-                onClick={() => setTab(t)}
-                className={`min-h-11 flex-1 rounded-xl border text-sm font-semibold ${tab === t ? "border-sky-300 bg-sky-300/10 text-sky-300" : "border-slate-700"}`}
-              >
-                {t === "prompts" ? `Prompts (${prompts.length})` : `Replies (${replies.length})`}
-              </button>
-            ))}
+          <div className="grid grid-cols-2 gap-2" role="tablist">
+            {decks.map((d) => {
+              const on = d.key === deck.key;
+              const tone = d.adult ? "border-rose-400 bg-rose-400/10 text-rose-300" : "border-sky-300 bg-sky-300/10 text-sky-300";
+              return (
+                <button
+                  key={d.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => setTab(d.key)}
+                  className={`min-h-11 rounded-xl border px-2 text-sm font-semibold ${on ? tone : "border-slate-700"}`}
+                >
+                  {d.label} ({d.cards.length})
+                </button>
+              );
+            })}
           </div>
           <input
             type="search"
@@ -58,7 +73,7 @@ export function DeckReview({ prompts, replies }: { prompts: string[]; replies: s
           {shown.map((c) => (
             <li key={c.i} className="flex gap-3 rounded-xl border border-slate-800 bg-slate-900 p-3">
               <span className="w-9 shrink-0 pt-0.5 text-right font-mono text-xs text-slate-500">{c.i + 1}</span>
-              {tab === "prompts" ? (
+              {deck.kind === "prompt" ? (
                 <span className="font-semibold leading-snug">
                   {c.text.split("____").map((piece, j, all) => (
                     <span key={j}>
