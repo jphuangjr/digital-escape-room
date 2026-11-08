@@ -17,6 +17,18 @@ const ROLE_TONE: Record<Role, string> = {
   recruiter: "text-fuchsia-300 border-fuchsia-400/60 bg-fuchsia-400/10",
 };
 
+/** What each role can do, in a few words (the Rules sheet has the full story). */
+export const ROLE_SHORT: Record<Role, string> = {
+  employee: "No powers. Find the Moles and vote them out.",
+  mole: "Picks someone to lay off each night with the other Moles.",
+  recruiter: "A Mole who can turn one player into a Mole, once.",
+  it: "Checks one person a night to learn if they're a Mole.",
+  hr: "Protects one person a night from a layoff.",
+  intern: "Picks a mentor and wins with their side.",
+  nephew: "Survives the first time the team votes him out.",
+  burnout: "Wins alone by getting fired at the vote.",
+};
+
 /** The lineup this table is dealt from, for the room's headcount. */
 export function tableLineup(party: AllHandsView, players: number): Lineup {
   return lineupFor(players, party.settings, party.lineup);
@@ -61,22 +73,25 @@ export function LineupPanel({ party, players, act }: { party: AllHandsView; play
           Roles are dealt at random when the game starts. Anyone here can tap a seat to swap its role.
         </p>
 
-        <ul className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-3" aria-label="Roles in this game">
+        <ul className="grid grid-cols-2 gap-2" aria-label="Roles in this game">
           {seats.map((r, i) => (
             <li key={`${r}-${i}`}>
               <button
                 type="button"
                 aria-pressed={picked === i}
-                aria-label={`${ROLE_INFO[r].name}. Tap to swap`}
+                aria-label={`${ROLE_INFO[r].name}: ${ROLE_SHORT[r]} Tap to swap`}
                 onClick={() => setPicked(picked === i ? null : i)}
-                className={`flex min-h-11 w-full items-center justify-between gap-1 rounded-xl border px-3 text-left text-sm font-semibold transition-transform duration-75 active:scale-[0.97] ${
+                className={`flex h-full min-h-11 w-full flex-col gap-0.5 rounded-xl border px-3 py-2 text-left transition-transform duration-75 active:scale-[0.97] ${
                   ROLE_TONE[r]
                 } ${picked === i ? "ring-2 ring-slate-100" : ""}`}
               >
-                <span className="truncate">{ROLE_INFO[r].name}</span>
-                <span aria-hidden className="text-xs opacity-60">
-                  ⇄
+                <span className="flex w-full items-center justify-between gap-1 text-sm font-semibold">
+                  <span className="truncate">{ROLE_INFO[r].name}</span>
+                  <span aria-hidden className="text-xs opacity-60">
+                    ⇄
+                  </span>
                 </span>
+                <span className="text-xs leading-snug text-slate-300">{ROLE_SHORT[r]}</span>
               </button>
             </li>
           ))}
@@ -85,7 +100,7 @@ export function LineupPanel({ party, players, act }: { party: AllHandsView; play
         {pickedRole && (
           <div className="flex flex-col gap-2 rounded-xl border border-slate-700 bg-slate-950 p-3" role="group" aria-label={`Swap the ${ROLE_INFO[pickedRole].name} for`}>
             <p className="text-sm font-semibold">Swap this {ROLE_INFO[pickedRole].name} for:</p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col gap-2">
               {LINEUP_ROLES.filter((r) => r !== pickedRole).map((r) => {
                 const why = cantAdd(lineup, r);
                 return (
@@ -93,11 +108,12 @@ export function LineupPanel({ party, players, act }: { party: AllHandsView; play
                     key={r}
                     type="button"
                     disabled={Boolean(why)}
-                    title={why ?? ROLE_INFO[r].power}
+                    title={ROLE_INFO[r].power}
                     onClick={() => swap(r)}
-                    className={`min-h-11 rounded-full border px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-35 ${ROLE_TONE[r]}`}
+                    className={`flex min-h-11 flex-col rounded-xl border px-3 py-2 text-left disabled:cursor-not-allowed disabled:opacity-40 ${ROLE_TONE[r]}`}
                   >
-                    {ROLE_INFO[r].name}
+                    <span className="text-sm font-semibold">{ROLE_INFO[r].name}</span>
+                    <span className="text-xs leading-snug text-slate-300">{why ?? ROLE_SHORT[r]}</span>
                   </button>
                 );
               })}
