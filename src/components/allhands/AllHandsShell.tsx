@@ -589,7 +589,7 @@ function Onboarding({
 // ---------- after hours ----------
 
 /** Who posted tonight's #random poll (the decoy question), one per round. */
-const POLL_AUTHORS = ["Brad (CEO)", "the Office Manager", "Chad from Sales", "the Founder's Nephew", "HR Bot", "the Growth Team"];
+const POLL_AUTHORS = ["Brad (CEO)", "the Office Manager", "Chad from Sales", "the Head of Vibes", "the Culture Committee", "the Growth Team"];
 
 const NIGHT_COPY: Record<NightKind, { title: string; body: string }> = {
   mole: { title: "Pick someone to lay off", body: "Agree with the other Moles. Your picks show up on each other's phones." },

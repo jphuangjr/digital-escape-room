@@ -289,7 +289,7 @@ export const JOB_TITLES = [
   "LinkedIn Influencer",
   "Scrum Master",
   "Prompt Engineer",
-  "Unpaid Intern",
+  "Ping-Pong Champion",
   "Chief Vibes Officer",
   "Product Manager",
   "Designer (Dark Mode Only)",
@@ -297,7 +297,7 @@ export const JOB_TITLES = [
   "Head of Synergy",
   "Thought Leader",
   "DevOps Wizard",
-  "Founder's Nephew",
+  "Spreadsheet Whisperer",
   "Agile Coach",
   "Full-Stack Ninja",
 ];
