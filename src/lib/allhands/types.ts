@@ -2,6 +2,8 @@
 // Client-safe shapes only. The game state with every role lives in src/server/allhands and never reaches a
 // client whole: each player gets an AllHandsView built for them alone.
 
+import type { Chatter } from "./chatter";
+
 export const ALL_HANDS_GAME_ID = "all-hands";
 
 export const MIN_PLAYERS = 5;
@@ -93,6 +95,8 @@ export interface DawnView {
   saved: boolean;
   /** Only on the phone of the player the Recruiter hired last night: you're a Mole now. */
   recruited: boolean;
+  /** Anonymous coworkers gossiping about the layoff. */
+  chatter?: Chatter;
 }
 
 export interface VoteView {
@@ -111,6 +115,8 @@ export interface ExitView {
   /** Null when the host turned role reveals off and the game isn't over. */
   role: Role | null;
   votes: number;
+  /** Anonymous coworkers gossiping about the firing. */
+  chatter?: Chatter;
 }
 
 export interface HistoryEntry {

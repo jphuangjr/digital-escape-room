@@ -10,6 +10,7 @@ import { TestBar } from "./TestBar";
 import { RulesButton } from "./RulesSheet";
 import { LineupPanel, tableLineup } from "./LineupPanel";
 import { lineupIssues, swapRole } from "@/lib/allhands/lineup";
+import { chatterLines, type Chatter } from "@/lib/allhands/chatter";
 import { FirstGameTip, HowToPlayTour } from "./HowToPlayTour";
 import { OPEN_TOUR_EVENT, markFirstGameDone, openTour, tipFor, tipsWanted, tourSeen } from "@/lib/allhands/tutorial";
 import {
@@ -692,6 +693,25 @@ function SlackPost({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Anonymous coworkers gossiping in a Slack thread under an announcement. */
+function ChatterThread({ chatter, who }: { chatter: Chatter; who: string }) {
+  const lines = chatterLines(chatter, who);
+  if (!lines) return null;
+  return (
+    <div className="mt-3 border-l-2 border-slate-700 pl-3">
+      <p className="text-xs font-semibold text-sky-300">{lines.length} replies</p>
+      <ul className="mt-1 flex flex-col gap-2">
+        {lines.map((l, k) => (
+          <li key={k} className="text-sm">
+            <span className="block text-xs font-bold text-slate-400">{l.who}</span>
+            <span className="text-slate-200">{l.text}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function Morning({ party, name, people }: { party: AllHandsView; name: Name; people: Map<string, PlayerPublic> }) {
   const d = party.dawn;
   const laidOffSeat = d?.laidOff ? party.seats.find((x) => x.id === d.laidOff) : undefined;
@@ -715,6 +735,7 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
                 chapter. 💼
               </p>
               {laidOffSeat?.role && <p className="mt-2 text-sm text-slate-400">Their badge said: {ROLE_INFO[laidOffSeat.role].name}.</p>}
+              {d.chatter && <ChatterThread chatter={d.chatter} who={name(d.laidOff)} />}
             </>
           ) : d.saved ? (
             <p>HR blocked a layoff overnight. Synergy is up 4%. 📈</p>
@@ -839,7 +860,8 @@ function ExitInterview({ party, name }: { party: AllHandsView; name: Name }) {
   const e = party.exit;
   if (!e) return null;
   return (
-    <div className="flex flex-col items-center gap-3 rounded-3xl border border-slate-800 bg-slate-900 p-6 text-center">
+    <>
+      <div className="flex flex-col items-center gap-3 rounded-3xl border border-slate-800 bg-slate-900 p-6 text-center">
       {e.fired && e.survived ? (
         <>
           <p className="text-sm uppercase tracking-[0.25em] text-slate-400">Voted out with {e.votes} votes</p>
@@ -867,7 +889,14 @@ function ExitInterview({ party, name }: { party: AllHandsView; name: Name }) {
           <p className="text-slate-400">The team decided to circle back. Synergy remains unclear.</p>
         </>
       )}
-    </div>
+      </div>
+      {e.fired && e.chatter && (
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
+          <p className="text-xs text-slate-500">#random</p>
+          <ChatterThread chatter={e.chatter} who={name(e.fired)} />
+        </div>
+      )}
+    </>
   );
 }
 
