@@ -44,6 +44,11 @@ export default async function PartyGames() {
                   </div>
                   <p className="text-sm leading-relaxed text-noir-ink-dim">{gameText(t, g, "blurb")}</p>
                   <ul className="flex flex-wrap gap-2 text-xs text-noir-ink-dim">
+                    {g.tags?.map((tag) => (
+                      <li key={tag} className="rounded-full border border-noir-brass/70 px-3 py-1 font-semibold text-noir-brass">
+                        {tag}
+                      </li>
+                    ))}
                     {(["players", "duration"] as const).map((f) => (
                       <li key={f} className="rounded-full border border-noir-line px-3 py-1">
                         {gameText(t, g, f)}
