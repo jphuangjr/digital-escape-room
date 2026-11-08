@@ -98,7 +98,7 @@ export const GAMES: GameInfo[] = [
     duration: "20–45 min",
     difficulty: "Easy",
     tone: "Party game",
-    status: "staging",
+    status: "live",
     href: "/play/reply-all",
     kind: "party",
     tags: ["Fill in the blank"],
