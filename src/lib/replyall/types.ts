@@ -26,9 +26,11 @@ export interface Settings {
   target: number;
   /** How long players have to reply, and the Manager (or the table) to pick. */
   pickMs: number;
+  /** Mix in the 18+ After Hours cards. Off unless the host turns it on. */
+  afterHours: boolean;
 }
 
-export const DEFAULT_SETTINGS: Settings = { mode: "manager", target: 5, pickMs: 90_000 };
+export const DEFAULT_SETTINGS: Settings = { mode: "manager", target: 5, pickMs: 90_000, afterHours: false };
 export const TARGET_OPTIONS = [3, 5, 7];
 export const PICK_OPTIONS_MS = [60_000, 90_000, 120_000];
 
@@ -53,10 +55,12 @@ export interface SeatView {
   /** This round: has replied (or, in vote mode, has voted). Never says what. */
   done: boolean;
   isManager: boolean;
+  /** Sitting this round out for a fresh hand. */
+  skipped: boolean;
 }
 
 export interface CardView {
-  /** The card's index in REPLIES, which is what `play` takes. */
+  /** The card's id (see ./deck), which is what `play` takes. */
   card: number;
   text: string;
 }
@@ -103,7 +107,10 @@ export interface ReplyAllView {
     played: number | null;
     /** That card's text. */
     playedText: string | null;
-    mulliganLeft: boolean;
+    /** Sat this round out for a fresh hand. */
+    skipped: boolean;
+    /** May sit this round out for a fresh hand now. */
+    canSkip: boolean;
     /** Vote mode: the entry I voted for. */
     voted: number | null;
   };

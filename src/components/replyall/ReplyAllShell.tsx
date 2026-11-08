@@ -101,6 +101,7 @@ export function ReplyAllShell({ code, state, refresh }: { code: string; state: R
             <p className="truncate text-lg font-bold">
               {PHASE_LABEL[party.phase]}
               {party.round > 0 && inGame && <span className="ml-2 text-sm font-normal text-slate-400">Thread {party.round}</span>}
+              {party.settings.afterHours && <span className="ml-2 rounded-full border border-rose-400/60 px-1.5 align-middle text-11px font-semibold text-rose-300">18+</span>}
             </p>
           </div>
           <Clock left={left} paused={party.paused} remainingMs={party.remainingMs} />
@@ -384,6 +385,25 @@ function Lobby({
               value={party.settings.target}
               onPick={(v) => void act({ type: "settings", settings: { target: v } })}
             />
+            <label className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900 p-3">
+              <span>
+                <span className="block font-semibold">
+                  After Hours cards <span className="ml-1 rounded-full border border-rose-400/60 px-1.5 text-11px text-rose-300">18+</span>
+                </span>
+                <span className="block text-xs text-slate-400">
+                  Mixes crude, boozy, innuendo-heavy cards into the deck. Only for a table where everyone is an adult and up for it.
+                </span>
+              </span>
+              <input
+                type="checkbox"
+                checked={party.settings.afterHours}
+                onChange={(e) => {
+                  if (e.target.checked && !window.confirm("Turn on the 18+ After Hours cards? Only do this if everyone at the table is an adult and okay with crude humor.")) return;
+                  void act({ type: "settings", settings: { afterHours: e.target.checked } });
+                }}
+                className="h-6 w-6 shrink-0 accent-rose-400"
+              />
+            </label>
             <Choice
               label="Time to reply"
               options={PICK_OPTIONS_MS.map((ms) => ({ value: ms, label: `${ms / 1000}s` }))}
@@ -398,7 +418,9 @@ function Lobby({
         </>
       ) : (
         <Banner>
-          Waiting for {name(party.hostId)} to start. {party.settings.mode === "manager" ? "A rotating Manager picks the best reply" : "Everyone votes for the best reply"}; first to {party.settings.target} pins wins.
+          Waiting for {name(party.hostId)} to start.{" "}
+          {party.settings.afterHours && <span className="font-semibold text-rose-300">After Hours (18+) cards are on. </span>}
+          {party.settings.mode === "manager" ? "A rotating Manager picks the best reply" : "Everyone votes for the best reply"}; first to {party.settings.target} pins wins.
         </Banner>
       )}
       <HowToPlay />
@@ -448,7 +470,8 @@ function HowToPlay() {
         <li>Each thread starts with a prompt. Read it out loud.</li>
         <li>Pick the reply from your hand that fits it best, or worst. Replies are anonymous.</li>
         <li>The Manager (or the whole table, in vote mode) reads them all out and pins the funniest.</li>
-        <li>A pin is a point. First to the target wins. Once a game you can Mark all as read for a fresh hand.</li>
+        <li>A pin is a point. First to the target wins.</li>
+        <li>Hate your hand? Mark all as read: skip replying for one thread and get seven new cards.</li>
       </ol>
     </Section>
   );
@@ -482,6 +505,11 @@ function Pick({ party, act, busy, name }: { party: ReplyAllView; act: Act; busy:
         </div>
       ) : party.me.seated ? (
         <>
+          {party.me.skipped && (
+            <Banner>
+              You&apos;re sitting this thread out. Here&apos;s your fresh hand for the next one. Waiting on {waiting} more.
+            </Banner>
+          )}
           {played !== null && (
             <Banner>
               Sent{playedText ? <>: <span className="font-semibold text-slate-100">{capitalize(playedText)}</span></> : ""}. Waiting on{" "}
@@ -492,31 +520,39 @@ function Pick({ party, act, busy, name }: { party: ReplyAllView; act: Act; busy:
             <ul className="flex flex-col gap-2">
               {party.me.hand.map((c) => (
                 <li key={c.card}>
-                  <ReplyCard text={c.text} selected={sel === c.card} onClick={() => setSel(sel === c.card ? null : c.card)} />
+                  <ReplyCard
+                    text={c.text}
+                    selected={sel === c.card}
+                    onClick={party.me.skipped ? undefined : () => setSel(sel === c.card ? null : c.card)}
+                  />
                 </li>
               ))}
             </ul>
           </Section>
-          <div className="sticky bottom-3 z-10 flex flex-col gap-2">
-            <PrimaryButton
-              disabled={busy || sel === null}
-              onClick={() => {
-                if (sel === null) return;
-                void act({ type: "play", card: sel });
-                setSel(null);
-              }}
-            >
-              {sel === null ? (played === null ? "Tap a card to reply" : "Tap a card to change your reply") : played === null ? "Send reply" : "Send this instead"}
-            </PrimaryButton>
-          </div>
-          {party.me.mulliganLeft && played === null && (
+          {!party.me.skipped && (
+            <div className="sticky bottom-3 z-10 flex flex-col gap-2">
+              <PrimaryButton
+                disabled={busy || sel === null}
+                onClick={() => {
+                  if (sel === null) return;
+                  void act({ type: "play", card: sel });
+                  setSel(null);
+                }}
+              >
+                {sel === null ? (played === null ? "Tap a card to reply" : "Tap a card to change your reply") : played === null ? "Send reply" : "Send this instead"}
+              </PrimaryButton>
+            </div>
+          )}
+          {party.me.canSkip && (
             <button
               type="button"
               disabled={busy}
-              onClick={() => window.confirm("Throw away your whole hand and draw seven new cards? You can do this once a game.") && void act({ type: "mulligan" })}
+              onClick={() =>
+                window.confirm("Skip replying this thread and swap your whole hand for seven new cards?") && void act({ type: "mulligan" })
+              }
               className="min-h-11 self-center rounded-xl px-4 text-sm font-semibold text-slate-400 underline active:text-slate-200"
             >
-              Mark all as read (fresh hand, once a game)
+              Mark all as read: skip this thread for a fresh hand
             </button>
           )}
         </>
@@ -688,7 +724,9 @@ function Scoreboard({ party, people, meId }: { party: ReplyAllView; people: Map<
                 {s.id === meId && <span className="text-slate-400"> (you)</span>}
               </span>
               {s.isManager && <span className="rounded-full border border-sky-300/50 px-1.5 text-11px text-sky-300">Mgr</span>}
-              {showDone && !s.isManager && <span aria-label={s.done ? "done" : "waiting"}>{s.done ? "✓" : "…"}</span>}
+              {showDone && !s.isManager && (
+                <span aria-label={s.skipped ? "skipped" : s.done ? "done" : "waiting"}>{s.skipped ? "↻" : s.done ? "✓" : "…"}</span>
+              )}
               <span className="font-mono font-bold">{s.score}</span>
             </li>
           );

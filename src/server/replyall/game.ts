@@ -1,5 +1,5 @@
 import "server-only";
-import { PROMPTS, REPLIES } from "@/lib/replyall/cards";
+import { promptIds, promptText, replyIds, replyText } from "@/lib/replyall/deck";
 import {
   DEFAULT_SETTINGS,
   HAND_SIZE,
@@ -20,11 +20,11 @@ export const RESULT_MS = 12_000;
 
 export interface Seat {
   id: string;
-  /** Card indexes into REPLIES. */
+  /** Reply card ids (see @/lib/replyall/deck). */
   hand: number[];
   score: number;
-  /** Used their one "Mark all as read" (a fresh hand) this game. */
-  mulligan: boolean;
+  /** The round they sat out to draw a fresh hand ("Mark all as read"): they don't reply that round. */
+  skippedRound?: number;
 }
 
 /** The whole game, every hand included. Stored in Room.scene; never sent to a client as is. */
@@ -94,6 +94,7 @@ function cleanSettings(x: Partial<Settings>): Settings {
     mode: x.mode === "vote" ? "vote" : "manager",
     target: TARGET_OPTIONS.includes(Number(x.target)) ? Number(x.target) : DEFAULT_SETTINGS.target,
     pickMs: PICK_OPTIONS_MS.includes(Number(x.pickMs)) ? Number(x.pickMs) : DEFAULT_SETTINGS.pickMs,
+    afterHours: x.afterHours === true,
   };
 }
 
@@ -116,7 +117,6 @@ function shuffle<T>(s: ReplyAllState, xs: readonly T[]): T[] {
   return a;
 }
 
-const range = (n: number) => Array.from({ length: n }, (_, i) => i);
 const clone = (s: ReplyAllState): ReplyAllState => structuredClone(s);
 
 function refuse<S>(state: S, error: string): PartyResult<S> {
@@ -131,6 +131,9 @@ export const managerOf = (s: ReplyAllState): string | null =>
   s.settings.mode === "manager" && s.seats.length ? s.seats[s.manager % s.seats.length].id : null;
 /** Who replies this round: everyone but the Manager. */
 const repliers = (s: ReplyAllState) => s.seats.filter((x) => x.id !== managerOf(s));
+const sittingOut = (s: ReplyAllState, seat: Seat) => seat.skippedRound === s.round;
+/** Who still owes a reply this round: the repliers, less anyone who sat it out for a fresh hand. */
+const answering = (s: ReplyAllState) => repliers(s).filter((x) => !sittingOut(s, x));
 const inGame = (s: ReplyAllState) => s.phase !== "lobby" && s.phase !== "over";
 
 /** Draw one reply card, reshuffling every card nobody holds when the deck runs out. */
@@ -138,7 +141,7 @@ function drawReply(s: ReplyAllState): number | null {
   if (!s.replyDeck.length) {
     const held = new Set(s.seats.flatMap((x) => x.hand));
     for (const p of Object.values(s.plays)) held.add(p.card);
-    s.replyDeck = shuffle(s, range(REPLIES.length).filter((c) => !held.has(c)));
+    s.replyDeck = shuffle(s, replyIds(s.settings.afterHours).filter((c) => !held.has(c)));
   }
   return s.replyDeck.pop() ?? null;
 }
@@ -152,7 +155,7 @@ function fillHand(s: ReplyAllState, seat: Seat): void {
 }
 
 function drawPrompt(s: ReplyAllState): number {
-  if (!s.promptDeck.length) s.promptDeck = shuffle(s, range(PROMPTS.length).filter((p) => p !== s.prompt));
+  if (!s.promptDeck.length) s.promptDeck = shuffle(s, promptIds(s.settings.afterHours).filter((p) => p !== s.prompt));
   return s.promptDeck.pop()!;
 }
 
@@ -178,12 +181,14 @@ function startRound(s: ReplyAllState, now: number): ReplyAllState {
 
 /** Everyone has replied (or the timer played for the rest): put the replies on the table, shuffled. */
 function reveal(s: ReplyAllState, now: number): ReplyAllState {
-  for (const seat of repliers(s)) {
+  for (const seat of answering(s)) {
     if (s.plays[seat.id] || !seat.hand.length) continue;
     const card = seat.hand.splice(rand(s, seat.hand.length), 1)[0];
     s.plays[seat.id] = { card, auto: true };
   }
   s.order = shuffle(s, Object.keys(s.plays));
+  // Everyone sat it out: no replies to pick from, so straight on to the next thread.
+  if (!s.order.length) return startRound(s, now);
   return timed(s, s.settings.mode === "manager" ? "judge" : "vote", s.settings.pickMs, now);
 }
 
@@ -237,7 +242,7 @@ function endPhase(s: ReplyAllState, now: number): ReplyAllState {
 
 /** Skip the wait once nobody is left to act. */
 function maybeEarly(s: ReplyAllState, now: number): ReplyAllState {
-  if (s.phase === "pick" && repliers(s).every((x) => s.plays[x.id])) return reveal(s, now);
+  if (s.phase === "pick" && answering(s).every((x) => s.plays[x.id])) return reveal(s, now);
   if (s.phase === "vote" && s.seats.every((x) => s.votes[x.id] !== undefined || !votableFor(s, x.id).length)) {
     return pin(s, topEntries(s), "vote", now);
   }
@@ -269,7 +274,7 @@ export function applyAction(s0: ReplyAllState, a: ReplyAllAction, ctx: PartyCtx)
       if (ids.length < MIN_PLAYERS) return refuse(s0, `You need at least ${MIN_PLAYERS} players to start.`);
       const fresh = initialState(s.settings);
       fresh.rng = ctx.rand(2 ** 31) | 0;
-      fresh.seats = ids.map((id) => ({ id, hand: [], score: 0, mulligan: false }));
+      fresh.seats = ids.map((id) => ({ id, hand: [], score: 0 }));
       fresh.manager = rand(fresh, fresh.seats.length);
       return done(startRound(fresh, now));
     }
@@ -285,7 +290,7 @@ export function applyAction(s0: ReplyAllState, a: ReplyAllAction, ctx: PartyCtx)
       if (!inGame(s)) return refuse(s0, "Wait for the host to start.");
       if (seat) return { state: s0, changed: false, ok: true };
       if (s.seats.length >= MAX_PLAYERS) return refuse(s0, "This table is full.");
-      const newSeat: Seat = { id: me, hand: [], score: 0, mulligan: false };
+      const newSeat: Seat = { id: me, hand: [], score: 0 };
       s.seats.push(newSeat);
       fillHand(s, newSeat);
       return done(s);
@@ -295,6 +300,7 @@ export function applyAction(s0: ReplyAllState, a: ReplyAllAction, ctx: PartyCtx)
       if (s.phase !== "pick") return refuse(s0, "It's not time to reply.");
       if (!seat) return refuse(s0, "You're not in this game. Tap Deal me in first.");
       if (me === managerOf(s)) return refuse(s0, "You're the Manager this round. Sit back and judge.");
+      if (sittingOut(s, seat)) return refuse(s0, "You're sitting this thread out for a fresh hand. You're back in next thread.");
       const at = seat.hand.indexOf(a.card);
       if (at < 0) return refuse(s0, "That card isn't in your hand.");
       // Changing your mind puts the earlier card back in your hand.
@@ -321,14 +327,16 @@ export function applyAction(s0: ReplyAllState, a: ReplyAllAction, ctx: PartyCtx)
     }
 
     case "mulligan": {
+      // Sit this thread out for a whole new hand. Any round, as often as you like: the price is not replying.
       if (s.phase !== "pick") return refuse(s0, "You can only swap your hand while replying.");
       if (!seat) return refuse(s0, "You're not in this game.");
-      if (seat.mulligan) return refuse(s0, "You've already used your fresh hand this game.");
+      if (me === managerOf(s)) return refuse(s0, "The Manager doesn't reply this round anyway.");
+      if (sittingOut(s, seat)) return refuse(s0, "You've already got a fresh hand this round.");
       if (s.plays[me]) return refuse(s0, "You've already replied this round.");
       seat.hand = [];
-      seat.mulligan = true;
+      seat.skippedRound = s.round;
       fillHand(s, seat);
-      return done(s);
+      return done(maybeEarly(s, now));
     }
 
     case "skip": {
@@ -425,29 +433,31 @@ export function viewFor(s: ReplyAllState, viewerId: string, ctx: { hostId: strin
       id: x.id,
       score: x.score,
       isManager: x.id === managerId,
-      done: s.phase === "pick" ? Boolean(s.plays[x.id]) : s.phase === "vote" ? s.votes[x.id] !== undefined : false,
+      skipped: s.phase === "pick" && sittingOut(s, x),
+      done: s.phase === "pick" ? Boolean(s.plays[x.id]) || sittingOut(s, x) : s.phase === "vote" ? s.votes[x.id] !== undefined : false,
     })),
     managerId,
-    prompt: s.prompt === null ? null : PROMPTS[s.prompt],
+    prompt: s.prompt === null ? null : promptText(s.prompt),
     me: {
       seated: Boolean(me),
       isManager: viewerId === managerId,
-      hand: (me?.hand ?? []).map((card) => ({ card, text: REPLIES[card] })),
+      hand: (me?.hand ?? []).map((card) => ({ card, text: replyText(card) })),
       played: s.plays[viewerId]?.card ?? null,
-      playedText: s.plays[viewerId] ? REPLIES[s.plays[viewerId].card] : null,
-      mulliganLeft: Boolean(me && !me.mulligan),
+      playedText: s.plays[viewerId] ? replyText(s.plays[viewerId].card) : null,
+      skipped: Boolean(me && s.phase === "pick" && sittingOut(s, me)),
+      canSkip: Boolean(me && s.phase === "pick" && viewerId !== managerId && !sittingOut(s, me) && !s.plays[viewerId]),
       voted: s.votes[viewerId] ?? null,
     },
     entries: shown
       ? s.order.map((pid, i) => ({
           entry: i,
-          text: REPLIES[s.plays[pid]?.card ?? 0],
+          text: replyText(s.plays[pid]?.card ?? 0),
           mine: pid === viewerId,
           ...(final ? { by: pid, auto: Boolean(s.plays[pid]?.auto), ...(s.settings.mode === "vote" ? { votes: votesFor(i) } : {}) } : {}),
         }))
       : null,
     result: final ? s.result : null,
-    history: s.history.map((h) => ({ round: h.round, prompt: PROMPTS[h.prompt], reply: REPLIES[h.card], winners: h.winners })),
+    history: s.history.map((h) => ({ round: h.round, prompt: promptText(h.prompt), reply: replyText(h.card), winners: h.winners })),
     champions: s.champions,
   };
 }
@@ -456,7 +466,7 @@ export function viewFor(s: ReplyAllState, viewerId: string, ctx: { hostId: strin
 export function botMove(s: ReplyAllState, id: string, r: (n: number) => number): ReplyAllAction | null {
   const seat = seatOf(s, id);
   if (!seat) return null;
-  if (s.phase === "pick" && id !== managerOf(s) && !s.plays[id] && seat.hand.length) return { type: "play", card: seat.hand[r(seat.hand.length)] };
+  if (s.phase === "pick" && id !== managerOf(s) && !s.plays[id] && !sittingOut(s, seat) && seat.hand.length) return { type: "play", card: seat.hand[r(seat.hand.length)] };
   if (s.phase === "judge" && id === managerOf(s) && s.order.length) return { type: "choose", entry: r(s.order.length) };
   if (s.phase === "vote" && s.votes[id] === undefined) {
     const options = votableFor(s, id);

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PROMPTS, REPLIES } from "@/lib/replyall/cards";
+import { AFTER_HOURS_PROMPTS, AFTER_HOURS_REPLIES } from "@/lib/replyall/afterHours";
+import { isAfterHours, replyText } from "@/lib/replyall/deck";
 import { HAND_SIZE, fillText, type ReplyAllAction } from "@/lib/replyall/types";
 import { RESULT_MS, advanceState, applyAction, botMove, initialState, managerOf, parseAction, parseState, viewFor, type ReplyAllState } from "../replyall/game";
 import type { PartyCtx } from "../party/registry";
@@ -27,7 +29,7 @@ function started(n = 4, settings = {}): ReplyAllState {
 /** Every replier plays their first card. */
 function allPlay(s: ReplyAllState, now = 2000): ReplyAllState {
   for (const seat of s.seats) {
-    if (seat.id === managerOf(s) || s.phase !== "pick") continue;
+    if (seat.id === managerOf(s) || s.phase !== "pick" || seat.skippedRound === s.round) continue;
     s = must(s, seat.id, { type: "play", card: seat.hand[0] }, now, s.seats.map((x) => x.id));
   }
   return s;
@@ -66,7 +68,7 @@ describe("Reply All", () => {
     expect(act(initialState(), "p2", { type: "start" }).ok).toBe(false);
     expect(act(initialState(), "p2", { type: "settings", settings: { target: 3 } }).ok).toBe(false);
     const s = must(initialState(), "p1", { type: "settings", settings: { target: 3, mode: "vote", pickMs: 1 } });
-    expect(s.settings).toEqual({ target: 3, mode: "vote", pickMs: 90_000 });
+    expect(s.settings).toEqual({ target: 3, mode: "vote", pickMs: 90_000, afterHours: false });
   });
 
   it("runs a Manager round: replies, an anonymous table, a pin and the next thread", () => {
@@ -159,14 +161,37 @@ describe("Reply All", () => {
     expect(s.history.length).toBeGreaterThanOrEqual(3);
   });
 
-  it("gives a fresh hand once a game", () => {
+  it("lets a player skip a thread for a fresh hand, any round", () => {
     let s = started(4);
-    const me = s.seats.find((x) => x.id !== managerOf(s))!;
+    const mgr = managerOf(s)!;
+    const me = s.seats.find((x) => x.id !== mgr)!;
+    expect(act(s, mgr, { type: "mulligan" }).ok).toBe(false);
     s = must(s, me.id, { type: "mulligan" });
     const fresh = s.seats.find((x) => x.id === me.id)!.hand;
     expect(fresh).toHaveLength(HAND_SIZE);
     expect(fresh.some((c) => me.hand.includes(c))).toBe(false);
+    expect(viewFor(s, me.id, { hostId: "p1" }).me.skipped).toBe(true);
     expect(act(s, me.id, { type: "mulligan" }).ok).toBe(false);
+    expect(act(s, me.id, { type: "play", card: fresh[0] }).ok).toBe(false);
+
+    // The round goes on without them: once the others reply, the table has two replies, not three.
+    s = allPlay(s);
+    expect(s.phase).toBe("judge");
+    expect(s.order).toHaveLength(2);
+    expect(s.order).not.toContain(me.id);
+
+    // Next round they can skip again.
+    s = must(s, managerOf(s)!, { type: "choose", entry: 0 });
+    s = must(s, "p1", { type: "skip" });
+    const again = s.seats.find((x) => x.id !== managerOf(s))!;
+    expect(act(s, again.id, { type: "mulligan" }).ok).toBe(true);
+  });
+
+  it("moves to the next thread if everyone skips", () => {
+    let s = started(3);
+    for (const seat of s.seats) if (seat.id !== managerOf(s)) s = must(s, seat.id, { type: "mulligan" }, 1000, ids(3));
+    expect(s.phase).toBe("pick");
+    expect(s.round).toBe(2);
   });
 
   it("deals in someone who arrives mid-game", () => {
@@ -195,6 +220,24 @@ describe("Reply All", () => {
       }
     }
     expect(s.phase).toBe("result");
+  });
+
+  it("keeps the 18+ After Hours cards out unless the host turns them on", () => {
+    for (const list of [AFTER_HOURS_PROMPTS, AFTER_HOURS_REPLIES]) expect(new Set(list).size).toBe(list.length);
+    expect(AFTER_HOURS_REPLIES.length).toBeGreaterThanOrEqual(100);
+    const dealt = (s: ReplyAllState) => [...s.seats.flatMap((x) => x.hand), ...s.replyDeck, ...s.promptDeck, s.prompt!];
+
+    const office = started(6);
+    expect(office.settings.afterHours).toBe(false);
+    expect(dealt(office).some(isAfterHours)).toBe(false);
+
+    const adult = started(6, { afterHours: true });
+    expect(dealt(adult).some(isAfterHours)).toBe(true);
+    expect(dealt(adult).some((c) => !isAfterHours(c))).toBe(true);
+    const v = viewFor(adult, "p2", { hostId: "p1" });
+    for (const c of v.me.hand) expect(c.text).toBe(replyText(c.card));
+    expect(v.me.hand.every((c) => c.text.length > 0)).toBe(true);
+    expect(act(adult, "p2", { type: "settings", settings: { afterHours: false } }).ok).toBe(false);
   });
 
   it("parses actions and tolerates an empty or foreign scene", () => {

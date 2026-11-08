@@ -12,7 +12,7 @@ import { HAND_SIZE, MAX_PLAYERS, MIN_PLAYERS, REPLY_ALL_GAME_ID } from "@/lib/re
 
 const STEPS: { title: string; body: string }[] = [
   { title: "The prompt", body: "Each round the all-staff thread gets a new prompt with a blank in it." },
-  { title: "Your hand", body: `You hold ${HAND_SIZE} reply cards. Send the one that fits best, or worst.` },
+  { title: "Your hand", body: `You hold ${HAND_SIZE} reply cards. Send the one that fits best, or worst, or skip a thread for a fresh hand.` },
   { title: "The Manager", body: "A rotating Manager reads the anonymous replies out and pins the funniest. Or the whole table votes." },
   { title: "Pins", body: "A pin is a point. First to the target wins the thread." },
 ];
@@ -133,7 +133,7 @@ export function ReplyAllLanding() {
           </ol>
           <p className="text-xs text-slate-500">
             {MIN_PLAYERS} to {MAX_PLAYERS} players in the same room, reading out loud. Every phone holds a secret hand; the app
-            deals, shuffles and keeps score.
+            deals, shuffles and keeps score. Hosts can also mix in an optional 18+ After Hours deck.
           </p>
         </section>
 
