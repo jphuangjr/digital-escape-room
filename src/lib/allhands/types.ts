@@ -95,8 +95,9 @@ export interface DawnView {
   saved: boolean;
   /** Only on the phone of the player the Recruiter hired last night: you're a Mole now. */
   recruited: boolean;
-  /** Only on the other Mole-side phones: who accepted the Recruiter's offer last night (a private DM). */
-  hired: string | null;
+  /** Last night's offer, as a private DM: the other Moles see it only when it was accepted; the Recruiter also
+   *  sees a turned-down or blocked one. Null for everyone else (and for the hire, who gets `recruited`). */
+  offer: { target: string; result: "hired" | "refused" | "blocked" } | null;
   /** Anonymous coworkers gossiping about the layoff. */
   chatter?: Chatter;
   /** Last night's #random poll, if anyone answered it. */

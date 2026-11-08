@@ -15,6 +15,7 @@ import {
   molesFor,
   type AllHandsAction,
   type AllHandsView,
+  type DawnView,
   type HistoryEntry,
   type NightKind,
   type NightRecord,
@@ -561,11 +562,14 @@ function inGame(s: AllHandsState): boolean {
 }
 
 /** Living Moles may use the back channel at any point in a running game. */
-/** Who accepted the Recruiter's offer on night `round`, for a Mole-side viewer other than the hire. Null for everyone else. */
-function hiredFor(s: AllHandsState, round: number, me: Seat | undefined): string | null {
+/** Night `round`'s offer for this viewer's private DM: every Mole-side player but the hire learns of a hire, and only
+ *  the Recruiter learns of a turned-down or blocked offer. Null for everyone else. */
+function offerFor(s: AllHandsState, round: number, me: Seat | undefined): DawnView["offer"] {
   if (!me || !isMoleRole(me.role) || me.recruitedRound === round) return null;
   const n = s.nights.find((x) => x.round === round);
-  return n?.offerResult === "hired" ? n.offerTarget : null;
+  if (!n?.offerTarget || !n.offerResult) return null;
+  if (n.offerResult !== "hired" && me.role !== "recruiter") return null;
+  return { target: n.offerTarget, result: n.offerResult };
 }
 
 export function canMoleChat(s: AllHandsState, playerId: string): boolean {
@@ -705,7 +709,7 @@ export function viewFor(s: AllHandsState, viewerId: string, ctx: { hostId: strin
     checks: me?.role === "it" || over ? s.checks : [],
     dawn:
       (s.phase === "dawn" || s.phase === "day") && s.dawn
-        ? { ...s.dawn, recruited: me?.recruitedRound === s.dawn.round, hired: hiredFor(s, s.dawn.round, me) }
+        ? { ...s.dawn, recruited: me?.recruitedRound === s.dawn.round, offer: offerFor(s, s.dawn.round, me) }
         : null,
     vote,
     exit: s.phase === "exit" && s.exit ? { ...s.exit, survived: Boolean(s.exit.survived), role: exitSeat ? roleFor(exitSeat) : null } : null,
