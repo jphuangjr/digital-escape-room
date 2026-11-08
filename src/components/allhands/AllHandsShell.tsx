@@ -730,6 +730,7 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
           </p>
         </div>
       )}
+      {d?.poll && <PollResults poll={d.poll} name={name} people={people} />}
       {d && (
         <SlackPost>
           {d.laidOff ? (
@@ -748,7 +749,6 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
           )}
         </SlackPost>
       )}
-      {d?.poll && <PollResults poll={d.poll} name={name} people={people} />}
       {party.phase === "day" && (
         <>
           <div>

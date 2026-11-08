@@ -117,7 +117,6 @@ export function AllHandsChat({
               {tab === "team" ? (
                 <>
                   <p className="mb-2 text-xs text-slate-500">Everyone in the room can read this. Moles too, so keep your poker face.</p>
-                  {party.polls.length > 0 && <PollPost poll={party.polls[party.polls.length - 1]} people={people} />}
                   <ChatPanel
                     ctx={ctx}
                     chat={chat}
@@ -132,27 +131,6 @@ export function AllHandsChat({
         </div>
       )}
     </>
-  );
-}
-
-/** The latest #random poll result, pinned above the team chat as a Synergr Bot post. Winners only, never counts. */
-function PollPost({ poll, people }: { poll: AllHandsView["polls"][number]; people: Map<string, PlayerPublic> }) {
-  const names = poll.winners.map((id) => people.get(id)?.displayName ?? "Someone");
-  const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0];
-  return (
-    <div className="mb-2 flex shrink-0 gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-sm">
-      <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-lime-300 text-sm font-black text-slate-950">S</span>
-      <div className="min-w-0">
-        <p className="text-xs text-slate-400">
-          <span className="font-bold text-slate-200">Synergr Bot</span> · #random · night {poll.round} poll
-        </p>
-        <p className="text-slate-300">{poll.prompt}</p>
-        <p className="font-semibold text-lime-200">
-          🏆 {list}
-          {names.length > 1 ? " (tie)" : ""}
-        </p>
-      </div>
-    </div>
   );
 }
 

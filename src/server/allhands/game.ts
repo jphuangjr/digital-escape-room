@@ -84,8 +84,6 @@ export interface AllHandsState {
   offer: string | null;
   /** The Moles' back channel for this game (original text; masked in views). */
   moleChat: { id: string; from: string; body: string; at: number }[];
-  /** Every night's #random poll result this game, oldest first. Optional for games saved before it existed. */
-  polls?: (PollResult & { round: number })[];
   /** The table's custom role lineup, if anyone in the lobby changed it; null deals the recommended one. Kept between games. */
   lineup?: RoleCounts | null;
 }
@@ -283,7 +281,6 @@ function resolveNight(s: AllHandsState, now: number): AllHandsState {
   const next: AllHandsState = {
     ...s,
     ...(chatter ? { chatterUsed: [...(s.chatterUsed ?? []), chatterKey(chatter)] } : {}),
-    ...(poll ? { polls: [...(s.polls ?? []), { round: s.round, ...poll }] } : {}),
     seats: withMentor,
     picks: {},
     offer: null,
@@ -711,7 +708,6 @@ export function viewFor(s: AllHandsState, viewerId: string, ctx: { hostId: strin
       knowsAll || isMoleRole(me?.role)
         ? s.moleChat.map((m) => ({ id: m.id, from: m.from, body: maskProfanity(m.body), at: new Date(m.at).toISOString() }))
         : null,
-    polls: s.polls ?? [],
     canMoleChat: canMoleChat(s, viewerId),
     canTeamChat: canTeamChat(s, viewerId),
     minPlayers: MIN_PLAYERS,
