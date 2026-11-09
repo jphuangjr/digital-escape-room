@@ -913,3 +913,13 @@ html.side-rail .rail-toast {
   padding-right: calc(1rem + env(safe-area-inset-right)); /* clear of the rail */
 }
 
+
+/* All Hands: the last five seconds of a timer flash the screen's edge once a second. */
+@keyframes ah-final-flash {
+  from { opacity: 0.9; }
+  to { opacity: 0; }
+}
+.ah-final-flash { animation: ah-final-flash 0.7s ease-out forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .ah-final-flash { animation: none; opacity: 0.5; }
+}

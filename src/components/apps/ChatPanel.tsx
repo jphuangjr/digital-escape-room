@@ -10,8 +10,11 @@ import { ColorDot, relativeTime, useNow } from "./shared";
 
 const MAX = 500;
 
-/** Room chat: messages oldest → newest, composer pinned at the bottom. Marks messages read while visible. */
-export function ChatPanel({ ctx, chat }: { ctx: GameCtx; chat: Chat }) {
+/**
+ * Room chat: messages oldest → newest, composer pinned at the bottom. Marks messages read while visible.
+ * `readOnly`: a note shown in place of the composer (say, for a player who's out of a party game).
+ */
+export function ChatPanel({ ctx, chat, readOnly }: { ctx: GameCtx; chat: Chat; readOnly?: string }) {
   const now = useNow(30_000);
   const intl = useIntl();
   const t = useT();
@@ -110,44 +113,48 @@ export function ChatPanel({ ctx, chat }: { ctx: GameCtx; chat: Chat }) {
           }}
         />
       )}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          void send();
-        }}
-        className="shrink-0 border-t border-stone-800 pt-2"
-      >
-        {error && (
-          <p role="alert" className="mb-1 text-xs text-red-400">
-            {error}
-          </p>
-        )}
-        <div className="flex items-end gap-2">
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value.slice(0, MAX))}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
-                e.preventDefault();
-                void send();
-              }
-            }}
-            rows={1}
-            placeholder={t("room.chat.placeholder")}
-            aria-label={t("room.chat.inputAria")}
-            enterKeyHint="send"
-            className="max-h-28 min-h-11 min-w-0 flex-1 resize-none rounded-xl border border-stone-700 bg-black px-3 py-2.5 text-base text-stone-100 outline-none placeholder:text-stone-600 focus:border-amber-500"
-          />
-          <button
-            type="submit"
-            disabled={sending || !draft.trim()}
-            className="min-h-11 shrink-0 rounded-xl bg-amber-500 px-4 font-semibold text-black active:bg-amber-400 disabled:opacity-40"
-          >
-            {t("room.chat.send")}
-          </button>
-        </div>
-        {draft.length > MAX - 60 && <p className="mt-1 text-right text-10px text-stone-500">{t("room.chat.left", { count: MAX - draft.length })}</p>}
-      </form>
+      {readOnly ? (
+        <p className="shrink-0 border-t border-stone-800 pt-2 text-center text-xs text-stone-500">{readOnly}</p>
+      ) : (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void send();
+          }}
+          className="shrink-0 border-t border-stone-800 pt-2"
+        >
+          {error && (
+            <p role="alert" className="mb-1 text-xs text-red-400">
+              {error}
+            </p>
+          )}
+          <div className="flex items-end gap-2">
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value.slice(0, MAX))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                  e.preventDefault();
+                  void send();
+                }
+              }}
+              rows={1}
+              placeholder={t("room.chat.placeholder")}
+              aria-label={t("room.chat.inputAria")}
+              enterKeyHint="send"
+              className="max-h-28 min-h-11 min-w-0 flex-1 resize-none rounded-xl border border-stone-700 bg-black px-3 py-2.5 text-base text-stone-100 outline-none placeholder:text-stone-600 focus:border-amber-500"
+            />
+            <button
+              type="submit"
+              disabled={sending || !draft.trim()}
+              className="min-h-11 shrink-0 rounded-xl bg-amber-500 px-4 font-semibold text-black active:bg-amber-400 disabled:opacity-40"
+            >
+              {t("room.chat.send")}
+            </button>
+          </div>
+          {draft.length > MAX - 60 && <p className="mt-1 text-right text-10px text-stone-500">{t("room.chat.left", { count: MAX - draft.length })}</p>}
+        </form>
+      )}
     </div>
   );
 }

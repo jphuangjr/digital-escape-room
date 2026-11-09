@@ -8,9 +8,11 @@ import { AccountBar, ContinueRooms, SignInButton, useMe } from "@/components/sit
 import { RedeemBox } from "@/components/site/RedeemBox";
 import { LanguageSwitcher, useT } from "@/i18n/client";
 import { AVATAR_COLORS } from "@/lib/avatarColors";
+import { PartyCodeField, PartyModeTabs, joinRoom, normalizeRoomCode, type PartyMode } from "@/components/site/PartyJoin";
+import { HowToPlayTour } from "@/components/allhands/HowToPlayTour";
 import { ALL_HANDS_GAME_ID, MAX_PLAYERS, MIN_PLAYERS, ROLE_INFO, type Role } from "@/lib/allhands/types";
 
-const ROLES: Role[] = ["employee", "mole", "it", "hr"];
+const ROLES: Role[] = ["employee", "mole", "it", "hr", "recruiter", "intern", "burnout", "nephew"];
 
 /** All Hands' page: the rules, and hosting a room. Hosting needs sign-in and a purchase code; joining is free. */
 export function AllHandsLanding() {
@@ -27,19 +29,40 @@ export function AllHandsLanding() {
   const [color, setColor] = useState(AVATAR_COLORS[0]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [mode, setMode] = useState<PartyMode>("host");
+  const [joinCode, setJoinCode] = useState("");
+  const [tour, setTour] = useState(false);
 
   useEffect(() => {
     try {
       const n = localStorage.getItem("ada_name");
       if (n) setName(n);
     } catch {}
+    const join = new URLSearchParams(window.location.search).get("join");
+    if (join) {
+      setJoinCode(normalizeRoomCode(join));
+      setMode("join");
+    }
   }, []);
 
-  async function start(replaceExisting = false): Promise<void> {
+  async function start(replaceExisting = false, test = false): Promise<void> {
     const displayName = name.trim();
     if (!displayName) return setErr(t("train.landing.errName"));
     setBusy(true);
     setErr(null);
+    if (mode === "join") {
+      const joined = await joinRoom(joinCode, displayName, color, t);
+      if ("error" in joined) {
+        setErr(joined.error);
+        setBusy(false);
+        return;
+      }
+      try {
+        localStorage.setItem("ada_name", displayName);
+      } catch {}
+      router.push(`/r/${joined.code}`);
+      return;
+    }
     const res = await fetch("/api/rooms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -62,7 +85,7 @@ export function AllHandsLanding() {
     }
     if (res.status === 409 && data.replaceRequired) {
       const codes = (data.openRooms ?? []).map((r) => r.code).join(", ");
-      if (window.confirm(t("train.landing.replace", { codes }))) return start(true);
+      if (window.confirm(t("train.landing.replace", { codes }))) return start(true, test);
       setBusy(false);
       return;
     }
@@ -74,6 +97,14 @@ export function AllHandsLanding() {
     try {
       localStorage.setItem("ada_name", displayName);
     } catch {}
+    // Admin test room: a full table of bots, ready to start.
+    if (test) {
+      await fetch(`/api/rooms/${encodeURIComponent(data.code)}/party/test`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "fill", total: 8 }),
+      }).catch(() => null);
+    }
     router.push(`/r/${data.code}`);
   }
 
@@ -91,6 +122,15 @@ export function AllHandsLanding() {
           <p className="mt-2 text-xs font-semibold uppercase tracking-[0.3em] text-lime-300">A Synergr party game</p>
           <h1 className="mt-1 text-5xl font-black tracking-tight">{gameText(t, game, "title")}</h1>
           <p className="mt-2 text-slate-300">{gameText(t, game, "tagline")}</p>
+          {game.tags && game.tags.length > 0 && (
+            <ul className="mt-3 flex flex-wrap justify-center gap-2">
+              {game.tags.map((tag) => (
+                <li key={tag} className="rounded-full border border-lime-300/60 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-lime-300">
+                  {tag}
+                </li>
+              ))}
+            </ul>
+          )}
         </header>
         <p className="leading-relaxed text-slate-300">{gameText(t, game, "blurb")}</p>
 
@@ -110,7 +150,15 @@ export function AllHandsLanding() {
             {MIN_PLAYERS} to {MAX_PLAYERS} players in the same room, talking out loud. Every phone is a secret badge; the app runs
             the clock and the narration.
           </p>
+          <button
+            type="button"
+            onClick={() => setTour(true)}
+            className="min-h-11 self-start rounded-xl border border-slate-700 px-4 text-sm font-semibold active:bg-slate-800"
+          >
+            🎓 How to play
+          </button>
         </section>
+        {tour && <HowToPlayTour onClose={() => setTour(false)} />}
 
         <ContinueRooms me={me} gameId={ALL_HANDS_GAME_ID} />
         <AccountBar me={me} callbackUrl={game.href} />
@@ -121,6 +169,15 @@ export function AllHandsLanding() {
           }}
           className="flex flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-900 p-4"
         >
+          <PartyModeTabs
+            mode={mode}
+            onChange={(m) => {
+              setMode(m);
+              setErr(null);
+            }}
+            activeClass="bg-lime-300 text-slate-950"
+          />
+          {mode === "join" && <PartyCodeField value={joinCode} onChange={setJoinCode} focusClass="focus:border-lime-300" />}
           <label className="flex flex-col gap-1.5">
             <span className="text-xs uppercase tracking-widest text-slate-400">{t("train.landing.name")}</span>
             <input
@@ -147,7 +204,11 @@ export function AllHandsLanding() {
             ))}
           </fieldset>
           {err && <p className="text-sm text-rose-300">{err}</p>}
-          {mustSignIn ? (
+          {mode === "join" ? (
+            <button type="submit" disabled={busy} className="min-h-12 rounded-xl bg-lime-300 text-slate-950 font-bold active:opacity-80 disabled:opacity-60">
+              {busy ? "Joining the meeting…" : t("site.join.button")}
+            </button>
+          ) : mustSignIn ? (
             <div className="flex flex-col gap-2">
               <SignInButton label={t("site.ada.signInToHost")} callbackUrl={game.href} />
               <p className="text-center text-xs text-slate-500">{t("site.ada.hostsSignIn")}</p>
@@ -159,7 +220,17 @@ export function AllHandsLanding() {
               {busy ? "Booking the meeting room…" : "Host a room"}
             </button>
           )}
-          <p className="text-xs text-slate-500">Friends join with the room code, the invite link or the QR code. No account needed to play.</p>
+          {mode === "host" && me?.isAdmin && signedIn && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void start(false, true)}
+              className="min-h-12 rounded-xl border border-amber-300/60 font-semibold text-amber-200 active:bg-amber-300/10 disabled:opacity-60"
+            >
+              Admin: create a test room with 7 bots
+            </button>
+          )}
+          {mode === "host" && <p className="text-xs text-slate-500">Friends join with the room code, the invite link or the QR code. No account needed to play.</p>}
         </form>
       </div>
     </main>

@@ -5,14 +5,26 @@ import Link from "next/link";
 import type { PlayerPublic, RoomState } from "@/lib/types";
 import { apiFetch } from "@/lib/client/game";
 import { QrCode } from "@/components/site/QrCode";
+import { AllHandsChat } from "./AllHandsChat";
+import { TestBar } from "./TestBar";
+import { RulesButton } from "./RulesSheet";
+import { nightLines } from "@/lib/allhands/recap";
+import { LineupPanel, tableLineup } from "./LineupPanel";
+import { lineupIssues, swapRole } from "@/lib/allhands/lineup";
+import { chatterLines, type Chatter } from "@/lib/allhands/chatter";
+import { FirstGameTip, HowToPlayTour } from "./HowToPlayTour";
+import { OPEN_TOUR_EVENT, markFirstGameDone, openTour, tipFor, tipsWanted, tourSeen } from "@/lib/allhands/tutorial";
 import {
   DAY_OPTIONS_MS,
   ROLE_INFO,
   SKIP,
+  isMoleRole,
   type AllHandsView,
   type HistoryEntry,
   type NightKind,
+  type PollResult,
   type Role,
+  type DawnView,
   type SeatView,
 } from "@/lib/allhands/types";
 
@@ -23,6 +35,10 @@ const ROLE_TONE: Record<Role, string> = {
   mole: "text-rose-300 border-rose-400/60 bg-rose-400/10",
   it: "text-sky-300 border-sky-300/50 bg-sky-300/10",
   hr: "text-amber-300 border-amber-300/50 bg-amber-300/10",
+  burnout: "text-violet-300 border-violet-300/50 bg-violet-300/10",
+  intern: "text-teal-300 border-teal-300/50 bg-teal-300/10",
+  nephew: "text-orange-300 border-orange-300/50 bg-orange-300/10",
+  recruiter: "text-fuchsia-300 border-fuchsia-400/60 bg-fuchsia-400/10",
 };
 
 const PHASE_LABEL: Record<AllHandsView["phase"], string> = {
@@ -38,21 +54,43 @@ const PHASE_LABEL: Record<AllHandsView["phase"], string> = {
 
 /** All Hands: one screen per phase, each phone showing only what its player may know. */
 export function AllHandsShell({ code, state, refresh }: { code: string; state: RoomState; refresh: () => Promise<void> }) {
-  const party = state.party!;
   const people = useMemo(() => new Map(state.players.map((p) => [p.id, p])), [state.players]);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // In an admin's test room the views are through the eyes of the bot they picked.
+  const meId = state.partyTest?.viewingAs ?? state.me.id;
+
+  // A tap shows at once: the screen is patched with what the tap will do, then replaced by the server's answer,
+  // then by the next full state. A new state from the server always wins, unless a tap is still on its way.
+  const [local, setLocal] = useState<AllHandsView | null>(null);
+  const inFlight = useRef(0);
+  useEffect(() => {
+    if (inFlight.current === 0) setLocal(null);
+  }, [state]);
+  const party = local ?? (state.party as AllHandsView);
+  const partyRef = useRef(party);
+  partyRef.current = party;
+  const playersRef = useRef(state.players.length);
+  playersRef.current = state.players.length;
 
   const act: Act = useCallback(
     async (body) => {
+      const tick = body.type === "tick";
+      if (!tick) {
+        setErr(null);
+        setLocal(optimistic(partyRef.current, body, meId, playersRef.current));
+      }
+      inFlight.current++;
       setBusy(true);
-      setErr(null);
-      const res = await apiFetch<{ error?: string }>(code, "/party", { body });
-      if (!res.ok && body.type !== "tick") setErr(res.data?.error ?? "That didn't work. Try again.");
-      setBusy(false);
-      await refresh();
+      const res = await apiFetch<{ error?: string; party?: AllHandsView }>(code, "/party", { body });
+      inFlight.current--;
+      if (res.data?.party) setLocal(res.data.party);
+      else if (!res.ok) setLocal(null);
+      if (!res.ok && !tick) setErr(res.data?.error ?? "That didn't work. Try again.");
+      if (inFlight.current === 0) setBusy(false);
+      void refresh();
     },
-    [code, refresh],
+    [code, refresh, meId],
   );
 
   // Presence: a heartbeat keeps this player counted as here (and the host's controls with the host).
@@ -72,6 +110,38 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
     void act({ type: "tick" });
   }, [left, party.endsAt, act]);
 
+  // The last five seconds of any timer: a buzz each second where the phone supports it (Android browsers; iPhones
+  // don't), plus a pulsing edge on every phone. Every phone does the same thing, so it gives nothing away.
+  const finalSecond = !party.paused && left !== null && left > 0 && left <= 5_000 ? Math.ceil(left / 1000) : null;
+  const buzzed = useRef<string | null>(null);
+  useEffect(() => {
+    if (finalSecond === null || !party.endsAt) return;
+    const key = `${party.endsAt}:${finalSecond}`;
+    if (buzzed.current === key) return;
+    buzzed.current = key;
+    try {
+      if (typeof navigator !== "undefined" && "vibrate" in navigator && document.visibilityState === "visible") {
+        navigator.vibrate(finalSecond === 1 ? 250 : 80);
+      }
+    } catch {}
+  }, [finalSecond, party.endsAt]);
+
+  // First-time help: the tour opens by itself the first time this phone reaches a lobby, and tips run through the first game.
+  const [tourOpen, setTourOpen] = useState(false);
+  const [tipsOn, setTipsOn] = useState(false);
+  const [closedTips, setClosedTips] = useState<string[]>([]);
+  useEffect(() => {
+    setTipsOn(tipsWanted());
+    if (!tourSeen() && partyRef.current.phase === "lobby") setTourOpen(true);
+    const open = () => setTourOpen(true);
+    window.addEventListener(OPEN_TOUR_EVENT, open);
+    return () => window.removeEventListener(OPEN_TOUR_EVENT, open);
+  }, []);
+  useEffect(() => {
+    if (party.phase === "over" && party.me.seated) markFirstGameDone();
+  }, [party.phase, party.me.seated]);
+  const tip = tipsOn ? tipFor(party) : null;
+
   const isHost = state.me.id === party.hostId;
   const name = (id: string | null | undefined) => (id ? (people.get(id)?.displayName ?? "Someone") : "Nobody");
 
@@ -81,19 +151,29 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
         className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/95 px-edge backdrop-blur"
         style={{ paddingTop: "max(env(safe-area-inset-top), 0.5rem)" }}
       >
+        {busy && <div aria-hidden className="absolute inset-x-0 bottom-0 h-0.5 animate-pulse bg-lime-300" />}
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3 py-2">
           <div className="min-w-0">
-            <p className="text-11px font-semibold uppercase tracking-[0.25em] text-lime-300">All Hands · {code}</p>
+            <p className="truncate whitespace-nowrap text-11px font-semibold uppercase tracking-[0.2em] text-lime-300">All Hands · {code}</p>
             <p className="truncate text-lg font-bold">
               {PHASE_LABEL[party.phase]}
               {party.round > 0 && party.phase !== "over" && <span className="ml-2 text-sm font-normal text-slate-400">Round {party.round}</span>}
             </p>
           </div>
-          <Clock left={left} paused={party.paused} remainingMs={party.remainingMs} />
+          <div className="flex shrink-0 items-center gap-2">
+            <RulesButton players={party.seats.length || state.players.length} settings={party.settings} lineup={party.lineup} seats={party.phase === "lobby" ? [] : party.seats} />
+            <TourButton />
+            <Clock left={left} paused={party.paused} remainingMs={party.remainingMs} />
+          </div>
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-xl flex-col gap-5 px-edge py-5">
+      {finalSecond !== null && (
+        // A flash on each of the last five seconds, for phones that can't vibrate. Keyed so it restarts every second.
+        <div key={finalSecond} aria-hidden className="ah-final-flash pointer-events-none fixed inset-0 z-50 rounded-[inherit] ring-[6px] ring-inset ring-rose-400" />
+      )}
+      <main className="mx-auto flex max-w-xl flex-col gap-5 px-edge pb-24 pt-5">
+        {state.partyTest && <TestBar code={code} test={state.partyTest} party={party} refresh={refresh} meId={state.me.id} />}
         {party.me.seated && !party.me.alive && party.phase !== "over" && <LinkedInBanner />}
         {!party.me.seated && party.phase !== "lobby" && party.phase !== "over" && (
           <Banner>The game started before you joined. You&apos;re watching this round and get dealt in next game.</Banner>
@@ -104,22 +184,67 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
           </p>
         )}
 
+        {tip && !closedTips.includes(tip.id) && (
+          <FirstGameTip
+            tip={tip}
+            onClose={() => (tipsWanted() ? setClosedTips((c) => [...c, tip.id]) : setTipsOn(false))}
+            onTour={openTour}
+          />
+        )}
+
         {party.phase === "lobby" && <Lobby code={code} state={state} party={party} isHost={isHost} act={act} busy={busy} name={name} />}
-        {party.phase === "reveal" && <Onboarding party={party} meId={state.me.id} act={act} busy={busy} name={name} />}
-        {party.phase === "night" && <AfterHours party={party} act={act} busy={busy} name={name} people={people} />}
+        {party.phase === "reveal" && <Onboarding party={party} meId={meId} act={act} busy={busy} name={name} left={left} />}
+        {party.phase === "night" && <AfterHours party={party} act={act} name={name} people={people} />}
         {(party.phase === "dawn" || party.phase === "day") && <Morning party={party} name={name} people={people} />}
-        {party.phase === "vote" && <Review party={party} act={act} busy={busy} name={name} people={people} me={state.me.id} />}
+        {party.phase === "vote" && <Review party={party} act={act} name={name} people={people} me={meId} />}
         {party.phase === "exit" && <ExitInterview party={party} name={name} />}
-        {party.phase === "over" && <GameOver party={party} isHost={isHost} act={act} busy={busy} name={name} people={people} />}
+        {party.phase === "over" && <GameOver party={party} isHost={isHost} act={act} busy={busy} name={name} people={people} meId={meId} />}
 
         {party.me.seated && party.phase !== "lobby" && party.phase !== "over" && party.phase !== "reveal" && (
-          <BadgeCard party={party} meId={state.me.id} name={name} compact />
+          <BadgeCard party={party} meId={meId} name={name} compact />
         )}
         {isHost && party.phase !== "lobby" && party.phase !== "over" && <HostBar party={party} act={act} busy={busy} />}
         {party.phase !== "lobby" && <History history={party.history} name={name} />}
       </main>
+      <AllHandsChat code={code} state={state} party={party} refresh={refresh} people={people} meId={meId} />
+      {tourOpen && <HowToPlayTour onClose={() => setTourOpen(false)} />}
     </div>
   );
+}
+
+/** What a tap will do to this phone's screen, shown before the server answers. */
+function optimistic(p: AllHandsView, body: Record<string, unknown>, meId: string, players: number): AllHandsView {
+  const target = typeof body.target === "string" ? body.target : null;
+  switch (body.type) {
+    case "ready":
+      return { ...p, me: { ...p.me, ready: true }, seats: p.seats.map((x) => (x.id === meId ? { ...x, ready: true } : x)) };
+    case "pick":
+      if (!p.night || !target) return p;
+      return {
+        ...p,
+        night: {
+          ...p.night,
+          myPick: target,
+          offer: body.offer ? target : p.night.canOffer ? null : p.night.offer,
+          acted: p.night.myPick ? p.night.acted : p.night.acted + 1,
+          team: p.night.team?.map((m) => (m.id === meId ? { ...m, pick: target } : m)) ?? null,
+        },
+      };
+    case "vote": {
+      if (!p.vote || !target) return p;
+      const tally: Record<string, string[]> = {};
+      for (const [k, ids] of Object.entries(p.vote.tally)) tally[k] = ids.filter((id) => id !== meId);
+      (tally[target] ??= []).push(meId);
+      return { ...p, vote: { ...p.vote, tally, myVote: target, voted: p.vote.myVote ? p.vote.voted : p.vote.voted + 1 } };
+    }
+    case "lineup": {
+      if (body.reset) return { ...p, lineup: null };
+      const r = swapRole(tableLineup(p, players), body.from as Role, body.to as Role);
+      return r.ok ? { ...p, lineup: r.lineup } : p;
+    }
+    default:
+      return p;
+  }
 }
 
 // ---------- clock ----------
@@ -166,7 +291,7 @@ function Dot({ p, size = "h-3 w-3" }: { p: PlayerPublic | undefined; size?: stri
 }
 
 function RoleChip({ role }: { role: Role }) {
-  return <span className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${ROLE_TONE[role]}`}>{ROLE_INFO[role].name}</span>;
+  return <span className={`shrink-0 rounded-full border px-2 py-0.5 text-xs font-semibold ${ROLE_TONE[role]}`}>{ROLE_INFO[role].name}</span>;
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -182,7 +307,7 @@ function PrimaryButton({ children, ...rest }: React.ButtonHTMLAttributes<HTMLBut
   return (
     <button
       {...rest}
-      className="min-h-12 w-full rounded-xl bg-lime-300 px-4 font-bold text-slate-950 active:bg-lime-200 disabled:cursor-not-allowed disabled:opacity-50"
+      className="min-h-12 w-full rounded-xl bg-lime-300 px-4 font-bold text-slate-950 transition-transform duration-75 enabled:active:scale-[0.98] active:bg-lime-200 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {children}
     </button>
@@ -207,7 +332,7 @@ function BadgeCard({ party, meId, name, compact = false }: { party: AllHandsView
   const role = party.me.role;
   if (!role) return null;
   const info = ROLE_INFO[role];
-  const fellowMoles = role === "mole" ? party.seats.filter((x) => x.role === "mole" && x.id !== meId) : [];
+  const fellowMoles = isMoleRole(role) ? party.seats.filter((x) => isMoleRole(x.role) && x.id !== meId) : [];
   const show = () => setShown(true);
   const hide = () => setShown(false);
   return (
@@ -232,10 +357,22 @@ function BadgeCard({ party, meId, name, compact = false }: { party: AllHandsView
           <p className={`${compact ? "text-2xl" : "text-4xl"} mt-1 font-black`}>{info.name}</p>
           {!compact && <p className="mt-3 text-slate-200">{info.blurb}</p>}
           <p className="mt-2 text-sm text-slate-300">{info.power}</p>
+          {party.me.recruited && <p className="mt-3 text-sm text-rose-200">You took the Recruiter&apos;s offer. You win with the Moles now.</p>}
           {fellowMoles.length > 0 && (
-            <p className="mt-3 text-sm text-rose-200">Your fellow Moles: {fellowMoles.map((x) => name(x.id)).join(", ")}</p>
+            <p className="mt-3 text-sm text-rose-200">
+              Your fellow Moles:{" "}
+              {fellowMoles.map((x) => `${name(x.id)}${x.role === "recruiter" ? " (Recruiter)" : ""}`).join(", ")}
+            </p>
           )}
-          {role === "mole" && fellowMoles.length === 0 && <p className="mt-3 text-sm text-rose-200">You&apos;re the only Mole. Good luck.</p>}
+          {isMoleRole(role) && fellowMoles.length === 0 && <p className="mt-3 text-sm text-rose-200">You&apos;re the only Mole. Good luck.</p>}
+          {role === "intern" && (
+            <p className="mt-3 text-sm text-teal-200">
+              {party.me.mentor ? `Your mentor: ${name(party.me.mentor)}. You win if their side wins.` : "You'll pick a mentor after hours tonight."}
+            </p>
+          )}
+          {role === "nephew" && party.history.some((h) => h.kind === "spared" && h.playerId === meId) && (
+            <p className="mt-3 text-sm text-orange-200">You&apos;ve used your get-out-of-firing card. Next time is real.</p>
+          )}
         </div>
       ) : (
         <div className="flex items-center gap-4">
@@ -275,8 +412,12 @@ function Lobby({
   const url = `${origin}/r/${code}`;
   const count = state.players.length;
   const need = Math.max(0, party.minPlayers - count);
+  const blocked = lineupIssues(tableLineup(party, count)).some((x) => x.level === "block");
   return (
     <>
+      <Link href="/party" className="-my-2 inline-flex min-h-11 items-center self-start text-sm text-slate-400 active:text-slate-200">
+        ← Back to Party games
+      </Link>
       <section className="flex flex-col items-center gap-3 rounded-3xl border border-slate-800 bg-slate-900 p-5 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Room code</p>
         <p className="font-mono text-5xl font-black tracking-widest text-lime-300">{code}</p>
@@ -316,6 +457,8 @@ function Lobby({
         </ul>
       </Section>
 
+      <LineupPanel party={party} players={count} act={act} />
+
       {isHost ? (
         <>
           <Section title="House rules">
@@ -328,7 +471,7 @@ function Lobby({
                 type="checkbox"
                 checked={party.settings.revealOnFire}
                 onChange={(e) => void act({ type: "settings", settings: { revealOnFire: e.target.checked } })}
-                className="h-6 w-6 accent-lime-300"
+                className="h-6 w-6 shrink-0 accent-lime-300"
               />
             </label>
             <div className="flex flex-col gap-2 rounded-xl border border-slate-800 bg-slate-900 p-3">
@@ -350,8 +493,8 @@ function Lobby({
               </div>
             </div>
           </Section>
-          <PrimaryButton disabled={busy || need > 0} onClick={() => void act({ type: "start" })}>
-            {need > 0 ? `Waiting for ${need} more ${need === 1 ? "player" : "players"}` : "Start the game"}
+          <PrimaryButton disabled={busy || need > 0 || blocked} onClick={() => void act({ type: "start" })}>
+            {need > 0 ? `Waiting for ${need} more ${need === 1 ? "player" : "players"}` : blocked ? "Fix the lineup to start" : "Start the game"}
           </PrimaryButton>
         </>
       ) : (
@@ -364,24 +507,67 @@ function Lobby({
 
 function HowToPlay() {
   return (
-    <details className="rounded-xl border border-slate-800 bg-slate-900 p-3 text-sm text-slate-300">
-      <summary className="min-h-8 cursor-pointer font-semibold text-slate-100">How to play</summary>
-      <ol className="mt-2 list-decimal space-y-1 pl-5">
-        <li>Everyone gets a secret badge. A few of you are Moles.</li>
-        <li>After hours, everyone taps something on their phone. The Moles pick someone to lay off; IT and HR use their powers.</li>
-        <li>In the morning the app tells you who got laid off. Then talk it out at all-hands.</li>
-        <li>At performance review, vote to fire a suspect, or circle back.</li>
-        <li>The company wins when every Mole is gone. The Moles win when they match everyone else.</li>
-      </ol>
-    </details>
+    <button
+      type="button"
+      onClick={openTour}
+      className="flex min-h-14 items-center gap-3 rounded-xl border border-slate-800 bg-slate-900 px-3 text-left active:bg-slate-800"
+    >
+      <span aria-hidden className="text-2xl">🎓</span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold">New to All Hands?</span>
+        <span className="block text-sm text-slate-400">Take the one-minute tour of how to play</span>
+      </span>
+      <span aria-hidden className="text-slate-500">›</span>
+    </button>
+  );
+}
+
+/** Replays the how-to-play tour from the top bar. */
+function TourButton() {
+  return (
+    <button
+      type="button"
+      onClick={openTour}
+      aria-label="How to play"
+      className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 text-sm font-bold text-slate-200 transition-transform duration-75 active:scale-95 active:bg-slate-800"
+    >
+      ?
+    </button>
   );
 }
 
 // ---------- onboarding ----------
 
-function Onboarding({ party, meId, act, busy, name }: { party: AllHandsView; meId: string; act: Act; busy: boolean; name: Name }) {
+function Onboarding({
+  party,
+  meId,
+  act,
+  busy,
+  name,
+  left,
+}: {
+  party: AllHandsView;
+  meId: string;
+  act: Act;
+  busy: boolean;
+  name: Name;
+  left: number | null;
+}) {
   const ready = party.seats.filter((x) => x.ready).length;
   const waiting = party.seats.filter((x) => !x.ready).map((x) => name(x.id));
+  const allReady = party.seats.length > 0 && waiting.length === 0;
+  if (allReady && !party.paused) {
+    const secs = left === null ? null : Math.ceil(left / 1000);
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-3xl border border-lime-300/40 bg-lime-300/10 p-8 text-center">
+        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-lime-300">Everyone&apos;s read their badge</p>
+        <p className="text-7xl font-black tabular-nums" aria-live="polite">
+          {secs ?? "…"}
+        </p>
+        <p className="text-slate-200">After hours starts in {secs === 1 ? "1 second" : `${secs ?? 10} seconds`}. Heads down, screens close.</p>
+      </div>
+    );
+  }
   return (
     <>
       <div>
@@ -403,27 +589,30 @@ function Onboarding({ party, meId, act, busy, name }: { party: AllHandsView; meI
 
 // ---------- after hours ----------
 
+/** Who posted tonight's #random poll (the decoy question), one per round. */
+const POLL_AUTHORS = ["Brad (CEO)", "the Office Manager", "Chad from Sales", "the Head of Vibes", "the Culture Committee", "the Growth Team"];
+
 const NIGHT_COPY: Record<NightKind, { title: string; body: string }> = {
   mole: { title: "Pick someone to lay off", body: "Agree with the other Moles. Your picks show up on each other's phones." },
   it: { title: "Whose DMs will you read?", body: "You'll find out in the morning whether they're a Mole." },
   hr: { title: "Who gets your paperwork?", body: "If the Moles go after them tonight, the layoff is blocked." },
-  decoy: { title: "", body: "Everyone taps something, so nobody can tell who has a power. Your answer is just for fun." },
+  intern: { title: "Pick a mentor", body: "You win if their side wins. They won't know, and you won't learn their role. Choose wisely." },
+  decoy: { title: "", body: "Vote in the poll. Everyone taps a name after hours, so nobody can tell who has a power." },
 };
 
 function AfterHours({
   party,
   act,
-  busy,
   name,
   people,
 }: {
   party: AllHandsView;
   act: Act;
-  busy: boolean;
   name: Name;
   people: Map<string, PlayerPublic>;
 }) {
   const n = party.night;
+  const [offerMode, setOfferMode] = useState(Boolean(n?.offer && n.canOffer));
   if (!n) {
     return (
       <>
@@ -434,34 +623,73 @@ function AfterHours({
     );
   }
   const solo = n.kind === "mole" && (n.team?.length ?? 0) <= 1;
-  const copy = solo ? { ...NIGHT_COPY.mole, body: "You're the only Mole. Pick who gets laid off tonight." } : NIGHT_COPY[n.kind];
+  const offering = n.canOffer && offerMode;
+  const copy = offering
+    ? {
+        title: "Make an offer",
+        body: "Once per game. Your pick secretly becomes a Mole, and nobody is laid off tonight. It fails on the IT Guy and HR Rep, and HR can block it.",
+      }
+    : solo
+      ? { ...NIGHT_COPY.mole, body: "You're the only Mole. Pick who gets laid off tonight." }
+      : NIGHT_COPY[n.kind];
+  const targets = offering ? n.offerTargets : n.targets;
   return (
     <>
       <div>
+        {n.kind === "decoy" && (
+          <p className="mb-2 flex items-center gap-2 text-sm text-slate-400">
+            <span className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-xs text-slate-300">#random</span>
+            <span aria-hidden>📊</span> Poll from {POLL_AUTHORS[(party.round - 1 + POLL_AUTHORS.length) % POLL_AUTHORS.length]}
+          </p>
+        )}
         <h1 className="text-3xl font-black">{n.kind === "decoy" ? n.prompt : copy.title}</h1>
-        <p className="mt-1 text-slate-300">{copy.body}</p>
+        <p className="mt-1 text-slate-300">{n.kind === "decoy" && n.myPick ? "Thanks for voting! 🙌" : copy.body}</p>
         <p className="mt-2 text-xs text-slate-500">Heads down. Keep your screen close. You can change your pick until time runs out.</p>
       </div>
+      {n.canOffer && (
+        <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-900 p-1" role="group" aria-label="Tonight's move">
+          {[
+            { on: false, label: "Lay someone off" },
+            { on: true, label: "💼 Make an offer" },
+          ].map((o) => (
+            <button
+              key={o.label}
+              type="button"
+              aria-pressed={offerMode === o.on}
+              onClick={() => setOfferMode(o.on)}
+              className={`min-h-11 rounded-lg text-sm font-semibold ${offerMode === o.on ? (o.on ? "bg-fuchsia-500/25 text-fuchsia-100" : "bg-slate-700") : "text-slate-400"}`}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
+      {n.kind === "mole" && !n.canOffer && n.offer && (
+        <p className="rounded-xl border border-fuchsia-400/40 bg-fuchsia-400/10 px-3 py-2 text-sm text-fuchsia-100">
+          The Recruiter is making {name(n.offer)} an offer tonight, so there&apos;s no layoff.
+        </p>
+      )}
       <ul className="grid grid-cols-2 gap-2">
         {party.seats
-          .filter((x) => x.alive && n.targets.includes(x.id))
+          .filter((x) => x.alive && targets.includes(x.id))
           .map((x) => {
-            const picked = n.myPick === x.id;
+            const picked = offering ? n.offer === x.id : n.myPick === x.id && !(n.canOffer && n.offer);
             const teammates = n.team?.filter((m) => m.pick === x.id) ?? [];
             return (
               <li key={x.id}>
                 <button
                   type="button"
-                  disabled={busy}
                   aria-pressed={picked}
-                  onClick={() => void act({ type: "pick", target: x.id })}
-                  className={`flex min-h-16 w-full flex-col items-start justify-center gap-1 rounded-2xl border px-3 py-2 text-left ${
+                  onClick={() => void act(offering ? { type: "pick", target: x.id, offer: true } : { type: "pick", target: x.id })}
+                  className={`flex min-h-16 w-full flex-col items-start justify-center gap-1 rounded-2xl border px-3 py-2 text-left transition-transform duration-75 active:scale-[0.97] ${
                     picked ? "border-lime-300 bg-lime-300/10" : "border-slate-800 bg-slate-900 active:bg-slate-800"
                   }`}
                 >
                   <span className="flex w-full items-center gap-2 font-semibold">
                     <Dot p={people.get(x.id)} />
                     <span className="truncate">{name(x.id)}</span>
+                    {x.id === party.me.mentor && <MentorTag />}
+                    {x.role === "nephew" && <RoleChip role="nephew" />}
                   </span>
                   <span className="text-xs text-slate-400">{x.title}</span>
                   {teammates.length > 0 && (
@@ -503,7 +731,7 @@ function Checks({ party, name }: { party: AllHandsView; name: Name }) {
 
 // ---------- morning and all-hands ----------
 
-function SlackPost({ children }: { children: React.ReactNode }) {
+function SlackPost({ children, channel = "#general" }: { children: React.ReactNode; channel?: string }) {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
       <div className="flex items-center gap-2">
@@ -512,10 +740,72 @@ function SlackPost({ children }: { children: React.ReactNode }) {
           <p className="text-sm font-bold">
             Synergr Bot <span className="ml-1 rounded bg-slate-800 px-1 text-11px font-normal text-slate-400">APP</span>
           </p>
-          <p className="text-xs text-slate-500">#general</p>
+          <p className="text-xs text-slate-500">{channel}</p>
         </div>
       </div>
       <div className="mt-3 text-slate-200">{children}</div>
+    </div>
+  );
+}
+
+/** A private DM about last night's offer: a hire goes to every other Mole, a turned-down or blocked offer to the Recruiter only. */
+function OfferDm({ offer, name }: { offer: NonNullable<DawnView["offer"]>; name: Name }) {
+  const who = name(offer.target);
+  const hired = offer.result === "hired";
+  return (
+    <div className="rounded-2xl border border-fuchsia-400/50 bg-fuchsia-400/10 p-4">
+      <div className="flex items-center gap-2">
+        <span aria-hidden className="grid h-9 w-9 place-items-center rounded-lg bg-fuchsia-400 text-lg text-slate-950">💼</span>
+        <div>
+          <p className="text-sm font-bold">Recruiting</p>
+          <p className="text-xs text-fuchsia-200/70">🔒 Direct message · {hired ? "only Moles see this" : "only you see this"}</p>
+        </div>
+      </div>
+      <p className="mt-3 text-fuchsia-50">
+        {hired
+          ? `🤝 ${who} accepted the offer. They're one of you now, and they can see the team and the back channel. Act normal.`
+          : offer.result === "blocked"
+            ? `🚫 HR blocked your offer to ${who}. Their paperwork was "lost". Your one offer is used up.`
+            : `🙅 ${who} turned down your offer. Your one offer is used up.`}
+      </p>
+    </div>
+  );
+}
+
+/** A private DM to the IT Guy or HR Rep who turned the Recruiter down: now they know who the Recruiter is. */
+function ApproachedDm({ recruiter }: { recruiter: string }) {
+  return (
+    <div className="rounded-2xl border border-fuchsia-400/50 bg-fuchsia-400/10 p-4">
+      <div className="flex items-center gap-2">
+        <span aria-hidden className="grid h-9 w-9 place-items-center rounded-lg bg-fuchsia-400 text-lg text-slate-950">💼</span>
+        <div>
+          <p className="text-sm font-bold">{recruiter}</p>
+          <p className="text-xs text-fuchsia-200/70">🔒 Direct message · only you see this</p>
+        </div>
+      </div>
+      <p className="mt-3 text-fuchsia-50">
+        &quot;Hey! Quick question, are you open to new opportunities? 👀&quot; {recruiter} tried to recruit you to the Moles last night.
+        You turned them down. They&apos;re the Recruiter, and they know you said no.
+      </p>
+    </div>
+  );
+}
+
+/** Anonymous coworkers gossiping in a Slack thread under an announcement. */
+function ChatterThread({ chatter, who }: { chatter: Chatter; who: string }) {
+  const lines = chatterLines(chatter, who);
+  if (!lines) return null;
+  return (
+    <div className="mt-3 border-l-2 border-slate-700 pl-3">
+      <p className="text-xs font-semibold text-sky-300">{lines.length} replies</p>
+      <ul className="mt-1 flex flex-col gap-2">
+        {lines.map((l, k) => (
+          <li key={k} className="text-sm">
+            <span className="block text-xs font-bold text-slate-400">{l.who}</span>
+            <span className="text-slate-200">{l.text}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -526,6 +816,17 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
   const alive = party.seats.filter((x) => x.alive);
   return (
     <>
+      {d?.recruited && (
+        <div className="rounded-2xl border border-rose-400/60 bg-rose-400/10 p-4">
+          <p className="font-bold text-rose-200">You accepted the offer. 🤝</p>
+          <p className="mt-1 text-sm text-rose-100/80">
+            You&apos;re a Mole now. You win with the Moles, you can see them on your badge, and you&apos;re in their chat. Act normal.
+          </p>
+        </div>
+      )}
+      {d?.offer && <OfferDm offer={d.offer} name={name} />}
+      {d?.approachedBy && <ApproachedDm recruiter={name(d.approachedBy)} />}
+      {d?.poll && <PollResults poll={d.poll} name={name} people={people} />}
       {d && (
         <SlackPost>
           {d.laidOff ? (
@@ -535,6 +836,7 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
                 chapter. 💼
               </p>
               {laidOffSeat?.role && <p className="mt-2 text-sm text-slate-400">Their badge said: {ROLE_INFO[laidOffSeat.role].name}.</p>}
+              {d.chatter && <ChatterThread chatter={d.chatter} who={name(d.laidOff)} />}
             </>
           ) : d.saved ? (
             <p>HR blocked a layoff overnight. Synergy is up 4%. 📈</p>
@@ -551,7 +853,7 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
           </div>
           {party.checks.length > 0 && <Checks party={party} name={name} />}
           <Section title={`Still employed (${alive.length})`}>
-            <Roster seats={alive} name={name} people={people} />
+            <Roster seats={alive} name={name} people={people} mentor={party.me.mentor} />
           </Section>
         </>
       )}
@@ -559,7 +861,67 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
   );
 }
 
-function Roster({ seats, name, people, showRoles = false }: { seats: SeatView[]; name: Name; people: Map<string, PlayerPublic>; showRoles?: boolean }) {
+/** Last night's #random poll. Just the winner, never a vote count: the poll's size would hint at how many have powers. */
+function PollResults({ poll, name, people }: { poll: PollResult; name: Name; people: Map<string, PlayerPublic> }) {
+  const tie = poll.winners.length > 1;
+  const names = poll.winners.map(name);
+  const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0];
+  return (
+    <SlackPost channel="#random">
+      <p className="text-sm text-slate-400">📊 Poll results are in</p>
+      <p className="mt-1 font-semibold">{poll.prompt}</p>
+      <ul className="mt-3 flex flex-wrap gap-2">
+        {poll.winners.map((id) => (
+          <li key={id} className="flex items-center gap-2 rounded-full border border-lime-300/40 bg-lime-300/10 px-3 py-1.5 font-semibold">
+            <span aria-hidden>🏆</span>
+            <Dot p={people.get(id)} />
+            {name(id)}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-sm text-slate-300">
+        {tie ? `It's a tie: ${list}. Nobody's surprised. 🙃` : `The people have spoken. Congrats, ${list}. 🎉`}
+      </p>
+    </SlackPost>
+  );
+}
+
+/** The IT Guy's own read on someone: `party.checks` is only ever filled on the IT Guy's phone (and at game over). */
+function CheckTag({ party, id }: { party: AllHandsView; id: string }) {
+  const c = [...party.checks].reverse().find((x) => x.target === id);
+  if (!c || party.phase === "over") return null;
+  return c.isMole ? (
+    <span className="shrink-0 rounded-full border border-rose-400/60 px-1.5 py-0.5 text-[11px] font-semibold text-rose-300">🔍 Mole</span>
+  ) : (
+    <span className="shrink-0 rounded-full border border-sky-300/50 px-1.5 py-0.5 text-[11px] font-semibold text-sky-200">🔍 Not a Mole</span>
+  );
+}
+
+/** Marks the Intern's mentor on the Intern's own phone. `me.mentor` is only ever set for the Intern, so nobody else sees it. */
+function MentorTag() {
+  return (
+    <span className="shrink-0 rounded-full border border-teal-300/50 px-1.5 py-0.5 text-[11px] font-semibold text-teal-200">🎓 Your mentor</span>
+  );
+}
+
+/** A fellow Mole's badge. The server only sends Mole-side roles of living players to other Moles, so nobody else sees it. */
+function FellowMoleTag({ seat, me }: { seat: SeatView; me: string }) {
+  return seat.id !== me && isMoleRole(seat.role) ? <RoleChip role={seat.role!} /> : null;
+}
+
+function Roster({
+  seats,
+  name,
+  people,
+  showRoles = false,
+  mentor = null,
+}: {
+  seats: SeatView[];
+  name: Name;
+  people: Map<string, PlayerPublic>;
+  showRoles?: boolean;
+  mentor?: string | null;
+}) {
   return (
     <ul className="flex flex-col gap-2">
       {seats.map((x) => (
@@ -572,6 +934,7 @@ function Roster({ seats, name, people, showRoles = false }: { seats: SeatView[];
             <span className={`block truncate font-semibold ${x.alive ? "" : "line-through"}`}>{name(x.id)}</span>
             <span className="block text-xs text-slate-400">{x.title}</span>
           </span>
+          {x.id === mentor && <MentorTag />}
           {(showRoles || x.role) && x.role && <RoleChip role={x.role} />}
         </li>
       ))}
@@ -584,14 +947,12 @@ function Roster({ seats, name, people, showRoles = false }: { seats: SeatView[];
 function Review({
   party,
   act,
-  busy,
   name,
   people,
   me,
 }: {
   party: AllHandsView;
   act: Act;
-  busy: boolean;
   name: Name;
   people: Map<string, PlayerPublic>;
   me: string;
@@ -605,10 +966,10 @@ function Review({
       <li key={id}>
         <button
           type="button"
-          disabled={busy || !v.canVote || id === me}
+          disabled={!v.canVote || id === me}
           aria-pressed={mine}
           onClick={() => void act({ type: "vote", target: id })}
-          className={`flex min-h-14 w-full items-center gap-3 rounded-2xl border px-3 py-2 text-left disabled:cursor-default ${
+          className={`flex min-h-14 w-full items-center gap-3 rounded-2xl border px-3 py-2 text-left transition-transform duration-75 enabled:active:scale-[0.97] disabled:cursor-default ${
             mine ? "border-lime-300 bg-lime-300/10" : "border-slate-800 bg-slate-900 enabled:active:bg-slate-800"
           }`}
         >
@@ -642,12 +1003,17 @@ function Review({
               <Dot p={people.get(x.id)} />
               {name(x.id)}
               {x.id === me && <span className="font-normal text-slate-400">(you)</span>}
+              {x.id === party.me.mentor && <MentorTag />}
+              <FellowMoleTag seat={x} me={me} />
+              {x.role === "nephew" && <RoleChip role="nephew" />}
+              <CheckTag party={party} id={x.id} />
             </span>,
             x.title,
           ),
         )}
         {option(SKIP, "Let's circle back", "Nobody gets fired today")}
       </ul>
+      {party.checks.length > 0 && <Checks party={party} name={name} />}
       <p className="text-sm text-slate-400">
         {v.voted} of {v.total} have voted.
       </p>
@@ -661,8 +1027,18 @@ function ExitInterview({ party, name }: { party: AllHandsView; name: Name }) {
   const e = party.exit;
   if (!e) return null;
   return (
-    <div className="flex flex-col items-center gap-3 rounded-3xl border border-slate-800 bg-slate-900 p-6 text-center">
-      {e.fired ? (
+    <>
+      <div className="flex flex-col items-center gap-3 rounded-3xl border border-slate-800 bg-slate-900 p-6 text-center">
+      {e.fired && e.survived ? (
+        <>
+          <p className="text-sm uppercase tracking-[0.25em] text-slate-400">Voted out with {e.votes} votes</p>
+          <p className="text-4xl font-black">{name(e.fired)}</p>
+          <p className="text-lg">
+            is the <RoleChip role="nephew" />
+          </p>
+          <p className="text-slate-400">A call from the Founder later, they still work here. That only works once.</p>
+        </>
+      ) : e.fired ? (
         <>
           <p className="text-sm uppercase tracking-[0.25em] text-slate-400">Fired with {e.votes} votes</p>
           <p className="text-4xl font-black">{name(e.fired)}</p>
@@ -680,7 +1056,14 @@ function ExitInterview({ party, name }: { party: AllHandsView; name: Name }) {
           <p className="text-slate-400">The team decided to circle back. Synergy remains unclear.</p>
         </>
       )}
-    </div>
+      </div>
+      {e.fired && e.chatter && (
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
+          <p className="text-xs text-slate-500">#random</p>
+          <ChatterThread chatter={e.chatter} who={name(e.fired)} />
+        </div>
+      )}
+    </>
   );
 }
 
@@ -691,6 +1074,7 @@ function GameOver({
   busy,
   name,
   people,
+  meId,
 }: {
   party: AllHandsView;
   isHost: boolean;
@@ -698,18 +1082,27 @@ function GameOver({
   busy: boolean;
   name: Name;
   people: Map<string, PlayerPublic>;
+  meId: string;
 }) {
   const company = party.winner === "company";
-  const myTeam = party.me.role ? ROLE_INFO[party.me.role].team : null;
+  const burnout = party.winner === "burnout";
+  const won = party.me.seated ? party.winners.includes(meId) : null;
+  const burntOut = party.seats.find((x) => x.role === "burnout");
+  const banner = burnout
+    ? { tone: "border-violet-300/50 bg-violet-300/10", kicker: "Severance secured", title: `${name(burntOut?.id)} got fired and wins alone.` }
+    : company
+      ? { tone: "border-lime-300/50 bg-lime-300/10", kicker: "The company survives", title: "Every Mole is out." }
+      : { tone: "border-rose-400/60 bg-rose-400/10", kicker: "Synergr was acquired for parts", title: "The Moles win." };
   return (
     <>
-      <div className={`rounded-3xl border p-6 text-center ${company ? "border-lime-300/50 bg-lime-300/10" : "border-rose-400/60 bg-rose-400/10"}`}>
-        <p className="text-sm uppercase tracking-[0.25em] text-slate-300">{company ? "The company survives" : "Synergr was acquired for parts"}</p>
-        <p className="mt-1 text-4xl font-black">{company ? "Every Mole is out." : "The Moles win."}</p>
-        {myTeam && <p className="mt-2 text-slate-200">{myTeam === party.winner ? "Your side won. Update your LinkedIn." : "Your side lost. Time to pivot."}</p>}
+      <div className={`rounded-3xl border p-6 text-center ${banner.tone}`}>
+        <p className="text-sm uppercase tracking-[0.25em] text-slate-300">{banner.kicker}</p>
+        <p className="mt-1 text-4xl font-black">{banner.title}</p>
+        {burnout && <p className="mt-2 text-slate-300">They were the Burnt-out Employee. Everyone else loses. Touch grass.</p>}
+        {won !== null && <p className="mt-2 text-slate-200">{won ? "You won. Update your LinkedIn." : "You lost. Time to pivot."}</p>}
       </div>
       <Section title="Who was who">
-        <Roster seats={party.seats} name={name} people={people} showRoles />
+        <Roster seats={party.seats} name={name} people={people} showRoles mentor={party.me.mentor} />
       </Section>
       {party.nights && <NightLog nights={party.nights} name={name} />}
       {isHost ? (
@@ -739,10 +1132,13 @@ function NightLog({ nights, name, live = false }: { nights: NonNullable<AllHands
         {nights.map((n) => (
           <li key={n.round} className="rounded-xl border border-slate-800 bg-slate-900 px-3 py-2">
             <p className="font-semibold">Night {n.round}</p>
-            <p className="text-slate-300">
-              Moles went after {name(n.moleTarget)}. HR covered {name(n.hrTarget)}. IT read {name(n.itTarget)}&apos;s DMs
-              {n.itResult !== null && (n.itResult ? " (a Mole!)" : " (clean)")}.
-            </p>
+            {n.offerTarget && (
+              <p className="text-fuchsia-200">
+                The Recruiter{n.recruiter ? ` (${name(n.recruiter)})` : ""} made {name(n.offerTarget)} an offer:{" "}
+                {n.offerResult === "hired" ? "accepted. They became a Mole." : n.offerResult === "blocked" ? "HR blocked it." : "turned down."}
+              </p>
+            )}
+            <p className="text-slate-300">{nightLines(n, name).join(" ")}</p>
             <p className="text-xs text-slate-500">
               {n.outcome === "laidoff" ? `${name(n.moleTarget)} was laid off.` : n.outcome === "saved" ? "HR blocked the layoff." : "Nobody was laid off."}
             </p>
@@ -767,6 +1163,8 @@ function History({ history, name }: { history: HistoryEntry[]; name: Name }) {
         return `${name(h.playerId)} was fired`;
       case "kept":
         return "The team circled back";
+      case "spared":
+        return `${name(h.playerId)} was voted out, and survived`;
     }
   };
   return (
@@ -801,14 +1199,14 @@ function HostBar({ party, act, busy }: { party: AllHandsView; act: Act; busy: bo
     <section aria-label="Host controls" className="flex flex-col gap-2 rounded-2xl border border-dashed border-slate-700 p-3">
       <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">Host controls</p>
       <div className="flex flex-wrap gap-2">
-        <button type="button" disabled={busy} onClick={() => void act({ type: "skip", from: party.phase })} className="min-h-11 flex-1 rounded-lg border border-slate-700 px-3 text-sm font-semibold">
+        <button type="button" disabled={busy} onClick={() => void act({ type: "skip", from: party.phase })} className="min-h-11 flex-1 rounded-lg border border-slate-700 px-3 text-sm font-semibold transition-transform duration-75 enabled:active:scale-[0.97] enabled:active:bg-slate-800 disabled:opacity-50">
           {skipLabel[party.phase] ?? "Skip ahead"}
         </button>
         <button
           type="button"
           disabled={busy}
           onClick={() => void act({ type: party.paused ? "resume" : "pause" })}
-          className="min-h-11 rounded-lg border border-slate-700 px-3 text-sm font-semibold"
+          className="min-h-11 rounded-lg border border-slate-700 px-3 text-sm font-semibold transition-transform duration-75 enabled:active:scale-[0.97] enabled:active:bg-slate-800 disabled:opacity-50"
         >
           {party.paused ? "Resume" : "Pause"}
         </button>
@@ -816,7 +1214,7 @@ function HostBar({ party, act, busy }: { party: AllHandsView; act: Act; busy: bo
           type="button"
           disabled={busy}
           onClick={() => window.confirm("End this game for everyone and go back to the lobby?") && void act({ type: "end" })}
-          className="min-h-11 rounded-lg border border-rose-400/50 px-3 text-sm font-semibold text-rose-300"
+          className="min-h-11 rounded-lg border border-rose-400/50 px-3 text-sm font-semibold text-rose-300 transition-transform duration-75 enabled:active:scale-[0.97] disabled:opacity-50"
         >
           End game
         </button>

@@ -165,3 +165,47 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   countdown hits zero) advances one phase, with a fresh clock.
 - Party games skip leaderboards, case records and badges. Hosting needs sign-in and a purchase, like escape rooms.
 - UI text for All Hands is English only for now; the directory button and game card are translated.
+- Chat: the room's ordinary chat (`/api/rooms/[code]/chat`) is the team chat. `PartyGame.canChat` lets a game mute
+  players; All Hands mutes the laid-off and fired until the game ends (403 `api.chat.benched`). The Moles' back
+  channel is the `moleChat {body}` party action: stored in the game state (last 100, reset each game), posted only by
+  living Moles mid-game, and shown in `AllHandsView.moleChat` only to Moles, the laid-off and fired, and everyone at
+  game over. It is never broadcast; Moles see new messages through the usual `progress.updated` refetch.
+- Admin test rooms: an admin hosting a party room may `POST /api/rooms/[code]/party/test` with `{action: "fill",
+  total}` (add bots between games), `{action: "viewAs", playerId|null}` (sets the `pv_<CODE>` cookie) or
+  `{action: "botsAct"}` (each bot makes its move via `PartyGame.botMove`, except the one being viewed). Bots are
+  Player rows whose token starts with `bot_` (`src/server/party/test.ts`). While viewing as a bot, `GET /state`
+  builds the party view for that bot and seat actions (`ready`, `pick`, `vote`, `moleChat`) are made as it; host
+  controls stay the admin's. `RoomState.partyTest` (every seat with its role) is sent only to that admin. Looking
+  through a real player's eyes is never allowed.
+- Burnt-out Employee (`burnout`, a Jester): dealt in place of one Employee at tables of 7+ when `settings.burnout`
+  is on (default). Plays the decoy at night and counts as a non-Mole for the win check; fired at performance review,
+  the game ends after the exit interview with `winner: "burnout"`. A night layoff doesn't count.
+- Intern (`intern`, 6+ players, `settings.intern`): the first night they pick a mentor (night kind `"intern"`;
+  no pick means the next living seat). They win with the mentor's team (`teamOf`), never learn the mentor's role,
+  and IT sees them as not a Mole. `AllHandsView.winners` lists every winning seat.
+- Founder's Nephew (`nephew`, 8+, `settings.nephew`): the first time he's fired he stays in, his role is revealed
+  to everyone, and history logs `"spared"` (`exit.survived`).
+- Recruiter (`recruiter`, 9+, `settings.recruiter`): replaces one Mole. Once per game sends
+  `{type: "pick", target, offer: true}` instead of a layoff; that night nobody is laid off. The offer is
+  `"blocked"` if HR protected the target, `"refused"` (silently) on IT, HR or a Mole, otherwise `"hired"`: the
+  target becomes a Mole (`me.recruited`, `dawn.recruited` for them only) and joins the Mole chat.
+  `dawn.offer = {target, result}` drives a private "Recruiting" DM on the morning screen: every Mole-side player
+  but the hire gets it on a hire, only the Recruiter gets it on `"refused"`/`"blocked"`, null for everyone else.
+  On `"refused"`, the IT Guy/HR Rep who said no gets `dawn.approachedBy = recruiterId` (a DM naming the Recruiter);
+  a blocked target is told nothing.
+  `isMoleRole` covers mole and recruiter.
+- #random poll: `DECOY_PROMPTS` are "most likely to" questions; `pollPrompt(s)` picks one per round from a per-game
+  offset. At dawn, `dawn.poll = {prompt, winners}` holds the most-picked player(s) among the decoy picks only (ties
+  share it, at most three). It has no vote counts, so the poll's size can't hint at how many players have powers.
+- Rules sheet: `goneRoles(counts, seats)` (src/lib/allhands/gone.ts) marks IT, HR, Intern, Burnt-out or Nephew as out
+  of the game once every seat dealt that role has departed with its role shown on this phone. With reveals off, a living
+  player sees nothing marked. A spared Nephew's role chip shows on the after-hours and review lists.
+- Each `NightRecord` also stores who held the powers that night (`moles`, `it`, `hr`, `recruiter`; optional for older
+  saved games). The game-over recap names them via `nightLines` (src/lib/allhands/recap.ts) and leaves out a power
+  whose holder was already gone, instead of saying "Nobody".
+- Onboarding: once every seat is ready, the reveal phase's `endsAt` moves to now + `READY_COUNTDOWN_MS` (10s, never
+  later than it was), and the screen shows a countdown. After hours then starts on the normal phase timeout.
+- Performance review on the IT Guy's phone: each checked player gets a "🔍 Mole" / "🔍 Not a Mole" tag, and the
+  "DMs you've read" list shows below. `checks` are still only sent to the IT Guy (and to everyone at game over).
+- Last five seconds of any All Hands timer (not while paused): `navigator.vibrate` once a second where supported
+  (Android browsers; iOS Safari has no Vibration API), and a fading red edge flash (`.ah-final-flash`) on every phone.

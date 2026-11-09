@@ -55,6 +55,7 @@ const messages: Record<keyof typeof en, string> = {
   "api.admin.badReport": "找不到這件檢舉。",
   "api.chat.empty": "訊息是空的。",
   "api.chat.tooLong": "訊息最多 {max} 個字元。",
+  "api.chat.benched": "你已出局，遊戲結束前只能閱讀聊天，不能發言。",
   "api.chat.slowDown": "請放慢一點。",
   "api.attempt.unknownPuzzle": "找不到這道謎題。",
   "api.attempt.missingInput": "缺少輸入內容。",

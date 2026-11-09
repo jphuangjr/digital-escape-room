@@ -25,6 +25,8 @@ export interface GameInfo {
    * of friends, listed on the Party games page (/party) behind the home page's Party games button.
    */
   kind?: "escape" | "party";
+  /** Genre tags shown as pills on the game's card and page, e.g. "Mafia" so players know how it plays. */
+  tags?: string[];
 }
 
 /**
@@ -81,9 +83,25 @@ export const GAMES: GameInfo[] = [
     duration: "20–40 min",
     difficulty: "Easy",
     tone: "Party game",
-    status: "staging",
+    status: "live",
     href: "/play/all-hands",
     kind: "party",
+    tags: ["Mafia"],
+  },
+  {
+    id: "reply-all",
+    title: "Reply All",
+    tagline: "Every thread needs a reply. Yours should be the worst one.",
+    blurb:
+      "Each round Synergr's all-staff thread gets a new prompt and you answer it with a reply card from your hand. Replies stay anonymous until a rotating Manager, or the whole table, pins the funniest. First to five pins wins.",
+    players: "3 to 12 players",
+    duration: "20–45 min",
+    difficulty: "Easy",
+    tone: "Party game",
+    status: "live",
+    href: "/play/reply-all",
+    kind: "party",
+    tags: ["Fill in the blank"],
   },
 ];
 
