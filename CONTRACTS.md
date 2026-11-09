@@ -209,3 +209,20 @@ Extra route: GET /api/rooms/[code]/files -> `{locked: true}` or `{locked:false, 
   "DMs you've read" list shows below. `checks` are still only sent to the IT Guy (and to everyone at game over).
 - Last five seconds of any All Hands timer (not while paused): `navigator.vibrate` once a second where supported
   (Android browsers; iOS Safari has no Vibration API), and a fading red edge flash (`.ah-final-flash`) on every phone.
+
+## Grunt (`gameId: "grunt"`, party game)
+
+- Rules in `src/server/grunt/game.ts`, client shapes in `src/lib/grunt/types.ts`, cards in `src/lib/grunt/cards.ts`
+  (a card's id is its index: only append). Same generic `POST /api/rooms/[code]/party` route as All Hands.
+- 4 to 16 players, dealt at `start` into two balanced random teams (Rocks 0, Sticks 1). Turns alternate teams; each
+  team's clue-givers rotate. `totalTurns = 2 × biggest team × settings.rounds`. A late `join` goes to the smaller team.
+- Phases: `lobby` → `ready` (30s, or the giver/host sends `begin`) → `clue` (`settings.turnMs`) → `recap` (10s) →
+  next `ready` … → `over`.
+- In `clue`, only the giver sends `emoji` (an index into the flat `EMOJI` list; the keyboard has no letters, numbers or
+  keycaps), `undo`, `clear`, `got` (1 = the word, once per card; 3 = the phrase, which also counts the word and deals a
+  new card), `next` (only after the word) and `pass`. The giver's teammates may send `guess`; a loose match
+  (`guessMatches`: case, punctuation, a/an/the and plural "s" ignored) scores by itself.
+- `bonk` (other team only, `settings.bonk` on, 4s cooldown per player) takes a point off the clue team's turn.
+- Secrecy: `GruntView.card` is sent to the giver and the other team only, never to the guessing team. Everyone sees
+  the clue. The recap and `history` show each card that scored or got a clue.
+- Staging: listed in `GAMES` with `status: "staging"`; `/play/grunt` 404s for anyone who isn't an admin or tester.

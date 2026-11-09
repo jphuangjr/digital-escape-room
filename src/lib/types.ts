@@ -153,7 +153,7 @@ export interface RoomState {
   /** Physical-room games only: the shared scene (narrow by gameId). */
   scene?: import("@/lib/train/types").SceneDTO | import("@/lib/atlas/types").AtlasSceneDTO;
   /** Party games only: this player's own view of the table (see src/server/party). */
-  party?: import("@/lib/allhands/types").AllHandsView | import("@/lib/replyall/types").ReplyAllView;
+  party?: import("@/lib/allhands/types").AllHandsView | import("@/lib/replyall/types").ReplyAllView | import("@/lib/grunt/types").GruntView;
   /** Admin test rooms only (an admin hosting): every seat, and whose eyes the party view is through. */
   partyTest?: PartyTestInfo;
 }
@@ -371,5 +371,6 @@ export interface ProfileResponse {
 /** An admin's test room: the table, roles included, and which player's view they're looking at. */
 export interface PartyTestInfo {
   viewingAs: string;
-  players: { id: string; name: string; bot: boolean; role: import("@/lib/allhands/types").Role | null }[];
+  /** `role`: an All Hands role id, or any other game's own label (Grunt: "Team Rocks"). */
+  players: { id: string; name: string; bot: boolean; role: string | null }[];
 }

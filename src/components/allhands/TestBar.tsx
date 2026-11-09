@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { PartyTestInfo } from "@/lib/types";
 import { apiFetch } from "@/lib/client/game";
-import { ROLE_INFO } from "@/lib/allhands/types";
+import { ROLE_INFO, type Role } from "@/lib/allhands/types";
 
 const SIZES = [5, 8, 12, 16];
 
@@ -47,7 +47,7 @@ export function TestBar({
   }
 
   const label = (p: PartyTestInfo["players"][number]) =>
-    `${p.name}${p.id === meId ? " (you)" : p.bot ? "" : " (real player)"}${p.role ? ` · ${ROLE_INFO[p.role].name}` : ""}`;
+    `${p.name}${p.id === meId ? " (you)" : p.bot ? "" : " (real player)"}${p.role ? ` · ${ROLE_INFO[p.role as Role]?.name ?? p.role}` : ""}`;
 
   return (
     <section aria-label="Test room tools" className="flex flex-col gap-3 rounded-2xl border border-amber-300/50 bg-amber-300/10 p-4">
