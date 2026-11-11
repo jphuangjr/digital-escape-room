@@ -103,6 +103,21 @@ export const GAMES: GameInfo[] = [
     kind: "party",
     tags: ["Fill in the blank"],
   },
+  {
+    id: "grunt",
+    title: "Grunt",
+    tagline: "No words. Just emoji, and a lot of pointing you're not allowed to do.",
+    blurb:
+      "Two teams, one card per turn: a word for 1 point and a harder phrase for 3. The clue-giver can't talk. They tap emoji on their phone and their team watches the clue grow and shouts guesses. The other team sees the card too, and bonks the clue-giver for any sound or gesture.",
+    players: "4 to 16 players",
+    duration: "20–40 min",
+    difficulty: "Easy",
+    tone: "Party game",
+    status: "staging",
+    href: "/play/grunt",
+    kind: "party",
+    tags: ["Charades", "Teams"],
+  },
 ];
 
 export function isPartyGame(game: Pick<GameInfo, "kind">): boolean {

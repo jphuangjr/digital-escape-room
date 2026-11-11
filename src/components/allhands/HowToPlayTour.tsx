@@ -133,6 +133,16 @@ export function HowToPlayTour({ onClose }: { onClose: () => void }) {
     markTourSeen();
     onClose();
   };
+  // The page underneath doesn't scroll while the tour is open.
+  useEffect(() => {
+    const root = document.documentElement;
+    const before = root.style.overflow;
+    root.style.overflow = "hidden";
+    return () => {
+      root.style.overflow = before;
+    };
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
@@ -145,7 +155,10 @@ export function HowToPlayTour({ onClose }: { onClose: () => void }) {
   }, []);
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex flex-col bg-slate-950/95 text-slate-100 backdrop-blur" role="dialog" aria-modal="true" aria-label="How to play All Hands">
+    // A solid background, not a translucent blur: iOS Safari draws a screen-sized backdrop-filter layer only in part,
+    // so on a scrolled phone page the tour showed as a band with the page through it. px-safe keeps it clear of a
+    // side rail (iPhone Duo).
+    <div className="fixed inset-0 z-50 flex h-dvh flex-col bg-slate-950 px-safe text-slate-100" role="dialog" aria-modal="true" aria-label="How to play All Hands">
       <div
         className="mx-auto flex h-full w-full max-w-xl flex-col px-edge"
         style={{ paddingTop: "max(env(safe-area-inset-top), 0.75rem)", paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)" }}
