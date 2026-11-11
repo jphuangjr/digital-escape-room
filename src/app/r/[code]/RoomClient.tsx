@@ -15,6 +15,8 @@ import { ATLAS_GAME_ID } from "@/lib/atlas/types";
 import { AllHandsShell } from "@/components/allhands/AllHandsShell";
 import { ReplyAllShell } from "@/components/replyall/ReplyAllShell";
 import { REPLY_ALL_GAME_ID } from "@/lib/replyall/types";
+import { GruntShell } from "@/components/grunt/GruntShell";
+import { GRUNT_GAME_ID } from "@/lib/grunt/types";
 import { CompassMark } from "@/components/shell/icons";
 import { FormattedMessage } from "react-intl";
 import { LanguageSwitcher, useT } from "@/i18n/client";
@@ -103,6 +105,7 @@ function LiveRoom({ code, state, load }: { code: string; state: RoomState; load:
   if (state.gameId === TRAIN_GAME_ID && state.scene) return <TrainShell code={code} state={state} refresh={load} />;
   if (state.gameId === ATLAS_GAME_ID && state.scene) return <AtlasShell code={code} state={state} refresh={load} />;
   if (state.party && state.gameId === REPLY_ALL_GAME_ID) return <ReplyAllShell code={code} state={state} refresh={load} />;
+  if (state.party && state.gameId === GRUNT_GAME_ID) return <GruntShell code={code} state={state} refresh={load} />;
   if (state.party) return <AllHandsShell code={code} state={state} refresh={load} />;
   return <GameShell code={code} state={state} refresh={load} />;
 }
