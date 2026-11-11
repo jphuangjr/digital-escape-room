@@ -29,6 +29,21 @@ export function normalizeCodeInput(raw: unknown): string | null {
 }
 
 /** ACCOUNT_ADMIN may hold one email or a comma-separated list. */
+/**
+ * Email domains whose accounts play every game free (no code needed to host). Matched exactly:
+ * "kikoff.com" covers ada@kikoff.com but not ada@mail.kikoff.com or ada@kikoff.com.evil.
+ */
+export const FREE_EMAIL_DOMAINS: readonly string[] = ["kikoff.com"];
+
+/** True when a *verified* email's domain is exactly one of FREE_EMAIL_DOMAINS (case-insensitive). */
+export function hasFreeEmailDomain(email: string | null | undefined, emailVerified: boolean): boolean {
+  if (!email || !emailVerified) return false;
+  const e = email.trim().toLowerCase();
+  const at = e.lastIndexOf("@");
+  if (at <= 0) return false;
+  return FREE_EMAIL_DOMAINS.includes(e.slice(at + 1));
+}
+
 export function parseAdminEmails(raw: string | undefined): Set<string> {
   return new Set(
     (raw ?? "")

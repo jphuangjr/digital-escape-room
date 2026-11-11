@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CODE_ALPHABET, CODE_LEN, formatCode, generateCodeBody, normalizeCodeInput, parseAdminEmails } from "../codes";
+import { CODE_ALPHABET, CODE_LEN, formatCode, generateCodeBody, hasFreeEmailDomain, normalizeCodeInput, parseAdminEmails } from "../codes";
 
 describe("purchase codes", () => {
   it("generates bodies from the unambiguous alphabet", () => {
@@ -27,5 +27,33 @@ describe("purchase codes", () => {
     expect(parseAdminEmails("Admin@Example.com")).toEqual(new Set(["admin@example.com"]));
     expect(parseAdminEmails(" a@x.com, B@y.com ,")).toEqual(new Set(["a@x.com", "b@y.com"]));
     expect(parseAdminEmails(undefined).size).toBe(0);
+  });
+});
+
+describe("free email domains", () => {
+  it("lets verified @kikoff.com emails in, case-insensitively", () => {
+    expect(hasFreeEmailDomain("ada@kikoff.com", true)).toBe(true);
+    expect(hasFreeEmailDomain(" Ada.Voss@KIKOFF.COM ", true)).toBe(true);
+  });
+
+  it("refuses unverified emails", () => {
+    expect(hasFreeEmailDomain("ada@kikoff.com", false)).toBe(false);
+  });
+
+  it("matches the domain exactly", () => {
+    for (const e of [
+      "ada@mail.kikoff.com",
+      "ada@kikoff.com.evil.io",
+      "ada@notkikoff.com",
+      "kikoff.com@gmail.com",
+      "ada@kikoff.co",
+      "@kikoff.com",
+      "kikoff.com",
+      "",
+      null,
+      undefined,
+    ]) {
+      expect(hasFreeEmailDomain(e, true)).toBe(false);
+    }
   });
 });
