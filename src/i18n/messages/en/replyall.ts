@@ -116,6 +116,7 @@ const messages = {
   "replyall.landing.step4.body": "A pin is a point. First to the target wins the thread.",
   "replyall.landing.note": "{min} to {max} players in the same room, reading out loud. Every phone holds a secret hand; the app deals, shuffles and keeps score. Hosts can also mix in an optional 18+ After Hours deck.",
   "replyall.landing.cardsEnglish": "The cards are in English.",
+  "replyall.landing.afterHoursEnglish": "The 18+ After Hours cards are in English.",
   "replyall.landing.reviewDeck": "Admin: review the deck",
   "replyall.landing.unlock": "Enter a purchase code to host Reply All.",
   "replyall.landing.joining": "Joining the thread…",

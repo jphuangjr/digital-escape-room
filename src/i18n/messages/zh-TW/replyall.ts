@@ -107,6 +107,7 @@ const messages: Record<keyof typeof en, string> = {
   "replyall.landing.step4.body": "一個釘選算一分。先達到目標者贏得這個討論串。",
   "replyall.landing.note": "同一個房間 {min} 至 {max} 人，大聲念出來玩。每支手機上都有秘密手牌；App 會發牌、洗牌和計分。主持人也可以加入選用的 18+ 下班後牌組。",
   "replyall.landing.cardsEnglish": "卡牌是英文的。",
+  "replyall.landing.afterHoursEnglish": "18+ 下班後卡牌是英文的。",
   "replyall.landing.reviewDeck": "管理員：檢查牌組",
   "replyall.landing.unlock": "輸入購買代碼才能主持全部回覆。",
   "replyall.landing.joining": "正在加入討論串…",

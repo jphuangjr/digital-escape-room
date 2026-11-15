@@ -8,6 +8,8 @@ import { QrCode } from "@/components/site/QrCode";
 import { TestBar } from "@/components/allhands/TestBar";
 import { FormattedMessage } from "react-intl";
 import { useT } from "@/i18n/client";
+import { localizeView } from "@/lib/replyall/content";
+import { useReplyPack } from "./useReplyPack";
 import {
   PICK_OPTIONS_MS,
   TARGET_OPTIONS,
@@ -45,7 +47,8 @@ export function ReplyAllShell({ code, state, refresh }: { code: string; state: R
   useEffect(() => {
     if (inFlight.current === 0) setLocal(null);
   }, [state]);
-  const party = local ?? (state.party as ReplyAllView);
+  const pack = useReplyPack();
+  const party = localizeView(local ?? (state.party as ReplyAllView), pack);
   const partyRef = useRef(party);
   partyRef.current = party;
 

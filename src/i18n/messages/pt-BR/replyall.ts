@@ -107,6 +107,7 @@ const messages: Record<keyof typeof en, string> = {
   "replyall.landing.step4.body": "Uma fixada é um ponto. Quem chegar primeiro ao objetivo vence a thread.",
   "replyall.landing.note": "De {min} a {max} jogadores na mesma sala, lendo em voz alta. Cada celular guarda uma mão secreta; o app distribui, embaralha e marca os pontos. O anfitrião também pode incluir um baralho opcional After Hours +18.",
   "replyall.landing.cardsEnglish": "As cartas estão em inglês.",
+  "replyall.landing.afterHoursEnglish": "As cartas After Hours +18 estão em inglês.",
   "replyall.landing.reviewDeck": "Admin: revisar o baralho",
   "replyall.landing.unlock": "Digite um código de compra para hospedar Reply All.",
   "replyall.landing.joining": "Entrando na thread…",
