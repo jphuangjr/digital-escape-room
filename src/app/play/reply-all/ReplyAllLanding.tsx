@@ -7,6 +7,7 @@ import { gameText, getGame } from "@/lib/games";
 import { AccountBar, ContinueRooms, SignInButton, useMe } from "@/components/site/Account";
 import { RedeemBox } from "@/components/site/RedeemBox";
 import { LanguageSwitcher, useLocale, useT } from "@/i18n/client";
+import { COMPLETE_PACKS, REPLY_PACK_LOADERS } from "@/lib/replyall/content";
 import { AVATAR_COLORS } from "@/lib/avatarColors";
 import { PartyCodeField, PartyModeTabs, joinRoom, normalizeRoomCode, type PartyMode } from "@/components/site/PartyJoin";
 import { HAND_SIZE, MAX_PLAYERS, MIN_PLAYERS, REPLY_ALL_GAME_ID } from "@/lib/replyall/types";
@@ -150,7 +151,7 @@ export function ReplyAllLanding() {
           </ol>
           <p className="text-xs text-slate-500">
             {t("replyall.landing.note", { min: MIN_PLAYERS, max: MAX_PLAYERS })}
-            {locale !== "en" && <> {t("replyall.landing.cardsEnglish")}</>}
+            {locale !== "en" && !COMPLETE_PACKS.has(locale) && <> {t(locale in REPLY_PACK_LOADERS ? "replyall.landing.afterHoursEnglish" : "replyall.landing.cardsEnglish")}</>}
           </p>
         </section>
 

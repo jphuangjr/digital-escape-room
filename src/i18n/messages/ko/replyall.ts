@@ -107,6 +107,7 @@ const messages: Record<keyof typeof en, string> = {
   "replyall.landing.step4.body": "고정 하나가 1점이에요. 목표에 먼저 닿으면 스레드에서 승리.",
   "replyall.landing.note": "한 방에 {min}~{max}명, 소리 내어 읽으며 플레이해요. 폰마다 비밀 손패가 있고, 앱이 카드를 나누고 섞고 점수를 매겨요. 호스트는 선택 사항인 18+ 애프터 아워스 덱도 섞을 수 있어요.",
   "replyall.landing.cardsEnglish": "카드는 영어로 되어 있어요.",
+  "replyall.landing.afterHoursEnglish": "18+ 애프터 아워스 카드는 영어로 되어 있어요.",
   "replyall.landing.reviewDeck": "관리자: 덱 검토",
   "replyall.landing.unlock": "전체 답장을 호스트하려면 구매 코드를 입력하세요.",
   "replyall.landing.joining": "스레드에 참가하는 중…",

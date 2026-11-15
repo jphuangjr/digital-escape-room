@@ -107,6 +107,7 @@ const messages: Record<keyof typeof en, string> = {
   "replyall.landing.step4.body": "ピン1つで1点。目標に先に届いた人がスレッドの勝者。",
   "replyall.landing.note": "同じ部屋で{min}〜{max}人、声に出して読みながら遊びます。スマホごとに秘密の手札があり、アプリが配ってシャッフルして得点をつけます。ホストは18禁のアフターアワーズデッキを混ぜることもできます。",
   "replyall.landing.cardsEnglish": "カードは英語です。",
+  "replyall.landing.afterHoursEnglish": "18禁のアフターアワーズカードは英語です。",
   "replyall.landing.reviewDeck": "管理者：デッキを確認",
   "replyall.landing.unlock": "全員に返信のホストには購入コードを入力してください。",
   "replyall.landing.joining": "スレッドに参加しています…",
