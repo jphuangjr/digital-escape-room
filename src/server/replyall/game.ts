@@ -466,6 +466,7 @@ export function viewFor(s: ReplyAllState, viewerId: string, ctx: { hostId: strin
     })),
     managerId,
     prompt: s.prompt === null ? null : promptText(s.prompt),
+    promptId: s.prompt,
     me: {
       seated: Boolean(me),
       isManager: viewerId === managerId,
@@ -479,13 +480,14 @@ export function viewFor(s: ReplyAllState, viewerId: string, ctx: { hostId: strin
     entries: shown
       ? s.order.map((pid, i) => ({
           entry: i,
+          card: s.plays[pid]?.card ?? 0,
           text: replyText(s.plays[pid]?.card ?? 0),
           mine: pid === viewerId,
           ...(final ? { by: pid, auto: Boolean(s.plays[pid]?.auto), ...(s.settings.mode === "vote" ? { votes: votesFor(i) } : {}) } : {}),
         }))
       : null,
     result: final ? s.result : null,
-    history: s.history.map((h) => ({ round: h.round, prompt: promptText(h.prompt), reply: replyText(h.card), winners: h.winners })),
+    history: s.history.map((h) => ({ round: h.round, prompt: promptText(h.prompt), reply: replyText(h.card), promptId: h.prompt, replyId: h.card, winners: h.winners })),
     champions: s.champions,
   };
 }

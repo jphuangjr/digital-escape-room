@@ -68,6 +68,8 @@ export interface CardView {
 /** A reply on the table. Anonymous until the result: `by` and `votes` are filled in only then. */
 export interface EntryView {
   entry: number;
+  /** The reply card's id, so a phone can show it in its own language. */
+  card?: number;
   text: string;
   /** Played by the timer because its writer ran out of time. Shown only at the result. */
   auto?: boolean;
@@ -80,6 +82,9 @@ export interface RoundRecord {
   round: number;
   prompt: string;
   reply: string;
+  /** The prompt's and reply's card ids, for showing them in the phone's language. */
+  promptId?: number;
+  replyId?: number;
   /** Who got the pin. Several in vote mode on a tie. */
   winners: string[];
 }
@@ -99,6 +104,8 @@ export interface ReplyAllView {
   seats: SeatView[];
   managerId: string | null;
   prompt: string | null;
+  /** The prompt's card id, for showing it in the phone's language. */
+  promptId?: number | null;
   me: {
     seated: boolean;
     isManager: boolean;
