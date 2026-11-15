@@ -65,18 +65,18 @@ describe("balance warnings", () => {
   const issues = (n: number, custom: Parameters<typeof lineupFor>[2]) => lineupIssues(lineupFor(n, DEFAULT_SETTINGS, custom));
 
   it("blocks lineups that end the game before it starts", () => {
-    expect(issues(6, { it: 1, hr: 1 }).some((x) => x.level === "block" && /no Moles/.test(x.text))).toBe(true);
-    expect(issues(6, { mole: 3, it: 1 }).some((x) => x.level === "block" && /half the team/.test(x.text))).toBe(true);
-    expect(issues(5, { mole: 1, it: 1, hr: 1, intern: 1, nephew: 1, burnout: 1 }).some((x) => x.level === "block" && /more role/.test(x.text))).toBe(
+    expect(issues(6, { it: 1, hr: 1 }).some((x) => x.level === "block" && x.msg.id === "allhands.lineup.noMoles")).toBe(true);
+    expect(issues(6, { mole: 3, it: 1 }).some((x) => x.level === "block" && x.msg.id === "allhands.lineup.halfMoles")).toBe(true);
+    expect(issues(5, { mole: 1, it: 1, hr: 1, intern: 1, nephew: 1, burnout: 1 }).some((x) => x.level === "block" && x.msg.id === "allhands.lineup.tooManyRoles")).toBe(
       true,
     );
   });
 
   it("warns which side has the edge", () => {
-    expect(issues(10, { mole: 4, it: 1, hr: 1 }).map((x) => x.text).join(" ")).toMatch(/Moles have the edge/);
-    expect(issues(10, { mole: 1, it: 1, hr: 1 }).map((x) => x.text).join(" ")).toMatch(/company has the edge/);
-    expect(issues(8, { mole: 2, hr: 1 }).map((x) => x.text).join(" ")).toMatch(/No IT Guy/);
-    expect(issues(6, { mole: 1, it: 1, hr: 1, nephew: 1 }).map((x) => x.text).join(" ")).toMatch(/meant for tables of 8/);
+    expect(issues(10, { mole: 4, it: 1, hr: 1 }).map((x) => x.msg.id)).toContain("allhands.lineup.manyMoles");
+    expect(issues(10, { mole: 1, it: 1, hr: 1 }).map((x) => x.msg.id)).toContain("allhands.lineup.fewMoles");
+    expect(issues(8, { mole: 2, hr: 1 }).map((x) => x.msg.id)).toContain("allhands.lineup.noIt");
+    expect(issues(6, { mole: 1, it: 1, hr: 1, nephew: 1 }).map((x) => x.msg)).toContainEqual({ id: "allhands.lineup.smallTable", values: { role: "@allhands.role.nephew.name", min: 8, n: 6 } });
     expect(issues(8, { mole: 2, it: 1, hr: 1 }).every((x) => x.level === "warn")).toBe(true);
   });
 });
@@ -104,7 +104,7 @@ describe("lineup in the lobby", () => {
     s = act(s, "p2", { type: "lineup", from: "mole", to: "employee" }, 6);
     const r = applyAction(s, { type: "start" }, ctx("p1", 6));
     expect(r.ok).toBe(false);
-    expect(r.error).toMatch(/no Moles/);
+    expect(r.error).toBe("allhands.lineup.noMoles");
   });
 
   it("follows the headcount until someone customises it", () => {

@@ -1,9 +1,12 @@
 import { db } from "@/server/db";
-import { error, isResponse, json, readBody, requirePlayer } from "@/server/http";
+import { error, isResponse, json, readBody, requirePlayer, translateLogicError } from "@/server/http";
 import { publish } from "@/server/realtime";
 import { partyGame } from "@/server/party/games";
 import { changeParty, effectiveHostId, rand } from "@/server/party/server";
 import { viewerId } from "@/server/party/test";
+import { getT } from "@/i18n/server";
+import { MESSAGES } from "@/i18n/messages";
+import { formatMsg } from "@/i18n/msg";
 
 /** In an admin's test room these are made as the bot being looked through; host controls stay the admin's. */
 // Grunt's turn moves act as the seat too; its "begin" stays the caller's so a host looking through a bot can still
@@ -41,7 +44,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   const partyCtx = { playerId: actor, hostId, roomPlayerIds: players.map((p) => p.id), now: now.getTime(), rand };
 
   const res = await changeParty(room, game, (cur) => game.apply(cur, body, partyCtx));
-  if (!res.ok) return error(409, res.error ?? "That didn't work.", { party: game.view(res.state, as, { hostId }) });
+  if (!res.ok) {
+    const t = await getT();
+    const id = res.error && res.error in MESSAGES.en ? res.error : null;
+    const message = id ? formatMsg(t, id, res.errorValues) : res.error ? translateLogicError(t, res.error) : t("party.err.generic");
+    return error(409, message, { party: game.view(res.state, as, { hostId }) });
+  }
 
   // Removing a player between games: the game has checked it's allowed.
   if (body.type === "kick" && typeof body.playerId === "string" && body.playerId !== room.hostId) {

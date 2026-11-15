@@ -24,8 +24,13 @@ export interface PartyResult<S> {
   state: S;
   changed: boolean;
   ok: boolean;
-  /** Why an action was refused, in words for the player. */
+  /**
+   * Why an action was refused: a message id (e.g. "party.err.hostOnly") that the party route translates into the
+   * caller's language, or plain words.
+   */
   error?: string;
+  /** Values for the error message's placeholders, e.g. {min: 4}. */
+  errorValues?: Record<string, string | number>;
 }
 
 export interface PartyGame<S = unknown, A = unknown, V = unknown> {

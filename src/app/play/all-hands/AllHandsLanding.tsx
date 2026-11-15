@@ -10,7 +10,7 @@ import { LanguageSwitcher, useT } from "@/i18n/client";
 import { AVATAR_COLORS } from "@/lib/avatarColors";
 import { PartyCodeField, PartyModeTabs, joinRoom, normalizeRoomCode, type PartyMode } from "@/components/site/PartyJoin";
 import { HowToPlayTour } from "@/components/allhands/HowToPlayTour";
-import { ALL_HANDS_GAME_ID, MAX_PLAYERS, MIN_PLAYERS, ROLE_INFO, type Role } from "@/lib/allhands/types";
+import { ALL_HANDS_GAME_ID, MAX_PLAYERS, MIN_PLAYERS, type Role } from "@/lib/allhands/types";
 
 const ROLES: Role[] = ["employee", "mole", "it", "hr", "recruiter", "intern", "burnout", "nephew"];
 
@@ -79,7 +79,7 @@ export function AllHandsLanding() {
     if (data.signInRequired || data.purchaseRequired) {
       if (data.signInRequired) setSignedOut(true);
       else setUnlocked(false);
-      setErr(data.signInRequired ? t("site.ada.errSignIn") : "Enter a purchase code to host All Hands.");
+      setErr(data.signInRequired ? t("site.ada.errSignIn") : t("allhands.landing.unlock"));
       setBusy(false);
       return;
     }
@@ -118,7 +118,7 @@ export function AllHandsLanding() {
           <LanguageSwitcher tone="shell" />
         </div>
         <header className="text-center">
-          {game.status === "staging" && <p className="font-mono text-11px uppercase tracking-[0.3em] text-rose-400">Staging · admins only</p>}
+          {game.status === "staging" && <p className="font-mono text-11px uppercase tracking-[0.3em] text-rose-400">{t("party.landing.staging")}</p>}
           <p className="mt-2 text-xs font-semibold uppercase tracking-[0.3em] text-lime-300">A Synergr party game</p>
           <h1 className="mt-1 text-5xl font-black tracking-tight">{gameText(t, game, "title")}</h1>
           <p className="mt-2 text-slate-300">{gameText(t, game, "tagline")}</p>
@@ -136,26 +136,25 @@ export function AllHandsLanding() {
 
         <section aria-labelledby="ah-roles" className="flex flex-col gap-2">
           <h2 id="ah-roles" className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
-            Who&apos;s who
+            {t("allhands.landing.whoIsWho")}
           </h2>
           <ul className="grid grid-cols-2 gap-2">
             {ROLES.map((r) => (
               <li key={r} className="rounded-2xl border border-slate-800 bg-slate-900 p-3">
-                <p className="font-bold">{ROLE_INFO[r].name}</p>
-                <p className="text-xs text-slate-400">{ROLE_INFO[r].power}</p>
+                <p className="font-bold">{t(`allhands.role.${r}.name`)}</p>
+                <p className="text-xs text-slate-400">{t(`allhands.role.${r}.power`)}</p>
               </li>
             ))}
           </ul>
           <p className="text-xs text-slate-500">
-            {MIN_PLAYERS} to {MAX_PLAYERS} players in the same room, talking out loud. Every phone is a secret badge; the app runs
-            the clock and the narration.
+            {t("allhands.landing.note", { min: MIN_PLAYERS, max: MAX_PLAYERS })}
           </p>
           <button
             type="button"
             onClick={() => setTour(true)}
             className="min-h-11 self-start rounded-xl border border-slate-700 px-4 text-sm font-semibold active:bg-slate-800"
           >
-            🎓 How to play
+            {t("allhands.landing.howToPlay")}
           </button>
         </section>
         {tour && <HowToPlayTour onClose={() => setTour(false)} />}
@@ -206,7 +205,7 @@ export function AllHandsLanding() {
           {err && <p className="text-sm text-rose-300">{err}</p>}
           {mode === "join" ? (
             <button type="submit" disabled={busy} className="min-h-12 rounded-xl bg-lime-300 text-slate-950 font-bold active:opacity-80 disabled:opacity-60">
-              {busy ? "Joining the meeting…" : t("site.join.button")}
+              {busy ? t("allhands.landing.joining") : t("site.join.button")}
             </button>
           ) : mustSignIn ? (
             <div className="flex flex-col gap-2">
@@ -217,7 +216,7 @@ export function AllHandsLanding() {
             <RedeemBox gameTitle={gameText(t, game, "title")} onRedeemed={(id) => id === ALL_HANDS_GAME_ID && setUnlocked(true)} />
           ) : (
             <button type="submit" disabled={busy} className="min-h-12 rounded-xl bg-lime-300 font-bold text-slate-950 active:bg-lime-200 disabled:opacity-60">
-              {busy ? "Booking the meeting room…" : "Host a room"}
+              {busy ? t("allhands.landing.starting") : t("party.landing.host")}
             </button>
           )}
           {mode === "host" && me?.isAdmin && signedIn && (
@@ -227,10 +226,10 @@ export function AllHandsLanding() {
               onClick={() => void start(false, true)}
               className="min-h-12 rounded-xl border border-amber-300/60 font-semibold text-amber-200 active:bg-amber-300/10 disabled:opacity-60"
             >
-              Admin: create a test room with 7 bots
+              {t("party.landing.testRoom", { n: 7 })}
             </button>
           )}
-          {mode === "host" && <p className="text-xs text-slate-500">Friends join with the room code, the invite link or the QR code. No account needed to play.</p>}
+          {mode === "host" && <p className="text-xs text-slate-500">{t("party.landing.friendsJoin")}</p>}
         </form>
       </div>
     </main>

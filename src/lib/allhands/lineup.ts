@@ -5,6 +5,7 @@
 // recommended lineup for its headcount (and follows it as people join) until someone swaps a role. From then on
 // the table plays the custom lineup until someone resets it.
 
+import type { Msg } from "@/i18n/msg";
 import {
   BURNOUT_MIN_PLAYERS,
   INTERN_MIN_PLAYERS,
@@ -12,7 +13,6 @@ import {
   MIN_PLAYERS,
   NEPHEW_MIN_PLAYERS,
   RECRUITER_MIN_PLAYERS,
-  ROLE_INFO,
   isMoleRole,
   molesFor,
   specialsFor,
@@ -119,10 +119,13 @@ export function lineupRoles(l: Lineup): Role[] | null {
   return roles;
 }
 
+/** A role's name inside a lineup message: translated where it's shown (see src/i18n/msg.ts). */
+const roleName = (r: Role) => `@allhands.role.${r}.name`;
+
 /** Why a role can't take one more seat, or null if it can. */
-export function cantAdd(l: Lineup, role: Role): string | null {
+export function cantAdd(l: Lineup, role: Role): Msg | null {
   const max = ROLE_MAX[role];
-  if (max !== undefined && l.counts[role] >= max) return `Only one ${ROLE_INFO[role].name} per game.`;
+  if (max !== undefined && l.counts[role] >= max) return { id: "allhands.lineup.onlyOne", values: { role: roleName(role) } };
   return null;
 }
 
@@ -130,10 +133,10 @@ export function cantAdd(l: Lineup, role: Role): string | null {
  * Swap one seat from `from` to `to`, and return the new custom lineup: null when that lands back on the recommended
  * one (so the table follows the recommendation again as people come and go). An error in words if it can't be done.
  */
-export function swapRole(l: Lineup, from: Role, to: Role): { ok: true; lineup: RoleCounts | null } | { ok: false; error: string } {
-  if (!LINEUP_ROLES.includes(from) || !LINEUP_ROLES.includes(to)) return { ok: false, error: "That's not a role." };
-  if (from === to) return { ok: false, error: "That seat already has that role." };
-  if (l.counts[from] <= 0) return { ok: false, error: `There's no ${ROLE_INFO[from].name} to swap out.` };
+export function swapRole(l: Lineup, from: Role, to: Role): { ok: true; lineup: RoleCounts | null } | { ok: false; error: Msg } {
+  if (!LINEUP_ROLES.includes(from) || !LINEUP_ROLES.includes(to)) return { ok: false, error: { id: "allhands.lineup.notRole" } };
+  if (from === to) return { ok: false, error: { id: "allhands.lineup.sameRole" } };
+  if (l.counts[from] <= 0) return { ok: false, error: { id: "allhands.lineup.noneToSwap", values: { role: roleName(from) } } };
   const blocked = cantAdd(l, to);
   if (blocked) return { ok: false, error: blocked };
   const next: RoleCounts = { ...l.counts };
@@ -146,7 +149,8 @@ export function swapRole(l: Lineup, from: Role, to: Role): { ok: true; lineup: R
 export interface LineupIssue {
   /** "block": the game can't start like this. "warn": it can, but one side has the edge. */
   level: "block" | "warn";
-  text: string;
+  /** What's wrong, as a message id and values (shown in the viewer's language). */
+  msg: Msg;
 }
 
 /** What's off about a lineup, worst first. Empty means it's balanced for the table. */
@@ -159,26 +163,24 @@ export function lineupIssues(l: Lineup): LineupIssue[] {
   const recMoles = LINEUP_ROLES.filter((r) => isMoleRole(r)).reduce((sum, r) => sum + (l.recommended[r] ?? 0), 0);
 
   if (extra > 0) {
-    out.push({ level: "block", text: `There are ${extra} more ${extra === 1 ? "role" : "roles"} than players. Swap ${extra === 1 ? "one" : extra} back to Employee.` });
+    out.push({ level: "block", msg: { id: "allhands.lineup.tooManyRoles", values: { n: extra } } });
   }
-  if (moleSide === 0) out.push({ level: "block", text: "There are no Moles, so the company wins before the game starts." });
-  else if (moleSide * 2 >= n) out.push({ level: "block", text: `${moleSide} Moles at a table of ${n} is already half the team, so the Moles win before anyone speaks.` });
-  else if (moleSide > recMoles) out.push({ level: "warn", text: `${moleSide} Moles is more than the ${recMoles} we suggest for ${n} players. The Moles have the edge.` });
-  else if (moleSide < recMoles) out.push({ level: "warn", text: `${moleSide} ${moleSide === 1 ? "Mole is" : "Moles is"} fewer than the ${recMoles} we suggest for ${n} players. The company has the edge.` });
+  if (moleSide === 0) out.push({ level: "block", msg: { id: "allhands.lineup.noMoles" } });
+  else if (moleSide * 2 >= n) out.push({ level: "block", msg: { id: "allhands.lineup.halfMoles", values: { moles: moleSide, n } } });
+  else if (moleSide > recMoles) out.push({ level: "warn", msg: { id: "allhands.lineup.manyMoles", values: { moles: moleSide, rec: recMoles, n } } });
+  else if (moleSide < recMoles) out.push({ level: "warn", msg: { id: "allhands.lineup.fewMoles", values: { moles: moleSide, rec: recMoles, n } } });
 
-  if (c.it === 0 && c.hr === 0) out.push({ level: "warn", text: "No IT Guy or HR Rep, so the company has no after-hours powers. The Moles have the edge." });
-  else if (c.it === 0) out.push({ level: "warn", text: "No IT Guy, so nobody can find out who's a Mole. The Moles have the edge." });
-  else if (c.hr === 0) out.push({ level: "warn", text: "No HR Rep, so nobody can block a layoff. The Moles have the edge." });
+  if (c.it === 0 && c.hr === 0) out.push({ level: "warn", msg: { id: "allhands.lineup.noItHr" } });
+  else if (c.it === 0) out.push({ level: "warn", msg: { id: "allhands.lineup.noIt" } });
+  else if (c.hr === 0) out.push({ level: "warn", msg: { id: "allhands.lineup.noHr" } });
 
-  if (c.recruiter > 0 && c.mole === 0 && moleSide > 0) {
-    out.push({ level: "warn", text: "The Recruiter is the only Mole. Making an offer skips that night's layoff, so it's a big gamble." });
-  }
+  if (c.recruiter > 0 && c.mole === 0 && moleSide > 0) out.push({ level: "warn", msg: { id: "allhands.lineup.loneRecruiter" } });
   for (const r of LINEUP_ROLES) {
     const min = ROLE_MIN_PLAYERS[r];
     if (min !== undefined && c[r] > 0 && n < min) {
-      out.push({ level: "warn", text: `The ${ROLE_INFO[r].name} is meant for tables of ${min} or more. At ${n} it swings the game a lot.` });
+      out.push({ level: "warn", msg: { id: "allhands.lineup.smallTable", values: { role: roleName(r), min, n } } });
     }
   }
-  if (c.employee === 0 && extra <= 0) out.push({ level: "warn", text: "Nobody is a plain Employee, so everyone's claim is a power claim. That's easy to see through." });
+  if (c.employee === 0 && extra <= 0) out.push({ level: "warn", msg: { id: "allhands.lineup.noEmployees" } });
   return out;
 }

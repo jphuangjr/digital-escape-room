@@ -6,23 +6,18 @@ import { useRouter } from "next/navigation";
 import { gameText, getGame } from "@/lib/games";
 import { AccountBar, ContinueRooms, SignInButton, useMe } from "@/components/site/Account";
 import { RedeemBox } from "@/components/site/RedeemBox";
-import { LanguageSwitcher, useT } from "@/i18n/client";
+import { LanguageSwitcher, useLocale, useT } from "@/i18n/client";
 import { AVATAR_COLORS } from "@/lib/avatarColors";
 import { PartyCodeField, PartyModeTabs, joinRoom, normalizeRoomCode, type PartyMode } from "@/components/site/PartyJoin";
 import { GRUNT_GAME_ID, MAX_PLAYERS, MIN_PLAYERS } from "@/lib/grunt/types";
 
-const STEPS: { title: string; body: string }[] = [
-  { title: "Two teams", body: "Rocks and Sticks, picked at random. Teams take turns; everyone gets a go at giving the clues." },
-  { title: "The card", body: "A word for 1 point and a harder phrase for 3. Your team can't see it." },
-  { title: "Emoji only", body: "No talking, no pointing. Tap emoji on your phone; they appear on every phone as you go." },
-  { title: "Bonk!", body: "The other team sees the card too. Catch the clue-giver talking or gesturing: a point off." },
-];
 /** Grunt's page: the rules, and hosting a room. Hosting needs sign-in and a purchase code; joining is free. */
 export function GruntLanding() {
   const router = useRouter();
   const game = getGame(GRUNT_GAME_ID)!;
   const me = useMe();
   const t = useT();
+  const locale = useLocale();
   const [unlocked, setUnlocked] = useState(false);
   const [signedOut, setSignedOut] = useState(false);
   const signedIn = Boolean(me?.user) && !signedOut;
@@ -81,7 +76,7 @@ export function GruntLanding() {
     if (data.signInRequired || data.purchaseRequired) {
       if (data.signInRequired) setSignedOut(true);
       else setUnlocked(false);
-      setErr(data.signInRequired ? t("site.ada.errSignIn") : "Enter a purchase code to host Grunt.");
+      setErr(data.signInRequired ? t("site.ada.errSignIn") : t("grunt.landing.unlock"));
       setBusy(false);
       return;
     }
@@ -120,8 +115,8 @@ export function GruntLanding() {
           <LanguageSwitcher tone="shell" />
         </div>
         <header className="text-center">
-          {game.status === "staging" && <p className="font-mono text-11px uppercase tracking-[0.3em] text-rose-400">Staging · admins only</p>}
-          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.3em] text-orange-400">A party game for loud rooms</p>
+          {game.status === "staging" && <p className="font-mono text-11px uppercase tracking-[0.3em] text-rose-400">{t("party.landing.staging")}</p>}
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.3em] text-orange-400">{t("grunt.landing.kicker")}</p>
           <h1 className="mt-1 text-5xl font-black tracking-tight">{gameText(t, game, "title")}</h1>
           <p className="mt-2 text-stone-300">{gameText(t, game, "tagline")}</p>
           {game.tags && game.tags.length > 0 && (
@@ -138,22 +133,23 @@ export function GruntLanding() {
 
         <section aria-labelledby="gr-how" className="flex flex-col gap-2">
           <h2 id="gr-how" className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-400">
-            How it plays
+            {t("party.landing.how")}
           </h2>
           <ol className="grid grid-cols-2 gap-2">
-            {STEPS.map((step, i) => (
-              <li key={step.title} className="rounded-2xl border border-stone-800 bg-stone-900 p-3">
+            {[1, 2, 3, 4].map((n, i) => (
+
+              <li key={n} className="rounded-2xl border border-stone-800 bg-stone-900 p-3">
                 <p className="font-bold">
                   <span className="mr-1 text-orange-400">{i + 1}.</span>
-                  {step.title}
+                  {t(`grunt.landing.step${n}.title`)}
                 </p>
-                <p className="text-xs text-stone-400">{step.body}</p>
+                <p className="text-xs text-stone-400">{t(`grunt.landing.step${n}.body`)}</p>
               </li>
             ))}
           </ol>
           <p className="text-xs text-stone-500">
-            {MIN_PLAYERS} to {MAX_PLAYERS} players in the same room. Everyone needs a phone: the app deals the cards, runs the
-            clock, shows the emoji clues and keeps score.
+            {t("grunt.landing.note", { min: MIN_PLAYERS, max: MAX_PLAYERS })}
+            {locale !== "en" && <> {t("grunt.landing.cardsEnglish")}</>}
           </p>
         </section>
 
@@ -203,7 +199,7 @@ export function GruntLanding() {
           {err && <p className="text-sm text-rose-300">{err}</p>}
           {mode === "join" ? (
             <button type="submit" disabled={busy} className="min-h-12 rounded-xl bg-orange-400 text-stone-950 font-bold active:opacity-80 disabled:opacity-60">
-              {busy ? "Joining the cave…" : t("site.join.button")}
+              {busy ? t("grunt.landing.joining") : t("site.join.button")}
             </button>
           ) : mustSignIn ? (
             <div className="flex flex-col gap-2">
@@ -214,7 +210,7 @@ export function GruntLanding() {
             <RedeemBox gameTitle={gameText(t, game, "title")} onRedeemed={(id) => id === GRUNT_GAME_ID && setUnlocked(true)} />
           ) : (
             <button type="submit" disabled={busy} className="min-h-12 rounded-xl bg-orange-400 font-bold text-stone-950 active:bg-orange-300 disabled:opacity-60">
-              {busy ? "Lighting the fire…" : "Host a room"}
+              {busy ? t("grunt.landing.starting") : t("party.landing.host")}
             </button>
           )}
           {mode === "host" && me?.isAdmin && signedIn && (
@@ -224,10 +220,10 @@ export function GruntLanding() {
               onClick={() => void start(false, true)}
               className="min-h-12 rounded-xl border border-amber-300/60 font-semibold text-amber-200 active:bg-amber-300/10 disabled:opacity-60"
             >
-              Admin: create a test room with 5 bots
+              {t("party.landing.testRoom", { n: 5 })}
             </button>
           )}
-          {mode === "host" && <p className="text-xs text-stone-500">Friends join with the room code, the invite link or the QR code. No account needed to play.</p>}
+          {mode === "host" && <p className="text-xs text-stone-500">{t("party.landing.friendsJoin")}</p>}
         </form>
       </div>
     </main>

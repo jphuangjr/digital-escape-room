@@ -137,8 +137,9 @@ const seatOf = (s: AllHandsState, id: string) => s.seats.find((x) => x.id === id
 const living = (s: AllHandsState) => s.seats.filter((x) => x.alive);
 const isAliveId = (s: AllHandsState, id: string) => seatOf(s, id)?.alive === true;
 
-function refuse<S>(state: S, error: string): PartyResult<S> {
-  return { state, changed: false, ok: false, error };
+/** A refused action. `error` is a message id the party route translates (src/i18n/messages/<locale>/party.ts etc.). */
+function refuse<S>(state: S, error: string, errorValues?: Record<string, string | number>): PartyResult<S> {
+  return { state, changed: false, ok: false, error, ...(errorValues ? { errorValues } : {}) };
 }
 function done(state: AllHandsState): PartyResult<AllHandsState> {
   return { state, changed: true, ok: true };
@@ -447,7 +448,7 @@ const HOST_ONLY = new Set(["start", "settings", "skip", "pause", "resume", "end"
 
 export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx): PartyResult<AllHandsState> {
   const { playerId: me, now } = ctx;
-  if (HOST_ONLY.has(a.type) && me !== ctx.hostId) return refuse(s, "Only the host can do that.");
+  if (HOST_ONLY.has(a.type) && me !== ctx.hostId) return refuse(s, "party.err.hostOnly");
   const seat = seatOf(s, me);
 
   switch (a.type) {
@@ -455,19 +456,20 @@ export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx):
       return advanceState(s, now);
 
     case "start": {
-      if (s.phase !== "lobby" && s.phase !== "over") return refuse(s, "The game is already running.");
-      if (ctx.roomPlayerIds.length < MIN_PLAYERS) return refuse(s, `You need at least ${MIN_PLAYERS} players to start.`);
+      if (s.phase !== "lobby" && s.phase !== "over") return refuse(s, "party.err.running");
+      if (ctx.roomPlayerIds.length < MIN_PLAYERS) return refuse(s, "party.err.needPlayers", { min: MIN_PLAYERS });
       const fresh = { ...initialState(s.settings), lineup: s.lineup ?? null };
       const lineup = lineupFor(ctx.roomPlayerIds.length, s.settings, s.lineup ?? null);
       const blocked = lineupIssues(lineup).find((x) => x.level === "block");
       const roles = lineupRoles(lineup);
-      if (blocked || !roles) return refuse(s, blocked?.text ?? "The lineup doesn't fit this table.");
+      if (blocked) return refuse(s, blocked.msg.id, blocked.msg.values);
+      if (!roles) return refuse(s, "allhands.lineup.doesntFit");
       const seats = dealRoles(ctx.roomPlayerIds, roles, ctx.rand);
       return done(timed({ ...fresh, seats, seed: ctx.rand(2 ** 31), chatterUsed: [] }, "reveal", REVEAL_MS, now));
     }
 
     case "settings": {
-      if (s.phase !== "lobby" && s.phase !== "over") return refuse(s, "Settings can only change between games.");
+      if (s.phase !== "lobby" && s.phase !== "over") return refuse(s, "party.err.settingsBetween");
       const next = { ...s.settings };
       const p = a.settings;
       if (typeof p.revealOnFire === "boolean") next.revealOnFire = p.revealOnFire;
@@ -477,19 +479,19 @@ export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx):
     }
 
     case "ready": {
-      if (s.phase !== "reveal" || !seat) return refuse(s, "Nothing to get ready for.");
+      if (s.phase !== "reveal" || !seat) return refuse(s, "allhands.err.nothingReady");
       if (seat.ready) return { state: s, changed: false, ok: true };
       const next = { ...s, seats: s.seats.map((x) => (x.id === me ? { ...x, ready: true } : x)) };
       return done(maybeEarly(next, now));
     }
 
     case "pick": {
-      if (s.phase !== "night") return refuse(s, "It's not after hours.");
-      if (!seat?.alive) return refuse(s, "You're not on the team anymore.");
-      if (!nightTargets(s, seat).includes(a.target)) return refuse(s, "You can't pick them.");
+      if (s.phase !== "night") return refuse(s, "allhands.err.notNight");
+      if (!seat?.alive) return refuse(s, "allhands.err.gone");
+      if (!nightTargets(s, seat).includes(a.target)) return refuse(s, "allhands.err.cantPick");
       if (a.offer) {
-        if (seat.role !== "recruiter" || seat.offered) return refuse(s, "You don't have an offer to make.");
-        if (!offerTargets(s).includes(a.target)) return refuse(s, "You can't make them an offer.");
+        if (seat.role !== "recruiter" || seat.offered) return refuse(s, "allhands.err.noOffer");
+        if (!offerTargets(s).includes(a.target)) return refuse(s, "allhands.err.cantOffer");
         if (s.offer === a.target && s.picks[me] === a.target) return { state: s, changed: false, ok: true };
         return done(maybeEarly({ ...s, offer: a.target, picks: { ...s.picks, [me]: a.target } }, now));
       }
@@ -500,26 +502,26 @@ export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx):
     }
 
     case "vote": {
-      if (s.phase !== "vote") return refuse(s, "Performance review hasn't started.");
-      if (!seat?.alive) return refuse(s, "Only current employees can vote.");
-      if (a.target !== SKIP && (!isAliveId(s, a.target) || a.target === me)) return refuse(s, "You can't vote for them.");
+      if (s.phase !== "vote") return refuse(s, "allhands.err.noReview");
+      if (!seat?.alive) return refuse(s, "allhands.err.employeesVote");
+      if (a.target !== SKIP && (!isAliveId(s, a.target) || a.target === me)) return refuse(s, "allhands.err.cantVote");
       if (s.votes[me] === a.target) return { state: s, changed: false, ok: true };
       return done(maybeEarly({ ...s, votes: { ...s.votes, [me]: a.target } }, now));
     }
 
     case "skip": {
-      if (s.phase === "lobby" || s.phase === "over") return refuse(s, "Nothing to skip.");
+      if (s.phase === "lobby" || s.phase === "over") return refuse(s, "party.err.noSkip");
       if (a.from && a.from !== s.phase) return { state: s, changed: false, ok: true }; // already moved on
       return done(endPhase({ ...s, pausedLeft: null }, now));
     }
 
     case "pause": {
-      if (s.endsAt === null) return refuse(s, "Nothing to pause.");
+      if (s.endsAt === null) return refuse(s, "party.err.noPause");
       return done({ ...s, pausedLeft: Math.max(0, s.endsAt - now), endsAt: null });
     }
 
     case "resume": {
-      if (s.pausedLeft === null) return refuse(s, "The game isn't paused.");
+      if (s.pausedLeft === null) return refuse(s, "party.err.notPaused");
       return done({ ...s, endsAt: now + s.pausedLeft, pausedLeft: null });
     }
 
@@ -528,27 +530,27 @@ export function applyAction(s: AllHandsState, a: AllHandsAction, ctx: PartyCtx):
 
     case "lineup": {
       // Anyone at the table may change the lineup between games (it's public), not just the host.
-      if (s.phase !== "lobby" && s.phase !== "over") return refuse(s, "The lineup can only change between games.");
+      if (s.phase !== "lobby" && s.phase !== "over") return refuse(s, "allhands.err.lineupBetween");
       if (a.reset) return s.lineup ? done({ ...s, lineup: null }) : { state: s, changed: false, ok: true };
-      if (!a.from || !a.to) return refuse(s, "Pick a role to swap.");
+      if (!a.from || !a.to) return refuse(s, "allhands.err.pickRole");
       const r = swapRole(lineupFor(ctx.roomPlayerIds.length, s.settings, s.lineup ?? null), a.from, a.to);
-      if (!r.ok) return refuse(s, r.error);
+      if (!r.ok) return refuse(s, r.error.id, r.error.values);
       return done({ ...s, lineup: r.lineup });
     }
 
     case "kick":
       // Removing a player is the route's job (it deletes their Player row); the game only checks it's allowed.
-      if (me !== ctx.hostId) return refuse(s, "Only the host can do that.");
-      if (s.phase !== "lobby" && s.phase !== "over") return refuse(s, "Players can only be removed between games.");
-      if (a.playerId === me) return refuse(s, "You can't remove yourself.");
+      if (me !== ctx.hostId) return refuse(s, "party.err.hostOnly");
+      if (s.phase !== "lobby" && s.phase !== "over") return refuse(s, "party.err.kickBetween");
+      if (a.playerId === me) return refuse(s, "party.err.kickSelf");
       return { state: s, changed: false, ok: true };
 
     case "moleChat": {
-      if (!canMoleChat(s, me)) return refuse(s, "Only Moles still on the team can use this channel.");
+      if (!canMoleChat(s, me)) return refuse(s, "allhands.err.molesOnly");
       const cleaned = cleanChatBody(a.body);
       if (!cleaned.ok) return refuse(s, cleaned.error);
       const last = [...s.moleChat].reverse().find((m) => m.from === me);
-      if (last && now - last.at < CHAT_MIN_INTERVAL_MS) return refuse(s, "Slow down a little.");
+      if (last && now - last.at < CHAT_MIN_INTERVAL_MS) return refuse(s, "allhands.err.slowDown");
       const id = `${now.toString(36)}${ctx.rand(36 ** 4).toString(36)}`;
       const moleChat = [...s.moleChat, { id, from: me, body: cleaned.body, at: now }].slice(-MOLE_CHAT_MAX);
       return done({ ...s, moleChat });
@@ -765,7 +767,7 @@ export const allHandsGame = definePartyGame<AllHandsState, Record<string, unknow
   isAction: (body) => parseAction(body) !== null,
   apply: (state, body, ctx) => {
     const action = parseAction(body);
-    return action ? applyAction(state, action, ctx) : refuse(state, "Unknown action.");
+    return action ? applyAction(state, action, ctx) : refuse(state, "party.err.unknown");
   },
   due: isDue,
   advance: advanceState,
