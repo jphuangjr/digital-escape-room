@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { gameText, getGame } from "@/lib/games";
 import { AccountBar, ContinueRooms, SignInButton, useMe } from "@/components/site/Account";
 import { RedeemBox } from "@/components/site/RedeemBox";
-import { LanguageSwitcher, useLocale, useT } from "@/i18n/client";
+import { LanguageSwitcher, useT } from "@/i18n/client";
 import { AVATAR_COLORS } from "@/lib/avatarColors";
 import { PartyCodeField, PartyModeTabs, joinRoom, normalizeRoomCode, type PartyMode } from "@/components/site/PartyJoin";
 import { GRUNT_GAME_ID, MAX_PLAYERS, MIN_PLAYERS } from "@/lib/grunt/types";
@@ -17,7 +17,6 @@ export function GruntLanding() {
   const game = getGame(GRUNT_GAME_ID)!;
   const me = useMe();
   const t = useT();
-  const locale = useLocale();
   const [unlocked, setUnlocked] = useState(false);
   const [signedOut, setSignedOut] = useState(false);
   const signedIn = Boolean(me?.user) && !signedOut;
@@ -149,7 +148,6 @@ export function GruntLanding() {
           </ol>
           <p className="text-xs text-stone-500">
             {t("grunt.landing.note", { min: MIN_PLAYERS, max: MAX_PLAYERS })}
-            {locale !== "en" && <> {t("grunt.landing.cardsEnglish")}</>}
           </p>
         </section>
 

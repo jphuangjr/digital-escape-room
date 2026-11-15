@@ -1,5 +1,6 @@
 import "server-only";
 import { CARDS } from "@/lib/grunt/cards";
+import { cardInEveryLanguage } from "./cardPacks";
 import {
   DEFAULT_SETTINGS,
   EMOJI,
@@ -199,7 +200,7 @@ function endTurn(s: GruntState, now: number): GruntState {
       points,
       cards: cards
         .filter((c) => c.word1 || c.phrase3 || c.clue.length)
-        .map((c) => ({ word: CARDS[c.card].word, phrase: CARDS[c.card].phrase, word1: c.word1, phrase3: c.phrase3, clue: clueText(c) })),
+        .map((c) => ({ card: c.card, word: CARDS[c.card].word, phrase: CARDS[c.card].phrase, word1: c.word1, phrase3: c.phrase3, clue: clueText(c) })),
     });
   }
   s.done = cards;
@@ -321,8 +322,13 @@ export function applyAction(s0: GruntState, a: GruntAction, ctx: PartyCtx): Part
       if (teamOf(s, me) !== s.clueTeam || me === s.giver) return refuse(s0, "grunt.err.teamGuesses");
       const text = a.text.replace(/\s+/g, " ").trim().slice(0, MAX_GUESS);
       if (!text) return refuse(s0, "grunt.err.emptyGuess");
-      const card = CARDS[c.card];
-      const hit: "word" | "phrase" | null = guessMatches(text, card.phrase) ? "phrase" : !c.word1 && guessMatches(text, card.word) ? "word" : null;
+      // A guess in any language counts: everyone's phone shows the card in its own language.
+      const cards = cardInEveryLanguage(c.card);
+      const hit: "word" | "phrase" | null = cards.some((k) => guessMatches(text, k.phrase))
+        ? "phrase"
+        : !c.word1 && cards.some((k) => guessMatches(text, k.word))
+          ? "word"
+          : null;
       s.guesses = [...s.guesses, { by: me, text, hit }].slice(-MAX_GUESSES);
       if (hit) score(s, hit);
       return done(s);
@@ -458,7 +464,7 @@ export function viewFor(s: GruntState, viewerId: string, ctx: { hostId: string |
         myTeam !== s.clueTeam &&
         !(viewerId in s.lastBonk && now - s.lastBonk[viewerId] < BONK_COOLDOWN_MS),
     },
-    card: c && seesCard && s.phase === "clue" ? { word: CARDS[c.card].word, phrase: CARDS[c.card].phrase, word1: c.word1 } : null,
+    card: c && seesCard && s.phase === "clue" ? { id: c.card, word: CARDS[c.card].word, phrase: CARDS[c.card].phrase, word1: c.word1 } : null,
     clue: c && s.phase === "clue" ? c.clue.map((i) => EMOJI[i] ?? "") : [],
     guesses: s.phase === "clue" ? s.guesses : [],
     turnPoints: [...s.done, ...(c ? [c] : [])].reduce((n, x) => n + cardPoints(x), 0) - s.bonks,

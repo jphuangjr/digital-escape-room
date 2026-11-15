@@ -105,7 +105,6 @@ const messages: Record<keyof typeof en, string> = {
   "grunt.landing.step4.title": "Bonk!",
   "grunt.landing.step4.body": "O outro time também vê a carta. Pegou quem dá as dicas falando ou gesticulando: menos um ponto.",
   "grunt.landing.note": "De {min} a {max} jogadores na mesma sala. Todo mundo precisa de um celular: o app distribui as cartas, roda o relógio, mostra as dicas em emoji e marca os pontos.",
-  "grunt.landing.cardsEnglish": "As cartas de palavras estão em inglês.",
   "grunt.landing.unlock": "Digite um código de compra para hospedar Grunhido.",
   "grunt.landing.joining": "Entrando na caverna…",
   "grunt.landing.starting": "Acendendo a fogueira…",

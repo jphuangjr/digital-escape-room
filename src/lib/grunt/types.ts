@@ -66,6 +66,8 @@ export interface CardResult {
   phrase3: boolean;
   /** The emoji clue, as text. */
   clue: string;
+  /** The card's id (index into CARDS), so a phone can show it in its own language. Missing in older games. */
+  card?: number;
 }
 
 export interface TurnRecord {
@@ -111,7 +113,7 @@ export interface GruntView {
    * This turn's card. Seen by the clue-giver and the other team (who police it), never by the guessing team until
    * the recap.
    */
-  card: { word: string; phrase: string; word1: boolean } | null;
+  card: { id: number; word: string; phrase: string; word1: boolean } | null;
   /** The clue so far, as emoji. Everyone sees it. */
   clue: string[];
   /** This turn's typed guesses, newest last. */
@@ -162,14 +164,15 @@ export const EMOJI: string[] = EMOJI_GROUPS.flatMap((g) => g.emoji);
 
 /**
  * A guess and a card's answer compared loosely: case, accents, punctuation, spacing, "a/an/the" and a plural "s" don't
- * matter. "The Hot-Dogs!" matches "hot dog".
+ * matter. "The Hot-Dogs!" matches "hot dog". Any script works (한국어, 中文, 日本語, español…): only letters and digits
+ * count, and spaces are dropped.
  */
 export function normalizeGuess(text: string): string {
   const words = text
     .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/\p{M}/gu, "")
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
     .split(/\s+/)
     .filter((w) => w && !["a", "an", "the"].includes(w))
     .map((w) => (w.length > 3 && w.endsWith("s") && !w.endsWith("ss") ? w.slice(0, -1) : w));
