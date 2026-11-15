@@ -1,22 +1,24 @@
 import type { NightRecord } from "./types";
 
-/** One night of the recap, with who held each power: "The Moles (Chad, Ashley) went after Tyler." */
-export function nightLines(n: NightRecord, name: (id: string | null) => string): string[] {
+type Translate = (id: string, values?: Record<string, string | number>) => string;
+
+/** One night of the recap, with who held each power: "The Moles (Chad and Ashley) went after Tyler." */
+export function nightLines(n: NightRecord, name: (id: string | null) => string, t: Translate): string[] {
   const who = (ids: (string | null | undefined)[]) => {
     const names = ids.filter((x): x is string => Boolean(x)).map(name);
     if (names.length === 0) return "";
-    return ` (${names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0]})`;
+    return t("allhands.recap.who", { names: names.reduce((a, b) => t("party.and", { a, b })) });
   };
   const lines: string[] = [];
-  const moles = `The ${n.moles && n.moles.length === 1 ? "Mole" : "Moles"}${who(n.moles ?? [])}`;
-  if (n.moleTarget) lines.push(`${moles} went after ${name(n.moleTarget)}.`);
-  else if (!n.offerTarget) lines.push(`${moles} didn't pick anyone.`);
+  const moles = { n: n.moles?.length ?? 2, who: who(n.moles ?? []) };
+  if (n.moleTarget) lines.push(t("allhands.recap.molesWent", { ...moles, name: name(n.moleTarget) }));
+  else if (!n.offerTarget) lines.push(t("allhands.recap.molesNone", moles));
   // A power whose holder was already gone that night is left out; older games don't know, so they only say what happened.
-  const hr = `HR${who([n.hr])}`;
-  if (n.hrTarget) lines.push(`${hr} covered ${name(n.hrTarget)}.`);
-  else if (n.hr) lines.push(`${hr} didn't cover anyone.`);
-  const it = `IT${who([n.it])}`;
-  if (n.itTarget) lines.push(`${it} read ${name(n.itTarget)}'s DMs${n.itResult === null ? "" : n.itResult ? " (a Mole!)" : " (clean)"}.`);
-  else if (n.it) lines.push(`${it} didn't read anyone's DMs.`);
+  if (n.hrTarget) lines.push(t("allhands.recap.hrCovered", { who: who([n.hr]), name: name(n.hrTarget) }));
+  else if (n.hr) lines.push(t("allhands.recap.hrNone", { who: who([n.hr]) }));
+  if (n.itTarget) {
+    const result = n.itResult === null ? "unknown" : n.itResult ? "mole" : "clean";
+    lines.push(t("allhands.recap.itRead", { who: who([n.it]), name: name(n.itTarget), result }));
+  } else if (n.it) lines.push(t("allhands.recap.itNone", { who: who([n.it]) }));
   return lines;
 }

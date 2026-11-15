@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { tipFor } from "@/lib/allhands/tutorial";
+import { enT } from "@/i18n/testing";
 import type { AllHandsView, NightKind, Phase, Role } from "@/lib/allhands/types";
 
 const party = (phase: Phase, opts: { round?: number; role?: Role; alive?: boolean; seated?: boolean; kind?: NightKind } = {}) =>
@@ -16,18 +17,18 @@ describe("first-game tips", () => {
   });
 
   it("explains the badge at onboarding", () => {
-    expect(tipFor(party("reveal"))?.text).toMatch(/hold your badge/);
+    expect(enT(tipFor(party("reveal"))?.text)).toMatch(/hold your badge/);
   });
 
   it("gives each night role its own advice, so a tip never gives a role away to the player's own eyes only", () => {
     const ids = (["decoy", "mole", "it", "hr", "intern"] as NightKind[]).map((kind) => tipFor(party("night", { kind }))!);
     expect(new Set(ids.map((t) => t.text)).size).toBe(5);
-    expect(ids[0].text).toMatch(/poll/);
+    expect(enT(ids[0].text)).toMatch(/poll/);
   });
 
   it("coaches Moles to blend in at all-hands, and everyone else to look for them", () => {
-    expect(tipFor(party("day", { role: "mole" }))?.text).toMatch(/blend in/);
-    expect(tipFor(party("day", { role: "it" }))?.text).toMatch(/lying to you/);
+    expect(enT(tipFor(party("day", { role: "mole" }))?.text)).toMatch(/blend in/);
+    expect(enT(tipFor(party("day", { role: "it" }))?.text)).toMatch(/lying to you/);
   });
 
   it("tells a laid-off player to stay quiet", () => {

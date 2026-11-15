@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { MIN_PLAYERS, ROLE_INFO, type AllHandsView, type Role } from "@/lib/allhands/types";
+import { MIN_PLAYERS, type AllHandsView, type Role } from "@/lib/allhands/types";
+import { useT } from "@/i18n/client";
+import { formatMsg } from "@/i18n/msg";
 import { LINEUP_ROLES, cantAdd, lineupFor, lineupIssues, type Lineup } from "@/lib/allhands/lineup";
 
 type Act = (body: Record<string, unknown>) => Promise<void>;
@@ -17,17 +19,6 @@ const ROLE_TONE: Record<Role, string> = {
   recruiter: "text-fuchsia-300 border-fuchsia-400/60 bg-fuchsia-400/10",
 };
 
-/** What each role can do, in a few words (the Rules sheet has the full story). */
-export const ROLE_SHORT: Record<Role, string> = {
-  employee: "No powers. Find the Moles and vote them out.",
-  mole: "Picks someone to lay off each night with the other Moles.",
-  recruiter: "A Mole who can turn one player into a Mole, once.",
-  it: "Checks one person a night to learn if they're a Mole.",
-  hr: "Protects one person a night from a layoff.",
-  intern: "Picks a mentor and wins with their side.",
-  nephew: "Survives the first time the team votes him out.",
-  burnout: "Wins alone by getting fired at the vote.",
-};
 
 /** The lineup this table is dealt from, for the room's headcount. */
 export function tableLineup(party: AllHandsView, players: number): Lineup {
@@ -39,6 +30,9 @@ export function tableLineup(party: AllHandsView, players: number): Lineup {
  * and swap its role, see what the change does to the balance, and reset to the recommendation.
  */
 export function LineupPanel({ party, players, act }: { party: AllHandsView; players: number; act: Act }) {
+  const t = useT();
+  const role = (r: Role) => t(`allhands.role.${r}.name`);
+  const short = (r: Role) => t(`allhands.role.${r}.short`);
   const lineup = tableLineup(party, players);
   const issues = lineupIssues(lineup);
   // The seat being swapped, by its place in the list (seats of one role are interchangeable).
@@ -56,50 +50,50 @@ export function LineupPanel({ party, players, act }: { party: AllHandsView; play
     <section className="flex flex-col gap-3" aria-labelledby="lineup-title">
       <div className="flex items-center justify-between gap-3">
         <h2 id="lineup-title" className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
-          Lineup · {lineup.players} players
+          {t("allhands.lineup.title", { n: lineup.players })}
         </h2>
         <span
           className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${
             lineup.custom ? "border-amber-300/50 text-amber-300" : "border-lime-300/50 text-lime-300"
           }`}
         >
-          {lineup.custom ? "Custom" : "Recommended"}
+          {lineup.custom ? t("allhands.lineup.custom") : t("allhands.lineup.recommended")}
         </span>
       </div>
 
       <div className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900 p-3">
         <p className="text-xs text-slate-400">
-          {players < MIN_PLAYERS ? `Shown for ${MIN_PLAYERS} players until more people join. ` : ""}
-          Roles are dealt at random when the game starts. Anyone here can tap a seat to swap its role.
+          {players < MIN_PLAYERS ? `${t("allhands.lineup.shownFor", { min: MIN_PLAYERS })} ` : ""}
+          {t("allhands.lineup.explain")}
         </p>
 
-        <ul className="grid grid-cols-2 gap-2" aria-label="Roles in this game">
+        <ul className="grid grid-cols-2 gap-2" aria-label={t("allhands.lineup.roles")}>
           {seats.map((r, i) => (
             <li key={`${r}-${i}`}>
               <button
                 type="button"
                 aria-pressed={picked === i}
-                aria-label={`${ROLE_INFO[r].name}: ${ROLE_SHORT[r]} Tap to swap`}
+                aria-label={t("allhands.lineup.seatLabel", { role: role(r), short: short(r) })}
                 onClick={() => setPicked(picked === i ? null : i)}
                 className={`flex h-full min-h-11 w-full flex-col gap-0.5 rounded-xl border px-3 py-2 text-left transition-transform duration-75 active:scale-[0.97] ${
                   ROLE_TONE[r]
                 } ${picked === i ? "ring-2 ring-slate-100" : ""}`}
               >
                 <span className="flex w-full items-center justify-between gap-1 text-sm font-semibold">
-                  <span className="truncate">{ROLE_INFO[r].name}</span>
+                  <span className="truncate">{role(r)}</span>
                   <span aria-hidden className="text-xs opacity-60">
                     ⇄
                   </span>
                 </span>
-                <span className="text-xs leading-snug text-slate-300">{ROLE_SHORT[r]}</span>
+                <span className="text-xs leading-snug text-slate-300">{short(r)}</span>
               </button>
             </li>
           ))}
         </ul>
 
         {pickedRole && (
-          <div className="flex flex-col gap-2 rounded-xl border border-slate-700 bg-slate-950 p-3" role="group" aria-label={`Swap the ${ROLE_INFO[pickedRole].name} for`}>
-            <p className="text-sm font-semibold">Swap this {ROLE_INFO[pickedRole].name} for:</p>
+          <div className="flex flex-col gap-2 rounded-xl border border-slate-700 bg-slate-950 p-3" role="group" aria-label={t("allhands.lineup.swapGroup", { role: role(pickedRole) })}>
+            <p className="text-sm font-semibold">{t("allhands.lineup.swapFor", { role: role(pickedRole) })}</p>
             <div className="flex flex-col gap-2">
               {LINEUP_ROLES.filter((r) => r !== pickedRole).map((r) => {
                 const why = cantAdd(lineup, r);
@@ -108,38 +102,38 @@ export function LineupPanel({ party, players, act }: { party: AllHandsView; play
                     key={r}
                     type="button"
                     disabled={Boolean(why)}
-                    title={ROLE_INFO[r].power}
+                    title={t(`allhands.role.${r}.power`)}
                     onClick={() => swap(r)}
                     className={`flex min-h-11 flex-col rounded-xl border px-3 py-2 text-left disabled:cursor-not-allowed disabled:opacity-40 ${ROLE_TONE[r]}`}
                   >
-                    <span className="text-sm font-semibold">{ROLE_INFO[r].name}</span>
-                    <span className="text-xs leading-snug text-slate-300">{why ?? ROLE_SHORT[r]}</span>
+                    <span className="text-sm font-semibold">{role(r)}</span>
+                    <span className="text-xs leading-snug text-slate-300">{why ? formatMsg(t, why.id, why.values) : short(r)}</span>
                   </button>
                 );
               })}
             </div>
             <button type="button" onClick={() => setPicked(null)} className="min-h-11 self-start text-sm text-slate-400 underline">
-              Cancel
+              {t("allhands.lineup.cancel")}
             </button>
           </div>
         )}
 
         {issues.length === 0 ? (
           <p className="rounded-xl border border-lime-300/40 bg-lime-300/10 px-3 py-2 text-sm text-lime-200">
-            ✓ Balanced for {lineup.players} players.
+            {t("allhands.lineup.balanced", { n: lineup.players })}
           </p>
         ) : (
-          <ul className="flex flex-col gap-2" aria-label="Balance warnings">
+          <ul className="flex flex-col gap-2" aria-label={t("allhands.lineup.warnings")}>
             {issues.map((x) => (
               <li
-                key={x.text}
+                key={x.msg.id}
                 className={`rounded-xl border px-3 py-2 text-sm ${
                   x.level === "block" ? "border-rose-400/50 bg-rose-400/10 text-rose-200" : "border-amber-300/50 bg-amber-300/10 text-amber-100"
                 }`}
               >
                 <span aria-hidden>{x.level === "block" ? "⛔ " : "⚠️ "}</span>
-                {x.level === "block" && <span className="font-semibold">Can&apos;t start: </span>}
-                {x.text}
+                {x.level === "block" && <span className="font-semibold">{t("allhands.lineup.cantStart")} </span>}
+                {formatMsg(t, x.msg.id, x.msg.values)}
               </li>
             ))}
           </ul>
@@ -154,7 +148,7 @@ export function LineupPanel({ party, players, act }: { party: AllHandsView; play
           }}
           className="min-h-11 rounded-xl border border-slate-700 px-4 text-sm font-semibold active:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Reset to recommended
+          {t("allhands.lineup.reset")}
         </button>
       </div>
     </section>

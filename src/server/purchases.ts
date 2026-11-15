@@ -3,7 +3,7 @@ import { randomInt } from "node:crypto";
 import type { User } from "@prisma/client";
 import { ALL_GAMES, GAMES, getGame } from "@/lib/games";
 import { db } from "./db";
-import { formatCode, generateCodeBody, normalizeCodeInput, parseAdminEmails } from "./codes";
+import { formatCode, generateCodeBody, hasFreeEmailDomain, normalizeCodeInput, parseAdminEmails } from "./codes";
 
 /**
  * An admin: the account's email is listed in ACCOUNT_ADMIN *and* was verified by the sign-in provider it came
@@ -12,6 +12,15 @@ import { formatCode, generateCodeBody, normalizeCodeInput, parseAdminEmails } fr
 export function isAdmin(user: Pick<User, "email" | "emailVerified"> | null): boolean {
   if (!user?.email || !user.emailVerified) return false;
   return parseAdminEmails(process.env.ACCOUNT_ADMIN).has(user.email.toLowerCase());
+}
+
+/**
+ * Plays every game free: a verified email at one of FREE_EMAIL_DOMAINS (e.g. @kikoff.com). Uses the
+ * email the sign-in provider verified, never anything the client sends. Unlike admins and testers,
+ * this doesn't open staging games or admin pages.
+ */
+export function hasFreeAccess(user: Pick<User, "email" | "emailVerified"> | null): boolean {
+  return Boolean(user && hasFreeEmailDomain(user.email, user.emailVerified));
 }
 
 /**
@@ -29,15 +38,15 @@ export async function seesStaging(user: User | null): Promise<boolean> {
   return isAdmin(user) || isTester(user);
 }
 
-/** Game ids this user may host. Admins and testers may host everything. */
+/** Game ids this user may host. Admins, testers and free-domain accounts may host everything. */
 export async function ownedGameIds(user: User): Promise<string[]> {
-  if (isAdmin(user) || (await isTester(user))) return GAMES.map((g) => g.id);
+  if (isAdmin(user) || hasFreeAccess(user) || (await isTester(user))) return GAMES.map((g) => g.id);
   const rows = await db.gamePurchase.findMany({ where: { userId: user.id }, select: { gameId: true } });
   return rows.map((r) => r.gameId);
 }
 
 export async function ownsGame(user: User, gameId: string): Promise<boolean> {
-  if (isAdmin(user)) return true;
+  if (isAdmin(user) || hasFreeAccess(user)) return true;
   if (await db.gamePurchase.findUnique({ where: { userId_gameId: { userId: user.id, gameId } } })) return true;
   return isTester(user);
 }

@@ -6,17 +6,11 @@ import { useRouter } from "next/navigation";
 import { gameText, getGame } from "@/lib/games";
 import { AccountBar, ContinueRooms, SignInButton, useMe } from "@/components/site/Account";
 import { RedeemBox } from "@/components/site/RedeemBox";
-import { LanguageSwitcher, useT } from "@/i18n/client";
+import { LanguageSwitcher, useLocale, useT } from "@/i18n/client";
 import { AVATAR_COLORS } from "@/lib/avatarColors";
 import { PartyCodeField, PartyModeTabs, joinRoom, normalizeRoomCode, type PartyMode } from "@/components/site/PartyJoin";
 import { HAND_SIZE, MAX_PLAYERS, MIN_PLAYERS, REPLY_ALL_GAME_ID } from "@/lib/replyall/types";
 
-const STEPS: { title: string; body: string }[] = [
-  { title: "The prompt", body: "Each round the all-staff thread gets a new prompt with a blank in it." },
-  { title: "Your hand", body: `You hold ${HAND_SIZE} reply cards. Send the one that fits best, or worst, or skip a thread for a fresh hand.` },
-  { title: "The Manager", body: "A rotating Manager reads the anonymous replies out and pins the funniest. Or the whole table votes." },
-  { title: "Pins", body: "A pin is a point. First to the target wins the thread." },
-];
 
 /** Reply All's page: the rules, and hosting a room. Hosting needs sign-in and a purchase code; joining is free. */
 export function ReplyAllLanding() {
@@ -24,6 +18,7 @@ export function ReplyAllLanding() {
   const game = getGame(REPLY_ALL_GAME_ID)!;
   const me = useMe();
   const t = useT();
+  const locale = useLocale();
   const [unlocked, setUnlocked] = useState(false);
   const [signedOut, setSignedOut] = useState(false);
   const signedIn = Boolean(me?.user) && !signedOut;
@@ -82,7 +77,7 @@ export function ReplyAllLanding() {
     if (data.signInRequired || data.purchaseRequired) {
       if (data.signInRequired) setSignedOut(true);
       else setUnlocked(false);
-      setErr(data.signInRequired ? t("site.ada.errSignIn") : "Enter a purchase code to host Reply All.");
+      setErr(data.signInRequired ? t("site.ada.errSignIn") : t("replyall.landing.unlock"));
       setBusy(false);
       return;
     }
@@ -121,8 +116,8 @@ export function ReplyAllLanding() {
           <LanguageSwitcher tone="shell" />
         </div>
         <header className="text-center">
-          {game.status === "staging" && <p className="font-mono text-11px uppercase tracking-[0.3em] text-rose-400">Staging · admins only</p>}
-          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.3em] text-sky-300">A Synergr party game</p>
+          {game.status === "staging" && <p className="font-mono text-11px uppercase tracking-[0.3em] text-rose-400">{t("party.landing.staging")}</p>}
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.3em] text-sky-300">{t("replyall.landing.kicker")}</p>
           <h1 className="mt-1 text-5xl font-black tracking-tight">{gameText(t, game, "title")}</h1>
           <p className="mt-2 text-slate-300">{gameText(t, game, "tagline")}</p>
           {game.tags && game.tags.length > 0 && (
@@ -139,22 +134,23 @@ export function ReplyAllLanding() {
 
         <section aria-labelledby="ra-how" className="flex flex-col gap-2">
           <h2 id="ra-how" className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
-            How it plays
+            {t("party.landing.how")}
           </h2>
           <ol className="grid grid-cols-2 gap-2">
-            {STEPS.map((step, i) => (
-              <li key={step.title} className="rounded-2xl border border-slate-800 bg-slate-900 p-3">
+            {[1, 2, 3, 4].map((n, i) => (
+
+              <li key={n} className="rounded-2xl border border-slate-800 bg-slate-900 p-3">
                 <p className="font-bold">
                   <span className="mr-1 text-sky-300">{i + 1}.</span>
-                  {step.title}
+                  {t(`replyall.landing.step${n}.title`)}
                 </p>
-                <p className="text-xs text-slate-400">{step.body}</p>
+                <p className="text-xs text-slate-400">{t(`replyall.landing.step${n}.body`, { n: HAND_SIZE })}</p>
               </li>
             ))}
           </ol>
           <p className="text-xs text-slate-500">
-            {MIN_PLAYERS} to {MAX_PLAYERS} players in the same room, reading out loud. Every phone holds a secret hand; the app
-            deals, shuffles and keeps score. Hosts can also mix in an optional 18+ After Hours deck.
+            {t("replyall.landing.note", { min: MIN_PLAYERS, max: MAX_PLAYERS })}
+            {locale !== "en" && <> {t("replyall.landing.cardsEnglish")}</>}
           </p>
         </section>
 
@@ -204,7 +200,7 @@ export function ReplyAllLanding() {
           {err && <p className="text-sm text-rose-300">{err}</p>}
           {mode === "join" ? (
             <button type="submit" disabled={busy} className="min-h-12 rounded-xl bg-sky-300 text-slate-950 font-bold active:opacity-80 disabled:opacity-60">
-              {busy ? "Joining the thread…" : t("site.join.button")}
+              {busy ? t("replyall.landing.joining") : t("site.join.button")}
             </button>
           ) : mustSignIn ? (
             <div className="flex flex-col gap-2">
@@ -215,7 +211,7 @@ export function ReplyAllLanding() {
             <RedeemBox gameTitle={gameText(t, game, "title")} onRedeemed={(id) => id === REPLY_ALL_GAME_ID && setUnlocked(true)} />
           ) : (
             <button type="submit" disabled={busy} className="min-h-12 rounded-xl bg-sky-300 font-bold text-slate-950 active:bg-sky-200 disabled:opacity-60">
-              {busy ? "Starting the thread…" : "Host a room"}
+              {busy ? t("replyall.landing.starting") : t("party.landing.host")}
             </button>
           )}
           {mode === "host" && me?.isAdmin && signedIn && (
@@ -225,7 +221,7 @@ export function ReplyAllLanding() {
               onClick={() => void start(false, true)}
               className="min-h-12 rounded-xl border border-amber-300/60 font-semibold text-amber-200 active:bg-amber-300/10 disabled:opacity-60"
             >
-              Admin: create a test room with 4 bots
+              {t("party.landing.testRoom", { n: 4 })}
             </button>
           )}
           {mode === "host" && me?.isAdmin && signedIn && (
@@ -233,10 +229,10 @@ export function ReplyAllLanding() {
               href="/play/reply-all/deck"
               className="inline-flex min-h-12 items-center justify-center rounded-xl border border-amber-300/60 font-semibold text-amber-200 active:bg-amber-300/10"
             >
-              Admin: review the deck
+              {t("replyall.landing.reviewDeck")}
             </Link>
           )}
-          {mode === "host" && <p className="text-xs text-slate-500">Friends join with the room code, the invite link or the QR code. No account needed to play.</p>}
+          {mode === "host" && <p className="text-xs text-slate-500">{t("party.landing.friendsJoin")}</p>}
         </form>
       </div>
     </main>
