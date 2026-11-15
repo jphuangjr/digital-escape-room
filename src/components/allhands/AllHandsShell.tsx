@@ -12,6 +12,8 @@ import { nightLines } from "@/lib/allhands/recap";
 import { LineupPanel, tableLineup } from "./LineupPanel";
 import { lineupIssues, swapRole } from "@/lib/allhands/lineup";
 import { chatterLines, type Chatter } from "@/lib/allhands/chatter";
+import { localPoll, localTitle } from "@/lib/allhands/content";
+import { PackContext, useLoadedPack, usePack } from "./contentPack";
 import { FirstGameTip, HowToPlayTour } from "./HowToPlayTour";
 import { FormattedMessage } from "react-intl";
 import { useT } from "@/i18n/client";
@@ -57,6 +59,7 @@ const atChannel = (chunks: React.ReactNode) => (
 /** All Hands: one screen per phase, each phone showing only what its player may know. */
 export function AllHandsShell({ code, state, refresh }: { code: string; state: RoomState; refresh: () => Promise<void> }) {
   const t = useT();
+  const pack = useLoadedPack();
   const people = useMemo(() => new Map(state.players.map((p) => [p.id, p])), [state.players]);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -149,6 +152,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
   const name = (id: string | null | undefined) => (id ? (people.get(id)?.displayName ?? t("party.someone")) : t("party.nobody"));
 
   return (
+    <PackContext.Provider value={pack}>
     <div className="min-h-[100dvh] bg-slate-950 text-slate-100" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
       <header
         className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/95 px-edge backdrop-blur"
@@ -212,6 +216,7 @@ export function AllHandsShell({ code, state, refresh }: { code: string; state: R
       <AllHandsChat code={code} state={state} party={party} refresh={refresh} people={people} meId={meId} />
       {tourOpen && <HowToPlayTour onClose={() => setTourOpen(false)} />}
     </div>
+    </PackContext.Provider>
   );
 }
 
@@ -337,6 +342,7 @@ function LinkedInBanner() {
 /** Your employee badge: hold to read it, so a neighbour can't glance at it. */
 function BadgeCard({ party, meId, name, compact = false }: { party: AllHandsView; meId: string; name: Name; compact?: boolean }) {
   const t = useT();
+  const pack = usePack();
   const [shown, setShown] = useState(false);
   const role = party.me.role;
   if (!role) return null;
@@ -361,7 +367,7 @@ function BadgeCard({ party, meId, name, compact = false }: { party: AllHandsView
     >
       {shown ? (
         <div>
-          <p className="text-11px font-semibold uppercase tracking-[0.25em] opacity-80">{t("allhands.badge.company", { title: party.me.title ?? "" })}</p>
+          <p className="text-11px font-semibold uppercase tracking-[0.25em] opacity-80">{t("allhands.badge.company", { title: localTitle(pack, party.me.title ?? "") })}</p>
           <p className={`${compact ? "text-2xl" : "text-4xl"} mt-1 font-black`}>{t(`allhands.role.${role}.name`)}</p>
           {!compact && <p className="mt-3 text-slate-200">{t(`allhands.role.${role}.blurb`)}</p>}
           <p className="mt-2 text-sm text-slate-300">{t(`allhands.role.${role}.power`)}</p>
@@ -625,6 +631,7 @@ function AfterHours({
   people: Map<string, PlayerPublic>;
 }) {
   const t = useT();
+  const pack = usePack();
   const n = party.night;
   const [offerMode, setOfferMode] = useState(Boolean(n?.offer && n.canOffer));
   if (!n) {
@@ -653,7 +660,7 @@ function AfterHours({
             <span aria-hidden>📊</span> {t("allhands.night.pollFrom", { who: t(`allhands.night.author.${(party.round - 1 + POLL_AUTHORS) % POLL_AUTHORS}`) })}
           </p>
         )}
-        <h1 className="text-3xl font-black">{n.kind === "decoy" ? n.prompt : copy.title}</h1>
+        <h1 className="text-3xl font-black">{n.kind === "decoy" ? localPoll(pack, n.prompt ?? "") : copy.title}</h1>
         <p className="mt-1 text-slate-300">{n.kind === "decoy" && n.myPick ? t("allhands.night.thanks") : copy.body}</p>
         <p className="mt-2 text-xs text-slate-500">{t("allhands.night.headsDown")}</p>
       </div>
@@ -702,7 +709,7 @@ function AfterHours({
                     {x.id === party.me.mentor && <MentorTag />}
                     {x.role === "nephew" && <RoleChip role="nephew" />}
                   </span>
-                  <span className="text-xs text-slate-400">{x.title}</span>
+                  <span className="text-xs text-slate-400">{localTitle(pack, x.title)}</span>
                   {teammates.length > 0 && (
                     <span className="text-xs text-rose-300">{t("allhands.night.pickedBy", { names: joinNames(t, teammates.map((m) => name(m.id))) })}</span>
                   )}
@@ -800,7 +807,8 @@ function ApproachedDm({ recruiter }: { recruiter: string }) {
 /** Anonymous coworkers gossiping in a Slack thread under an announcement. */
 function ChatterThread({ chatter, who }: { chatter: Chatter; who: string }) {
   const t = useT();
-  const lines = chatterLines(chatter, who);
+  const pack = usePack();
+  const lines = chatterLines(chatter, who, pack);
   if (!lines) return null;
   return (
     <div className="mt-3 border-l-2 border-slate-700 pl-3">
@@ -871,12 +879,13 @@ function Morning({ party, name, people }: { party: AllHandsView; name: Name; peo
 /** Last night's #random poll. Just the winner, never a vote count: the poll's size would hint at how many have powers. */
 function PollResults({ poll, name, people }: { poll: PollResult; name: Name; people: Map<string, PlayerPublic> }) {
   const t = useT();
+  const pack = usePack();
   const tie = poll.winners.length > 1;
   const list = joinNames(t, poll.winners.map(name));
   return (
     <SlackPost channel="#random">
       <p className="text-sm text-slate-400">{t("allhands.poll.in")}</p>
-      <p className="mt-1 font-semibold">{poll.prompt}</p>
+      <p className="mt-1 font-semibold">{localPoll(pack, poll.prompt)}</p>
       <ul className="mt-3 flex flex-wrap gap-2">
         {poll.winners.map((id) => (
           <li key={id} className="flex items-center gap-2 rounded-full border border-lime-300/40 bg-lime-300/10 px-3 py-1.5 font-semibold">
@@ -931,6 +940,7 @@ function Roster({
   showRoles?: boolean;
   mentor?: string | null;
 }) {
+  const pack = usePack();
   return (
     <ul className="flex flex-col gap-2">
       {seats.map((x) => (
@@ -941,7 +951,7 @@ function Roster({
           <Dot p={people.get(x.id)} size="h-4 w-4" />
           <span className="min-w-0 flex-1">
             <span className={`block truncate font-semibold ${x.alive ? "" : "line-through"}`}>{name(x.id)}</span>
-            <span className="block text-xs text-slate-400">{x.title}</span>
+            <span className="block text-xs text-slate-400">{localTitle(pack, x.title)}</span>
           </span>
           {x.id === mentor && <MentorTag />}
           {(showRoles || x.role) && x.role && <RoleChip role={x.role} />}
@@ -967,6 +977,7 @@ function Review({
   me: string;
 }) {
   const t = useT();
+  const pack = usePack();
   const v = party.vote!;
   const alive = party.seats.filter((x) => x.alive);
   const option = (id: string, label: React.ReactNode, sub: string | null) => {
@@ -1016,7 +1027,7 @@ function Review({
               {x.role === "nephew" && <RoleChip role="nephew" />}
               <CheckTag party={party} id={x.id} />
             </span>,
-            x.title,
+            localTitle(pack, x.title),
           ),
         )}
         {option(SKIP, t("allhands.vote.skip"), t("allhands.vote.skipNote"))}
