@@ -105,7 +105,6 @@ const messages: Record<keyof typeof en, string> = {
   "grunt.landing.step4.title": "봉크!",
   "grunt.landing.step4.body": "상대 팀도 카드를 봐요. 힌트 담당이 말하거나 몸짓을 하면: 1점 감점.",
   "grunt.landing.note": "한 방에 {min}~{max}명. 모두 폰이 필요해요: 앱이 카드를 나눠 주고, 시계를 돌리고, 이모지 힌트를 보여 주고, 점수를 매겨요.",
-  "grunt.landing.cardsEnglish": "단어 카드는 영어로 되어 있어요.",
   "grunt.landing.unlock": "그런트를 호스트하려면 구매 코드를 입력하세요.",
   "grunt.landing.joining": "동굴에 들어가는 중…",
   "grunt.landing.starting": "불 피우는 중…",

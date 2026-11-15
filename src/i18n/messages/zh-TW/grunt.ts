@@ -105,7 +105,6 @@ const messages: Record<keyof typeof en, string> = {
   "grunt.landing.step4.title": "敲頭！",
   "grunt.landing.step4.body": "對手隊伍也看得到卡片。抓到出題者說話或比手勢：扣一分。",
   "grunt.landing.note": "同一個房間 {min} 至 {max} 人。每個人都需要手機：App 會發卡、計時、顯示表情符號提示並計分。",
-  "grunt.landing.cardsEnglish": "單字卡是英文的。",
   "grunt.landing.unlock": "輸入購買代碼才能主持咕噥。",
   "grunt.landing.joining": "正在進入洞穴…",
   "grunt.landing.starting": "正在生火…",
