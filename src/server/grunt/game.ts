@@ -9,7 +9,6 @@ import {
   MAX_PLAYERS,
   MIN_PLAYERS,
   ROUND_OPTIONS,
-  TEAM_NAMES,
   TURN_OPTIONS_MS,
   guessMatches,
   type GruntAction,

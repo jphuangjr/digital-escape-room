@@ -452,11 +452,18 @@ export function pickChatter(pool: ChatterPool, seed: number, step: number, used:
 }
 
 /** The thread's lines with the player's name filled in, or null if the chatter is unknown (e.g. an older client). */
-export function chatterLines(c: Chatter, name: string): { who: string; text: string }[] | null {
-  const entry = CHATTER[c.pool]?.[c.i];
-  if (!entry) return null;
+export function chatterLines(
+  c: Chatter,
+  name: string,
+  pack: { chatter: Record<ChatterPool, readonly (readonly string[])[]>; anon: readonly string[] } = { chatter: CHATTER, anon: ANON_NAMES },
+): { who: string; text: string }[] | null {
+  const english = CHATTER[c.pool]?.[c.i];
+  if (!english) return null;
+  // A translation with the same number of lines, or the English thread.
+  const local = pack.chatter[c.pool]?.[c.i];
+  const entry = local && local.length === english.length ? local : english;
   return entry.map((line, k) => ({
-    who: ANON_NAMES[c.who[k] ?? k] ?? "Anonymous Coworker",
+    who: pack.anon[c.who[k] ?? k] ?? ANON_NAMES[c.who[k] ?? k] ?? "Anonymous Coworker",
     text: line.replaceAll("{name}", name),
   }));
 }
