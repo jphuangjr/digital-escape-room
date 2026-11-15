@@ -14,6 +14,7 @@ export interface ReplyPack {
 export const REPLY_PACK_LOADERS: Record<string, () => Promise<{ default: ReplyPack }>> = {
   ko: () => import("./ko"),
   es: () => import("./es"),
+  ja: () => import("./ja"),
 };
 
 /** Languages whose packs have every card, After Hours included (the landing page says nothing about English). */
