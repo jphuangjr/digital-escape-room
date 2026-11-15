@@ -4,11 +4,23 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ROLE_INFO, type Role, type Team } from "@/lib/allhands/types";
 import { markTourSeen, turnTipsOff, type Tip } from "@/lib/allhands/tutorial";
+import { FormattedMessage } from "react-intl";
+import { useT } from "@/i18n/client";
 
-const TEAM_STYLE: Record<Team, { label: string; tone: string }> = {
-  company: { label: "The company", tone: "border-lime-300/40 text-lime-300" },
-  moles: { label: "The Moles", tone: "border-rose-400/50 text-rose-300" },
-  burnout: { label: "On their own", tone: "border-violet-300/40 text-violet-300" },
+const TEAM_STYLE: Record<Team, { tone: string }> = {
+  company: { tone: "border-lime-300/40 text-lime-300" },
+  moles: { tone: "border-rose-400/50 text-rose-300" },
+  burnout: { tone: "border-violet-300/40 text-violet-300" },
+};
+
+/** Colours a side's name inside a translated sentence. */
+const side = (cls: string) => {
+  const Side = (chunks: React.ReactNode) => (
+    <span key={cls} className={`font-bold ${cls}`}>
+      {chunks}
+    </span>
+  );
+  return Side;
 };
 
 /** Every role, grouped by side. Read from ROLE_INFO, so a new role shows up here without touching this file. */
@@ -21,104 +33,98 @@ function rolesByTeam(): [Team, Role[]][] {
   return [...groups.entries()];
 }
 
+/** "@channel" highlighted inside a translated sentence. */
+const atChannel = (chunks: React.ReactNode) => (
+  <span key="at" className="text-sky-300">
+    {chunks}
+  </span>
+);
+
 const DEMO_NAMES = ["Priya", "Marcus", "Jen", "Theo"];
 
+type T = ReturnType<typeof useT>;
+
+/** A step of the tour: its title and body are allhands.tour.<n>.title/body. */
 interface Slide {
-  title: string;
-  body: string;
-  demo?: () => React.ReactNode;
+  demo?: (t: T) => React.ReactNode;
 }
 
 const SLIDES: Slide[] = [
   {
-    title: "Welcome to Synergr",
-    body: "You all work at a startup, and a few of your coworkers are secretly Moles planted by a rival. Find them and fire them before they lay everyone else off. If you've played Mafia or Werewolf, you already know the rules.",
-    demo: () => (
+    demo: (t) => (
       <ul className="grid grid-cols-2 gap-2 text-sm">
         <li className="rounded-xl border border-slate-800 bg-slate-900 p-3">
           <span aria-hidden className="text-2xl">🗣️</span>
-          <p className="mt-1 font-semibold">Play out loud</p>
-          <p className="text-slate-400">Sit together. All the talking happens at the table.</p>
+          <p className="mt-1 font-semibold">{t("allhands.tour.1.loudTitle")}</p>
+          <p className="text-slate-400">{t("allhands.tour.1.loudBody")}</p>
         </li>
         <li className="rounded-xl border border-slate-800 bg-slate-900 p-3">
           <span aria-hidden className="text-2xl">📱</span>
-          <p className="mt-1 font-semibold">Your phone is your badge</p>
-          <p className="text-slate-400">It shows your secret role and runs the clock.</p>
+          <p className="mt-1 font-semibold">{t("allhands.tour.1.phoneTitle")}</p>
+          <p className="text-slate-400">{t("allhands.tour.1.phoneBody")}</p>
         </li>
       </ul>
     ),
   },
   {
-    title: "Your badge is a secret",
-    body: "When the game starts, everyone is dealt a secret role. Press and hold your badge to read it, then let go. Try it now.",
     demo: () => <DemoBadge />,
   },
   {
-    title: "Who's who",
-    body: "Most of the team are Employees with no powers. A few people have something extra.",
-    demo: () => (
+    demo: (t) => (
       <div className="flex flex-col gap-3">
         {rolesByTeam().map(([team, roles]) => (
           <div key={team} className="flex flex-col gap-1.5">
             <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${TEAM_STYLE[team]?.tone ?? "text-slate-400"}`}>
-              {TEAM_STYLE[team]?.label ?? team}
+              {t(`allhands.team.${team}`)}
             </p>
             {roles.map((r) => (
               <div key={r} className={`rounded-xl border bg-slate-900 px-3 py-2 ${TEAM_STYLE[team]?.tone ?? "border-slate-700"}`}>
                 <p className="text-sm font-bold">
-                  {ROLE_INFO[r].name} <span className="font-normal text-slate-500">({ROLE_INFO[r].classic})</span>
+                  {t(`allhands.role.${r}.name`)} <span className="font-normal text-slate-500">({t(`allhands.role.${r}.classic`)})</span>
                 </p>
-                <p className="text-sm text-slate-300">{ROLE_INFO[r].power}</p>
+                <p className="text-sm text-slate-300">{t(`allhands.role.${r}.power`)}</p>
               </div>
             ))}
           </div>
         ))}
-        <p className="text-xs text-slate-500">Not every role is in every game. It depends on how many play and what the host turns on.</p>
+        <p className="text-xs text-slate-500">{t("allhands.tour.3.note")}</p>
       </div>
     ),
   },
   {
-    title: "After hours",
-    body: "Heads down, screens close. Everyone taps a name, so nobody can tell who has a power. The Moles pick someone to lay off, and anyone with a power uses it. Everyone else answers a silly poll. Tap one to try it.",
-    demo: () => <DemoPick prompt="Who replies-all to everything?" />,
+    demo: (t) => <DemoPick prompt={t("allhands.tour.4.prompt")} />,
   },
   {
-    title: "Morning Slack, then all-hands",
-    body: "In the morning the app says who got laid off. They're out. Then put your phones down and argue: accuse, defend, bluff. The Moles are lying to you.",
-    demo: () => (
+    demo: (t) => (
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4 text-sm">
         <div className="flex items-center gap-2">
           <span aria-hidden className="grid h-8 w-8 place-items-center rounded-lg bg-lime-300 font-black text-slate-950">S</span>
           <p className="font-bold">
-            Synergr Bot <span className="ml-1 rounded bg-slate-800 px-1 text-11px font-normal text-slate-400">APP</span>
+            {t("allhands.slack.bot")} <span className="ml-1 rounded bg-slate-800 px-1 text-11px font-normal text-slate-400">{t("allhands.slack.app")}</span>
           </p>
         </div>
         <p className="mt-2 text-slate-200">
-          <span className="text-sky-300">@channel</span> Marcus is no longer with the company. We wish them well in their next chapter. 💼
+          <FormattedMessage id="allhands.morning.laidOff" values={{ name: "Marcus", at: atChannel }} />
         </p>
       </div>
     ),
   },
   {
-    title: "Performance review",
-    body: "When the clock runs out, everyone votes. The most votes gets fired. If it's a tie, or Let's circle back gets as many votes, nobody goes. Votes are public. Try one.",
     demo: () => <DemoVote />,
   },
   {
-    title: "How to win",
-    body: "Rounds repeat (after hours, morning, all-hands, review) until one side wins.",
-    demo: () => (
+    demo: (t) => (
       <div className="flex flex-col gap-2 text-sm">
         <p className="rounded-xl border border-lime-300/40 bg-slate-900 p-3">
-          <span className="font-bold text-lime-300">The company</span> wins when every Mole has been fired.
+          <FormattedMessage id="allhands.tour.7.company" values={{ company: side("text-lime-300") }} />
         </p>
         <p className="rounded-xl border border-rose-400/50 bg-slate-900 p-3">
-          <span className="font-bold text-rose-300">The Moles</span> win when there are as many of them as everyone else still employed.
+          <FormattedMessage id="allhands.tour.7.moles" values={{ moles: side("text-rose-300") }} />
         </p>
         <p className="rounded-xl border border-slate-700 bg-slate-900 p-3 text-slate-300">
-          Out of the game? You&apos;re &ldquo;on LinkedIn&rdquo;: you can see every role, but stay quiet and keep a straight face.
+          {t("allhands.tour.7.out")}
         </p>
-        <p className="text-xs text-slate-500">Forget something mid-game? 📖 Rules in the top bar has every role, and ? brings this tour back.</p>
+        <p className="text-xs text-slate-500">{t("allhands.tour.7.help")}</p>
       </div>
     ),
   },
@@ -126,6 +132,7 @@ const SLIDES: Slide[] = [
 
 /** The how-to-play walkthrough: a full-screen sheet of short steps with small try-it demos. Skippable, and replayable. */
 export function HowToPlayTour({ onClose }: { onClose: () => void }) {
+  const t = useT();
   const [i, setI] = useState(0);
   const last = i === SLIDES.length - 1;
   const slide = SLIDES[i];
@@ -158,17 +165,17 @@ export function HowToPlayTour({ onClose }: { onClose: () => void }) {
     // A solid background, not a translucent blur: iOS Safari draws a screen-sized backdrop-filter layer only in part,
     // so on a scrolled phone page the tour showed as a band with the page through it. px-safe keeps it clear of a
     // side rail (iPhone Duo).
-    <div className="fixed inset-0 z-50 flex h-dvh flex-col bg-slate-950 px-safe text-slate-100" role="dialog" aria-modal="true" aria-label="How to play All Hands">
+    <div className="fixed inset-0 z-50 flex h-dvh flex-col bg-slate-950 px-safe text-slate-100" role="dialog" aria-modal="true" aria-label={t("allhands.tour.label")}>
       <div
         className="mx-auto flex h-full w-full max-w-xl flex-col px-edge"
         style={{ paddingTop: "max(env(safe-area-inset-top), 0.75rem)", paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)" }}
       >
         <div className="flex items-center justify-between py-2">
           <p className="text-11px font-semibold uppercase tracking-[0.25em] text-lime-300">
-            How to play · {i + 1} of {SLIDES.length}
+            {t("allhands.tour.progress", { n: i + 1, total: SLIDES.length })}
           </p>
           <button type="button" onClick={close} className="min-h-11 rounded-lg px-3 text-sm text-slate-400 active:bg-slate-800">
-            {last ? "Close" : "Skip"}
+            {last ? t("allhands.tour.close") : t("allhands.tour.skip")}
           </button>
         </div>
         <div aria-hidden className="flex gap-1">
@@ -178,15 +185,15 @@ export function HowToPlayTour({ onClose }: { onClose: () => void }) {
         </div>
 
         <div key={i} className="flex flex-1 flex-col gap-4 overflow-y-auto overscroll-contain py-6">
-          <h2 className="text-3xl font-black">{slide.title}</h2>
-          <p className="leading-relaxed text-slate-300">{slide.body}</p>
-          {slide.demo?.()}
+          <h2 className="text-3xl font-black">{t(`allhands.tour.${i + 1}.title`)}</h2>
+          <p className="leading-relaxed text-slate-300">{t(`allhands.tour.${i + 1}.body`)}</p>
+          {slide.demo?.(t)}
         </div>
 
         <div className="flex gap-2 pt-2">
           {i > 0 && (
             <button type="button" onClick={() => setI(i - 1)} className="min-h-12 rounded-xl border border-slate-700 px-5 font-semibold active:bg-slate-800">
-              Back
+              {t("allhands.tour.back")}
             </button>
           )}
           <button
@@ -194,7 +201,7 @@ export function HowToPlayTour({ onClose }: { onClose: () => void }) {
             onClick={() => (last ? close() : setI(i + 1))}
             className="min-h-12 flex-1 rounded-xl bg-lime-300 px-4 font-bold text-slate-950 active:bg-lime-200"
           >
-            {last ? "Got it, let's play" : "Next"}
+            {last ? t("allhands.tour.done") : t("allhands.tour.next")}
           </button>
         </div>
       </div>
@@ -205,6 +212,7 @@ export function HowToPlayTour({ onClose }: { onClose: () => void }) {
 
 /** A practice badge: the same press-and-hold as the real one, with a made-up role. */
 function DemoBadge() {
+  const t = useT();
   const [shown, setShown] = useState(false);
   const [tried, setTried] = useState(false);
   const show = () => {
@@ -224,35 +232,36 @@ function DemoBadge() {
         onKeyUp={hide}
         onBlur={hide}
         onContextMenu={(e) => e.preventDefault()}
-        aria-label="Practice badge: hold to see it"
+        aria-label={t("allhands.tour.2.label")}
         className={`w-full select-none rounded-3xl border p-5 text-left transition [-webkit-touch-callout:none] ${
           shown ? "border-sky-300/50 bg-sky-300/10 text-sky-300" : "border-slate-700 bg-slate-900"
         }`}
       >
         {shown ? (
           <div>
-            <p className="text-11px font-semibold uppercase tracking-[0.25em] opacity-80">Synergr · Practice badge</p>
-            <p className="mt-1 text-3xl font-black">{ROLE_INFO.it.name}</p>
-            <p className="mt-2 text-sm text-slate-300">{ROLE_INFO.it.power}</p>
+            <p className="text-11px font-semibold uppercase tracking-[0.25em] opacity-80">{t("allhands.tour.2.practice")}</p>
+            <p className="mt-1 text-3xl font-black">{t("allhands.role.it.name")}</p>
+            <p className="mt-2 text-sm text-slate-300">{t("allhands.role.it.power")}</p>
           </div>
         ) : (
           <div className="flex items-center gap-4">
             <span aria-hidden className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-800 text-2xl">🪪</span>
             <div>
-              <p className="font-bold">Hold to see your badge</p>
-              <p className="text-sm text-slate-400">Press and hold. Keep it close to your chest.</p>
+              <p className="font-bold">{t("allhands.badge.hold")}</p>
+              <p className="text-sm text-slate-400">{t("allhands.badge.press")}</p>
             </div>
           </div>
         )}
       </button>
       <p className="text-sm text-slate-400" aria-live="polite">
-        {tried ? "That's it. Let go and it hides again, so nobody peeks over your shoulder." : "This one is just for practice."}
+        {tried ? t("allhands.tour.2.tried") : t("allhands.tour.2.untried")}
       </p>
     </div>
   );
 }
 
 function DemoPick({ prompt }: { prompt: string }) {
+  const t = useT();
   const [pick, setPick] = useState<string | null>(null);
   return (
     <div className="flex flex-col gap-2">
@@ -277,13 +286,14 @@ function DemoPick({ prompt }: { prompt: string }) {
         ))}
       </ul>
       <p className="text-sm text-slate-400" aria-live="polite">
-        {pick ? "From across the table, that looked exactly like a Mole picking a layoff. That's the point." : "You can change your pick until time runs out."}
+        {pick ? t("allhands.tour.4.picked") : t("allhands.tour.4.change")}
       </p>
     </div>
   );
 }
 
 function DemoVote() {
+  const t = useT();
   const [vote, setVote] = useState<string | null>(null);
   const base: Record<string, number> = { Priya: 2, Jen: 1, skip: 1 };
   const options = [...DEMO_NAMES.filter((n) => n !== "Marcus"), "skip"];
@@ -302,7 +312,7 @@ function DemoVote() {
                   vote === o ? "border-lime-300 bg-lime-300/10" : "border-slate-800 bg-slate-900 active:bg-slate-800"
                 }`}
               >
-                <span className="font-semibold">{o === "skip" ? "Let's circle back" : o}</span>
+                <span className="font-semibold">{o === "skip" ? t("allhands.vote.skip") : o}</span>
                 <span className="font-mono text-lg tabular-nums">{count}</span>
               </button>
             </li>
@@ -310,15 +320,17 @@ function DemoVote() {
         })}
       </ul>
       <p className="text-sm text-slate-400" aria-live="polite">
-        {vote === null
-          ? "Everyone sees who voted for whom, so votes are clues too."
-          : vote === "Priya"
-            ? "Priya has 3 votes and gets fired. Hope she was a Mole."
-            : vote === "Jen"
-              ? "Now it's a 2–2 tie between Priya and Jen, so nobody gets fired."
-              : vote === "skip"
-                ? "Circling back ties with Priya, so nobody gets fired."
-                : "Priya still has the most votes, so she gets fired."}
+        {t(
+          vote === null
+            ? "allhands.tour.6.none"
+            : vote === "Priya"
+              ? "allhands.tour.6.priya"
+              : vote === "Jen"
+                ? "allhands.tour.6.jen"
+                : vote === "skip"
+                  ? "allhands.tour.6.skip"
+                  : "allhands.tour.6.other",
+        )}
       </p>
     </div>
   );
@@ -326,16 +338,17 @@ function DemoVote() {
 
 /** A small card with advice for the moment, shown during a player's first game. */
 export function FirstGameTip({ tip, onClose, onTour }: { tip: Tip; onClose: () => void; onTour: () => void }) {
+  const t = useT();
   return (
     <div className="rounded-2xl border border-lime-300/40 bg-lime-300/5 p-3 text-sm">
       <div className="flex items-start gap-2">
         <span aria-hidden className="text-lg leading-5">💡</span>
         <div className="min-w-0 flex-1">
-          <p className="text-11px font-semibold uppercase tracking-[0.2em] text-lime-300">First game tip</p>
-          <p className="mt-1 text-slate-200">{tip.text}</p>
+          <p className="text-11px font-semibold uppercase tracking-[0.2em] text-lime-300">{t("allhands.tip.label")}</p>
+          <p className="mt-1 text-slate-200">{t(tip.text)}</p>
           <div className="mt-1 flex flex-wrap gap-x-4">
             <button type="button" onClick={onTour} className="min-h-9 text-xs text-slate-400 underline">
-              How to play
+              {t("allhands.tip.tour")}
             </button>
             <button
               type="button"
@@ -345,11 +358,11 @@ export function FirstGameTip({ tip, onClose, onTour }: { tip: Tip; onClose: () =
               }}
               className="min-h-9 text-xs text-slate-400 underline"
             >
-              Turn tips off
+              {t("allhands.tip.off")}
             </button>
           </div>
         </div>
-        <button type="button" onClick={onClose} aria-label="Hide this tip" className="-mr-1 -mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-400 active:bg-slate-800">
+        <button type="button" onClick={onClose} aria-label={t("allhands.tip.hide")} className="-mr-1 -mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-400 active:bg-slate-800">
           ✕
         </button>
       </div>

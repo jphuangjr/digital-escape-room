@@ -24,6 +24,7 @@ import {
 import type { PartyCtx } from "../party/registry";
 import { goneRoles } from "@/lib/allhands/gone";
 import { nightLines } from "@/lib/allhands/recap";
+import { enT } from "@/i18n/testing";
 import { CHATTER, chatterLines, pickChatter, reviewChatterPool } from "@/lib/allhands/chatter";
 
 const ids = (n: number) => Array.from({ length: n }, (_, i) => `p${i + 1}`);
@@ -703,13 +704,14 @@ describe("after-hours recap", () => {
     s = advanceState(s, 1000 + 60_000).state;
     const n = s.nights[0];
     expect(n).toMatchObject({ moles: ["p1"], it: "p2", hr: "p3" });
-    expect(nightLines(n, nm)).toEqual(["The Mole (P1) went after P4.", "HR (P3) covered P4.", "IT (P2) didn't read anyone's DMs."]);
+    expect(nightLines(n, nm, enT)).toEqual(["The Mole (P1) went after P4.", "HR (P3) covered P4.", "IT (P2) didn't read anyone's DMs."]);
   });
 
   it("leaves out powers whose holder is gone and never says Nobody", () => {
     const lines = nightLines(
       { round: 3, moleTarget: null, itTarget: null, itResult: null, hrTarget: null, offerTarget: null, offerResult: null, outcome: "quiet", moles: ["a", "b"], it: null, hr: null, recruiter: null },
       nm,
+      enT,
     );
     expect(lines).toEqual(["The Moles (A and B) didn't pick anyone."]);
   });

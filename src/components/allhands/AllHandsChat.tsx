@@ -6,6 +6,7 @@ import { apiFetch, type GameCtx } from "@/lib/client/game";
 import { useChat } from "@/lib/client/chat";
 import { ChatPanel } from "@/components/apps/ChatPanel";
 import type { AllHandsView, MoleChatMessage } from "@/lib/allhands/types";
+import { useT } from "@/i18n/client";
 
 type Tab = "team" | "moles";
 
@@ -33,6 +34,7 @@ export function AllHandsChat({
   people: Map<string, PlayerPublic>;
 }) {
   const chat = useChat(code, state.me.id, state.me.blocked);
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("team");
   const moles = party.moleChat;
@@ -76,11 +78,11 @@ export function AllHandsChat({
           if (!open && hasMoles && live && moleUnread > 0) setTab("moles");
           setOpen(true);
         }}
-        aria-label={badge ? `Chat, ${badge} unread` : "Chat"}
+        aria-label={badge ? t("allhands.chat.unread", { n: badge }) : t("allhands.chat.title")}
         className="fixed bottom-4 right-4 z-30 flex h-14 items-center gap-2 rounded-full border border-slate-700 bg-slate-900 px-5 font-semibold text-slate-100 shadow-lg shadow-black/50 active:bg-slate-800"
         style={{ marginBottom: "env(safe-area-inset-bottom)" }}
       >
-        <span aria-hidden>💬</span> Chat
+        <span aria-hidden>💬</span> {t("allhands.chat.title")}
         {badge > 0 && (
           // One color for every badge: a red one would out a Mole to anyone glancing at their phone.
           <span className="rounded-full bg-lime-300 px-2 py-0.5 text-xs font-bold text-slate-950">
@@ -93,7 +95,7 @@ export function AllHandsChat({
         <div className="fixed inset-0 z-40 flex flex-col justify-end bg-black/60" onClick={() => setOpen(false)}>
           <div
             role="dialog"
-            aria-label="Chat"
+            aria-label={t("allhands.chat.title")}
             onClick={(e) => e.stopPropagation()}
             className="mx-auto flex h-[80dvh] w-full max-w-xl flex-col rounded-t-2xl border border-slate-800 bg-slate-950 px-4 pt-3"
             style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)" }}
@@ -105,22 +107,22 @@ export function AllHandsChat({
                 </TabButton>
                 {hasMoles && (
                   <TabButton active={tab === "moles"} onClick={() => setTab("moles")} tone="rose">
-                    🕵️ Moles only {tab !== "moles" && moleUnread > 0 && <Dot tone="bg-rose-500" />}
+                    {t("allhands.chat.molesTab")} {tab !== "moles" && moleUnread > 0 && <Dot tone="bg-rose-500" />}
                   </TabButton>
                 )}
               </div>
               <button type="button" onClick={() => setOpen(false)} className="min-h-11 rounded-lg px-3 text-sm text-slate-400 active:bg-slate-800">
-                Close
+                {t("allhands.chat.close")}
               </button>
             </div>
             <div className="flex min-h-0 flex-1 flex-col">
               {tab === "team" ? (
                 <>
-                  <p className="mb-2 text-xs text-slate-500">Everyone in the room can read this. Moles too, so keep your poker face.</p>
+                  <p className="mb-2 text-xs text-slate-500">{t("allhands.chat.public")}</p>
                   <ChatPanel
                     ctx={ctx}
                     chat={chat}
-                    readOnly={party.canTeamChat ? undefined : "You're out, so you can read along but not post until the game ends."}
+                    readOnly={party.canTeamChat ? undefined : t("allhands.chat.outReadOnly")}
                   />
                 </>
               ) : (
@@ -168,6 +170,7 @@ function MoleChannel({
   people: Map<string, PlayerPublic>;
   refresh: () => Promise<void>;
 }) {
+  const t = useT();
   const messages: MoleChatMessage[] = party.moleChat ?? [];
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
@@ -186,7 +189,7 @@ function MoleChannel({
     const res = await apiFetch<{ error?: string }>(code, "/party", { body: { type: "moleChat", body } });
     setSending(false);
     if (res.ok) setDraft("");
-    else setError(res.data?.error ?? "That didn't send. Try again.");
+    else setError(res.data?.error ?? t("allhands.chat.sendFailed"));
     await refresh();
   }
 
@@ -194,15 +197,15 @@ function MoleChannel({
   const solo = party.seats.filter((x) => x.role === "mole").length === 1;
   const note = party.canMoleChat
     ? solo
-      ? "You're the only Mole this game, so it's just you in here. Notes to self are fine."
-      : "Only Moles see this. Nobody else's phone gets these messages."
+      ? t("allhands.chat.soloMole")
+      : t("allhands.chat.molesOnly")
     : party.phase === "over"
-      ? "Game over: here's everything the Moles said."
+      ? t("allhands.chat.over")
       : me.seated && !me.alive
         ? me.role === "mole"
-          ? "You're out. You can read your team's channel, but not post."
-          : "You're out, so you get to read the Moles' channel. Don't tell anyone."
-        : "Only Moles see this.";
+          ? t("allhands.chat.outMole")
+          : t("allhands.chat.outOther")
+        : t("allhands.chat.onlyMoles");
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -210,7 +213,7 @@ function MoleChannel({
       <div ref={listRef} className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain pb-2">
         {messages.length === 0 ? (
           <p className="py-6 text-center text-sm text-slate-500">
-            Nothing yet. Pick a target together, or agree on who to throw under the bus at the all-hands.
+            {t("allhands.chat.empty")}
           </p>
         ) : (
           messages.map((m, i) => {
@@ -218,7 +221,7 @@ function MoleChannel({
             const showName = !mine && messages[i - 1]?.from !== m.from;
             return (
               <div key={m.id} className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
-                {showName && <span className="mb-0.5 text-xs text-rose-300/80">{people.get(m.from)?.displayName ?? "A Mole"}</span>}
+                {showName && <span className="mb-0.5 text-xs text-rose-300/80">{people.get(m.from)?.displayName ?? t("allhands.chat.aMole")}</span>}
                 <div
                   className={`max-w-[85%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-sm ${
                     mine ? "bg-rose-500 text-white" : "bg-slate-800 text-slate-100"
@@ -255,8 +258,8 @@ function MoleChannel({
                 }
               }}
               rows={1}
-              placeholder="Whisper to the other Moles…"
-              aria-label="Message the other Moles"
+              placeholder={t("allhands.chat.placeholder")}
+              aria-label={t("allhands.chat.label")}
               enterKeyHint="send"
               className="max-h-28 min-h-11 min-w-0 flex-1 resize-none rounded-xl border border-slate-700 bg-black px-3 py-2.5 text-base text-slate-100 outline-none placeholder:text-slate-600 focus:border-rose-400"
             />
@@ -265,7 +268,7 @@ function MoleChannel({
               disabled={sending || !draft.trim()}
               className="min-h-11 shrink-0 rounded-xl bg-rose-500 px-4 font-semibold text-white active:bg-rose-400 disabled:opacity-40"
             >
-              Send
+              {t("allhands.chat.send")}
             </button>
           </div>
         </form>

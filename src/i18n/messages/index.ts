@@ -101,17 +101,42 @@ import esWait from "./es/wait";
 import jaWait from "./ja/wait";
 import ptWait from "./pt-BR/wait";
 
+import enParty from "./en/party";
+import koParty from "./ko/party";
+import zhParty from "./zh-TW/party";
+import esParty from "./es/party";
+import jaParty from "./ja/party";
+import ptParty from "./pt-BR/party";
+import enGrunt from "./en/grunt";
+import koGrunt from "./ko/grunt";
+import zhGrunt from "./zh-TW/grunt";
+import esGrunt from "./es/grunt";
+import jaGrunt from "./ja/grunt";
+import ptGrunt from "./pt-BR/grunt";
+import enReplyAll from "./en/replyall";
+import koReplyAll from "./ko/replyall";
+import zhReplyAll from "./zh-TW/replyall";
+import esReplyAll from "./es/replyall";
+import jaReplyAll from "./ja/replyall";
+import ptReplyAll from "./pt-BR/replyall";
+import enAllHands from "./en/allhands";
+import koAllHands from "./ko/allhands";
+import zhAllHands from "./zh-TW/allhands";
+import esAllHands from "./es/allhands";
+import jaAllHands from "./ja/allhands";
+import ptAllHands from "./pt-BR/allhands";
+
 export type Messages = Record<string, string>;
 
-const en: Messages = { ...enAuth, ...enWait, ...enResult, ...enAtlas, ...enProfile, ...enTrain, ...enBoard, ...enTour, ...enCommon, ...enSite, ...enShell, ...enRoom, ...enApps, ...enBrowser, ...enAdmin, ...enApi };
-const ko: Messages = { ...koAuth, ...koWait, ...koResult, ...koAtlas, ...koProfile, ...koTrain, ...koBoard, ...koTour, ...koCommon, ...koSite, ...koShell, ...koRoom, ...koApps, ...koBrowser, ...koAdmin, ...koApi };
+const en: Messages = { ...enParty, ...enGrunt, ...enReplyAll, ...enAllHands, ...enAuth, ...enWait, ...enResult, ...enAtlas, ...enProfile, ...enTrain, ...enBoard, ...enTour, ...enCommon, ...enSite, ...enShell, ...enRoom, ...enApps, ...enBrowser, ...enAdmin, ...enApi };
+const ko: Messages = { ...koParty, ...koGrunt, ...koReplyAll, ...koAllHands, ...koAuth, ...koWait, ...koResult, ...koAtlas, ...koProfile, ...koTrain, ...koBoard, ...koTour, ...koCommon, ...koSite, ...koShell, ...koRoom, ...koApps, ...koBrowser, ...koAdmin, ...koApi };
 
-const zhTW: Messages = { ...zhAuth, ...zhWait, ...zhResult, ...zhAtlas, ...zhProfile, ...zhTrain, ...zhBoard, ...zhTour, ...zhCommon, ...zhSite, ...zhShell, ...zhRoom, ...zhApps, ...zhBrowser, ...zhAdmin, ...zhApi };
+const zhTW: Messages = { ...zhParty, ...zhGrunt, ...zhReplyAll, ...zhAllHands, ...zhAuth, ...zhWait, ...zhResult, ...zhAtlas, ...zhProfile, ...zhTrain, ...zhBoard, ...zhTour, ...zhCommon, ...zhSite, ...zhShell, ...zhRoom, ...zhApps, ...zhBrowser, ...zhAdmin, ...zhApi };
 
-const es: Messages = { ...esAuth, ...esWait, ...esResult, ...esAtlas, ...esProfile, ...esTrain, ...esBoard, ...esTour, ...esCommon, ...esSite, ...esShell, ...esRoom, ...esApps, ...esBrowser, ...esAdmin, ...esApi };
+const es: Messages = { ...esParty, ...esGrunt, ...esReplyAll, ...esAllHands, ...esAuth, ...esWait, ...esResult, ...esAtlas, ...esProfile, ...esTrain, ...esBoard, ...esTour, ...esCommon, ...esSite, ...esShell, ...esRoom, ...esApps, ...esBrowser, ...esAdmin, ...esApi };
 
-const ja: Messages = { ...jaAuth, ...jaWait, ...jaResult, ...jaAtlas, ...jaProfile, ...jaTrain, ...jaBoard, ...jaTour, ...jaCommon, ...jaSite, ...jaShell, ...jaRoom, ...jaApps, ...jaBrowser, ...jaAdmin, ...jaApi };
+const ja: Messages = { ...jaParty, ...jaGrunt, ...jaReplyAll, ...jaAllHands, ...jaAuth, ...jaWait, ...jaResult, ...jaAtlas, ...jaProfile, ...jaTrain, ...jaBoard, ...jaTour, ...jaCommon, ...jaSite, ...jaShell, ...jaRoom, ...jaApps, ...jaBrowser, ...jaAdmin, ...jaApi };
 
-const ptBR: Messages = { ...ptAuth, ...ptWait, ...ptResult, ...ptAtlas, ...ptProfile, ...ptTrain, ...ptBoard, ...ptTour, ...ptCommon, ...ptSite, ...ptShell, ...ptRoom, ...ptApps, ...ptBrowser, ...ptAdmin, ...ptApi };
+const ptBR: Messages = { ...ptParty, ...ptGrunt, ...ptReplyAll, ...ptAllHands, ...ptAuth, ...ptWait, ...ptResult, ...ptAtlas, ...ptProfile, ...ptTrain, ...ptBoard, ...ptTour, ...ptCommon, ...ptSite, ...ptShell, ...ptRoom, ...ptApps, ...ptBrowser, ...ptAdmin, ...ptApi };
 
 export const MESSAGES: Record<Locale, Messages> = { en, ko, "zh-TW": zhTW, es, ja, "pt-BR": ptBR };

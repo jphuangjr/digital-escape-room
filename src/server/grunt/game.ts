@@ -131,8 +131,9 @@ function shuffle<T>(s: GruntState, xs: readonly T[]): T[] {
 
 const clone = (s: GruntState): GruntState => structuredClone(s);
 
-function refuse<S>(state: S, error: string): PartyResult<S> {
-  return { state, changed: false, ok: false, error };
+/** A refused action. `error` is a message id the party route translates (src/i18n/messages/<locale>/party.ts etc.). */
+function refuse<S>(state: S, error: string, errorValues?: Record<string, string | number>): PartyResult<S> {
+  return { state, changed: false, ok: false, error, ...(errorValues ? { errorValues } : {}) };
 }
 function done(state: GruntState): PartyResult<GruntState> {
   return { state, changed: true, ok: true };
@@ -239,10 +240,10 @@ const GIVER_ONLY = new Set<GruntAction["type"]>(["emoji", "undo", "clear", "got"
 
 export function applyAction(s0: GruntState, a: GruntAction, ctx: PartyCtx): PartyResult<GruntState> {
   const { playerId: me, now } = ctx;
-  if (HOST_ONLY.has(a.type) && me !== ctx.hostId) return refuse(s0, "Only the host can do that.");
+  if (HOST_ONLY.has(a.type) && me !== ctx.hostId) return refuse(s0, "party.err.hostOnly");
   if (GIVER_ONLY.has(a.type)) {
-    if (s0.phase !== "clue" || !s0.current) return refuse(s0, "The clock isn't running.");
-    if (me !== s0.giver) return refuse(s0, "Only this turn's clue-giver can do that.");
+    if (s0.phase !== "clue" || !s0.current) return refuse(s0, "grunt.err.noClock");
+    if (me !== s0.giver) return refuse(s0, "grunt.err.giverOnly");
   }
   const s = clone(s0);
   const c = s.current;
@@ -252,9 +253,9 @@ export function applyAction(s0: GruntState, a: GruntAction, ctx: PartyCtx): Part
       return advanceState(s0, now);
 
     case "start": {
-      if (inGame(s)) return refuse(s0, "The game is already running.");
+      if (inGame(s)) return refuse(s0, "party.err.running");
       const ids = ctx.roomPlayerIds.slice(0, MAX_PLAYERS);
-      if (ids.length < MIN_PLAYERS) return refuse(s0, `You need at least ${MIN_PLAYERS} players to start.`);
+      if (ids.length < MIN_PLAYERS) return refuse(s0, "party.err.needPlayers", { min: MIN_PLAYERS });
       const fresh = initialState(s.settings);
       fresh.rng = ctx.rand(2 ** 31) | 0;
       // Random, balanced teams: deal the shuffled table out like cards.
@@ -264,29 +265,29 @@ export function applyAction(s0: GruntState, a: GruntAction, ctx: PartyCtx): Part
     }
 
     case "settings": {
-      if (inGame(s)) return refuse(s0, "Settings can only change between games.");
+      if (inGame(s)) return refuse(s0, "party.err.settingsBetween");
       s.settings = cleanSettings({ ...s.settings, ...a.settings });
       return done(s);
     }
 
     case "join": {
       // Arrived mid-game: join the smaller team. Your first clue turn comes when your team's rotation reaches you.
-      if (!inGame(s)) return refuse(s0, "Wait for the host to start.");
+      if (!inGame(s)) return refuse(s0, "party.err.waitHost");
       if (teamOf(s, me) !== null) return { state: s0, changed: false, ok: true };
-      if (s.teams[0].length + s.teams[1].length >= MAX_PLAYERS) return refuse(s0, "This game is full.");
+      if (s.teams[0].length + s.teams[1].length >= MAX_PLAYERS) return refuse(s0, "party.err.full");
       s.teams[s.teams[0].length <= s.teams[1].length ? 0 : 1].push(me);
       return done(s);
     }
 
     case "begin": {
-      if (s.phase !== "ready") return refuse(s0, "It's not time to start a turn.");
-      if (me !== s.giver && me !== ctx.hostId) return refuse(s0, "The clue-giver starts their own turn.");
+      if (s.phase !== "ready") return refuse(s0, "grunt.err.notReady");
+      if (me !== s.giver && me !== ctx.hostId) return refuse(s0, "grunt.err.giverBegins");
       return done(beginClock(s, now));
     }
 
     case "emoji": {
-      if (!Number.isInteger(a.emoji) || a.emoji < 0 || a.emoji >= EMOJI.length) return refuse(s0, "That's not on the keyboard.");
-      if (c!.clue.length >= MAX_CLUE) return refuse(s0, `That's ${MAX_CLUE} emoji. Clear it and try another way in.`);
+      if (!Number.isInteger(a.emoji) || a.emoji < 0 || a.emoji >= EMOJI.length) return refuse(s0, "grunt.err.notOnKeyboard");
+      if (c!.clue.length >= MAX_CLUE) return refuse(s0, "grunt.err.clueFull", { max: MAX_CLUE });
       c!.clue.push(a.emoji);
       return done(s);
     }
@@ -302,12 +303,12 @@ export function applyAction(s0: GruntState, a: GruntAction, ctx: PartyCtx): Part
       return done(s);
 
     case "got":
-      if (a.points === 1 && c!.word1) return refuse(s0, "The word's already counted. Go for the phrase, or move on.");
+      if (a.points === 1 && c!.word1) return refuse(s0, "grunt.err.wordCounted");
       score(s, a.points === 3 ? "phrase" : "word");
       return done(s);
 
     case "next":
-      if (!c!.word1) return refuse(s0, "They haven't got the word yet. Pass if you want a new card.");
+      if (!c!.word1) return refuse(s0, "grunt.err.noWordYet");
       nextCard(s);
       return done(s);
 
@@ -317,10 +318,10 @@ export function applyAction(s0: GruntState, a: GruntAction, ctx: PartyCtx): Part
 
     case "guess": {
       // Typed guesses, for anyone on the clue team but the clue-giver. Right ones score by themselves.
-      if (s.phase !== "clue" || !c) return refuse(s0, "Wait for the clock to start.");
-      if (teamOf(s, me) !== s.clueTeam || me === s.giver) return refuse(s0, "Only the clue-giver's team guesses.");
+      if (s.phase !== "clue" || !c) return refuse(s0, "grunt.err.waitClock");
+      if (teamOf(s, me) !== s.clueTeam || me === s.giver) return refuse(s0, "grunt.err.teamGuesses");
       const text = a.text.replace(/\s+/g, " ").trim().slice(0, MAX_GUESS);
-      if (!text) return refuse(s0, "Type a guess first.");
+      if (!text) return refuse(s0, "grunt.err.emptyGuess");
       const card = CARDS[c.card];
       const hit: "word" | "phrase" | null = guessMatches(text, card.phrase) ? "phrase" : !c.word1 && guessMatches(text, card.word) ? "word" : null;
       s.guesses = [...s.guesses, { by: me, text, hit }].slice(-MAX_GUESSES);
@@ -330,11 +331,11 @@ export function applyAction(s0: GruntState, a: GruntAction, ctx: PartyCtx): Part
 
     case "bonk": {
       // The other team caught the clue-giver talking or pointing: a point off this turn.
-      if (!s.settings.bonk) return refuse(s0, "Bonks are off in this game.");
-      if (s.phase !== "clue") return refuse(s0, "Nothing to bonk right now.");
+      if (!s.settings.bonk) return refuse(s0, "grunt.err.bonksOff");
+      if (s.phase !== "clue") return refuse(s0, "grunt.err.nothingToBonk");
       const t = teamOf(s, me);
-      if (t === null || t === s.clueTeam) return refuse(s0, "Only the other team can bonk.");
-      if (me in s.lastBonk && now - s.lastBonk[me] < BONK_COOLDOWN_MS) return refuse(s0, "Easy. One bonk at a time.");
+      if (t === null || t === s.clueTeam) return refuse(s0, "grunt.err.otherTeamBonks");
+      if (me in s.lastBonk && now - s.lastBonk[me] < BONK_COOLDOWN_MS) return refuse(s0, "grunt.err.bonkCooldown");
       s.lastBonk[me] = now;
       s.bonks += 1;
       return done(s);
@@ -342,19 +343,19 @@ export function applyAction(s0: GruntState, a: GruntAction, ctx: PartyCtx): Part
 
     case "skip": {
       // The host moves things on: start the waiting turn, end the running one, or go to the next turn.
-      if (!inGame(s)) return refuse(s0, "Nothing to skip.");
+      if (!inGame(s)) return refuse(s0, "party.err.noSkip");
       return done(endPhase(s, now));
     }
 
     case "pause": {
-      if (s.endsAt === null) return refuse(s0, "Nothing to pause.");
+      if (s.endsAt === null) return refuse(s0, "party.err.noPause");
       s.pausedLeft = Math.max(0, s.endsAt - now);
       s.endsAt = null;
       return done(s);
     }
 
     case "resume": {
-      if (s.pausedLeft === null) return refuse(s0, "The game isn't paused.");
+      if (s.pausedLeft === null) return refuse(s0, "party.err.notPaused");
       s.endsAt = now + s.pausedLeft;
       s.pausedLeft = null;
       return done(s);
@@ -364,8 +365,8 @@ export function applyAction(s0: GruntState, a: GruntAction, ctx: PartyCtx): Part
       return done(initialState(s.settings));
 
     case "kick":
-      if (inGame(s)) return refuse(s0, "Players can only be removed between games.");
-      if (a.playerId === me) return refuse(s0, "You can't remove yourself.");
+      if (inGame(s)) return refuse(s0, "party.err.kickBetween");
+      if (a.playerId === me) return refuse(s0, "party.err.kickSelf");
       return { state: s0, changed: false, ok: true };
   }
 }
@@ -484,12 +485,13 @@ export const gruntGame = definePartyGame<GruntState, Record<string, unknown>, Gr
   isAction: (body) => parseAction(body) !== null,
   apply: (state, body, ctx) => {
     const action = parseAction(body);
-    return action ? applyAction(state, action, ctx) : refuse(state, "Unknown action.");
+    return action ? applyAction(state, action, ctx) : refuse(state, "party.err.unknown");
   },
   due: isDue,
   advance: advanceState,
   view: (s, viewer, ctx) => viewFor(s, viewer, ctx),
   isOver: (s) => s.phase === "over",
   botMove: (s, id, r) => botMove(s, id, r) as Record<string, unknown> | null,
-  roles: (s) => new Map([...s.teams[0].map((id) => [id, `Team ${TEAM_NAMES[0]}`] as const), ...s.teams[1].map((id) => [id, `Team ${TEAM_NAMES[1]}`] as const)]),
+  // Message ids: the test bar shows them in the viewer's language.
+  roles: (s) => new Map([...s.teams[0].map((id) => [id, "grunt.testRole.0"] as const), ...s.teams[1].map((id) => [id, "grunt.testRole.1"] as const)]),
 });

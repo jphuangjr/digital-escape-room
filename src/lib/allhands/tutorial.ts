@@ -39,42 +39,36 @@ export const turnTipsOff = () => write(TIPS_OFF_KEY);
 export interface Tip {
   /** Which advice this is. A tip the player closes stays closed for the rest of the game. */
   id: string;
+  /** The advice, as a message id (src/i18n/messages/<locale>/allhands.ts). */
   text: string;
 }
 
 const NIGHT_TIPS: Partial<Record<NightKind, string>> = {
-  decoy:
-    "You have no secret power, but answer the poll anyway. Everyone taps something after hours, so nobody can tell who has a power by who's tapping.",
-  mole: "Pick who gets laid off. Agree with the other Moles without talking: your picks show on each other's phones. If you split, the most-picked name goes.",
-  it: "Pick someone to check. Only you see the answer. Choose when to share it at all-hands: the Moles will go after a loud IT Guy.",
-  intern: "Pick your mentor. You'll never learn their role, but you win if their side wins, so pick someone you trust.",
-  hr: "Pick someone to protect, yourself included. If the Moles go after them tonight, nobody gets laid off. You can't cover the same person two nights running.",
+  decoy: "allhands.tip.night.decoy",
+  mole: "allhands.tip.night.mole",
+  it: "allhands.tip.night.it",
+  intern: "allhands.tip.night.intern",
+  hr: "allhands.tip.night.hr",
 };
 
 /** The one tip a first-time player sees right now, or null. */
 export function tipFor(party: Pick<AllHandsView, "phase" | "round" | "me" | "night">): Tip | null {
   const { phase, round, me } = party;
   if (!me.seated) return null;
-  if (!me.alive && phase !== "over") {
-    return { id: "out", text: "You're out. You can see every role now. Keep a straight face, and don't help either side at the table." };
-  }
+  if (!me.alive && phase !== "over") return { id: "out", text: "allhands.tip.out" };
   const tips: Partial<Record<Phase, string>> = {
-    reveal:
-      "Press and hold your badge to read it, and tilt your screen away from your neighbours. When you've read it, tap the button. The game starts once everyone's ready.",
-    dawn: "The bot announces who got laid off overnight. Whoever it names is out: they can watch but not talk.",
-    day:
-      me.role && ROLE_INFO[me.role].team === "moles"
-        ? "Put your phone down and blend in. Accuse someone, defend yourself, agree with the room. Just don't be the one everyone suspects."
-        : "Put your phone down and talk. Who's being quiet? Who's too helpful? Who pushed for that last firing? The Moles are lying to you.",
-    vote: "Votes are public. Tap a name to fire them, or Let's circle back to fire nobody. You can change your vote until time runs out. A tie fires nobody.",
-    exit: "If the host turned role reveals on, you'll see what the fired player really was. Look back at who voted for them.",
-    over: "That's your first game. Scroll down to see who was who and every after-hours move.",
+    reveal: "allhands.tip.reveal",
+    dawn: "allhands.tip.dawn",
+    day: me.role && ROLE_INFO[me.role].team === "moles" ? "allhands.tip.dayMole" : "allhands.tip.day",
+    vote: "allhands.tip.vote",
+    exit: "allhands.tip.exit",
+    over: "allhands.tip.over",
   };
   // Two rounds of hand-holding is enough; after that the screens explain themselves.
   if (round > 2 && phase !== "over") return null;
   if (phase === "night") {
     const kind = party.night?.kind;
-    const text = (kind && NIGHT_TIPS[kind]) ?? "Heads down. Make your pick on your phone before the clock runs out, and keep your screen close.";
+    const text = (kind && NIGHT_TIPS[kind]) ?? "allhands.tip.night";
     return { id: `night-${kind ?? "none"}`, text };
   }
   const text = tips[phase];

@@ -6,13 +6,13 @@ import type { PlayerPublic, RoomState } from "@/lib/types";
 import { apiFetch } from "@/lib/client/game";
 import { QrCode } from "@/components/site/QrCode";
 import { TestBar } from "@/components/allhands/TestBar";
+import { useT } from "@/i18n/client";
 import {
   EMOJI,
   EMOJI_GROUPS,
   MAX_GUESS,
   ROUND_OPTIONS,
   TEAM_ICONS,
-  TEAM_NAMES,
   TURN_OPTIONS_MS,
   type GruntView,
   type TeamId,
@@ -21,20 +21,14 @@ import {
 
 type Act = (body: Record<string, unknown>) => Promise<void>;
 type Name = (id: string | null | undefined) => string;
-
-const PHASE_LABEL: Record<GruntView["phase"], string> = {
-  lobby: "Lobby",
-  ready: "Next up",
-  clue: "Grunting",
-  recap: "Turn over",
-  over: "Game over",
-};
+type T = ReturnType<typeof useT>;
 
 /**
  * Grunt on one phone. The clue-giver gets the card and an emoji keyboard; their team sees the clue grow and guesses
  * (out loud, or typed); the other team sees the card too and has the BONK button for anyone caught talking.
  */
 export function GruntShell({ code, state, refresh }: { code: string; state: RoomState; refresh: () => Promise<void> }) {
+  const t = useT();
   const people = useMemo(() => new Map(state.players.map((p) => [p.id, p])), [state.players]);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -63,11 +57,11 @@ export function GruntShell({ code, state, refresh }: { code: string; state: Room
       inFlight.current--;
       if (res.data?.party) setLocal(res.data.party);
       else if (!res.ok) setLocal(null);
-      if (!res.ok && !tick) setErr(res.data?.error ?? "That didn't work. Try again.");
+      if (!res.ok && !tick) setErr(res.data?.error ?? t("party.err.generic"));
       if (inFlight.current === 0) setBusy(false);
       void refresh();
     },
-    [code, refresh],
+    [code, refresh, t],
   );
 
   useEffect(() => {
@@ -87,7 +81,7 @@ export function GruntShell({ code, state, refresh }: { code: string; state: Room
 
   const bonked = useBonkFlash(party);
   const isHost = state.me.id === party.hostId;
-  const name: Name = (id) => (id ? (people.get(id)?.displayName ?? "Someone") : "Nobody");
+  const name: Name = (id) => (id ? (people.get(id)?.displayName ?? t("party.someone")) : t("party.nobody"));
   const inGame = party.phase !== "lobby" && party.phase !== "over";
   const seated = party.me.team !== null;
 
@@ -95,7 +89,7 @@ export function GruntShell({ code, state, refresh }: { code: string; state: Room
     <div className="min-h-[100dvh] bg-stone-950 text-stone-100" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
       {bonked && (
         <div aria-hidden className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-orange-500/25">
-          <span className="animate-bounce text-7xl font-black tracking-tight text-orange-300 drop-shadow-[0_4px_0_rgba(0,0,0,0.6)]">BONK!</span>
+          <span className="animate-bounce text-7xl font-black tracking-tight text-orange-300 drop-shadow-[0_4px_0_rgba(0,0,0,0.6)]">{t("grunt.bonk")}</span>
         </div>
       )}
       <header
@@ -107,10 +101,10 @@ export function GruntShell({ code, state, refresh }: { code: string; state: Room
           <div className="min-w-0">
             <p className="truncate whitespace-nowrap text-11px font-semibold uppercase tracking-[0.2em] text-orange-300">Grunt · {code}</p>
             <p className="truncate text-lg font-bold">
-              {PHASE_LABEL[party.phase]}
+              {t(`grunt.phase.${party.phase}`)}
               {inGame && (
                 <span className="ml-2 text-sm font-normal text-stone-400">
-                  Turn {party.turn} of {party.totalTurns}
+                  {t("grunt.turnOf", { n: party.turn, total: party.totalTurns })}
                 </span>
               )}
             </p>
@@ -128,7 +122,7 @@ export function GruntShell({ code, state, refresh }: { code: string; state: Room
             refresh={refresh}
             meId={state.me.id}
             sizes={[4, 6, 8]}
-            hint="Look through a bot's eyes to give its clues or bonk for its team. Bot clue-givers start, tap a few emoji and pass. The host controls stay yours."
+            hint={t("grunt.testHint")}
           />
         )}
         {err && (
@@ -138,9 +132,9 @@ export function GruntShell({ code, state, refresh }: { code: string; state: Room
         )}
         {inGame && !seated && (
           <div className="flex flex-col gap-3 rounded-2xl border border-orange-400/40 bg-orange-400/10 p-4">
-            <p className="text-sm text-orange-100">This game started before you got here. Join a team and you&apos;re in.</p>
+            <p className="text-sm text-orange-100">{t("grunt.late")}</p>
             <PrimaryButton disabled={busy} onClick={() => void act({ type: "join" })}>
-              Join a team
+              {t("grunt.joinTeam")}
             </PrimaryButton>
           </div>
         )}
@@ -231,12 +225,18 @@ function fmt(ms: number): string {
 }
 
 function Clock({ left, paused, remainingMs }: { left: number | null; paused: boolean; remainingMs: number | null }) {
-  if (paused) return <span className="rounded-full border border-amber-300/50 px-3 py-1 font-mono text-sm text-amber-300">Paused {remainingMs !== null && fmt(remainingMs)}</span>;
+  const t = useT();
+  if (paused)
+    return (
+      <span className="rounded-full border border-amber-300/50 px-3 py-1 font-mono text-sm text-amber-300">
+        {t("party.clock.paused")} {remainingMs !== null && fmt(remainingMs)}
+      </span>
+    );
   if (left === null) return null;
   return (
     <span
       className={`shrink-0 rounded-full border px-3 py-1 font-mono text-lg tabular-nums ${left < 10_000 ? "border-rose-400/60 text-rose-300" : "border-stone-700 text-stone-200"}`}
-      aria-label={`${Math.ceil(left / 1000)} seconds left`}
+      aria-label={t("party.clock.left", { n: Math.ceil(left / 1000) })}
     >
       {fmt(left)}
     </span>
@@ -273,30 +273,35 @@ function PrimaryButton({ children, ...rest }: React.ButtonHTMLAttributes<HTMLBut
   );
 }
 
-const teamLabel = (t: TeamId) => `${TEAM_ICONS[t]} Team ${TEAM_NAMES[t]}`;
+const teamLabel = (t: T, team: TeamId) => t("grunt.team", { icon: TEAM_ICONS[team], team: String(team) });
 
 /** The emoji clue so far, big. */
 function ClueStrip({ clue, big }: { clue: string[]; big?: boolean }) {
+  const t = useT();
   return (
     <div
-      aria-label={clue.length ? `Clue: ${clue.join(" ")}` : "No clue yet"}
+      aria-label={clue.length ? t("grunt.clue.label", { clue: clue.join(" ") }) : t("grunt.clue.empty")}
       className={`flex min-h-20 flex-wrap items-center gap-1 rounded-2xl border border-stone-700 bg-stone-900 p-3 ${big ? "text-5xl" : "text-3xl"}`}
     >
-      {clue.length ? clue.map((e, i) => <span key={i}>{e}</span>) : <span className="text-base text-stone-500">No grunts yet…</span>}
+      {clue.length ? clue.map((e, i) => <span key={i}>{e}</span>) : <span className="text-base text-stone-500">{t("grunt.clue.none")}</span>}
     </div>
   );
 }
 
 /** The card: the 1-point word and the 3-point phrase. */
 function Card({ card }: { card: NonNullable<GruntView["card"]> }) {
+  const t = useT();
   return (
     <article className="grid grid-cols-2 overflow-hidden rounded-3xl border-2 border-orange-300/70 bg-orange-50 text-stone-900 shadow-lg">
       <div className={`p-4 ${card.word1 ? "bg-emerald-200" : ""}`}>
-        <p className="text-11px font-bold uppercase tracking-[0.2em] text-stone-500">1 point{card.word1 && " ✓"}</p>
+        <p className="text-11px font-bold uppercase tracking-[0.2em] text-stone-500">
+          {t("grunt.card.word")}
+          {card.word1 && " ✓"}
+        </p>
         <p className="mt-1 text-2xl font-black leading-tight">{card.word}</p>
       </div>
       <div className="border-l-2 border-orange-300/70 p-4">
-        <p className="text-11px font-bold uppercase tracking-[0.2em] text-stone-500">3 points</p>
+        <p className="text-11px font-bold uppercase tracking-[0.2em] text-stone-500">{t("grunt.card.phrase")}</p>
         <p className="mt-1 text-2xl font-black leading-tight">{card.phrase}</p>
       </div>
     </article>
@@ -306,6 +311,7 @@ function Card({ card }: { card: NonNullable<GruntView["card"]> }) {
 // ---------- lobby ----------
 
 function Lobby({ code, state, party, isHost, act, busy, name }: { code: string; state: RoomState; party: GruntView; isHost: boolean; act: Act; busy: boolean; name: Name }) {
+  const t = useT();
   const [origin, setOrigin] = useState("");
   const [copied, setCopied] = useState(false);
   useEffect(() => setOrigin(window.location.origin), []);
@@ -316,68 +322,66 @@ function Lobby({ code, state, party, isHost, act, busy, name }: { code: string; 
   return (
     <>
       <Link href="/party" className="-my-2 inline-flex min-h-11 items-center self-start text-sm text-stone-400 active:text-stone-200">
-        ← Back to Party games
+        {t("party.back")}
       </Link>
       <section className="flex flex-col items-center gap-3 rounded-3xl border border-stone-800 bg-stone-900 p-5 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-400">Room code</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-400">{t("party.roomCode")}</p>
         <p className="font-mono text-5xl font-black tracking-widest text-orange-300">{code}</p>
-        {origin && <QrCode url={url} size={168} label={`QR code to join room ${code}`} />}
+        {origin && <QrCode url={url} size={168} label={t("party.qrLabel", { code })} />}
         <button
           type="button"
           onClick={() => void navigator.clipboard?.writeText(url).then(() => setCopied(true))}
           className="min-h-11 rounded-xl border border-stone-700 px-4 text-sm font-semibold active:bg-stone-800"
         >
-          {copied ? "Link copied" : "Copy invite link"}
+          {copied ? t("party.linkCopied") : t("party.copyLink")}
         </button>
       </section>
 
-      <Section title={`In the cave (${count})`}>
+      <Section title={t("grunt.lobby.players", { n: count })}>
         <ul className="flex flex-col gap-2">
           {state.players.map((p) => (
             <li key={p.id} className="flex min-h-12 items-center gap-3 rounded-xl border border-stone-800 bg-stone-900 px-3">
               <Dot p={p} size="h-4 w-4" />
               <span className="min-w-0 flex-1 truncate font-semibold">
                 {p.displayName}
-                {p.id === state.me.id && <span className="ml-1 font-normal text-stone-400">(you)</span>}
+                {p.id === state.me.id && <span className="ml-1 font-normal text-stone-400">{t("party.you")}</span>}
               </span>
-              {p.id === party.hostId && <span className="text-xs text-orange-300">Host</span>}
+              {p.id === party.hostId && <span className="text-xs text-orange-300">{t("party.hostTag")}</span>}
               {isHost && p.id !== state.me.id && (
                 <button
                   type="button"
-                  onClick={() => window.confirm(`Remove ${p.displayName} from the room?`) && void act({ type: "kick", playerId: p.id })}
+                  onClick={() => window.confirm(t("party.removeConfirm", { name: p.displayName })) && void act({ type: "kick", playerId: p.id })}
                   className="min-h-11 px-2 text-xs text-stone-400 underline"
                 >
-                  Remove
+                  {t("party.remove")}
                 </button>
               )}
             </li>
           ))}
         </ul>
-        <p className="text-xs text-stone-500">Teams are picked at random when the game starts.</p>
+        <p className="text-xs text-stone-500">{t("grunt.lobby.randomTeams")}</p>
       </Section>
 
       {isHost ? (
         <>
-          <Section title="House rules">
+          <Section title={t("party.houseRules")}>
             <Choice
-              label="Time per turn"
-              options={TURN_OPTIONS_MS.map((ms) => ({ value: ms, label: `${ms / 1000}s` }))}
+              label={t("grunt.lobby.turnTime")}
+              options={TURN_OPTIONS_MS.map((ms) => ({ value: ms, label: t("party.seconds", { n: ms / 1000 }) }))}
               value={party.settings.turnMs}
               onPick={(v) => void act({ type: "settings", settings: { turnMs: v } })}
             />
             <Choice
-              label="Turns each"
+              label={t("grunt.lobby.rounds")}
               options={ROUND_OPTIONS.map((n) => ({ value: n, label: String(n) }))}
               value={party.settings.rounds}
               onPick={(v) => void act({ type: "settings", settings: { rounds: v } })}
-              note="How many times every player gives the clues."
+              note={t("grunt.lobby.roundsNote")}
             />
             <label className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-stone-800 bg-stone-900 p-3">
               <span>
-                <span className="block font-semibold">Bonks</span>
-                <span className="block text-xs text-stone-400">
-                  The other team gets a BONK button. Catch the clue-giver talking, pointing or acting it out: a point off.
-                </span>
+                <span className="block font-semibold">{t("grunt.lobby.bonks")}</span>
+                <span className="block text-xs text-stone-400">{t("grunt.lobby.bonksNote")}</span>
               </span>
               <input
                 type="checkbox"
@@ -388,13 +392,17 @@ function Lobby({ code, state, party, isHost, act, busy, name }: { code: string; 
             </label>
           </Section>
           <PrimaryButton disabled={busy || need > 0 || tooMany} onClick={() => void act({ type: "start" })}>
-            {need > 0 ? `Waiting for ${need} more ${need === 1 ? "player" : "players"}` : tooMany ? `${party.maxPlayers} players at most` : "Start the game"}
+            {need > 0 ? t("party.waitingForPlayers", { n: need }) : tooMany ? t("party.atMost", { max: party.maxPlayers }) : t("grunt.lobby.start")}
           </PrimaryButton>
         </>
       ) : (
         <Banner>
-          Waiting for {name(party.hostId)} to start. {party.settings.turnMs / 1000}s turns, {party.settings.rounds}{" "}
-          {party.settings.rounds === 1 ? "turn" : "turns"} each{party.settings.bonk ? ", bonks on" : ""}.
+          {t("grunt.lobby.waiting", {
+            name: name(party.hostId),
+            secs: party.settings.turnMs / 1000,
+            rounds: party.settings.rounds,
+            bonk: String(party.settings.bonk),
+          })}
         </Banner>
       )}
       <HowToPlay />
@@ -425,15 +433,13 @@ function Choice<T extends string | number>({ label, options, value, onPick, note
 }
 
 function HowToPlay() {
+  const t = useT();
   return (
-    <Section title="How to play">
+    <Section title={t("party.howToPlay")}>
       <ol className="flex list-decimal flex-col gap-2 pl-5 text-sm leading-relaxed text-stone-300">
-        <li>Two teams take turns. Each turn one player is the clue-giver.</li>
-        <li>They get a card: a word for 1 point and a harder phrase for 3.</li>
-        <li>No talking, pointing or acting. The only clues allowed are emoji, tapped on their phone. Everyone sees them appear.</li>
-        <li>Their team shouts guesses (or types them). The clue-giver taps when someone gets it.</li>
-        <li>The other team sees the card too. Catch the clue-giver making a sound or a gesture? BONK: a point off.</li>
-        <li>Stuck? Pass for a new card. Most points after everyone&apos;s turns wins.</li>
+        {[1, 2, 3, 4, 5, 6].map((n) => (
+          <li key={n}>{t(`grunt.how.${n}`)}</li>
+        ))}
       </ol>
     </Section>
   );
@@ -442,24 +448,25 @@ function HowToPlay() {
 // ---------- a turn ----------
 
 function Ready({ party, isHost, act, busy, name }: { party: GruntView; isHost: boolean; act: Act; busy: boolean; name: Name }) {
-  const t = party.clueTeam!;
-  const mine = party.me.team === t;
+  const t = useT();
+  const team = party.clueTeam!;
+  const mine = party.me.team === team;
   return (
     <section className="flex flex-col gap-4 rounded-3xl border border-orange-400/40 bg-orange-400/10 p-5 text-center">
-      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-300">{teamLabel(t)} is up</p>
-      <p className="text-3xl font-black">{party.me.isGiver ? "You're grunting." : `${name(party.giverId)} grunts.`}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-300">{t("grunt.ready.up", { team: teamLabel(t, team) })}</p>
+      <p className="text-3xl font-black">{party.me.isGiver ? t("grunt.ready.you") : t("grunt.ready.other", { name: name(party.giverId) })}</p>
       <p className="text-sm text-orange-100/80">
         {party.me.isGiver
-          ? `You'll get a card and ${party.settings.turnMs / 1000} seconds. Emoji only: no talking, no pointing.`
+          ? t("grunt.ready.youNote", { secs: party.settings.turnMs / 1000 })
           : mine
-            ? "Get ready to guess. Shout it out, or type it."
+            ? t("grunt.ready.mateNote")
             : party.me.team !== null
-              ? `You'll see their card. ${party.settings.bonk ? "Bonk them if they talk or point." : "Keep them honest."}`
-              : "Watch the clues come in."}
+              ? t(party.settings.bonk ? "grunt.ready.otherNote" : "grunt.ready.otherNoBonk")
+              : t("grunt.ready.watch")}
       </p>
       {(party.me.isGiver || isHost) && (
         <PrimaryButton disabled={busy} onClick={() => void act({ type: "begin" })}>
-          {party.me.isGiver ? "Start grunting" : `Start ${name(party.giverId)}'s turn`}
+          {party.me.isGiver ? t("grunt.ready.start") : t("grunt.ready.startFor", { name: name(party.giverId) })}
         </PrimaryButton>
       )}
     </section>
@@ -467,12 +474,13 @@ function Ready({ party, isHost, act, busy, name }: { party: GruntView; isHost: b
 }
 
 function Clue({ party, act, busy, name }: { party: GruntView; act: Act; busy: boolean; name: Name }) {
+  const t = useT();
   if (party.me.isGiver) return <GiverView party={party} act={act} busy={busy} />;
   const guessing = party.me.team === party.clueTeam;
   return (
     <>
       <p className="text-center text-sm text-stone-400">
-        {teamLabel(party.clueTeam!)} · {name(party.giverId)} is grunting · {party.turnPoints} {Math.abs(party.turnPoints) === 1 ? "point" : "points"} this turn
+        {t("grunt.clue.status", { team: teamLabel(t, party.clueTeam!), name: name(party.giverId), points: t("grunt.points", { n: party.turnPoints }) })}
       </p>
       {party.card && <Card card={party.card} />}
       <ClueStrip clue={party.clue} big />
@@ -482,6 +490,7 @@ function Clue({ party, act, busy, name }: { party: GruntView; act: Act; busy: bo
 }
 
 function GiverView({ party, act, busy }: { party: GruntView; act: Act; busy: boolean }) {
+  const t = useT();
   const [group, setGroup] = useState(0);
   const offsets = EMOJI_GROUPS.map((_, i) => EMOJI_GROUPS.slice(0, i).reduce((n, g) => n + g.emoji.length, 0));
   const btn = "min-h-12 rounded-xl border px-3 font-bold transition-transform duration-75 enabled:active:scale-[0.97] disabled:opacity-50";
@@ -491,10 +500,10 @@ function GiverView({ party, act, busy }: { party: GruntView; act: Act; busy: boo
       <ClueStrip clue={party.clue} />
       <div className="flex gap-2">
         <button type="button" onClick={() => void act({ type: "undo" })} disabled={!party.clue.length} className={`${btn} flex-1 border-stone-700`}>
-          ⌫ Undo
+          {t("grunt.giver.undo")}
         </button>
         <button type="button" onClick={() => void act({ type: "clear" })} disabled={!party.clue.length} className={`${btn} flex-1 border-stone-700`}>
-          Clear
+          {t("grunt.giver.clear")}
         </button>
       </div>
 
@@ -508,7 +517,7 @@ function GiverView({ party, act, busy }: { party: GruntView; act: Act; busy: boo
               onClick={() => setGroup(i)}
               className={`min-h-10 shrink-0 rounded-lg px-3 text-sm font-semibold ${group === i ? "bg-orange-400 text-stone-950" : "text-stone-300"}`}
             >
-              {g.label}
+              {t(`grunt.giver.group.${g.label}`)}
             </button>
           ))}
         </div>
@@ -534,27 +543,27 @@ function GiverView({ party, act, busy }: { party: GruntView; act: Act; busy: boo
           onClick={() => void act({ type: "got", points: 1 })}
           className={`${btn} border-emerald-400/60 bg-emerald-400/15 text-emerald-200`}
         >
-          Got the word +1
+          {t("grunt.giver.gotWord")}
         </button>
         <button type="button" disabled={busy} onClick={() => void act({ type: "got", points: 3 })} className={`${btn} border-emerald-400/60 bg-emerald-400/25 text-emerald-100`}>
-          Got the phrase +3
+          {t("grunt.giver.gotPhrase")}
         </button>
         <button type="button" disabled={busy || !party.card?.word1} onClick={() => void act({ type: "next" })} className={`${btn} border-stone-700`}>
-          Next card
+          {t("grunt.giver.next")}
         </button>
         <button type="button" disabled={busy} onClick={() => void act({ type: "pass" })} className={`${btn} border-stone-700 text-stone-300`}>
-          Pass
+          {t("grunt.giver.pass")}
         </button>
       </div>
       <p className="text-center text-xs text-stone-500">
-        {party.turnPoints} {Math.abs(party.turnPoints) === 1 ? "point" : "points"} this turn{party.turnBonks > 0 && ` · ${party.turnBonks} bonked`}. Typed guesses
-        that are right count by themselves.
+        {t("grunt.giver.status", { points: t("grunt.points", { n: party.turnPoints }), bonks: party.turnBonks })}
       </p>
     </>
   );
 }
 
 function GuessBox({ party, act, name }: { party: GruntView; act: Act; name: Name }) {
+  const t = useT();
   const [text, setText] = useState("");
   const list = useRef<HTMLUListElement>(null);
   useEffect(() => {
@@ -562,7 +571,7 @@ function GuessBox({ party, act, name }: { party: GruntView; act: Act; name: Name
   }, [party.guesses.length]);
   return (
     <section className="flex flex-col gap-2">
-      <p className="text-center text-sm font-semibold text-orange-200">Shout it out, or type it:</p>
+      <p className="text-center text-sm font-semibold text-orange-200">{t("grunt.guess.prompt")}</p>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -576,14 +585,14 @@ function GuessBox({ party, act, name }: { party: GruntView; act: Act; name: Name
         <input
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, MAX_GUESS))}
-          placeholder="Your guess"
-          aria-label="Your guess"
+          placeholder={t("grunt.guess.placeholder")}
+          aria-label={t("grunt.guess.placeholder")}
           autoComplete="off"
           enterKeyHint="send"
           className="min-h-12 min-w-0 flex-1 rounded-xl border border-stone-700 bg-black px-3 text-base text-stone-100 outline-none focus:border-orange-400"
         />
         <button type="submit" className="min-h-12 shrink-0 rounded-xl bg-orange-400 px-4 font-bold text-stone-950 active:bg-orange-300">
-          Guess
+          {t("grunt.guess.button")}
         </button>
       </form>
       {party.guesses.length > 0 && (
@@ -603,8 +612,9 @@ function GuessBox({ party, act, name }: { party: GruntView; act: Act; name: Name
 }
 
 function BonkBox({ party, act, busy }: { party: GruntView; act: Act; busy: boolean }) {
+  const t = useT();
   if (party.me.team === null) return null;
-  if (!party.settings.bonk) return <Banner>Keep them honest: emoji only, no talking or pointing.</Banner>;
+  if (!party.settings.bonk) return <Banner>{t("grunt.bonk.off")}</Banner>;
   return (
     <section className="flex flex-col items-center gap-2">
       <button
@@ -613,9 +623,9 @@ function BonkBox({ party, act, busy }: { party: GruntView; act: Act; busy: boole
         onClick={() => void act({ type: "bonk" })}
         className="flex aspect-square w-48 items-center justify-center rounded-full border-4 border-orange-200 bg-orange-500 text-4xl font-black text-stone-950 shadow-[0_8px_0_#9a3412] transition-transform duration-75 enabled:active:translate-y-2 enabled:active:shadow-none disabled:opacity-40"
       >
-        🦴 BONK
+        {t("grunt.bonk.button")}
       </button>
-      <p className="text-center text-xs text-stone-400">Talking, pointing or acting it out costs them a point.</p>
+      <p className="text-center text-xs text-stone-400">{t("grunt.bonk.note")}</p>
     </section>
   );
 }
@@ -623,23 +633,22 @@ function BonkBox({ party, act, busy }: { party: GruntView; act: Act; busy: boole
 // ---------- after a turn, and the end ----------
 
 function Recap({ turn, name }: { turn: TurnRecord; name: Name }) {
+  const t = useT();
   return (
     <section className="flex flex-col gap-3 rounded-3xl border border-orange-400/40 bg-orange-400/10 p-5">
       <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-orange-300">
-        {teamLabel(turn.team)} · {name(turn.giver)}
+        {teamLabel(t, turn.team)} · {name(turn.giver)}
       </p>
-      <p className="text-center text-4xl font-black">
-        {turn.points > 0 ? "+" : ""}
-        {turn.points} {Math.abs(turn.points) === 1 ? "point" : "points"}
-      </p>
-      {turn.bonks > 0 && <p className="text-center text-sm text-orange-200">Bonked {turn.bonks} {turn.bonks === 1 ? "time" : "times"}.</p>}
+      <p className="text-center text-4xl font-black">{t("grunt.pointsSigned", { sign: turn.points > 0 ? "+" : "", n: turn.points })}</p>
+      {turn.bonks > 0 && <p className="text-center text-sm text-orange-200">{t("grunt.recap.bonked", { n: turn.bonks })}</p>}
       <TurnCards turn={turn} />
     </section>
   );
 }
 
 function TurnCards({ turn }: { turn: TurnRecord }) {
-  if (!turn.cards.length) return <p className="text-center text-sm text-stone-400">No cards this turn.</p>;
+  const t = useT();
+  if (!turn.cards.length) return <p className="text-center text-sm text-stone-400">{t("grunt.recap.noCards")}</p>;
   return (
     <ul className="flex flex-col gap-2">
       {turn.cards.map((c, i) => (
@@ -657,20 +666,21 @@ function TurnCards({ turn }: { turn: TurnRecord }) {
 }
 
 function GameOver({ party, isHost, act, busy }: { party: GruntView; isHost: boolean; act: Act; busy: boolean }) {
+  const t = useT();
   const [a, b] = party.teams;
   return (
     <>
       <div className="rounded-3xl border border-orange-400/40 bg-orange-400/10 p-5 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-300">Game over</p>
-        <p className="mt-2 text-3xl font-black">{party.winner === null ? "It's a tie!" : `${teamLabel(party.winner)} wins!`}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-orange-300">{t("grunt.phase.over")}</p>
+        <p className="mt-2 text-3xl font-black">{party.winner === null ? t("grunt.over.tie") : t("grunt.over.wins", { team: teamLabel(t, party.winner) })}</p>
         <p className="mt-1 text-orange-100/80">
-          {a.score} to {b.score}. {party.winner === null ? "Everyone shares the fire." : "Ooga booga."}
+          {t("grunt.over.score", { a: a.score, b: b.score })} {t(party.winner === null ? "grunt.over.tieLine" : "grunt.over.winLine")}
         </p>
       </div>
       {isHost ? (
         <div className="flex flex-col gap-2">
           <PrimaryButton disabled={busy} onClick={() => void act({ type: "start" })}>
-            Play again (new teams)
+            {t("grunt.over.again")}
           </PrimaryButton>
           <button
             type="button"
@@ -678,11 +688,11 @@ function GameOver({ party, isHost, act, busy }: { party: GruntView; isHost: bool
             onClick={() => void act({ type: "end" })}
             className="min-h-12 rounded-xl border border-stone-700 font-semibold active:bg-stone-800 disabled:opacity-50"
           >
-            Back to the lobby (change the rules)
+            {t("party.backToLobby")}
           </button>
         </div>
       ) : (
-        <Banner>Waiting for the host to start another game.</Banner>
+        <Banner>{t("party.waitingHostAnother")}</Banner>
       )}
     </>
   );
@@ -691,27 +701,28 @@ function GameOver({ party, isHost, act, busy }: { party: GruntView; isHost: bool
 // ---------- always there ----------
 
 function Teams({ party, people, meId }: { party: GruntView; people: Map<string, PlayerPublic>; meId: string }) {
+  const t = useT();
   return (
-    <Section title="Teams">
+    <Section title={t("grunt.teams")}>
       <div className="grid grid-cols-2 gap-2">
-        {party.teams.map((t) => (
+        {party.teams.map((team) => (
           <div
-            key={t.id}
-            className={`flex flex-col gap-2 rounded-2xl border p-3 ${party.clueTeam === t.id ? "border-orange-400/70 bg-orange-400/10" : "border-stone-800 bg-stone-900"}`}
+            key={team.id}
+            className={`flex flex-col gap-2 rounded-2xl border p-3 ${party.clueTeam === team.id ? "border-orange-400/70 bg-orange-400/10" : "border-stone-800 bg-stone-900"}`}
           >
             <div className="flex items-baseline justify-between gap-2">
-              <span className="truncate text-sm font-bold">{teamLabel(t.id)}</span>
-              <span className="font-mono text-2xl font-black">{t.score}</span>
+              <span className="truncate text-sm font-bold">{teamLabel(t, team.id)}</span>
+              <span className="font-mono text-2xl font-black">{team.score}</span>
             </div>
             <ul className="flex flex-col gap-1 text-sm">
-              {t.players.map((id) => (
+              {team.players.map((id) => (
                 <li key={id} className="flex items-center gap-2">
                   <Dot p={people.get(id)} />
                   <span className="min-w-0 flex-1 truncate">
-                    {people.get(id)?.displayName ?? "Someone"}
-                    {id === meId && <span className="text-stone-400"> (you)</span>}
+                    {people.get(id)?.displayName ?? t("party.someone")}
+                    {id === meId && <span className="text-stone-400"> {t("party.you")}</span>}
                   </span>
-                  {id === party.giverId && <span aria-label="clue-giver">🗿</span>}
+                  {id === party.giverId && <span aria-label={t("grunt.giverTag")}>🗿</span>}
                 </li>
               ))}
             </ul>
@@ -723,11 +734,12 @@ function Teams({ party, people, meId }: { party: GruntView; people: Map<string, 
 }
 
 function History({ party, name }: { party: GruntView; name: Name }) {
+  const t = useT();
   // In the recap the turn that just ended is already shown above, and it's always the last one in history.
   const past = (party.phase === "recap" ? party.history.slice(0, -1) : party.history.slice()).reverse();
   if (!past.length) return null;
   return (
-    <Section title="Turns so far">
+    <Section title={t("grunt.history")}>
       <ul className="flex flex-col gap-2">
         {past.map((h, i) => (
           <li key={i} className="rounded-xl border border-stone-800 bg-stone-900 p-3 text-sm">
@@ -749,26 +761,27 @@ function History({ party, name }: { party: GruntView; name: Name }) {
 }
 
 function HostBar({ party, act, busy }: { party: GruntView; act: Act; busy: boolean }) {
-  const skipLabel: Partial<Record<GruntView["phase"], string>> = { ready: "Start the clock", clue: "End this turn", recap: "Next turn" };
+  const t = useT();
+  const skipLabel: Partial<Record<GruntView["phase"], string>> = { ready: t("grunt.skip.ready"), clue: t("grunt.skip.clue"), recap: t("grunt.skip.recap") };
   const btn =
     "min-h-11 rounded-lg border border-stone-700 px-3 text-sm font-semibold transition-transform duration-75 enabled:active:scale-[0.97] enabled:active:bg-stone-800 disabled:opacity-50";
   return (
-    <section aria-label="Host controls" className="flex flex-col gap-2 rounded-2xl border border-dashed border-stone-700 p-3">
-      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-500">Host controls</p>
+    <section aria-label={t("party.hostBar.title")} className="flex flex-col gap-2 rounded-2xl border border-dashed border-stone-700 p-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-500">{t("party.hostBar.title")}</p>
       <div className="flex flex-wrap gap-2">
         <button type="button" disabled={busy} onClick={() => void act({ type: "skip" })} className={`${btn} flex-1`}>
-          {skipLabel[party.phase] ?? "Skip ahead"}
+          {skipLabel[party.phase] ?? t("party.hostBar.skip")}
         </button>
         <button type="button" disabled={busy} onClick={() => void act({ type: party.paused ? "resume" : "pause" })} className={btn}>
-          {party.paused ? "Resume" : "Pause"}
+          {party.paused ? t("party.hostBar.resume") : t("party.hostBar.pause")}
         </button>
         <button
           type="button"
           disabled={busy}
-          onClick={() => window.confirm("End this game for everyone and go back to the lobby?") && void act({ type: "end" })}
+          onClick={() => window.confirm(t("party.hostBar.endConfirm")) && void act({ type: "end" })}
           className="min-h-11 rounded-lg border border-rose-400/50 px-3 text-sm font-semibold text-rose-300 transition-transform duration-75 enabled:active:scale-[0.97] disabled:opacity-50"
         >
-          End game
+          {t("party.hostBar.end")}
         </button>
       </div>
     </section>

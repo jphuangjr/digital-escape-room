@@ -119,8 +119,9 @@ function shuffle<T>(s: ReplyAllState, xs: readonly T[]): T[] {
 
 const clone = (s: ReplyAllState): ReplyAllState => structuredClone(s);
 
-function refuse<S>(state: S, error: string): PartyResult<S> {
-  return { state, changed: false, ok: false, error };
+/** A refused action. `error` is a message id the party route translates (src/i18n/messages/<locale>/party.ts etc.). */
+function refuse<S>(state: S, error: string, errorValues?: Record<string, string | number>): PartyResult<S> {
+  return { state, changed: false, ok: false, error, ...(errorValues ? { errorValues } : {}) };
 }
 function done(state: ReplyAllState): PartyResult<ReplyAllState> {
   return { state, changed: true, ok: true };
@@ -287,7 +288,7 @@ const HOST_ONLY = new Set<ReplyAllAction["type"]>(["start", "settings", "pause",
 
 export function applyAction(s0: ReplyAllState, a: ReplyAllAction, ctx: PartyCtx): PartyResult<ReplyAllState> {
   const { playerId: me, now } = ctx;
-  if (HOST_ONLY.has(a.type) && me !== ctx.hostId) return refuse(s0, "Only the host can do that.");
+  if (HOST_ONLY.has(a.type) && me !== ctx.hostId) return refuse(s0, "party.err.hostOnly");
   const s = clone(s0);
   const seat = seatOf(s, me);
 
@@ -296,9 +297,9 @@ export function applyAction(s0: ReplyAllState, a: ReplyAllAction, ctx: PartyCtx)
       return advanceState(s0, now);
 
     case "start": {
-      if (inGame(s)) return refuse(s0, "The game is already running.");
+      if (inGame(s)) return refuse(s0, "party.err.running");
       const ids = ctx.roomPlayerIds.slice(0, MAX_PLAYERS);
-      if (ids.length < MIN_PLAYERS) return refuse(s0, `You need at least ${MIN_PLAYERS} players to start.`);
+      if (ids.length < MIN_PLAYERS) return refuse(s0, "party.err.needPlayers", { min: MIN_PLAYERS });
       const fresh = initialState(s.settings);
       fresh.rng = ctx.rand(2 ** 31) | 0;
       fresh.seats = ids.map((id) => ({ id, hand: [], score: 0 }));
@@ -307,16 +308,16 @@ export function applyAction(s0: ReplyAllState, a: ReplyAllAction, ctx: PartyCtx)
     }
 
     case "settings": {
-      if (inGame(s)) return refuse(s0, "Settings can only change between games.");
+      if (inGame(s)) return refuse(s0, "party.err.settingsBetween");
       s.settings = cleanSettings({ ...s.settings, ...a.settings });
       return done(s);
     }
 
     case "join": {
       // Someone who arrived mid-game: deal them in now. They reply from the next thread on (or this one, if there's time).
-      if (!inGame(s)) return refuse(s0, "Wait for the host to start.");
+      if (!inGame(s)) return refuse(s0, "party.err.waitHost");
       if (seat) return { state: s0, changed: false, ok: true };
-      if (s.seats.length >= MAX_PLAYERS) return refuse(s0, "This table is full.");
+      if (s.seats.length >= MAX_PLAYERS) return refuse(s0, "party.err.full");
       const newSeat: Seat = { id: me, hand: [], score: 0 };
       s.seats.push(newSeat);
       fillHand(s, newSeat);
@@ -324,12 +325,12 @@ export function applyAction(s0: ReplyAllState, a: ReplyAllAction, ctx: PartyCtx)
     }
 
     case "play": {
-      if (s.phase !== "pick") return refuse(s0, "It's not time to reply.");
-      if (!seat) return refuse(s0, "You're not in this game. Tap Deal me in first.");
-      if (me === managerOf(s)) return refuse(s0, "You're the Manager this round. Sit back and judge.");
-      if (sittingOut(s, seat)) return refuse(s0, "You're sitting this thread out for a fresh hand. You're back in next thread.");
+      if (s.phase !== "pick") return refuse(s0, "replyall.err.notReplying");
+      if (!seat) return refuse(s0, "replyall.err.dealInFirst");
+      if (me === managerOf(s)) return refuse(s0, "replyall.err.managerJudges");
+      if (sittingOut(s, seat)) return refuse(s0, "replyall.err.sittingOut");
       const at = seat.hand.indexOf(a.card);
-      if (at < 0) return refuse(s0, "That card isn't in your hand.");
+      if (at < 0) return refuse(s0, "replyall.err.notInHand");
       // Changing your mind puts the earlier card back in your hand.
       const prev = s.plays[me];
       seat.hand.splice(at, 1);
@@ -339,27 +340,27 @@ export function applyAction(s0: ReplyAllState, a: ReplyAllAction, ctx: PartyCtx)
     }
 
     case "choose": {
-      if (s.phase !== "judge") return refuse(s0, "Nothing to pick right now.");
-      if (me !== managerOf(s)) return refuse(s0, "Only this round's Manager picks.");
-      if (!Number.isInteger(a.entry) || a.entry < 0 || a.entry >= s.order.length) return refuse(s0, "Pick one of the replies.");
+      if (s.phase !== "judge") return refuse(s0, "replyall.err.nothingToPick");
+      if (me !== managerOf(s)) return refuse(s0, "replyall.err.managerPicks");
+      if (!Number.isInteger(a.entry) || a.entry < 0 || a.entry >= s.order.length) return refuse(s0, "replyall.err.pickReply");
       return done(pin(s, [a.entry], "manager", now));
     }
 
     case "vote": {
-      if (s.phase !== "vote") return refuse(s0, "Voting isn't open.");
-      if (!seat) return refuse(s0, "You're not in this game.");
-      if (!votableFor(s, me).includes(a.entry)) return refuse(s0, "You can't vote for your own reply.");
+      if (s.phase !== "vote") return refuse(s0, "replyall.err.votingClosed");
+      if (!seat) return refuse(s0, "party.err.notInGame");
+      if (!votableFor(s, me).includes(a.entry)) return refuse(s0, "replyall.err.ownReply");
       s.votes[me] = a.entry;
       return done(maybeEarly(s, now));
     }
 
     case "mulligan": {
       // Sit this thread out for a whole new hand. Any round, as often as you like: the price is not replying.
-      if (s.phase !== "pick") return refuse(s0, "You can only swap your hand while replying.");
-      if (!seat) return refuse(s0, "You're not in this game.");
-      if (me === managerOf(s)) return refuse(s0, "The Manager doesn't reply this round anyway.");
-      if (sittingOut(s, seat)) return refuse(s0, "You've already got a fresh hand this round.");
-      if (s.plays[me]) return refuse(s0, "You've already replied this round.");
+      if (s.phase !== "pick") return refuse(s0, "replyall.err.swapWhileReplying");
+      if (!seat) return refuse(s0, "party.err.notInGame");
+      if (me === managerOf(s)) return refuse(s0, "replyall.err.managerNoReply");
+      if (sittingOut(s, seat)) return refuse(s0, "replyall.err.alreadySwapped");
+      if (s.plays[me]) return refuse(s0, "replyall.err.alreadyReplied");
       seat.hand = [];
       seat.skippedRound = s.round;
       fillHand(s, seat);
@@ -369,19 +370,19 @@ export function applyAction(s0: ReplyAllState, a: ReplyAllAction, ctx: PartyCtx)
     case "skip": {
       // The host moves things on: close replies (the timer's auto-replies fill the gaps), pick at random, close the
       // vote, or go to the next thread.
-      if (!inGame(s)) return refuse(s0, "Nothing to skip.");
+      if (!inGame(s)) return refuse(s0, "party.err.noSkip");
       return done(endPhase(s, now));
     }
 
     case "pause": {
-      if (s.endsAt === null) return refuse(s0, "Nothing to pause.");
+      if (s.endsAt === null) return refuse(s0, "party.err.noPause");
       s.pausedLeft = Math.max(0, s.endsAt - now);
       s.endsAt = null;
       return done(s);
     }
 
     case "resume": {
-      if (s.pausedLeft === null) return refuse(s0, "The game isn't paused.");
+      if (s.pausedLeft === null) return refuse(s0, "party.err.notPaused");
       s.endsAt = now + s.pausedLeft;
       s.pausedLeft = null;
       return done(s);
@@ -392,8 +393,8 @@ export function applyAction(s0: ReplyAllState, a: ReplyAllAction, ctx: PartyCtx)
 
     case "kick":
       // Removing a player is the route's job (it deletes their Player row); the game only checks it's allowed.
-      if (inGame(s)) return refuse(s0, "Players can only be removed between games.");
-      if (a.playerId === me) return refuse(s0, "You can't remove yourself.");
+      if (inGame(s)) return refuse(s0, "party.err.kickBetween");
+      if (a.playerId === me) return refuse(s0, "party.err.kickSelf");
       return { state: s0, changed: false, ok: true };
   }
 }
@@ -509,7 +510,7 @@ export const replyAllGame = definePartyGame<ReplyAllState, Record<string, unknow
   isAction: (body) => parseAction(body) !== null,
   apply: (state, body, ctx) => {
     const action = parseAction(body);
-    return action ? applyAction(state, action, ctx) : refuse(state, "Unknown action.");
+    return action ? applyAction(state, action, ctx) : refuse(state, "party.err.unknown");
   },
   due: isDue,
   advance: advanceState,
