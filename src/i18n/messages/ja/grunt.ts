@@ -105,7 +105,6 @@ const messages: Record<keyof typeof en, string> = {
   "grunt.landing.step4.title": "ボンク！",
   "grunt.landing.step4.body": "相手チームにもカードが見えています。出題役がしゃべったりジェスチャーをしたら1点減点。",
   "grunt.landing.note": "同じ部屋で{min}〜{max}人。全員スマホが必要です：アプリがカードを配り、時計を動かし、絵文字ヒントを表示し、得点をつけます。",
-  "grunt.landing.cardsEnglish": "単語カードは英語です。",
   "grunt.landing.unlock": "グラントのホストには購入コードを入力してください。",
   "grunt.landing.joining": "洞窟に入っています…",
   "grunt.landing.starting": "火をおこしています…",

@@ -238,3 +238,37 @@ describe("actions and bots", () => {
     expect(botMove(s, opponent(s), seq())).toBeNull();
   });
 });
+
+describe("cards in every language", () => {
+  it("every language has every card, with a word and a different phrase", async () => {
+    const { ALL_CARD_PACKS } = await import("../grunt/cardPacks");
+    for (const pack of ALL_CARD_PACKS) {
+      expect(pack).toHaveLength(CARDS.length);
+      for (const c of pack) {
+        expect(normalizeGuess(c.word)).toBeTruthy();
+        expect(normalizeGuess(c.phrase)).not.toBe(normalizeGuess(c.word));
+      }
+    }
+  });
+
+  it("matches guesses in any script, ignoring accents, spaces and punctuation", () => {
+    expect(guessMatches("눈사람", "눈 사람")).toBe(true);
+    expect(guessMatches("雪人！", "雪人")).toBe(true);
+    expect(guessMatches("muñeco de nieve", "Muneco de Nieve")).toBe(true);
+    expect(guessMatches("雪だるま", "雪")).toBe(false);
+  });
+
+  it("a typed guess in another language scores, and the view says which card it is", async () => {
+    const { ALL_CARD_PACKS } = await import("../grunt/cardPacks");
+    let s = clueing();
+    const id = s.current!.card;
+    expect(viewFor(s, s.giver!, { hostId: "p1" }).card?.id).toBe(id);
+    const ko = ALL_CARD_PACKS[1][id];
+    s = must(s, teammate(s), { type: "guess", text: ko.word });
+    expect(s.guesses.at(-1)!.hit).toBe("word");
+    const es = ALL_CARD_PACKS[3][id];
+    s = must(s, teammate(s), { type: "guess", text: es.phrase });
+    expect(s.guesses.at(-1)!.hit).toBe("phrase");
+    expect(s.done.at(-1)!.card).toBe(id);
+  });
+});

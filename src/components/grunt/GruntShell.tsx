@@ -7,6 +7,7 @@ import { apiFetch } from "@/lib/client/game";
 import { QrCode } from "@/components/site/QrCode";
 import { TestBar } from "@/components/allhands/TestBar";
 import { useT } from "@/i18n/client";
+import { useCardPack } from "./useCardPack";
 import {
   EMOJI,
   EMOJI_GROUPS,
@@ -291,6 +292,9 @@ function ClueStrip({ clue, big }: { clue: string[]; big?: boolean }) {
 /** The card: the 1-point word and the 3-point phrase. */
 function Card({ card }: { card: NonNullable<GruntView["card"]> }) {
   const t = useT();
+  const local = useCardPack()?.[card.id];
+  const word = local?.word ?? card.word;
+  const phrase = local?.phrase ?? card.phrase;
   return (
     <article className="grid grid-cols-2 overflow-hidden rounded-3xl border-2 border-orange-300/70 bg-orange-50 text-stone-900 shadow-lg">
       <div className={`p-4 ${card.word1 ? "bg-emerald-200" : ""}`}>
@@ -298,11 +302,11 @@ function Card({ card }: { card: NonNullable<GruntView["card"]> }) {
           {t("grunt.card.word")}
           {card.word1 && " ✓"}
         </p>
-        <p className="mt-1 text-2xl font-black leading-tight">{card.word}</p>
+        <p className="mt-1 text-2xl font-black leading-tight">{word}</p>
       </div>
       <div className="border-l-2 border-orange-300/70 p-4">
         <p className="text-11px font-bold uppercase tracking-[0.2em] text-stone-500">{t("grunt.card.phrase")}</p>
-        <p className="mt-1 text-2xl font-black leading-tight">{card.phrase}</p>
+        <p className="mt-1 text-2xl font-black leading-tight">{phrase}</p>
       </div>
     </article>
   );
@@ -648,19 +652,23 @@ function Recap({ turn, name }: { turn: TurnRecord; name: Name }) {
 
 function TurnCards({ turn }: { turn: TurnRecord }) {
   const t = useT();
+  const pack = useCardPack();
   if (!turn.cards.length) return <p className="text-center text-sm text-stone-400">{t("grunt.recap.noCards")}</p>;
   return (
     <ul className="flex flex-col gap-2">
-      {turn.cards.map((c, i) => (
+      {turn.cards.map((c, i) => {
+        const local = c.card !== undefined ? pack?.[c.card] : undefined;
+        return (
         <li key={i} className="rounded-xl border border-stone-800 bg-stone-900 p-3 text-sm">
           <p className="font-semibold">
-            <span className={c.word1 ? "text-emerald-300" : "text-stone-400 line-through"}>{c.word}</span>
+            <span className={c.word1 ? "text-emerald-300" : "text-stone-400 line-through"}>{local?.word ?? c.word}</span>
             <span className="text-stone-500"> · </span>
-            <span className={c.phrase3 ? "text-emerald-300" : "text-stone-400 line-through"}>{c.phrase}</span>
+            <span className={c.phrase3 ? "text-emerald-300" : "text-stone-400 line-through"}>{local?.phrase ?? c.phrase}</span>
           </p>
           {c.clue && <p className="mt-1 text-2xl leading-snug">{c.clue}</p>}
         </li>
-      ))}
+        );
+      })}
     </ul>
   );
 }

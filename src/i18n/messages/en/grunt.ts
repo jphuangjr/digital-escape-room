@@ -1,5 +1,4 @@
-// Grunt's screens. The word cards themselves stay in English (src/lib/grunt/cards.ts): typed guesses are matched
-// against them.
+// Grunt's screens. The word cards are per language in src/lib/grunt/cards.ts and src/lib/grunt/cardPacks.
 const messages = {
   "grunt.phase.lobby": "Lobby",
   "grunt.phase.ready": "Next up",
@@ -112,7 +111,6 @@ const messages = {
   "grunt.landing.step4.title": "Bonk!",
   "grunt.landing.step4.body": "The other team sees the card too. Catch the clue-giver talking or gesturing: a point off.",
   "grunt.landing.note": "{min} to {max} players in the same room. Everyone needs a phone: the app deals the cards, runs the clock, shows the emoji clues and keeps score.",
-  "grunt.landing.cardsEnglish": "The word cards are in English.",
   "grunt.landing.unlock": "Enter a purchase code to host Grunt.",
   "grunt.landing.joining": "Joining the cave…",
   "grunt.landing.starting": "Lighting the fire…",
