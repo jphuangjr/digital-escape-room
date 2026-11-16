@@ -15,6 +15,7 @@ export const REPLY_PACK_LOADERS: Record<string, () => Promise<{ default: ReplyPa
   ko: () => import("./ko"),
   es: () => import("./es"),
   ja: () => import("./ja"),
+  "zh-TW": () => import("./zh-TW"),
 };
 
 /** Languages whose packs have every card, After Hours included (the landing page says nothing about English). */
