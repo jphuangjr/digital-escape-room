@@ -15,7 +15,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.vault.skip": "輕觸以略過",
   "site.directory.eyebrow": "線上密室逃脫",
   "site.directory.intro": "大家各用自己的手機，一起破解的解謎懸案。選一個案件，邀請你的夥伴，然後逃出去。",
-  "site.directory.casesHeading": "案件",
+  "site.directory.casesHeading": "密室逃脫",
+  "site.directory.casesIntro": "一起追查線索、破解謎團，找到出口。",
+  "site.directory.escapeRoom": "密室逃脫",
   "site.directory.comingSoon": "即將推出",
   "site.directory.openCase": "開啟案件 →",
   "site.directory.playAria": "遊玩「{title}」",
@@ -165,13 +167,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.grunt.duration": "20–40 分鐘",
   "site.game.grunt.difficulty": "簡單",
   "site.game.grunt.tone": "派對遊戲",
-  "site.directory.partyGames": "派對遊戲",
-  "site.directory.partyGamesHint": "適合一屋子朋友的社交遊戲",
   "site.party.title": "派對遊戲",
   "site.party.intro": "給同一個房間裡的一群人玩的遊戲，每人用自己的手機。一人開房，其他人用房間代碼加入。",
-  "site.party.back": "← 密室逃脫",
   "site.party.play": "開始玩 →",
-  "site.party.empty": "派對遊戲即將推出。",
 };
 
 export default messages;

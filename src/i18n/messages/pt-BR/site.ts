@@ -15,7 +15,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.vault.skip": "Toque para pular",
   "site.directory.eyebrow": "Escape rooms on-line",
   "site.directory.intro": "Mistérios cheios de enigmas para resolver em grupo, cada um no seu celular. Escolha um caso, convide sua turma e escape.",
-  "site.directory.casesHeading": "Casos",
+  "site.directory.casesHeading": "Escape rooms",
+  "site.directory.casesIntro": "Resolvam um mistério juntos, pista por pista, e encontrem a saída.",
+  "site.directory.escapeRoom": "Escape room",
   "site.directory.comingSoon": "Em breve",
   "site.directory.openCase": "Abrir o caso →",
   "site.directory.playAria": "Jogar {title}",
@@ -165,13 +167,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.grunt.duration": "20–40 min",
   "site.game.grunt.difficulty": "Fácil",
   "site.game.grunt.tone": "Jogo de festa",
-  "site.directory.partyGames": "Jogos de festa",
-  "site.directory.partyGamesHint": "Jogos sociais para uma sala cheia de amigos",
   "site.party.title": "Jogos de festa",
   "site.party.intro": "Jogos para um grupo na mesma sala, cada um no seu celular. Uma pessoa cria a sala; os outros entram com o código.",
-  "site.party.back": "← Salas de fuga",
   "site.party.play": "Jogar →",
-  "site.party.empty": "Os jogos de festa estão chegando.",
 };
 
 export default messages;

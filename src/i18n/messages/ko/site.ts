@@ -15,7 +15,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.vault.skip": "탭하여 건너뛰기",
   "site.directory.eyebrow": "온라인 방탈출",
   "site.directory.intro": "각자 자기 휴대폰으로 함께 푸는 추리 퍼즐이에요. 사건을 고르고 친구들을 초대해서 탈출해 보세요.",
-  "site.directory.casesHeading": "사건",
+  "site.directory.casesHeading": "방탈출",
+  "site.directory.casesIntro": "단서를 하나씩 풀며 함께 미스터리를 해결하고 출구를 찾아보세요.",
+  "site.directory.escapeRoom": "방탈출",
   "site.directory.comingSoon": "준비 중",
   "site.directory.openCase": "사건 열기 →",
   "site.directory.playAria": "{title} 플레이",
@@ -165,13 +167,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.grunt.duration": "20~40분",
   "site.game.grunt.difficulty": "쉬움",
   "site.game.grunt.tone": "파티 게임",
-  "site.directory.partyGames": "파티 게임",
-  "site.directory.partyGamesHint": "친구들과 한 방에서 즐기는 소셜 게임",
   "site.party.title": "파티 게임",
   "site.party.intro": "한 방에 모인 사람들이 각자 폰으로 함께하는 게임이에요. 한 명이 방을 열고, 나머지는 방 코드로 들어와요.",
-  "site.party.back": "← 방탈출",
   "site.party.play": "플레이 →",
-  "site.party.empty": "파티 게임이 곧 찾아와요.",
 };
 
 export default messages;

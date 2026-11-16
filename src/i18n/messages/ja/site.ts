@@ -15,7 +15,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.vault.skip": "タップでスキップ",
   "site.directory.eyebrow": "オンライン脱出ゲーム",
   "site.directory.intro": "それぞれのスマホで、みんなで解く謎解きミステリー。事件を選んで、仲間を招待して、脱出しましょう。",
-  "site.directory.casesHeading": "事件",
+  "site.directory.casesHeading": "脱出ゲーム",
+  "site.directory.casesIntro": "手がかりをひとつずつたどって、みんなで謎を解き、出口を見つけましょう。",
+  "site.directory.escapeRoom": "脱出ゲーム",
   "site.directory.comingSoon": "近日公開",
   "site.directory.openCase": "事件を開く →",
   "site.directory.playAria": "{title}をプレイ",
@@ -165,13 +167,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.grunt.duration": "20〜40分",
   "site.game.grunt.difficulty": "かんたん",
   "site.game.grunt.tone": "パーティーゲーム",
-  "site.directory.partyGames": "パーティーゲーム",
-  "site.directory.partyGamesHint": "友だちが集まった部屋で遊ぶソーシャルゲーム",
   "site.party.title": "パーティーゲーム",
   "site.party.intro": "同じ部屋にいる仲間と、それぞれのスマホで遊ぶゲーム。ひとりがルームを作り、ほかの人はルームコードで参加します。",
-  "site.party.back": "← 脱出ゲーム",
   "site.party.play": "遊ぶ →",
-  "site.party.empty": "パーティーゲームは準備中です。",
 };
 
 export default messages;
