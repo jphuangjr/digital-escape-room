@@ -24,6 +24,8 @@ function GameCard({ game, t, i }: { game: GameInfo; t: Translate; i: number }) {
         <Compass needle={live ? "sway" : undefined} className={`h-14 w-14 shrink-0 ${live ? "text-noir-brass" : "text-noir-ink-faint"}`} />
         <div className="min-w-0">
           <p className="font-mono text-11px uppercase tracking-[0.25em] text-noir-ink-faint">
+            <span className="text-noir-brass">{t("site.directory.escapeRoom")}</span>
+            <span aria-hidden> · </span>
             {live ? gameText(t, game, "tone") : t("site.directory.comingSoon")}
             {staging && (
               <span className="ml-2 rounded border border-noir-blood/70 px-1.5 py-0.5 text-noir-blood">Staging · admins only</span>
@@ -95,6 +97,23 @@ function PartyCard({ game, t }: { game: GameInfo; t: Translate }) {
   );
 }
 
+/** A section's title between two rules, with the compass in the middle; used for both kinds of game. */
+function SectionHeader({ id, title, intro, style }: { id: string; title: string; intro: string; style: React.CSSProperties }) {
+  return (
+    <div style={style} className="lb-in flex flex-col items-center gap-3 pt-4 text-center">
+      <div className="flex w-full items-center gap-4" aria-hidden>
+        <span className="h-px flex-1 bg-gradient-to-r from-transparent to-noir-line" />
+        <Compass className="h-6 w-6 text-noir-brass" />
+        <span className="h-px flex-1 bg-gradient-to-l from-transparent to-noir-line" />
+      </div>
+      <h2 id={id} className="font-serif text-3xl leading-tight text-noir-ink">
+        {title}
+      </h2>
+      <p className="max-w-md text-sm text-noir-ink-dim">{intro}</p>
+    </div>
+  );
+}
+
 /** Entrance order for a lobby block (.lb-in in globals.css). */
 const step = (i: number) => ({ "--i": i }) as React.CSSProperties;
 
@@ -124,9 +143,7 @@ export default async function Directory() {
         </div>
 
         <section aria-labelledby="cases-heading" className="flex flex-col gap-4">
-          <h2 id="cases-heading" style={step(2)} className="lb-in font-mono text-xs uppercase tracking-[0.3em] text-noir-ink-faint">
-            {t("site.directory.casesHeading")}
-          </h2>
+          <SectionHeader id="cases-heading" title={t("site.directory.casesHeading")} intro={t("site.directory.casesIntro")} style={step(2)} />
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {games.map((g, i) => (
               <div key={g.id} className="lb-in h-full" style={step(3 + i)}>
@@ -143,17 +160,7 @@ export default async function Directory() {
 
         {party.length > 0 && (
           <section id="party-games" aria-labelledby="party-heading" className="flex scroll-mt-6 flex-col gap-4">
-            <div style={step(4 + games.length)} className="lb-in flex flex-col items-center gap-3 pt-4 text-center">
-              <div className="flex w-full items-center gap-4" aria-hidden>
-                <span className="h-px flex-1 bg-gradient-to-r from-transparent to-noir-line" />
-                <Compass className="h-6 w-6 text-noir-brass" />
-                <span className="h-px flex-1 bg-gradient-to-l from-transparent to-noir-line" />
-              </div>
-              <h2 id="party-heading" className="font-mono text-xs uppercase tracking-[0.3em] text-noir-ink-faint">
-                {t("site.party.title")}
-              </h2>
-              <p className="max-w-md text-sm text-noir-ink-dim">{t("site.party.intro")}</p>
-            </div>
+            <SectionHeader id="party-heading" title={t("site.party.title")} intro={t("site.party.intro")} style={step(4 + games.length)} />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {party.map((g, i) => (
                 <div key={g.id} className="lb-in h-full" style={step(5 + games.length + i)}>
