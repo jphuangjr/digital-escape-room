@@ -165,13 +165,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.grunt.duration": "20~40분",
   "site.game.grunt.difficulty": "쉬움",
   "site.game.grunt.tone": "파티 게임",
-  "site.directory.partyGames": "파티 게임",
-  "site.directory.partyGamesHint": "친구들과 한 방에서 즐기는 소셜 게임",
   "site.party.title": "파티 게임",
   "site.party.intro": "한 방에 모인 사람들이 각자 폰으로 함께하는 게임이에요. 한 명이 방을 열고, 나머지는 방 코드로 들어와요.",
-  "site.party.back": "← 방탈출",
   "site.party.play": "플레이 →",
-  "site.party.empty": "파티 게임이 곧 찾아와요.",
 };
 
 export default messages;

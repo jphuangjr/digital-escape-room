@@ -174,13 +174,9 @@ const messages = {
   "site.game.grunt.duration": "20–40 min",
   "site.game.grunt.difficulty": "Easy",
   "site.game.grunt.tone": "Party game",
-  "site.directory.partyGames": "Party games",
-  "site.directory.partyGamesHint": "Social games for a room full of friends",
   "site.party.title": "Party games",
   "site.party.intro": "Games for a group in the same room, each on their own phone. One person hosts; everyone else joins with the room code.",
-  "site.party.back": "← Escape rooms",
   "site.party.play": "Play →",
-  "site.party.empty": "Party games are on their way.",
 } as const;
 
 export default messages;
