@@ -165,13 +165,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.grunt.duration": "20–40 分鐘",
   "site.game.grunt.difficulty": "簡單",
   "site.game.grunt.tone": "派對遊戲",
-  "site.directory.partyGames": "派對遊戲",
-  "site.directory.partyGamesHint": "適合一屋子朋友的社交遊戲",
   "site.party.title": "派對遊戲",
   "site.party.intro": "給同一個房間裡的一群人玩的遊戲，每人用自己的手機。一人開房，其他人用房間代碼加入。",
-  "site.party.back": "← 密室逃脫",
   "site.party.play": "開始玩 →",
-  "site.party.empty": "派對遊戲即將推出。",
 };
 
 export default messages;

@@ -165,13 +165,9 @@ const messages: Record<keyof typeof en, string> = {
   "site.game.grunt.duration": "20–40 min",
   "site.game.grunt.difficulty": "Fácil",
   "site.game.grunt.tone": "Juego de fiesta",
-  "site.directory.partyGames": "Juegos de fiesta",
-  "site.directory.partyGamesHint": "Juegos sociales para una sala llena de amigos",
   "site.party.title": "Juegos de fiesta",
   "site.party.intro": "Juegos para un grupo en la misma sala, cada uno con su móvil. Una persona crea la sala y los demás entran con el código.",
-  "site.party.back": "← Salas de escape",
   "site.party.play": "Jugar →",
-  "site.party.empty": "Los juegos de fiesta están en camino.",
 };
 
 export default messages;

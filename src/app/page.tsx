@@ -60,15 +60,50 @@ function GameCard({ game, t, i }: { game: GameInfo; t: Translate; i: number }) {
   );
 }
 
+function PartyCard({ game, t }: { game: GameInfo; t: Translate }) {
+  return (
+    <Link href={game.href} className="block h-full" aria-label={t("site.directory.playAria", { title: gameText(t, game, "title") })}>
+      <article className="lb-card flex h-full flex-col gap-4 rounded-xl border border-noir-line bg-noir-bg-2/90 p-5 active:border-noir-brass">
+        <div>
+          <p className="font-mono text-11px uppercase tracking-[0.25em] text-noir-ink-faint">
+            {gameText(t, game, "tone")}
+            {game.status === "staging" && (
+              <span className="ml-2 rounded border border-noir-blood/70 px-1.5 py-0.5 text-noir-blood">Staging · admins only</span>
+            )}
+          </p>
+          <h3 className="mt-1 text-2xl font-bold leading-tight text-noir-ink">{gameText(t, game, "title")}</h3>
+          <p className="mt-1 text-noir-ink-dim">{gameText(t, game, "tagline")}</p>
+        </div>
+        <p className="text-sm leading-relaxed text-noir-ink-dim">{gameText(t, game, "blurb")}</p>
+        <ul className="flex flex-wrap gap-2 text-xs text-noir-ink-dim">
+          {game.tags?.map((tag) => (
+            <li key={tag} className="rounded-full border border-noir-brass/70 px-3 py-1 font-semibold text-noir-brass">
+              {tag}
+            </li>
+          ))}
+          {(["players", "duration"] as const).map((f) => (
+            <li key={f} className="rounded-full border border-noir-line px-3 py-1">
+              {gameText(t, game, f)}
+            </li>
+          ))}
+        </ul>
+        <span className="mt-auto inline-flex min-h-12 items-center justify-center rounded-lg bg-noir-brass font-semibold text-noir-bg">
+          {t("site.party.play")}
+        </span>
+      </article>
+    </Link>
+  );
+}
+
 /** Entrance order for a lobby block (.lb-in in globals.css). */
 const step = (i: number) => ({ "--i": i }) as React.CSSProperties;
 
 export default async function Directory() {
   const t = await getT();
   const visible = visibleGames(await seesStaging(await getSessionUser().catch(() => null)));
-  // Escape rooms are the heart of the site; party games live one tap away, on their own page.
+  // Escape rooms first, then party games below a divider: everything playable is on one page.
   const games = visible.filter((g) => !isPartyGame(g));
-  const hasParty = visible.some(isPartyGame);
+  const party = visible.filter(isPartyGame);
   return (
     <main className="noir-vignette min-h-dvh pt-safe pb-safe px-safe">
       <VaultIntro />
@@ -106,26 +141,34 @@ export default async function Directory() {
           </div>
         </section>
 
-        {hasParty && (
-          <div className="lb-in mx-auto w-full max-w-md" style={step(4 + games.length)}>
-            <Link
-              href="/party"
-              className="flex min-h-14 items-center justify-between gap-3 rounded-xl border border-noir-line bg-noir-bg-2/90 px-4 py-3 active:border-noir-brass"
-            >
-              <span className="min-w-0">
-                <span className="block font-semibold text-noir-ink">{t("site.directory.partyGames")}</span>
-                <span className="block text-xs text-noir-ink-faint">{t("site.directory.partyGamesHint")}</span>
-              </span>
-              <span aria-hidden className="shrink-0 text-noir-brass">→</span>
-            </Link>
-          </div>
+        {party.length > 0 && (
+          <section id="party-games" aria-labelledby="party-heading" className="flex scroll-mt-6 flex-col gap-4">
+            <div style={step(4 + games.length)} className="lb-in flex flex-col items-center gap-3 pt-4 text-center">
+              <div className="flex w-full items-center gap-4" aria-hidden>
+                <span className="h-px flex-1 bg-gradient-to-r from-transparent to-noir-line" />
+                <Compass className="h-6 w-6 text-noir-brass" />
+                <span className="h-px flex-1 bg-gradient-to-l from-transparent to-noir-line" />
+              </div>
+              <h2 id="party-heading" className="font-mono text-xs uppercase tracking-[0.3em] text-noir-ink-faint">
+                {t("site.party.title")}
+              </h2>
+              <p className="max-w-md text-sm text-noir-ink-dim">{t("site.party.intro")}</p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {party.map((g, i) => (
+                <div key={g.id} className="lb-in h-full" style={step(5 + games.length + i)}>
+                  <PartyCard game={g} t={t} />
+                </div>
+              ))}
+            </div>
+          </section>
         )}
 
-        <div className="lb-in mx-auto w-full max-w-md" style={step(4 + games.length)}>
+        <div className="lb-in mx-auto w-full max-w-md" style={step(5 + games.length + party.length)}>
           <DirectoryCases />
         </div>
 
-        <footer style={step(5 + games.length)} className="lb-in text-center font-mono text-11px text-noir-ink-faint">
+        <footer style={step(6 + games.length + party.length)} className="lb-in text-center font-mono text-11px text-noir-ink-faint">
           {t("site.directory.footer")}
         </footer>
       </div>
