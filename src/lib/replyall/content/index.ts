@@ -20,7 +20,7 @@ export const REPLY_PACK_LOADERS: Record<string, () => Promise<{ default: ReplyPa
 };
 
 /** Languages whose packs have every card, After Hours included (the landing page says nothing about English). */
-export const COMPLETE_PACKS = new Set<string>(["ko", "es", "ja"]);
+export const COMPLETE_PACKS = new Set<string>(["ko", "es", "ja", "zh-TW"]);
 
 export function localPrompt(pack: ReplyPack | null, id: number | null | undefined, english: string): string {
   if (!pack || id === null || id === undefined) return english;
